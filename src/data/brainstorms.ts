@@ -1,4 +1,4 @@
-import { Brainstorm } from "@/types/brainstorm";
+import { Brainstorm, BrainstormConnection } from "@/types/brainstorm";
 
 export const mockBrainstorms: Brainstorm[] = [
   {
@@ -8,6 +8,7 @@ export const mockBrainstorms: Brainstorm[] = [
     brainScore: 75,
     threadCount: 3,
     connectedIds: ["2", "3"],
+    position: { x: 0, y: 0 },
   },
   {
     id: "2", 
@@ -16,6 +17,7 @@ export const mockBrainstorms: Brainstorm[] = [
     brainScore: 92,
     threadCount: 7,
     connectedIds: ["1", "3"],
+    position: { x: 400, y: 200 },
   },
   {
     id: "3",
@@ -24,6 +26,28 @@ export const mockBrainstorms: Brainstorm[] = [
     brainScore: 88,
     threadCount: 5,
     connectedIds: ["1", "2"],
+    position: { x: 200, y: 400 },
+  },
+];
+
+export const mockConnections: BrainstormConnection[] = [
+  {
+    fromId: "1",
+    toId: "2", 
+    type: "inspiration",
+    strength: 0.8,
+  },
+  {
+    fromId: "1",
+    toId: "3",
+    type: "continuation", 
+    strength: 0.6,
+  },
+  {
+    fromId: "2",
+    toId: "3",
+    type: "inspiration",
+    strength: 0.9,
   },
 ];
 
