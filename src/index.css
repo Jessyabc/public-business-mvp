@@ -8,40 +8,41 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Fresh brainstorming theme */
-    --background: 197 100% 98%;
-    --foreground: 222.2 84% 4.9%;
+    /* visionOS-inspired theme */
+    --background: 240 10% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 10% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 10% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 197 71% 73%;
-    --primary-foreground: 222.2 84% 4.9%;
+    --primary: 213 94% 68%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 197 100% 94%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 5% 26%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 5% 26%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 197 100% 88%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 240 5% 26%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 197 71% 73%;
+    --border: 240 5% 26%;
+    --input: 240 5% 26%;
+    --ring: 213 94% 68%;
 
-    /* Spark box colors */
-    --spark-bg: 197 100% 94%;
-    --spark-border: 197 71% 85%;
+    /* visionOS glassmorphism */
+    --glass-bg: 0 0% 100% / 0.1;
+    --glass-border: 0 0% 100% / 0.2;
+    --glass-shadow: 0 8px 32px 0 rgb(31 38 135 / 37%);
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -106,5 +107,27 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: 
+      radial-gradient(ellipse 80% 80% at 50% -20%, hsl(213 94% 68% / 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 80% 50%, hsl(213 94% 68% / 0.1) 0%, transparent 50%),
+      hsl(var(--background));
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.2),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
   }
 }
