@@ -53,40 +53,40 @@ export function BusinessFeed() {
   };
 
   return (
-    <div className="min-h-screen p-6 relative overflow-hidden pb-32">
-      {/* Background Elements */}
+    <div className="min-h-screen p-6 relative overflow-hidden pb-32 transition-all duration-700 ease-in-out bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
+      {/* Background Elements - Light business theme */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#489FE3]/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#489FE3]/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-3/4 left-3/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-3/4 left-3/4 w-64 h-64 bg-indigo-200/20 rounded-full blur-3xl"></div>
       </div>
 
       <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
-        <header className="mb-8">
-          <div className="glass-card rounded-3xl p-8 backdrop-blur-xl">
+        <header className="mb-8 transition-all duration-500 ease-in-out">
+          <div className="glass-card rounded-3xl p-8 backdrop-blur-xl bg-white/60 border-blue-200/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Building2 className="w-10 h-10 text-[#489FE3]" />
                 <div>
-                  <h1 className="text-4xl font-light text-white tracking-wide">
+                  <h1 className="text-4xl font-light text-slate-700 tracking-wide">
                     Business Hub
                   </h1>
-                  <p className="text-white/80 mt-1 font-light">
+                  <p className="text-slate-600 mt-1 font-light">
                     Manage projects, collaborate with teams, and drive results
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="glass-card rounded-2xl p-4 text-center">
+                <div className="glass-card rounded-2xl p-4 text-center bg-white/40 border-blue-200/30">
                   <BarChart3 className="w-6 h-6 text-[#489FE3] mx-auto mb-1" />
-                  <div className="text-white font-medium">23</div>
-                  <div className="text-white/60 text-xs">Active Projects</div>
+                  <div className="text-slate-700 font-medium">23</div>
+                  <div className="text-slate-500 text-xs">Active Projects</div>
                 </div>
-                <div className="glass-card rounded-2xl p-4 text-center">
+                <div className="glass-card rounded-2xl p-4 text-center bg-white/40 border-blue-200/30">
                   <Users className="w-6 h-6 text-[#489FE3] mx-auto mb-1" />
-                  <div className="text-white font-medium">156</div>
-                  <div className="text-white/60 text-xs">Team Members</div>
+                  <div className="text-slate-700 font-medium">156</div>
+                  <div className="text-slate-500 text-xs">Team Members</div>
                 </div>
               </div>
             </div>
@@ -94,31 +94,31 @@ export function BusinessFeed() {
         </header>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 transition-all duration-500 ease-in-out">
           {businessProjects.map((project) => (
-            <Card key={project.id} className="glass-card border-white/20 backdrop-blur-xl">
+            <Card key={project.id} className="glass-card border-blue-200/30 backdrop-blur-xl bg-white/60 transition-all duration-300 hover:bg-white/70">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-lg font-medium">
+                  <CardTitle className="text-slate-700 text-lg font-medium">
                     {project.title}
                   </CardTitle>
                   <Badge className={getPriorityColor(project.priority)}>
                     {project.priority}
                   </Badge>
                 </div>
-                <p className="text-white/60 text-sm">{project.department}</p>
+                <p className="text-slate-500 text-sm">{project.department}</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Badge className={getStatusColor(project.status)}>
                     {project.status}
                   </Badge>
-                  <div className="flex items-center space-x-1 text-white/60 text-sm">
+                  <div className="flex items-center space-x-1 text-slate-500 text-sm">
                     <Users className="w-4 h-4" />
                     <span>{project.participants}</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 text-white/60 text-sm">
+                <div className="flex items-center space-x-2 text-slate-500 text-sm">
                   <Calendar className="w-4 h-4" />
                   <span>Due: {project.deadline}</span>
                 </div>
@@ -134,22 +134,22 @@ export function BusinessFeed() {
         </div>
 
         {/* Quick Actions */}
-        <div className="glass-card rounded-3xl p-8 backdrop-blur-xl">
-          <h3 className="text-white text-xl font-medium mb-6">Quick Actions</h3>
+        <div className="glass-card rounded-3xl p-8 backdrop-blur-xl bg-white/60 border-blue-200/30">
+          <h3 className="text-slate-700 text-xl font-medium mb-6">Quick Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button className="glass-card bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border border-[#489FE3]/50 p-6 h-auto">
+            <Button className="glass-card bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-slate-700 border border-[#489FE3]/50 p-6 h-auto bg-white/40">
               <div className="flex flex-col items-center space-y-2">
                 <Plus className="w-6 h-6" />
                 <span>New Project</span>
               </div>
             </Button>
-            <Button className="glass-card bg-purple-500/20 hover:bg-purple-500/30 text-white border border-purple-500/50 p-6 h-auto">
+            <Button className="glass-card bg-purple-500/20 hover:bg-purple-500/30 text-slate-700 border border-purple-500/50 p-6 h-auto bg-white/40">
               <div className="flex flex-col items-center space-y-2">
                 <Users className="w-6 h-6" />
                 <span>Invite Team</span>
               </div>
             </Button>
-            <Button className="glass-card bg-green-500/20 hover:bg-green-500/30 text-white border border-green-500/50 p-6 h-auto">
+            <Button className="glass-card bg-green-500/20 hover:bg-green-500/30 text-slate-700 border border-green-500/50 p-6 h-auto bg-white/40">
               <div className="flex flex-col items-center space-y-2">
                 <TrendingUp className="w-6 h-6" />
                 <span>View Analytics</span>
