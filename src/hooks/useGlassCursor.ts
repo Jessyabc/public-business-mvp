@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 export function useGlassCursor() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      // Only run if there are elements with the class
       const glassElements = document.querySelectorAll('.glass-follow-cursor');
+      
+      if (glassElements.length === 0) return;
       
       glassElements.forEach((element) => {
         const rect = element.getBoundingClientRect();
@@ -15,7 +18,8 @@ export function useGlassCursor() {
       });
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    // Use passive listener for better performance
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => document.removeEventListener('mousemove', handleMouseMove);
   }, []);
 }

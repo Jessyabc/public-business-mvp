@@ -3,15 +3,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function DisconnectButton() {
   const { signOut } = useAuth();
   const { mode } = useAppMode();
+  const navigate = useNavigate();
 
   const handleDisconnect = async () => {
     try {
       await signOut();
       toast.success('Successfully signed out');
+      // Force navigation to root which will show Landing page
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
       toast.error('Failed to sign out');
