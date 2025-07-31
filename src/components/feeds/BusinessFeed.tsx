@@ -1,154 +1,161 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { FileText, Video, Presentation, Plus, TrendingUp } from "lucide-react";
-
-const mockBusinessPosts = [
-  {
-    id: 1,
-    title: "Q4 Market Analysis: Tech Sector Trends",
-    type: "Report",
-    uScore: 85,
-    engagement: "12 shares",
-    author: "TechCorp Analytics",
-    timestamp: "2 hours ago",
-    preview: "Comprehensive analysis of emerging technologies and their market impact...",
-  },
-  {
-    id: 2,
-    title: "Remote Work Best Practices",
-    type: "White Paper",
-    uScore: 72,
-    engagement: "8 links",
-    author: "WorkFlow Solutions",
-    timestamp: "5 hours ago",
-    preview: "Evidence-based strategies for maintaining productivity in distributed teams...",
-  },
-  {
-    id: 3,
-    title: "AI Implementation Webinar",
-    type: "Webinar",
-    uScore: 91,
-    engagement: "24 attendees",
-    author: "Innovation Labs",
-    timestamp: "1 day ago",
-    preview: "Live session covering practical AI integration for business processes...",
-  },
-];
-
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'Report': return FileText;
-    case 'White Paper': return FileText;
-    case 'Webinar': return Video;
-    case 'Video': return Video;
-    default: return Presentation;
-  }
-};
-
-const getUScoreColor = (score: number) => {
-  if (score >= 80) return "text-green-400 border-green-500/30 bg-green-500/20";
-  if (score >= 60) return "text-blue-400 border-blue-500/30 bg-blue-500/20";
-  return "text-slate-400 border-slate-500/30 bg-slate-500/20";
-};
+import { Building2, Users, TrendingUp, Calendar, Plus, BarChart3 } from "lucide-react";
 
 export function BusinessFeed() {
+  const businessProjects = [
+    {
+      id: 1,
+      title: "Q4 Marketing Campaign",
+      department: "Marketing",
+      participants: 12,
+      status: "In Progress",
+      deadline: "Dec 15, 2024",
+      priority: "High"
+    },
+    {
+      id: 2,
+      title: "Product Development Sprint",
+      department: "Engineering",
+      participants: 8,
+      status: "Planning",
+      deadline: "Jan 30, 2025",
+      priority: "Medium"
+    },
+    {
+      id: 3,
+      title: "Customer Feedback Analysis",
+      department: "Research",
+      participants: 5,
+      status: "Review",
+      deadline: "Nov 20, 2024",
+      priority: "Low"
+    }
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "In Progress": return "bg-[#489FE3]/20 text-[#489FE3] border-[#489FE3]/30";
+      case "Planning": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "Review": return "bg-green-500/20 text-green-400 border-green-500/30";
+      default: return "bg-white/20 text-white border-white/30";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "High": return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "Medium": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "Low": return "bg-green-500/20 text-green-400 border-green-500/30";
+      default: return "bg-white/20 text-white border-white/30";
+    }
+  };
+
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-8 text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <TrendingUp className="w-8 h-8 text-slate-300" />
-            <h1 className="text-4xl font-light text-slate-100 tracking-wide">
-              Business Insights
-            </h1>
+    <div className="min-h-screen p-6 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#489FE3]/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#489FE3]/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-3/4 left-3/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="mb-8">
+          <div className="glass-card rounded-3xl p-8 backdrop-blur-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Building2 className="w-10 h-10 text-[#489FE3]" />
+                <div>
+                  <h1 className="text-4xl font-light text-white tracking-wide">
+                    Business Hub
+                  </h1>
+                  <p className="text-white/80 mt-1 font-light">
+                    Manage projects, collaborate with teams, and drive results
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="glass-card rounded-2xl p-4 text-center">
+                  <BarChart3 className="w-6 h-6 text-[#489FE3] mx-auto mb-1" />
+                  <div className="text-white font-medium">23</div>
+                  <div className="text-white/60 text-xs">Active Projects</div>
+                </div>
+                <div className="glass-card rounded-2xl p-4 text-center">
+                  <Users className="w-6 h-6 text-[#489FE3] mx-auto mb-1" />
+                  <div className="text-white font-medium">156</div>
+                  <div className="text-white/60 text-xs">Team Members</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-slate-300/80 mt-2 font-light max-w-2xl mx-auto">
-            Professional insights • Industry reports • Strategic analysis
-          </p>
         </header>
 
-        {/* Sort Filters */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="border-slate-500/30 text-slate-300">
-              U-Score
-            </Button>
-            <Button variant="outline" size="sm" className="border-slate-500/30 text-slate-300">
-              Industry
-            </Button>
-            <Button variant="outline" size="sm" className="border-slate-500/30 text-slate-300">
-              Recency
-            </Button>
-          </div>
-          
-          <Button className="bg-slate-600 hover:bg-slate-500 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            New Insight
-          </Button>
+        {/* Projects Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {businessProjects.map((project) => (
+            <Card key={project.id} className="glass-card border-white/20 backdrop-blur-xl">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white text-lg font-medium">
+                    {project.title}
+                  </CardTitle>
+                  <Badge className={getPriorityColor(project.priority)}>
+                    {project.priority}
+                  </Badge>
+                </div>
+                <p className="text-white/60 text-sm">{project.department}</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge className={getStatusColor(project.status)}>
+                    {project.status}
+                  </Badge>
+                  <div className="flex items-center space-x-1 text-white/60 text-sm">
+                    <Users className="w-4 h-4" />
+                    <span>{project.participants}</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 text-white/60 text-sm">
+                  <Calendar className="w-4 h-4" />
+                  <span>Due: {project.deadline}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full glass-card border-[#489FE3]/30 text-[#489FE3] hover:bg-[#489FE3]/10"
+                >
+                  View Project
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Business Posts Grid */}
-        <div className="grid gap-6">
-          {mockBusinessPosts.map((post) => {
-            const TypeIcon = getTypeIcon(post.type);
-            
-            return (
-              <Card key={post.id} className="glass-card border-slate-500/20 hover:border-slate-400/30 transition-all duration-300">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-slate-600/30">
-                        <TypeIcon className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-slate-100 text-lg font-semibold">
-                          {post.title}
-                        </CardTitle>
-                        <div className="flex items-center space-x-3 mt-1">
-                          <Badge variant="outline" className="text-xs border-slate-500/30 text-slate-400">
-                            {post.type}
-                          </Badge>
-                          <span className="text-xs text-slate-400">{post.author}</span>
-                          <span className="text-xs text-slate-500">{post.timestamp}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* U-Score Progress Ring */}
-                    <div className="flex flex-col items-center">
-                      <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${getUScoreColor(post.uScore)}`}>
-                        <span className="text-sm font-bold">{post.uScore}</span>
-                      </div>
-                      <span className="text-xs text-slate-500 mt-1">U-Score</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <p className="text-slate-300/80 text-sm leading-relaxed mb-4">
-                    {post.preview}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <span className="text-xs text-slate-400">{post.engagement}</span>
-                      <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-200">
-                        Share
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-200">
-                        Link
-                      </Button>
-                    </div>
-                    
-                    <Button size="sm" className="bg-slate-600 hover:bg-slate-500 text-white">
-                      View Full
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        {/* Quick Actions */}
+        <div className="glass-card rounded-3xl p-8 backdrop-blur-xl">
+          <h3 className="text-white text-xl font-medium mb-6">Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button className="glass-card bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border border-[#489FE3]/50 p-6 h-auto">
+              <div className="flex flex-col items-center space-y-2">
+                <Plus className="w-6 h-6" />
+                <span>New Project</span>
+              </div>
+            </Button>
+            <Button className="glass-card bg-purple-500/20 hover:bg-purple-500/30 text-white border border-purple-500/50 p-6 h-auto">
+              <div className="flex flex-col items-center space-y-2">
+                <Users className="w-6 h-6" />
+                <span>Invite Team</span>
+              </div>
+            </Button>
+            <Button className="glass-card bg-green-500/20 hover:bg-green-500/30 text-white border border-green-500/50 p-6 h-auto">
+              <div className="flex flex-col items-center space-y-2">
+                <TrendingUp className="w-6 h-6" />
+                <span>View Analytics</span>
+              </div>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
