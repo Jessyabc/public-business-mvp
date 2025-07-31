@@ -370,6 +370,35 @@ All colors MUST be HSL.
     transform: translateY(-1px);
   }
 
+  /* Mouse-following light effects */
+  .glass-follow-cursor {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-follow-cursor::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 40%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    border-radius: 24px;
+  }
+
+  .glass-follow-cursor:hover::before {
+    opacity: 1;
+  }
+
   /* Animation keyframes */
   @keyframes shimmer {
     0%, 100% { opacity: 0; transform: translateX(-100%); }

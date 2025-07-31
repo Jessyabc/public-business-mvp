@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
 import { FloatingCreateButton } from '@/components/ui/FloatingCreateButton';
+import { useGlassCursor } from '@/hooks/useGlassCursor';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -14,6 +15,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { user } = useAuth();
   const { mode } = useAppMode();
   const location = useLocation();
+  
+  useGlassCursor();
 
   return (
     <div className={`min-h-screen w-full transition-all duration-700 ease-in-out ${
