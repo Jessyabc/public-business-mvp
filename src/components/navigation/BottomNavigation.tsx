@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, FileText, History, Bell, Search, MessageSquare, Brain, Building2 } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +11,7 @@ export function BottomNavigation() {
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
-    { to: '/my-posts', icon: FileText, label: mode === 'business' ? 'My Posts' : 'Brainstorms', badge: null },
-    { to: '/history', icon: History, label: 'History', badge: null },
+    { to: '/history', icon: History, label: 'Profile & History', badge: null },
     { to: '/notifications', icon: Bell, label: 'Notifications', badge: 3 },
     { to: '/research', icon: Search, label: 'Research', badge: null },
     { to: '/beta-feedback', icon: MessageSquare, label: 'PB', badge: null }

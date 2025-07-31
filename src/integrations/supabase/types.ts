@@ -119,6 +119,48 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          company: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          linkedin_url: string | null
+          location: string | null
+          role: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          linkedin_url?: string | null
+          location?: string | null
+          role?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          linkedin_url?: string | null
+          location?: string | null
+          role?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
