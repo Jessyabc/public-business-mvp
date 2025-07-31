@@ -119,6 +119,69 @@ export type Database = {
         }
         Relationships: []
       }
+      posts: {
+        Row: {
+          comments_count: number | null
+          content: string
+          created_at: string
+          department_id: string | null
+          id: string
+          industry_id: string | null
+          likes_count: number | null
+          metadata: Json | null
+          mode: string
+          status: string
+          t_score: number | null
+          title: string | null
+          type: string
+          u_score: number | null
+          updated_at: string
+          user_id: string
+          views_count: number | null
+          visibility: string
+        }
+        Insert: {
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          industry_id?: string | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode: string
+          status?: string
+          t_score?: number | null
+          title?: string | null
+          type: string
+          u_score?: number | null
+          updated_at?: string
+          user_id: string
+          views_count?: number | null
+          visibility?: string
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          industry_id?: string | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string
+          status?: string
+          t_score?: number | null
+          title?: string | null
+          type?: string
+          u_score?: number | null
+          updated_at?: string
+          user_id?: string
+          views_count?: number | null
+          visibility?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
