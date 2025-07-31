@@ -96,6 +96,8 @@ export function usePosts() {
 
     setLoading(true);
     try {
+      console.log('Creating post with data:', { user_id: user.id, ...postData });
+      
       const { data, error } = await supabase
         .from('posts')
         .insert({
@@ -107,7 +109,12 @@ export function usePosts() {
         .select()
         .single();
 
-      if (error) throw error;
+      console.log('Post creation result:', { data, error });
+      
+      if (error) {
+        console.error('Post creation error details:', error);
+        throw error;
+      }
       
       // Add the new post to the local state
       setPosts(prev => [data as Post, ...prev]);

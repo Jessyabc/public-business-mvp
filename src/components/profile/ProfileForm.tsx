@@ -77,6 +77,18 @@ export function ProfileForm() {
 
     setSaving(true);
     try {
+      console.log('Updating profile with data:', {
+        id: user.id,
+        display_name: profile.display_name,
+        avatar_url: profile.avatar_url,
+        bio: profile.bio,
+        website: profile.website,
+        linkedin_url: profile.linkedin_url,
+        company: profile.company,
+        role: profile.role,
+        location: profile.location,
+      });
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -91,7 +103,12 @@ export function ProfileForm() {
           location: profile.location,
         });
 
-      if (error) throw error;
+      console.log('Profile update result:', { error });
+
+      if (error) {
+        console.error('Profile update error details:', error);
+        throw error;
+      }
 
       toast.success('Profile updated successfully');
     } catch (error) {
