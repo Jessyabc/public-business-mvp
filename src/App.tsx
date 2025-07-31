@@ -6,8 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppModeProvider } from "@/contexts/AppModeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout } from "@/components/layout/MainLayout";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { navItems } from "./nav-items";
 
 const queryClient = new QueryClient();
 
@@ -21,9 +20,9 @@ const App = () => (
           <AppModeProvider>
             <MainLayout>
             <Routes>
-              <Route path="/" element={<Index />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+              {navItems.map(({ to, page }) => (
+                <Route key={to} path={to} element={page} />
+              ))}
             </Routes>
             </MainLayout>
           </AppModeProvider>
