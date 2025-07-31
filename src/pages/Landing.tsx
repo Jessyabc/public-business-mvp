@@ -5,15 +5,8 @@ import { AuthModal } from "@/components/auth/AuthModal";
 
 export function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'signup' | 'login'>('signup');
 
-  const handlePublicMember = () => {
-    setAuthMode('signup');
-    setShowAuthModal(true);
-  };
-
-  const handleBusinessMember = () => {
-    setAuthMode('login'); // Business members likely already have accounts or will be invited
+  const handleSignUp = () => {
     setShowAuthModal(true);
   };
 
@@ -22,17 +15,11 @@ export function Landing() {
       {/* Logo and Header */}
       <div className="text-center mb-16">
         <div className="flex items-center justify-center mb-6">
-          <div className="relative">
-            {/* Circular logo element */}
-            <div className="w-20 h-20 rounded-full border-4 border-[#489FE3] bg-white flex items-center justify-center relative">
-              {/* Gap in the circle */}
-              <div className="absolute bottom-0 right-2 w-4 h-4 bg-white"></div>
-            </div>
-          </div>
-        </div>
-        <div className="mb-4">
-          <h1 className="text-4xl font-bold text-[#000000] mb-2 tracking-wide">PUBLIC BUSINESS</h1>
-          <p className="text-[#489FE3] font-medium tracking-wider text-sm uppercase">Creating Collaboration</p>
+          <img 
+            src="/lovable-uploads/1a58e202-c32a-4b09-89d8-ff1eb22b437d.png" 
+            alt="Public Business Logo" 
+            className="h-20 w-auto"
+          />
         </div>
       </div>
 
@@ -72,20 +59,13 @@ export function Landing() {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-6">
+        {/* Single Join Button */}
+        <div className="flex justify-center">
           <Button
-            onClick={handlePublicMember}
-            className="bg-[#489FE3] hover:bg-[#489FE3]/90 text-white px-8 py-4 text-lg font-medium rounded-lg h-auto"
+            onClick={handleSignUp}
+            className="bg-[#489FE3] hover:bg-[#489FE3]/90 text-white px-12 py-4 text-lg font-medium rounded-lg h-auto"
           >
-            PUBLIC MEMBER
-          </Button>
-          <Button
-            onClick={handleBusinessMember}
-            variant="outline"
-            className="border-[#489FE3] text-[#489FE3] hover:bg-[#489FE3]/10 px-8 py-4 text-lg font-medium rounded-lg h-auto"
-          >
-            BUSINESS MEMBER
+            JOIN AS PUBLIC MEMBER
           </Button>
         </div>
       </div>

@@ -18,7 +18,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userType, setUserType] = useState<'public' | 'business'>('public');
+  const [userType] = useState<'public' | 'business'>('public'); // Always public for initial signup
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
@@ -75,7 +75,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setUserType('public');
+    // userType is always 'public' - no need to reset
   };
 
   return (
@@ -148,26 +148,10 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="signup" className="space-y-4 mt-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 glass-card rounded-lg border border-white/10">
-                <div className="flex items-center space-x-3">
-                  <Brain className={`w-5 h-5 ${userType === 'public' ? 'text-blue-400' : 'text-muted-foreground'}`} />
-                  <span className={`font-medium ${userType === 'public' ? 'text-blue-400' : 'text-muted-foreground'}`}>
-                    Public Member
-                  </span>
-                </div>
-                
-                <Switch
-                  checked={userType === 'business'}
-                  onCheckedChange={(checked) => setUserType(checked ? 'business' : 'public')}
-                  className="data-[state=checked]:bg-slate-600 data-[state=unchecked]:bg-blue-600"
-                />
-                
-                <div className="flex items-center space-x-3">
-                  <span className={`font-medium ${userType === 'business' ? 'text-slate-300' : 'text-muted-foreground'}`}>
-                    Business Member
-                  </span>
-                  <Building2 className={`w-5 h-5 ${userType === 'business' ? 'text-slate-300' : 'text-muted-foreground'}`} />
-                </div>
+              <div className="text-center p-4 glass-card rounded-lg border border-white/10">
+                <p className="text-sm text-muted-foreground">
+                  Join as a Public Member. You can request business membership later through your profile.
+                </p>
               </div>
 
               <div className="space-y-2">
