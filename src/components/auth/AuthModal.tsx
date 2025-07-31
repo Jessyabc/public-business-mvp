@@ -80,7 +80,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md glass-card border-white/20 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-md border border-white/20 bg-black/20 backdrop-blur-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <DialogHeader>
           <DialogTitle className="text-2xl font-light text-center text-white">
             Join Public Business
