@@ -1,5 +1,5 @@
 import { Home, History as HistoryIcon, User, Compass, Users, Building2, Search, Bell, MessageSquare, FileText } from "lucide-react";
-import Feed from "./pages/Feed";
+import Index from "./pages/Index";
 import MyPosts from "./pages/MyPosts";
 import History from "./pages/History";
 import Notifications from "./pages/Notifications";
@@ -16,7 +16,7 @@ export const navItems = [
     title: "Feed",
     to: "/",
     icon: <Home className="h-4 w-4" />,
-    page: <Feed />,
+    page: <Index />,
   },
   {
     title: "My Posts",
