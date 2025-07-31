@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Brain, Building2, Sparkles, FileText } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { usePosts } from "@/hooks/usePosts";
 
 interface ComposerModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface ComposerModalProps {
 
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const { mode } = useAppMode();
+  const { createPost, loading } = usePosts();
   const [composerType, setComposerType] = useState<'brainstorm' | 'insight' | null>(null);
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
@@ -31,10 +33,20 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     onClose();
   };
 
-  const handleCreate = () => {
-    console.log("Creating:", { composerType, content, title, postType, visibility });
-    // Handle creation logic here
-    handleClose();
+  const handleCreate = async () => {
+    try {
+      const postData = {
+        content,
+        post_type: composerType === 'brainstorm' ? 'brainstorm' : postType,
+        visibility: composerType === 'brainstorm' ? 'public' : visibility,
+        ...(composerType === 'insight' && { title }),
+      };
+      
+      await createPost(postData);
+      handleClose();
+    } catch (error) {
+      console.error('Error creating post:', error);
+    }
   };
 
   const renderTypeSelection = () => (
@@ -43,7 +55,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       <div className="grid grid-cols-1 gap-4">
         <Button
           onClick={() => setComposerType('brainstorm')}
-          className="h-20 flex flex-col items-center justify-center space-y-2 glass-ios-card hover:glass-ios-widget text-primary"
+          className="h-20 flex flex-col items-center justify-center space-y-2 glass-business-card hover:glass-business text-primary"
         >
           <Brain className="w-6 h-6" />
           <div className="text-center">
@@ -54,7 +66,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
         <Button
           onClick={() => setComposerType('insight')}
-          className="h-20 flex flex-col items-center justify-center space-y-2 glass-ios-card hover:glass-ios-widget text-secondary-foreground"
+          className="h-20 flex flex-col items-center justify-center space-y-2 glass-business-card hover:glass-business text-secondary-foreground"
         >
           <FileText className="w-6 h-6" />
           <div className="text-center">
@@ -80,7 +92,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your idea, thought, or insight..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[100px] glass-ios-card"
+          className="min-h-[100px] glass-business-card"
         />
       </div>
 
@@ -88,9 +100,9 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         <Button variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button onClick={handleCreate} disabled={!content.trim()}>
+        <Button onClick={handleCreate} disabled={!content.trim() || loading}>
           <Sparkles className="w-4 h-4 mr-2" />
-          Create Brainstorm
+          {loading ? 'Creating...' : 'Create Brainstorm'}
         </Button>
       </div>
     </div>
@@ -110,14 +122,14 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Give your insight a compelling title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="glass-ios-card"
+          className="glass-business-card"
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="post-type">Type</Label>
         <Select value={postType} onValueChange={setPostType}>
-          <SelectTrigger className="glass-ios-card">
+          <SelectTrigger className="glass-business-card">
             <SelectValue placeholder="Select post type" />
           </SelectTrigger>
           <SelectContent>
@@ -133,7 +145,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       <div className="space-y-2">
         <Label htmlFor="visibility">Visibility</Label>
         <Select value={visibility} onValueChange={setVisibility}>
-          <SelectTrigger className="glass-ios-card">
+          <SelectTrigger className="glass-business-card">
             <SelectValue placeholder="Who can see this?" />
           </SelectTrigger>
           <SelectContent>
@@ -152,7 +164,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your professional insight, analysis, or findings..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[120px] glass-ios-card"
+          className="min-h-[120px] glass-business-card"
         />
       </div>
 
@@ -160,9 +172,9 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         <Button variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button onClick={handleCreate} disabled={!content.trim() || !title.trim() || !postType || !visibility}>
+        <Button onClick={handleCreate} disabled={!content.trim() || !title.trim() || !postType || !visibility || loading}>
           <Building2 className="w-4 h-4 mr-2" />
-          Create Insight
+          {loading ? 'Creating...' : 'Create Insight'}
         </Button>
       </div>
     </div>
@@ -170,7 +182,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="glass-ios-widget backdrop-blur-xl max-w-lg">
+      <DialogContent className="glass-business-card backdrop-blur-xl max-w-lg z-50 fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
         <DialogHeader>
           <DialogTitle className="sr-only">Create New Content</DialogTitle>
         </DialogHeader>

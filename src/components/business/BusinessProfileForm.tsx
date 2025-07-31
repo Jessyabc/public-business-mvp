@@ -110,7 +110,7 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
           {profile && getStatusBadge(profile.status)}
         </div>
 
-        <Card className="glass-card border-white/20 bg-white/40 backdrop-blur-xl animate-scale-in">
+        <Card className="glass-business-card animate-scale-in">
           <CardHeader>
             <CardTitle className="text-slate-900">Business Information</CardTitle>
             <CardDescription className="text-slate-600">
@@ -127,11 +127,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     <FormItem>
                       <FormLabel className="text-slate-700">Company Name</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter your company name" 
-                          className="glass-card bg-white/50 border-white/30"
-                          {...field} 
-                        />
+                         <Input 
+                           placeholder="Enter your company name" 
+                           className="glass-business-card"
+                           {...field} 
+                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -146,11 +146,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                       <FormItem>
                         <FormLabel className="text-slate-700">Industry</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="glass-card bg-white/50 border-white/30">
-                              <SelectValue placeholder="Select industry" />
-                            </SelectTrigger>
-                          </FormControl>
+                           <FormControl>
+                             <SelectTrigger className="glass-business-card">
+                               <SelectValue placeholder="Select industry" />
+                             </SelectTrigger>
+                           </FormControl>
                           <SelectContent>
                             {industries.map((industry) => (
                               <SelectItem key={industry.id} value={industry.id}>
@@ -171,11 +171,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                       <FormItem>
                         <FormLabel className="text-slate-700">Department</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="glass-card bg-white/50 border-white/30">
-                              <SelectValue placeholder="Select department" />
-                            </SelectTrigger>
-                          </FormControl>
+                           <FormControl>
+                             <SelectTrigger className="glass-business-card">
+                               <SelectValue placeholder="Select department" />
+                             </SelectTrigger>
+                           </FormControl>
                           <SelectContent>
                             {departments.map((department) => (
                               <SelectItem key={department.id} value={department.id}>
@@ -197,11 +197,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     <FormItem>
                       <FormLabel className="text-slate-700">Company Size</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="glass-card bg-white/50 border-white/30">
-                            <SelectValue placeholder="Select company size" />
-                          </SelectTrigger>
-                        </FormControl>
+                         <FormControl>
+                           <SelectTrigger className="glass-business-card">
+                             <SelectValue placeholder="Select company size" />
+                           </SelectTrigger>
+                         </FormControl>
                         <SelectContent>
                           <SelectItem value="1-10">1-10 employees</SelectItem>
                           <SelectItem value="11-50">11-50 employees</SelectItem>
@@ -223,11 +223,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                       <FormItem>
                         <FormLabel className="text-slate-700">Phone</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter phone number" 
-                            className="glass-card bg-white/50 border-white/30"
-                            {...field} 
-                          />
+                           <Input 
+                             placeholder="Enter phone number" 
+                             className="glass-business-card"
+                             {...field} 
+                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -241,11 +241,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                       <FormItem>
                         <FormLabel className="text-slate-700">Website</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="https://example.com" 
-                            className="glass-card bg-white/50 border-white/30"
-                            {...field} 
-                          />
+                           <Input 
+                             placeholder="https://example.com" 
+                             className="glass-business-card"
+                             {...field} 
+                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -260,11 +260,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     <FormItem>
                       <FormLabel className="text-slate-700">LinkedIn Profile</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="https://linkedin.com/in/yourprofile" 
-                          className="glass-card bg-white/50 border-white/30"
-                          {...field} 
-                        />
+                         <Input 
+                           placeholder="https://linkedin.com/in/yourprofile" 
+                           className="glass-business-card"
+                           {...field} 
+                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -278,11 +278,11 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     <FormItem>
                       <FormLabel className="text-slate-700">Company Bio</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Tell us about your company..."
-                          className="glass-card bg-white/50 border-white/30 min-h-[100px]"
-                          {...field} 
-                        />
+                         <Textarea 
+                           placeholder="Tell us about your company..."
+                           className="glass-business-card min-h-[100px]"
+                           {...field} 
+                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
