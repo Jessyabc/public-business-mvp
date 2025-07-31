@@ -50,10 +50,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, userType: 'public' | 'business') => {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { error: { message: 'Please enter a valid email address' } as AuthError };
+    }
+
+    // Validate password length
+    if (password.length < 8) {
+      return { error: { message: 'Password must be at least 8 characters long' } as AuthError };
+    }
+
+    const redirectUrl = `${window.location.origin}/`;
+    
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: redirectUrl,
         data: {
           user_type: userType,
         },

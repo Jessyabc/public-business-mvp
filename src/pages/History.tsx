@@ -7,6 +7,7 @@ import { ProfileForm } from '@/components/profile/ProfileForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Brain, Building2, User, History as HistoryIcon, Clock, Bookmark, Plus, Eye, MessageCircle, Share2, Video, FileText, TrendingUp, Filter, Calendar, BarChart3 } from 'lucide-react';
+import { DisconnectButton } from '@/components/profile/DisconnectButton';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -388,6 +389,11 @@ const History = () => {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Disconnect Button for History Page */}
+        <div className="mt-6 max-w-md mx-auto">
+          <DisconnectButton />
+        </div>
       </div>
     </div>
   );

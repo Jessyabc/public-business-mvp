@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { toast } from "sonner";
 import { User, Mail, Building, MapPin, Globe, Linkedin, Save } from "lucide-react";
+import { DisconnectButton } from "./DisconnectButton";
 
 interface Profile {
   id: string;
@@ -313,6 +314,9 @@ export function ProfileForm() {
           <Save className="w-4 h-4 mr-2" />
           {saving ? 'Saving...' : 'Save Profile'}
         </Button>
+
+        {/* Disconnect Button */}
+        <DisconnectButton />
       </CardContent>
     </Card>
   );
