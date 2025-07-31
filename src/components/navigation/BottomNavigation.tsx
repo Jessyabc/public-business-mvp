@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 export function BottomNavigation() {
   const location = useLocation();
   const { user } = useAuth();
-  const { mode } = useAppMode();
+  const { mode, toggleMode } = useAppMode();
 
   const navItems = [
     {
@@ -38,8 +38,11 @@ export function BottomNavigation() {
     <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
       <div className="glass-card rounded-full px-6 py-3 backdrop-blur-xl border border-white/20">
         <div className="flex items-center space-x-6">
-          {/* Mode Indicator */}
-          <div className="flex items-center space-x-2 px-3 py-2 glass-card rounded-full border border-[#489FE3]/30">
+          {/* Mode Toggle - Now clickable to switch modes */}
+          <button 
+            onClick={toggleMode}
+            className="flex items-center space-x-2 px-3 py-2 glass-card rounded-full border border-[#489FE3]/30 hover:bg-[#489FE3]/10 transition-all duration-200"
+          >
             {mode === 'public' ? (
               <Brain className="w-4 h-4 text-[#489FE3]" />
             ) : (
@@ -48,7 +51,7 @@ export function BottomNavigation() {
             <span className={`text-xs font-medium ${mode === 'public' ? 'text-[#489FE3]' : 'text-purple-400'}`}>
               {mode === 'public' ? 'Public' : 'Business'}
             </span>
-          </div>
+          </button>
 
           {/* Navigation Items */}
           {navItems.map((item) => {
