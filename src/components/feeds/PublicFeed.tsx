@@ -1,6 +1,5 @@
 import FlowView from "@/components/FlowView";
-import { Button } from "@/components/ui/button";
-import { Plus, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export function PublicFeed() {
   return (
@@ -28,14 +27,6 @@ export function PublicFeed() {
         
         <div className="w-full h-[calc(100vh-280px)] relative">
           <FlowView />
-          
-          {/* Floating New Brainstorm Button */}
-          <Button 
-            className="fixed bottom-24 right-8 w-16 h-16 rounded-full glass-card bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border border-[#489FE3]/50 backdrop-blur-xl transition-all duration-300 hover:scale-110 z-40"
-            size="icon"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
         </div>
       </div>
     </div>

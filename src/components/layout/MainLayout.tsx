@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
+import { FloatingCreateButton } from '@/components/ui/FloatingCreateButton';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -38,6 +39,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         </AnimatePresence>
       </main>
 
+      {/* Floating Create Button - only show when user is logged in */}
+      {user && <FloatingCreateButton />}
+      
       {/* Bottom Navigation - only show when user is logged in */}
       {user && <BottomNavigation />}
     </div>
