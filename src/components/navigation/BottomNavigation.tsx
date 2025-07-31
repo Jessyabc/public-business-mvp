@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, User, Building2, Brain } from 'lucide-react';
+import { Home, Compass, Users, User, Building2, Brain } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { Badge } from '@/components/ui/badge';
@@ -17,9 +17,15 @@ export function BottomNavigation() {
       badge: null
     },
     {
-      to: '/history',
-      icon: History,
-      label: 'History',
+      to: '/explore',
+      icon: Compass,
+      label: 'Explore',
+      badge: null
+    },
+    {
+      to: '/community',
+      icon: Users,
+      label: 'Community',
       badge: null
     },
     {
