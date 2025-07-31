@@ -5,9 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Sparkles, FileText } from "lucide-react";
+import { Brain, Sparkles, FileText, Lock } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
+import { useUserRoles } from "@/hooks/useUserRoles";
 
 interface ComposerModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface ComposerModalProps {
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const { mode } = useAppMode();
   const { createPost } = usePosts();
+  const { canCreateBusinessPosts, checkBusinessPostPermission } = useUserRoles();
   const [composerType, setComposerType] = useState<'brainstorm' | 'insight' | null>(null);
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
@@ -76,16 +78,25 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
         <Button
           onClick={() => setComposerType('insight')}
-          className={`h-20 flex flex-col items-center justify-center space-y-2 ${
+          disabled={mode === 'business' && !canCreateBusinessPosts}
+          className={`h-20 flex flex-col items-center justify-center space-y-2 relative ${
             mode === 'public' 
               ? 'glass-ios-card hover:glass-ios-widget text-foreground' 
               : 'glass-business-card hover:glass-business text-blue-600'
-          }`}
+          } ${mode === 'business' && !canCreateBusinessPosts ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
+          {mode === 'business' && !canCreateBusinessPosts && (
+            <Lock className="absolute top-2 right-2 w-4 h-4" />
+          )}
           <FileText className="w-6 h-6" />
           <div className="text-center">
             <div className="font-semibold">New Business Insight</div>
-            <div className="text-xs opacity-80">Share professional knowledge</div>
+            <div className="text-xs opacity-80">
+              {mode === 'business' && !canCreateBusinessPosts 
+                ? 'Business membership required' 
+                : 'Share professional knowledge'
+              }
+            </div>
           </div>
         </Button>
       </div>

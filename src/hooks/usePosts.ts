@@ -80,6 +80,20 @@ export function usePosts() {
       return null;
     }
 
+    // Check if user can create business posts
+    if (postData.mode === 'business' && postData.type !== 'brainstorm') {
+      const { data: canCreate } = await supabase.rpc('can_create_business_posts', { user_uuid: user.id });
+      
+      if (!canCreate) {
+        toast({
+          title: "Business Member Required",
+          description: "You need to be a Business member to create business posts. Business membership is available by invitation only.",
+          variant: "destructive",
+        });
+        return null;
+      }
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase

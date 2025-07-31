@@ -1,23 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { PostCard } from "@/components/business/PostCard";
-import { mockBusinessPosts, industries } from "@/data/business-posts";
+import { PostCard as BusinessPostCard } from "@/components/business/PostCard";
+import { PostCard } from "@/components/posts/PostCard";
 import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, ToggleLeft, Sparkles } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { usePosts } from "@/hooks/usePosts";
 
 export function BusinessFeed() {
   const { toggleMode } = useAppMode();
+  const { posts, loading, fetchPosts } = usePosts();
   const [filters, setFilters] = useState<BusinessFeedFilters>({
     search: "",
     sortBy: "most_useful",
     industries: []
   });
 
-  const [filteredPosts] = useState(mockBusinessPosts);
+  useEffect(() => {
+    fetchPosts('business');
+  }, []);
+
+  // Filter posts based on current filters
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = !filters.search || 
+      post.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
+      post.content.toLowerCase().includes(filters.search.toLowerCase());
+    
+    return matchesSearch && post.mode === 'business';
+  });
 
   const handleViewPost = (postId: string) => {
     console.log("View post:", postId);
@@ -127,15 +140,22 @@ export function BusinessFeed() {
 
         {/* Feed Content */}
         <div className="space-y-6">
-          {filteredPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onViewPost={handleViewPost}
-              onSavePost={handleSavePost}
-              onLinkToBrainstorm={handleLinkToBrainstorm}
-            />
-          ))}
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground">Loading posts...</div>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground">No business posts found. Create the first one!</div>
+            </div>
+          ) : (
+            filteredPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+              />
+            ))
+          )}
         </div>
 
         {/* Load More Button */}
