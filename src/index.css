@@ -123,7 +123,7 @@ All colors MUST be HSL.
     );
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: none;
     border-radius: 24px;
     box-shadow: 
       0 8px 32px 0 rgba(31, 38, 135, 0.4),
@@ -159,13 +159,7 @@ All colors MUST be HSL.
     );
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid;
-    border-image: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.3) 0%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0.2) 100%
-    ) 1;
+    border: none;
     border-radius: 24px;
     box-shadow: 
       0 12px 40px 0 rgba(31, 38, 135, 0.3),
@@ -205,12 +199,6 @@ All colors MUST be HSL.
       rgba(255, 255, 255, 0.05) 50%,
       rgba(255, 255, 255, 0.12) 100%
     );
-    border-image: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.4) 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.3) 100%
-    ) 1;
     box-shadow: 
       0 16px 50px 0 rgba(31, 38, 135, 0.4),
       0 8px 25px 0 rgba(0, 0, 0, 0.2),
@@ -219,7 +207,18 @@ All colors MUST be HSL.
     transform: translateY(-2px);
   }
 
-  /* Enhanced glass morphing effects with consistent radius */
+  /* Override any default border styles */
+  .glass-card,
+  .glass,
+  .glass-morphing,
+  .glass-frosted,
+  .glass-ios-widget,
+  .glass-ios-card {
+    border: none !important;
+    outline: none !important;
+  }
+
+  /* Enhanced glass morphing effects with no borders */
   .glass-morphing {
     background: linear-gradient(
       135deg, 
@@ -231,9 +230,13 @@ All colors MUST be HSL.
     );
     backdrop-filter: blur(30px) saturate(200%) contrast(120%);
     -webkit-backdrop-filter: blur(30px) saturate(200%) contrast(120%);
-    border: 2px solid transparent;
+    border: none;
     border-radius: 24px;
-    background-clip: padding-box;
+    box-shadow: 
+      0 20px 60px 0 rgba(31, 38, 135, 0.4),
+      0 10px 30px 0 rgba(0, 0, 0, 0.2),
+      inset 0 2px 0 0 rgba(255, 255, 255, 0.3),
+      inset 0 -2px 0 0 rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
   }
@@ -242,7 +245,6 @@ All colors MUST be HSL.
     content: '';
     position: absolute;
     inset: 0;
-    padding: 2px;
     background: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.5) 0%,
@@ -252,9 +254,8 @@ All colors MUST be HSL.
       rgba(255, 255, 255, 0.4) 100%
     );
     border-radius: 24px;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: xor;
-    -webkit-mask-composite: xor;
+    opacity: 0.3;
+    pointer-events: none;
   }
   
   .glass-morphing::after {
@@ -279,7 +280,7 @@ All colors MUST be HSL.
     opacity: 1;
   }
 
-  /* Frosted glass variant with consistent styling */
+  /* Frosted glass variant with no borders */
   .glass-frosted {
     background: linear-gradient(
       135deg, 
@@ -288,7 +289,7 @@ All colors MUST be HSL.
     );
     backdrop-filter: blur(40px) saturate(180%) brightness(110%);
     -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(110%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border: none;
     border-radius: 24px;
     box-shadow: 
       0 20px 60px 0 rgba(31, 38, 135, 0.5),
@@ -321,7 +322,7 @@ All colors MUST be HSL.
     border-radius: 24px;
   }
 
-  /* iOS-style variants for specific use cases */
+  /* iOS-style variants with authentic Apple aesthetics */
   .glass-ios-widget {
     background: linear-gradient(
       135deg, 
@@ -330,7 +331,7 @@ All colors MUST be HSL.
     );
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    border: none;
     border-radius: 24px;
     box-shadow: 
       0 8px 32px 0 rgba(0, 0, 0, 0.12),
@@ -347,7 +348,7 @@ All colors MUST be HSL.
     );
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    border: none;
     border-radius: 24px;
     box-shadow: 
       0 12px 40px 0 rgba(0, 0, 0, 0.15),
@@ -362,7 +363,6 @@ All colors MUST be HSL.
       rgba(255, 255, 255, 0.12) 0%, 
       rgba(255, 255, 255, 0.04) 100%
     );
-    border: 0.5px solid rgba(255, 255, 255, 0.25);
     box-shadow: 
       0 16px 50px 0 rgba(0, 0, 0, 0.2),
       0 8px 25px 0 rgba(0, 0, 0, 0.12),

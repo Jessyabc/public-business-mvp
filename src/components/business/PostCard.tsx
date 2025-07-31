@@ -42,8 +42,8 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
   const uScoreProgress = (post.uScore.total / 100) * 100;
 
   return (
-    <Card className={cn(
-      "glass-card backdrop-blur-xl border border-white/10 p-6 transition-all duration-300 hover:border-white/20 hover:shadow-lg relative group",
+    <div className={cn(
+      "glass-ios-card p-6 transition-all duration-300 hover:shadow-lg relative group",
       post.isHighlighted && "ring-2 ring-primary/30 shadow-primary/20"
     )}>
       {/* Highlight glow for linked posts */}
@@ -179,6 +179,6 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
           <Zap className="w-4 h-4" />
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }

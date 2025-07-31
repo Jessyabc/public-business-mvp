@@ -43,7 +43,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       <div className="grid grid-cols-1 gap-4">
         <Button
           onClick={() => setComposerType('brainstorm')}
-          className="h-20 flex flex-col items-center justify-center space-y-2 glass-card bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+          className="h-20 flex flex-col items-center justify-center space-y-2 glass-ios-card hover:glass-ios-widget text-primary"
         >
           <Brain className="w-6 h-6" />
           <div className="text-center">
@@ -54,7 +54,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
         <Button
           onClick={() => setComposerType('insight')}
-          className="h-20 flex flex-col items-center justify-center space-y-2 glass-card bg-secondary/10 hover:bg-secondary/20 text-secondary-foreground border border-secondary/20"
+          className="h-20 flex flex-col items-center justify-center space-y-2 glass-ios-card hover:glass-ios-widget text-secondary-foreground"
         >
           <FileText className="w-6 h-6" />
           <div className="text-center">
@@ -80,7 +80,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your idea, thought, or insight..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[100px] bg-background/50 border-white/10 backdrop-blur-sm"
+          className="min-h-[100px] glass-ios-card"
         />
       </div>
 
@@ -110,14 +110,14 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Give your insight a compelling title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="bg-background/50 border-white/10 backdrop-blur-sm"
+          className="glass-ios-card"
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="post-type">Type</Label>
         <Select value={postType} onValueChange={setPostType}>
-          <SelectTrigger className="bg-background/50 border-white/10 backdrop-blur-sm">
+          <SelectTrigger className="glass-ios-card">
             <SelectValue placeholder="Select post type" />
           </SelectTrigger>
           <SelectContent>
@@ -133,7 +133,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       <div className="space-y-2">
         <Label htmlFor="visibility">Visibility</Label>
         <Select value={visibility} onValueChange={setVisibility}>
-          <SelectTrigger className="bg-background/50 border-white/10 backdrop-blur-sm">
+          <SelectTrigger className="glass-ios-card">
             <SelectValue placeholder="Who can see this?" />
           </SelectTrigger>
           <SelectContent>
@@ -152,7 +152,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your professional insight, analysis, or findings..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[120px] bg-background/50 border-white/10 backdrop-blur-sm"
+          className="min-h-[120px] glass-ios-card"
         />
       </div>
 
@@ -170,7 +170,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="glass-card backdrop-blur-xl border border-white/10 max-w-lg">
+      <DialogContent className="glass-ios-widget backdrop-blur-xl max-w-lg">
         <DialogHeader>
           <DialogTitle className="sr-only">Create New Content</DialogTitle>
         </DialogHeader>

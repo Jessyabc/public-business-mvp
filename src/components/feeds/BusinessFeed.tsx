@@ -56,7 +56,7 @@ export function BusinessFeed() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-8 relative z-10">
-          <div className="glass-card rounded-3xl p-8 backdrop-blur-xl border border-white/10">
+          <div className="glass-ios-widget rounded-3xl p-8 backdrop-blur-xl">
             {/* Top bar with search and filters */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
@@ -85,7 +85,7 @@ export function BusinessFeed() {
                   placeholder="Search by title, company, or industry..."
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="pl-10 bg-background/50 border-white/10 backdrop-blur-sm"
+                  className="pl-10 glass-ios-card"
                 />
               </div>
 
@@ -96,7 +96,7 @@ export function BusinessFeed() {
                   setFilters(prev => ({ ...prev, sortBy: value }))
                 }
               >
-                <SelectTrigger className="w-full lg:w-48 bg-background/50 border-white/10 backdrop-blur-sm">
+                <SelectTrigger className="w-full lg:w-48 glass-ios-card">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -109,7 +109,7 @@ export function BusinessFeed() {
               </Select>
 
               {/* Industry Filter */}
-              <Button variant="outline" className="bg-background/50 border-white/10 backdrop-blur-sm">
+              <Button variant="outline" className="glass-ios-card">
                 <Filter className="w-4 h-4 mr-2" />
                 Industries
               </Button>
@@ -142,7 +142,7 @@ export function BusinessFeed() {
         <div className="mt-8 text-center">
           <Button 
             variant="outline" 
-            className="glass-card bg-background/50 border-white/10 backdrop-blur-sm hover:bg-background/70"
+            className="glass-ios-card hover:glass-ios-widget"
           >
             Load More Posts
           </Button>
