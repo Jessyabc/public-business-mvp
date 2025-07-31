@@ -80,15 +80,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-white/20 max-w-md">
+      <DialogContent className="sm:max-w-md border border-white/20 bg-black/80 backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-light text-center text-foreground">
+          <DialogTitle className="text-2xl font-light text-center text-white">
             Join Public Business
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass bg-white/5">
+          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10">
             <TabsTrigger value="signin" className="data-[state=active]:bg-white/10">
               Sign In
             </TabsTrigger>
@@ -99,19 +99,19 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="signin" className="space-y-4 mt-6">
             <div className="space-y-2">
-              <Label htmlFor="signin-email">Email</Label>
+              <Label htmlFor="signin-email" className="text-white">Email</Label>
               <Input
                 id="signin-email"
                 type="email"
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="glass border-white/20"
+                className="bg-black/50 border-white/20 text-white placeholder:text-white/60"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="signin-password">Password</Label>
+              <Label htmlFor="signin-password" className="text-white">Password</Label>
               <div className="relative">
                 <Input
                   id="signin-password"
@@ -119,7 +119,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="glass border-white/20 pr-10"
+                  className="bg-black/50 border-white/20 text-white placeholder:text-white/60 pr-10"
                 />
                 <Button
                   type="button"
@@ -148,26 +148,26 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="signup" className="space-y-4 mt-6">
             <div className="space-y-4">
-              <div className="text-center p-4 glass-card rounded-lg border border-white/10">
-                <p className="text-sm text-muted-foreground">
+              <div className="text-center p-4 rounded-lg border border-white/10 bg-white/5">
+                <p className="text-sm text-white/60">
                   Join as a Public Member. You can request business membership later through your profile.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
+                <Label htmlFor="signup-email" className="text-white">Email</Label>
                 <Input
                   id="signup-email"
                   type="email"
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="glass border-white/20"
+                  className="bg-black/50 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
+                <Label htmlFor="signup-password" className="text-white">Password</Label>
                 <div className="relative">
                   <Input
                     id="signup-password"
@@ -175,7 +175,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="glass border-white/20 pr-10"
+                    className="bg-black/50 border-white/20 text-white placeholder:text-white/60 pr-10"
                   />
                   <Button
                     type="button"
@@ -194,14 +194,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Label htmlFor="confirm-password" className="text-white">Confirm Password</Label>
                 <Input
                   id="confirm-password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="glass border-white/20"
+                  className="bg-black/50 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
             </div>
