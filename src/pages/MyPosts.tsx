@@ -3,10 +3,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Brain, Building2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useComposerStore } from '@/hooks/useComposerStore';
 
 const MyPosts = () => {
   const { mode } = useAppMode();
   const { user } = useAuth();
+  const { openComposer } = useComposerStore();
 
   return (
     <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
@@ -61,6 +63,7 @@ const MyPosts = () => {
                 }
               </p>
               <Button 
+                onClick={() => openComposer()}
                 className={`transition-all duration-300 ${
                   mode === 'public'
                     ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
