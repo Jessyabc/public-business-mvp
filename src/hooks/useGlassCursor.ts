@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 export function useGlassCursor() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Only run if there are elements with the class
-      const glassElements = document.querySelectorAll('.glass-follow-cursor');
+      // Only run if there are elements with the class, but exclude dialogs
+      const glassElements = document.querySelectorAll('.glass-follow-cursor:not([data-radix-dialog-content])');
       
       if (glassElements.length === 0) return;
       

@@ -80,7 +80,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border border-white/20 bg-black/80 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-md glass-card border-white/20 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-light text-center text-white">
             Join Public Business
@@ -88,7 +88,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
         </DialogHeader>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10">
+          <TabsList className="grid w-full grid-cols-2 glass bg-white/5">
             <TabsTrigger value="signin" className="data-[state=active]:bg-white/10">
               Sign In
             </TabsTrigger>
@@ -106,7 +106,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-black/50 border-white/20 text-white placeholder:text-white/60"
+                className="glass border-white/20 text-white placeholder:text-white/60"
               />
             </div>
 
@@ -119,7 +119,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-black/50 border-white/20 text-white placeholder:text-white/60 pr-10"
+                  className="glass border-white/20 text-white placeholder:text-white/60 pr-10"
                 />
                 <Button
                   type="button"
@@ -148,7 +148,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="signup" className="space-y-4 mt-6">
             <div className="space-y-4">
-              <div className="text-center p-4 rounded-lg border border-white/10 bg-white/5">
+              <div className="text-center p-4 glass-card rounded-lg border border-white/10">
                 <p className="text-sm text-white/60">
                   Join as a Public Member. You can request business membership later through your profile.
                 </p>
@@ -162,7 +162,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-black/50 border-white/20 text-white placeholder:text-white/60"
+                  className="glass border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -175,7 +175,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder:text-white/60 pr-10"
+                    className="glass border-white/20 text-white placeholder:text-white/60 pr-10"
                   />
                   <Button
                     type="button"
@@ -201,7 +201,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-black/50 border-white/20 text-white placeholder:text-white/60"
+                  className="glass border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
             </div>
