@@ -197,7 +197,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className={`${mode === 'public' ? 'glass-ios-widget' : 'glass-business'} backdrop-blur-xl max-w-lg z-50`}>
+      <DialogContent className={`${mode === 'public' ? 'glass-ios-widget' : 'glass-business'} backdrop-blur-xl max-w-lg fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]`}>
         <DialogHeader>
           <DialogTitle className="sr-only">Create New Content</DialogTitle>
         </DialogHeader>

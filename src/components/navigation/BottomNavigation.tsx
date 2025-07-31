@@ -1,13 +1,16 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
+import { useComposerStore } from '@/hooks/useComposerStore';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export function BottomNavigation() {
-  const location = useLocation();
+  const { openComposer } = useComposerStore();
   const { user } = useAuth();
   const { mode, toggleMode } = useAppMode();
+  const location = useLocation();
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
@@ -79,6 +82,19 @@ export function BottomNavigation() {
               </NavLink>
             );
           })}
+          
+          {/* Create Button */}
+          <Button
+            onClick={() => openComposer()}
+            className={`w-10 h-10 rounded-full transition-all duration-300 hover:scale-110 ml-2 ${
+              mode === 'public'
+                ? 'bg-primary/20 hover:bg-primary/30 text-primary border-primary/30'
+                : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 border-blue-500/30'
+            } glass-card backdrop-blur-xl border`}
+            size="icon"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </nav>

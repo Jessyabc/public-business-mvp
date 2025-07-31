@@ -42,8 +42,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         </AnimatePresence>
       </main>
 
-      {/* Floating Create Button - only show when user is logged in */}
-      {user && <FloatingCreateButton />}
+      {/* Bottom Navigation - only show when user is logged in */}
       
       {/* Bottom Navigation - only show when user is logged in */}
       {user && <BottomNavigation />}
