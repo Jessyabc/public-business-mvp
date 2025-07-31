@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Building2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
+import { useAppMode } from '@/contexts/AppModeContext';
 import { BusinessProfile } from '@/types/database';
 
 const businessProfileSchema = z.object({
@@ -31,6 +32,7 @@ interface BusinessProfileFormProps {
 }
 
 export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
+  const { mode } = useAppMode();
   const { profile, industries, departments, loading, createProfile, updateProfile } = useBusinessProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -100,10 +102,14 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
             <Building2 className="w-8 h-8 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className={`text-3xl font-bold ${
+              mode === 'business' ? 'text-blue-900' : 'text-slate-900'
+            }`}>
               {profile ? 'Update Business Profile' : 'Create Business Profile'}
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className={`mt-2 ${
+              mode === 'business' ? 'text-blue-700' : 'text-slate-600'
+            }`}>
               {profile ? 'Update your business information' : 'Join our business community and unlock professional features'}
             </p>
           </div>
@@ -112,8 +118,10 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
 
         <Card className="glass-business-card animate-scale-in">
           <CardHeader>
-            <CardTitle className="text-slate-900">Business Information</CardTitle>
-            <CardDescription className="text-slate-600">
+            <CardTitle className={mode === 'business' ? 'text-blue-900' : 'text-slate-900'}>
+              Business Information
+            </CardTitle>
+            <CardDescription className={mode === 'business' ? 'text-blue-700' : 'text-slate-600'}>
               Provide your business details for verification and access to business features.
             </CardDescription>
           </CardHeader>
@@ -125,7 +133,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                   name="company_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-700">Company Name</FormLabel>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Company Name
+                      </FormLabel>
                       <FormControl>
                          <Input 
                            placeholder="Enter your company name" 
@@ -144,7 +154,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     name="industry_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-700">Industry</FormLabel>
+                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                          Industry
+                        </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                            <FormControl>
                              <SelectTrigger className="glass-business-card">
@@ -169,7 +181,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     name="department_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-700">Department</FormLabel>
+                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                          Department
+                        </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                            <FormControl>
                              <SelectTrigger className="glass-business-card">
@@ -195,7 +209,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                   name="company_size"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-700">Company Size</FormLabel>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Company Size
+                      </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                          <FormControl>
                            <SelectTrigger className="glass-business-card">
@@ -221,7 +237,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-700">Phone</FormLabel>
+                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                          Phone
+                        </FormLabel>
                         <FormControl>
                            <Input 
                              placeholder="Enter phone number" 
@@ -239,7 +257,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                     name="website"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-700">Website</FormLabel>
+                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                          Website
+                        </FormLabel>
                         <FormControl>
                            <Input 
                              placeholder="https://example.com" 
@@ -258,7 +278,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                   name="linkedin_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-700">LinkedIn Profile</FormLabel>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        LinkedIn Profile
+                      </FormLabel>
                       <FormControl>
                          <Input 
                            placeholder="https://linkedin.com/in/yourprofile" 
@@ -276,7 +298,9 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
                   name="bio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-700">Company Bio</FormLabel>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Company Bio
+                      </FormLabel>
                       <FormControl>
                          <Textarea 
                            placeholder="Tell us about your company..."
