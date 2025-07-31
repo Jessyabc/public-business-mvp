@@ -68,21 +68,21 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
     switch (status) {
       case 'pending':
         return (
-          <Badge variant="secondary" className="glass-card bg-yellow-100/50 text-yellow-700 border-yellow-200/30">
+          <Badge variant="secondary" className="glass-business-card bg-yellow-100/50 text-yellow-700 border-yellow-200/30">
             <Clock className="w-3 h-3 mr-1" />
             Pending Review
           </Badge>
         );
       case 'approved':
         return (
-          <Badge variant="secondary" className="glass-card bg-green-100/50 text-green-700 border-green-200/30">
+          <Badge variant="secondary" className="glass-business-card bg-green-100/50 text-green-700 border-green-200/30">
             <CheckCircle className="w-3 h-3 mr-1" />
             Approved
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge variant="destructive" className="glass-card bg-red-100/50 text-red-700 border-red-200/30">
+          <Badge variant="destructive" className="glass-business-card bg-red-100/50 text-red-700 border-red-200/30">
             <XCircle className="w-3 h-3 mr-1" />
             Rejected
           </Badge>
@@ -96,7 +96,7 @@ export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6 animate-fade-in">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center space-y-4">
-          <div className="glass-card w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto border border-blue-200/30">
+          <div className="glass-business w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto border border-blue-200/30">
             <Building2 className="w-8 h-8 text-blue-600" />
           </div>
           <div>

@@ -17,12 +17,13 @@ interface ComposerModalProps {
 
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const { mode } = useAppMode();
-  const { createPost, loading } = usePosts();
+  const { createPost } = usePosts();
   const [composerType, setComposerType] = useState<'brainstorm' | 'insight' | null>(null);
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [postType, setPostType] = useState<string>("");
   const [visibility, setVisibility] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClose = () => {
     setComposerType(null);
@@ -34,18 +35,24 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   };
 
   const handleCreate = async () => {
+    if (!content.trim()) return;
+    
+    setIsSubmitting(true);
     try {
       const postData = {
-        content,
-        post_type: composerType === 'brainstorm' ? 'brainstorm' : postType,
-        visibility: composerType === 'brainstorm' ? 'public' : visibility,
-        ...(composerType === 'insight' && { title }),
+        content: content.trim(),
+        type: composerType === 'brainstorm' ? 'brainstorm' as const : postType as any,
+        mode: mode,
+        visibility: (visibility || 'public') as 'public' | 'my_business' | 'other_businesses' | 'draft',
+        ...(composerType === 'insight' && title.trim() && { title: title.trim() }),
       };
-      
+
       await createPost(postData);
       handleClose();
     } catch (error) {
       console.error('Error creating post:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -55,7 +62,11 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       <div className="grid grid-cols-1 gap-4">
         <Button
           onClick={() => setComposerType('brainstorm')}
-          className="h-20 flex flex-col items-center justify-center space-y-2 glass-business-card hover:glass-business text-primary"
+          className={`h-20 flex flex-col items-center justify-center space-y-2 ${
+            mode === 'public' 
+              ? 'glass-ios-card hover:glass-ios-widget text-primary' 
+              : 'glass-business-card hover:glass-business text-blue-600'
+          }`}
         >
           <Brain className="w-6 h-6" />
           <div className="text-center">
@@ -66,7 +77,11 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
         <Button
           onClick={() => setComposerType('insight')}
-          className="h-20 flex flex-col items-center justify-center space-y-2 glass-business-card hover:glass-business text-secondary-foreground"
+          className={`h-20 flex flex-col items-center justify-center space-y-2 ${
+            mode === 'public' 
+              ? 'glass-ios-card hover:glass-ios-widget text-secondary-foreground' 
+              : 'glass-business-card hover:glass-business text-blue-600'
+          }`}
         >
           <FileText className="w-6 h-6" />
           <div className="text-center">
@@ -92,7 +107,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your idea, thought, or insight..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[100px] glass-business-card"
+          className={`min-h-[100px] ${mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}`}
         />
       </div>
 
@@ -100,9 +115,9 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         <Button variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button onClick={handleCreate} disabled={!content.trim() || loading}>
+        <Button onClick={handleCreate} disabled={!content.trim() || isSubmitting}>
           <Sparkles className="w-4 h-4 mr-2" />
-          {loading ? 'Creating...' : 'Create Brainstorm'}
+          {isSubmitting ? 'Creating...' : 'Create Brainstorm'}
         </Button>
       </div>
     </div>
@@ -122,14 +137,14 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Give your insight a compelling title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="glass-business-card"
+          className={mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="post-type">Type</Label>
         <Select value={postType} onValueChange={setPostType}>
-          <SelectTrigger className="glass-business-card">
+          <SelectTrigger className={mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}>
             <SelectValue placeholder="Select post type" />
           </SelectTrigger>
           <SelectContent>
@@ -145,7 +160,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       <div className="space-y-2">
         <Label htmlFor="visibility">Visibility</Label>
         <Select value={visibility} onValueChange={setVisibility}>
-          <SelectTrigger className="glass-business-card">
+          <SelectTrigger className={mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}>
             <SelectValue placeholder="Who can see this?" />
           </SelectTrigger>
           <SelectContent>
@@ -164,7 +179,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your professional insight, analysis, or findings..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[120px] glass-business-card"
+          className={`min-h-[120px] ${mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}`}
         />
       </div>
 
@@ -172,9 +187,9 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         <Button variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button onClick={handleCreate} disabled={!content.trim() || !title.trim() || !postType || !visibility || loading}>
+        <Button onClick={handleCreate} disabled={!content.trim() || !title.trim() || !postType || !visibility || isSubmitting}>
           <Building2 className="w-4 h-4 mr-2" />
-          {loading ? 'Creating...' : 'Create Insight'}
+          {isSubmitting ? 'Creating...' : 'Create Insight'}
         </Button>
       </div>
     </div>
@@ -182,7 +197,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="glass-business-card backdrop-blur-xl max-w-lg z-50 fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+      <DialogContent className={`${mode === 'public' ? 'glass-ios-widget' : 'glass-business'} backdrop-blur-xl max-w-lg z-50`}>
         <DialogHeader>
           <DialogTitle className="sr-only">Create New Content</DialogTitle>
         </DialogHeader>
