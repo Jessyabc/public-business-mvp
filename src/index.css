@@ -418,4 +418,44 @@ All colors MUST be HSL.
   .glass-float {
     animation: glass-float 6s ease-in-out infinite;
   }
+
+  /* Business mode glass effects - frosted and darker for white backgrounds */
+  .glass-business {
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.15), 
+      rgba(147, 197, 253, 0.1)
+    );
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 16px;
+    box-shadow: 
+      0 8px 24px rgba(59, 130, 246, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-business-card {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.8), 
+      rgba(248, 250, 252, 0.6)
+    );
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 12px;
+    box-shadow: 
+      0 4px 16px rgba(59, 130, 246, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .glass-business-header {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9), 
+      rgba(241, 245, 249, 0.7)
+    );
+    backdrop-filter: blur(32px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 32px rgba(59, 130, 246, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
 }

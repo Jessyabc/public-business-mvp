@@ -75,11 +75,7 @@ export default function FlowView() {
         nodesConnectable={false}
         elementsSelectable={true}
       >
-        <Controls 
-          className="!glass !border-white/20" 
-          showInteractive={false}
-        />
-        <Background 
+        <Background
           color="rgba(255, 255, 255, 0.1)" 
           gap={20} 
           size={1}

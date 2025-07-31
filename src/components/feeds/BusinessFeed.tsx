@@ -56,7 +56,7 @@ export function BusinessFeed() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-8 relative z-10">
-          <div className="glass-ios-widget rounded-3xl p-8 backdrop-blur-xl">
+          <div className="glass-business-header rounded-3xl p-8 backdrop-blur-xl">
             {/* Top bar with search and filters */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
@@ -85,7 +85,7 @@ export function BusinessFeed() {
                   placeholder="Search by title, company, or industry..."
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="pl-10 glass-ios-card"
+                  className="pl-10 glass-business-card"
                 />
               </div>
 
@@ -96,7 +96,7 @@ export function BusinessFeed() {
                   setFilters(prev => ({ ...prev, sortBy: value }))
                 }
               >
-                <SelectTrigger className="w-full lg:w-48 glass-ios-card">
+                <SelectTrigger className="w-full lg:w-48 glass-business-card">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -109,7 +109,7 @@ export function BusinessFeed() {
               </Select>
 
               {/* Industry Filter */}
-              <Button variant="outline" className="glass-ios-card">
+              <Button variant="outline" className="glass-business-card">
                 <Filter className="w-4 h-4 mr-2" />
                 Industries
               </Button>
@@ -142,7 +142,7 @@ export function BusinessFeed() {
         <div className="mt-8 text-center">
           <Button 
             variant="outline" 
-            className="glass-ios-card hover:glass-ios-widget"
+            className="glass-business-card hover:glass-business"
           >
             Load More Posts
           </Button>
