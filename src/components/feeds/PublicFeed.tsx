@@ -4,7 +4,7 @@ import { Plus, Sparkles } from "lucide-react";
 
 export function PublicFeed() {
   return (
-    <div className="min-h-screen p-6 relative overflow-hidden">
+    <div className="min-h-screen p-6 relative overflow-hidden pb-32">
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#489FE3]/20 rounded-full blur-3xl"></div>
@@ -26,12 +26,12 @@ export function PublicFeed() {
           </div>
         </header>
         
-        <div className="w-full h-[calc(100vh-200px)] relative glass-card rounded-3xl backdrop-blur-xl overflow-hidden">
+        <div className="w-full h-[calc(100vh-280px)] relative">
           <FlowView />
           
           {/* Floating New Brainstorm Button */}
           <Button 
-            className="fixed bottom-8 right-8 w-16 h-16 rounded-full glass-card bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border border-[#489FE3]/50 backdrop-blur-xl transition-all duration-300 hover:scale-110 z-50"
+            className="fixed bottom-24 right-8 w-16 h-16 rounded-full glass-card bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border border-[#489FE3]/50 backdrop-blur-xl transition-all duration-300 hover:scale-110 z-40"
             size="icon"
           >
             <Plus className="w-6 h-6" />
