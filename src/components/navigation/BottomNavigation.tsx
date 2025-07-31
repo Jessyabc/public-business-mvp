@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Compass, Users, User, Building2, Brain } from 'lucide-react';
+import { Home, FileText, History, Bell, Search, MessageSquare, Brain, Building2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { Badge } from '@/components/ui/badge';
@@ -9,16 +9,13 @@ export function BottomNavigation() {
   const { user } = useAuth();
   const { mode, toggleMode } = useAppMode();
 
-  const navItems = mode === 'business' ? [
-    { to: '/', icon: Home, label: 'Hub', badge: null },
-    { to: '/business-profile', icon: Building2, label: 'Business', badge: null },
-    { to: '/community', icon: Users, label: 'Community', badge: null },
-    { to: '/profile', icon: User, label: 'Profile', badge: null }
-  ] : [
-    { to: '/', icon: Home, label: 'Home', badge: null },
-    { to: '/explore', icon: Compass, label: 'Explore', badge: null },
-    { to: '/community', icon: Users, label: 'Community', badge: null },
-    { to: '/profile', icon: User, label: 'Profile', badge: null }
+  const navItems = [
+    { to: '/', icon: Home, label: 'Feed', badge: null },
+    { to: '/my-posts', icon: FileText, label: mode === 'business' ? 'My Posts' : 'Brainstorms', badge: null },
+    { to: '/history', icon: History, label: 'History', badge: null },
+    { to: '/notifications', icon: Bell, label: 'Notifications', badge: 3 },
+    { to: '/research', icon: Search, label: 'Research', badge: null },
+    { to: '/beta-feedback', icon: MessageSquare, label: 'PB', badge: null }
   ];
 
   if (!user) {
@@ -27,13 +24,13 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-700 ease-in-out">
-      <div className={`glass-card rounded-full px-6 py-3 backdrop-blur-xl border transition-all duration-700 ease-in-out ${
+      <div className={`glass-card rounded-full px-4 py-3 backdrop-blur-xl border transition-all duration-700 ease-in-out ${
         mode === 'public' 
           ? 'border-white/20 bg-black/20' 
           : 'border-blue-200/30 bg-white/40'
       }`}>
-        <div className="flex items-center space-x-6">
-          {/* Mode Toggle - Now clickable to switch modes */}
+        <div className="flex items-center space-x-3">
+          {/* Mode Toggle */}
           <button 
             onClick={toggleMode}
             className={`flex items-center space-x-2 px-3 py-2 glass-card rounded-full border transition-all duration-500 ease-in-out ${
@@ -63,7 +60,7 @@ export function BottomNavigation() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`relative flex flex-col items-center space-y-1 px-3 py-2 rounded-xl transition-all duration-300 ${
+                className={`relative flex flex-col items-center space-y-1 px-2 py-2 rounded-xl transition-all duration-300 ${
                   isActive 
                     ? mode === 'public'
                       ? 'glass-card bg-[#489FE3]/20 text-[#489FE3]'
@@ -73,8 +70,8 @@ export function BottomNavigation() {
                       : 'text-slate-600 hover:text-slate-700 hover:bg-white/20'
                 }`}
               >
-                <IconComponent className="w-5 h-5 transition-all duration-300" />
-                <span className="text-xs font-medium transition-all duration-300">{item.label}</span>
+                <IconComponent className="w-4 h-4 transition-all duration-300" />
+                <span className="text-xs font-medium transition-all duration-300 whitespace-nowrap">{item.label}</span>
                 {item.badge && (
                   <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs transition-all duration-300">
                     {item.badge}
