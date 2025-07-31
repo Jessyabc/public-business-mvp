@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Brain, Building2, Sparkles, FileText } from "lucide-react";
+import { Brain, Sparkles, FileText } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
 
@@ -79,7 +78,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           onClick={() => setComposerType('insight')}
           className={`h-20 flex flex-col items-center justify-center space-y-2 ${
             mode === 'public' 
-              ? 'glass-ios-card hover:glass-ios-widget text-secondary-foreground' 
+              ? 'glass-ios-card hover:glass-ios-widget text-foreground' 
               : 'glass-business-card hover:glass-business text-blue-600'
           }`}
         >
@@ -126,7 +125,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const renderInsightComposer = () => (
     <div className="space-y-4">
       <div className="flex items-center space-x-2 mb-4">
-        <FileText className="w-5 h-5 text-secondary-foreground" />
+        <FileText className="w-5 h-5 text-foreground" />
         <h3 className="text-lg font-semibold">New Business Insight</h3>
       </div>
       
@@ -188,7 +187,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           Cancel
         </Button>
         <Button onClick={handleCreate} disabled={!content.trim() || !title.trim() || !postType || !visibility || isSubmitting}>
-          <Building2 className="w-4 h-4 mr-2" />
+          <Sparkles className="w-4 h-4 mr-2" />
           {isSubmitting ? 'Creating...' : 'Create Insight'}
         </Button>
       </div>
@@ -197,9 +196,12 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className={`${mode === 'public' ? 'glass-ios-widget' : 'glass-business'} backdrop-blur-xl max-w-lg fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]`}>
+      <DialogContent className={`${mode === 'public' ? 'glass-ios-widget' : 'glass-business'} backdrop-blur-xl max-w-lg`}>
         <DialogHeader>
           <DialogTitle className="sr-only">Create New Content</DialogTitle>
+          <DialogDescription className="sr-only">
+            Create a new brainstorm or business insight
+          </DialogDescription>
         </DialogHeader>
         
         {!composerType && renderTypeSelection()}
