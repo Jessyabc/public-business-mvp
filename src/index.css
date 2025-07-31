@@ -124,7 +124,7 @@ All colors MUST be HSL.
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 20px;
+    border-radius: 24px;
     box-shadow: 
       0 8px 32px 0 rgba(31, 38, 135, 0.4),
       0 4px 16px 0 rgba(0, 0, 0, 0.1),
@@ -166,7 +166,7 @@ All colors MUST be HSL.
       rgba(255, 255, 255, 0.1) 50%,
       rgba(255, 255, 255, 0.2) 100%
     ) 1;
-    border-radius: 16px;
+    border-radius: 24px;
     box-shadow: 
       0 12px 40px 0 rgba(31, 38, 135, 0.3),
       0 6px 20px 0 rgba(0, 0, 0, 0.15),
@@ -191,6 +191,7 @@ All colors MUST be HSL.
       transparent 100%
     );
     transition: left 0.7s ease-in-out;
+    border-radius: 24px;
   }
   
   .glass-card:hover::before {
@@ -218,7 +219,7 @@ All colors MUST be HSL.
     transform: translateY(-2px);
   }
 
-  /* Enhanced glass morphing effects */
+  /* Enhanced glass morphing effects with consistent radius */
   .glass-morphing {
     background: linear-gradient(
       135deg, 
@@ -271,28 +272,14 @@ All colors MUST be HSL.
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
+    border-radius: 24px;
   }
   
   .glass-morphing:hover::after {
     opacity: 1;
   }
 
-  /* Animation keyframes */
-  @keyframes shimmer {
-    0%, 100% { opacity: 0; transform: translateX(-100%); }
-    50% { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes glass-float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(1deg); }
-  }
-  
-  .glass-float {
-    animation: glass-float 6s ease-in-out infinite;
-  }
-
-  /* Frosted glass variant */
+  /* Frosted glass variant with consistent styling */
   .glass-frosted {
     background: linear-gradient(
       135deg, 
@@ -302,13 +289,14 @@ All colors MUST be HSL.
     backdrop-filter: blur(40px) saturate(180%) brightness(110%);
     -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(110%);
     border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 20px;
+    border-radius: 24px;
     box-shadow: 
       0 20px 60px 0 rgba(31, 38, 135, 0.5),
       0 10px 30px 0 rgba(0, 0, 0, 0.2),
       inset 0 2px 0 0 rgba(255, 255, 255, 0.4),
       inset 0 -2px 0 0 rgba(255, 255, 255, 0.1);
     position: relative;
+    overflow: hidden;
   }
   
   .glass-frosted::before {
@@ -330,10 +318,75 @@ All colors MUST be HSL.
     );
     animation: rotate 20s linear infinite;
     z-index: -1;
+    border-radius: 24px;
+  }
+
+  /* iOS-style variants for specific use cases */
+  .glass-ios-widget {
+    background: linear-gradient(
+      135deg, 
+      rgba(255, 255, 255, 0.12) 0%, 
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.12),
+      0 4px 16px 0 rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    position: relative;
+  }
+
+  .glass-ios-card {
+    background: linear-gradient(
+      135deg, 
+      rgba(255, 255, 255, 0.08) 0%, 
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    box-shadow: 
+      0 12px 40px 0 rgba(0, 0, 0, 0.15),
+      0 6px 20px 0 rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .glass-ios-card:hover {
+    background: linear-gradient(
+      135deg, 
+      rgba(255, 255, 255, 0.12) 0%, 
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    border: 0.5px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      0 16px 50px 0 rgba(0, 0, 0, 0.2),
+      0 8px 25px 0 rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Animation keyframes */
+  @keyframes shimmer {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    50% { opacity: 1; transform: translateX(0); }
+  }
+  
+  @keyframes glass-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
   }
   
   @keyframes rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+  }
+  
+  .glass-float {
+    animation: glass-float 6s ease-in-out infinite;
   }
 }
