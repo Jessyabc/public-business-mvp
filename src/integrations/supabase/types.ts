@@ -14,8 +14,43 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_invitations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by_type: string
+          invited_by_user_id: string
+          invited_email: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by_type: string
+          invited_by_user_id: string
+          invited_email: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by_type?: string
+          invited_by_user_id?: string
+          invited_email?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_profiles: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           bio: string | null
           company_name: string
           company_size: string | null
@@ -31,6 +66,8 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           bio?: string | null
           company_name: string
           company_size?: string | null
@@ -46,6 +83,8 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           bio?: string | null
           company_name?: string
           company_size?: string | null
@@ -250,6 +289,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_business_invitation: {
+        Args: { invitation_id: string }
+        Returns: boolean
+      }
+      can_create_business_posts: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"]
