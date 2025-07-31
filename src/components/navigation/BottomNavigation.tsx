@@ -5,9 +5,10 @@ import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ComposerModal } from '@/components/composer/ComposerModal';
 
 export function BottomNavigation() {
-  const { openComposer } = useComposerStore();
+  const { isOpen, openComposer, closeComposer } = useComposerStore();
   const { user } = useAuth();
   const { mode, toggleMode } = useAppMode();
   const location = useLocation();
@@ -97,6 +98,11 @@ export function BottomNavigation() {
           </Button>
         </div>
       </div>
+
+      <ComposerModal 
+        isOpen={isOpen} 
+        onClose={closeComposer} 
+      />
     </nav>
   );
 }

@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
-import { FloatingCreateButton } from '@/components/ui/FloatingCreateButton';
+
 import { useGlassCursor } from '@/hooks/useGlassCursor';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
