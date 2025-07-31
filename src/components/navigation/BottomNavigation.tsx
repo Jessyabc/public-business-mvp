@@ -9,31 +9,16 @@ export function BottomNavigation() {
   const { user } = useAuth();
   const { mode, toggleMode } = useAppMode();
 
-  const navItems = [
-    {
-      to: '/',
-      icon: Home,
-      label: 'Home',
-      badge: null
-    },
-    {
-      to: '/explore',
-      icon: Compass,
-      label: 'Explore',
-      badge: null
-    },
-    {
-      to: '/community',
-      icon: Users,
-      label: 'Community',
-      badge: null
-    },
-    {
-      to: '/profile',
-      icon: User,
-      label: 'Profile',
-      badge: null
-    }
+  const navItems = mode === 'business' ? [
+    { to: '/', icon: Home, label: 'Hub', badge: null },
+    { to: '/business-profile', icon: Building2, label: 'Business', badge: null },
+    { to: '/community', icon: Users, label: 'Community', badge: null },
+    { to: '/profile', icon: User, label: 'Profile', badge: null }
+  ] : [
+    { to: '/', icon: Home, label: 'Home', badge: null },
+    { to: '/explore', icon: Compass, label: 'Explore', badge: null },
+    { to: '/community', icon: Users, label: 'Community', badge: null },
+    { to: '/profile', icon: User, label: 'Profile', badge: null }
   ];
 
   if (!user) {
