@@ -3,6 +3,7 @@ import { useAppMode } from '@/contexts/AppModeContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/navigation/AppSidebar';
 import { ModeToggle } from '@/components/ModeToggle';
+import { UserProfile } from '@/components/auth/UserProfile';
 import { Menu } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -49,7 +50,10 @@ export function MainLayout({ children }: MainLayoutProps) {
               </div>
             </div>
 
-            <ModeToggle />
+            <div className="flex items-center space-x-4">
+              <ModeToggle />
+              <UserProfile />
+            </div>
           </div>
         </header>
 
