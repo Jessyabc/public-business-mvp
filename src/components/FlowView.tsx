@@ -1,18 +1,17 @@
-import { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
   ReactFlow,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
-  Node,
-  Edge,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import BrainstormNodeComponent from './BrainstormNode';
 import ConnectionEdgeComponent from './ConnectionEdge';
-import { mockBrainstorms, mockConnections } from '@/data/brainstorms';
+import { useRealtimeBrainstorms } from '@/hooks/useRealtimeBrainstorms';
 
 const nodeTypes = {
   brainstorm: BrainstormNodeComponent,
@@ -23,31 +22,17 @@ const edgeTypes = {
 };
 
 export default function FlowView() {
-  // Convert brainstorms to flow nodes
-  const initialNodes: Node[] = useMemo(() => 
-    mockBrainstorms.map((brainstorm) => ({
-      id: brainstorm.id,
-      type: 'brainstorm',
-      position: brainstorm.position,
-      data: { brainstorm },
-      draggable: true,
-    })), []
-  );
-
-  // Convert connections to flow edges
-  const initialEdges: Edge[] = useMemo(() => 
-    mockConnections.map((connection, index) => ({
-      id: `edge-${index}`,
-      source: connection.fromId,
-      target: connection.toId,
-      type: 'connection',
-      data: { connection },
-      animated: connection.type === 'inspiration',
-    })), []
-  );
+  // Get real-time brainstorm data
+  const { nodes: initialNodes, edges: initialEdges } = useRealtimeBrainstorms();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Update nodes when new brainstorms are added
+  React.useEffect(() => {
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   const onConnect = useCallback(() => {
     // Disable manual connections for now
@@ -70,15 +55,24 @@ export default function FlowView() {
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
         style={{ 
           backgroundColor: 'transparent',
+          width: '100%',
+          height: '100%',
         }}
         nodesDraggable={true}
         nodesConnectable={false}
         elementsSelectable={true}
       >
         <Background
-          color="rgba(255, 255, 255, 0.1)" 
+          color="rgba(72, 159, 227, 0.2)" 
           gap={20} 
           size={1}
+          variant={BackgroundVariant.Dots}
+        />
+        <Controls 
+          className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg"
+          showZoom={true}
+          showFitView={true}
+          showInteractive={false}
         />
       </ReactFlow>
     </div>
