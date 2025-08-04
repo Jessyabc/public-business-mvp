@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
 import Community from "./pages/Community";
 import BusinessProfile from "./pages/BusinessProfile";
+import { BusinessMembership } from "./pages/BusinessMembership";
 import SecurityDashboard from "./pages/SecurityDashboard";
 import { UserProfile } from "./components/auth/UserProfile";
 
@@ -72,6 +73,12 @@ export const navItems = [
     to: "/business-profile",
     icon: <Building2 className="h-4 w-4" />,
     page: <BusinessProfile />,
+  },
+  {
+    title: "Business Membership",
+    to: "/business-membership", 
+    icon: <Building2 className="h-4 w-4" />,
+    page: <BusinessMembership />,
   },
   {
     title: "Security",

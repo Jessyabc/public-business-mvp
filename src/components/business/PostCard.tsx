@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BusinessPost } from "@/types/business-post";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MessageCircle, Link, Eye, Share2, Bookmark, Zap, PlayCircle, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PostReaderModal } from "@/components/posts/PostReaderModal";
 
 interface PostCardProps {
   post: BusinessPost;
@@ -14,6 +16,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: PostCardProps) {
+  const [showReader, setShowReader] = useState(false);
   const getPostTypeColor = (type: BusinessPost['type']) => {
     switch (type) {
       case 'insight': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
@@ -121,7 +124,13 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
           </div>
         )}
 
-        <p className="text-sm text-muted-foreground line-clamp-3">{post.summary}</p>
+        
+        <div 
+          className="text-sm text-muted-foreground line-clamp-3 cursor-pointer hover:text-foreground transition-colors"
+          onClick={() => setShowReader(true)}
+        >
+          {post.summary}
+        </div>
       </div>
 
       {/* U-Score Breakdown */}
@@ -157,7 +166,7 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
       {/* Action Buttons */}
       <div className="flex items-center gap-2">
         <Button 
-          onClick={() => onViewPost(post.id)}
+          onClick={() => setShowReader(true)}
           className="flex-1 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20"
         >
           View Full Post
@@ -179,6 +188,31 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
           <Zap className="w-4 h-4" />
         </Button>
       </div>
+
+      <PostReaderModal 
+        isOpen={showReader}
+        onClose={() => setShowReader(false)}
+        post={{
+          id: post.id,
+          user_id: post.company.name,
+          title: post.title,
+          content: post.summary,
+          type: post.type,
+          visibility: 'public',
+          mode: 'business',
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          status: 'active',
+          likes_count: post.uScore.breakdown.links || 0,
+          comments_count: post.uScore.breakdown.comments,
+          views_count: post.uScore.breakdown.views,
+          t_score: null,
+          u_score: post.uScore.total,
+          industry_id: null,
+          department_id: null
+        }}
+      />
     </div>
   );
 }

@@ -88,3 +88,5 @@ export function BusinessMembership() {
     </div>
   );
 }
+
+export default BusinessMembership;

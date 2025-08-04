@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Brain, FileText, Eye, MessageCircle, Heart, Share2, MoreHorizontal } from 'lucide-react';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { Post } from '@/hooks/usePosts';
+import { PostReaderModal } from './PostReaderModal';
 
 interface PostCardProps {
   post: Post;
@@ -14,6 +16,7 @@ interface PostCardProps {
 
 export function PostCard({ post, onEdit, onDelete }: PostCardProps) {
   const { mode } = useAppMode();
+  const [showReader, setShowReader] = useState(false);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -91,11 +94,14 @@ export function PostCard({ post, onEdit, onDelete }: PostCardProps) {
       </CardHeader>
       
       <CardContent>
-        <p className={`text-sm mb-4 line-clamp-3 ${
-          mode === 'public' ? 'text-white/80' : 'text-slate-600'
-        }`}>
+        <div 
+          className={`text-sm mb-4 line-clamp-3 cursor-pointer ${
+            mode === 'public' ? 'text-white/80' : 'text-slate-600'
+          }`}
+          onClick={() => setShowReader(true)}
+        >
           {post.content}
-        </p>
+        </div>
 
         <div className="flex items-center justify-between">
           <div className={`flex items-center gap-4 text-xs ${
@@ -144,6 +150,12 @@ export function PostCard({ post, onEdit, onDelete }: PostCardProps) {
           </div>
         </div>
       </CardContent>
+
+      <PostReaderModal 
+        isOpen={showReader}
+        onClose={() => setShowReader(false)}
+        post={post}
+      />
     </Card>
   );
 }
