@@ -35,6 +35,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    exclude: ['@supabase/supabase-js']
+    include: ['@supabase/supabase-js'],
+    exclude: ['@supabase/postgrest-js']
   }
 }));
