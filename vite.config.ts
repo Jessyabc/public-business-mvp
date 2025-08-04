@@ -8,6 +8,21 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    watch: {
+      // Reduce file watcher overhead
+      usePolling: false,
+      interval: 100,
+      ignored: [
+        '**/node_modules/**',
+        '**/.git/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/*.log',
+        '**/coverage/**',
+        '**/tmp/**',
+        '**/temp/**'
+      ]
+    }
   },
   plugins: [
     react(),
@@ -19,4 +34,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: ['@supabase/supabase-js']
+  }
 }));
