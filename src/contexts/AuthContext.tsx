@@ -21,14 +21,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userType, setUserType] = useState<'public' | 'business' | null>(null);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Get initial session with error handling
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Auth session error:', error);
+      }
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         // Get user type from metadata
         setUserType(session.user.user_metadata?.user_type || 'public');
       }
+      setLoading(false);
+    }).catch((error) => {
+      console.error('Auth initialization error:', error);
       setLoading(false);
     });
 
