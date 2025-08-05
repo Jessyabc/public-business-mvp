@@ -11,6 +11,37 @@ import { useAppMode } from "@/contexts/AppModeContext";
 import { toast } from "sonner";
 import { User, Mail, Building, MapPin, Globe, Linkedin, Save } from "lucide-react";
 import { DisconnectButton } from "./DisconnectButton";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+
+export async function handleProfileSubmit(formData: {
+  display_name: string;
+  avatar_url?: string;
+  bio?: string;
+  linkedin_url?: string;
+}) {
+  const { data: user, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user?.user?.id) {
+    console.error("Not authenticated:", authError);
+    return { error: "Not authenticated." };
+  }
+
+  const { error: insertError } = await supabase.from("profiles").insert({
+    id: user.user.id,
+    display_name: formData.display_name,
+    avatar_url: formData.avatar_url || null,
+    bio: formData.bio || null,
+    linkedin_url: formData.linkedin_url || null,
+  });
+
+  if (insertError) {
+    console.error("Error inserting profile:", insertError);
+    return { error: "Failed to complete profile." };
+  }
+
+  return { success: true };
+}
 
 interface Profile {
   id: string;
