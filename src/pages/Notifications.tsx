@@ -52,7 +52,6 @@ const Notifications = () => {
               }`}>
                 <Brain className="w-4 h-4" />
                 <span className="text-sm font-medium">Public</span>
-                <Badge className="text-xs">3</Badge>
               </button>
               <button className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
                 mode === 'public' ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-700'

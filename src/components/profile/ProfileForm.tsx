@@ -38,14 +38,32 @@ export function ProfileForm() {
   }, [user]);
 
   const fetchProfile = async () => {
+    if (!user?.id) return;
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Profile fetch error:', error);
+        // Create a default profile if there's an error
+        const defaultProfile = {
+          id: user.id,
+          display_name: user.user_metadata?.name || user.email?.split('@')[0] || '',
+          avatar_url: null,
+          bio: null,
+          website: null,
+          linkedin_url: null,
+          company: null,
+          role: null,
+          location: null,
+        };
+        setProfile(defaultProfile);
+        return;
+      }
 
       if (data) {
         setProfile(data);
@@ -65,8 +83,20 @@ export function ProfileForm() {
         setProfile(newProfile);
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast.error('Failed to load profile');
+      console.warn('Error fetching profile, using fallback:', error);
+      // Fallback profile
+      const fallbackProfile = {
+        id: user?.id || '',
+        display_name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+        avatar_url: null,
+        bio: null,
+        website: null,
+        linkedin_url: null,
+        company: null,
+        role: null,
+        location: null,
+      };
+      setProfile(fallbackProfile);
     } finally {
       setLoading(false);
     }

@@ -16,7 +16,7 @@ export function BottomNavigation() {
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
     { to: '/history', icon: History, label: 'Profile & History', badge: null },
-    { to: '/notifications', icon: Bell, label: 'Notifications', badge: 3 },
+    { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
     { to: '/security', icon: Shield, label: 'Security', badge: null },
     { to: '/research', icon: Search, label: 'Research', badge: null },
     { to: '/beta-feedback', icon: MessageSquare, label: 'PB', badge: null }
