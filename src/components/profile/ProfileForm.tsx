@@ -87,6 +87,7 @@ export function ProfileForm() {
         company: profile.company,
         role: profile.role,
         location: profile.location,
+        is_completed: true,
       });
 
       const { error } = await supabase
