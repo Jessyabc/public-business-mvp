@@ -229,6 +229,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_completed: boolean | null
           linkedin_url: string | null
           location: string | null
           role: string | null
@@ -242,6 +243,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          is_completed?: boolean | null
           linkedin_url?: string | null
           location?: string | null
           role?: string | null
@@ -255,6 +257,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_completed?: boolean | null
           linkedin_url?: string | null
           location?: string | null
           role?: string | null
