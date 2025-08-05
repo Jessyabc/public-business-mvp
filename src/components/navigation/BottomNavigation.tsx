@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User, Plus } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User, Plus, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -17,6 +17,7 @@ export function BottomNavigation() {
     { to: '/', icon: Home, label: 'Feed', badge: null },
     { to: '/history', icon: History, label: 'Profile & History', badge: null },
     { to: '/notifications', icon: Bell, label: 'Notifications', badge: 3 },
+    { to: '/security', icon: Shield, label: 'Security', badge: null },
     { to: '/research', icon: Search, label: 'Research', badge: null },
     { to: '/beta-feedback', icon: MessageSquare, label: 'PB', badge: null }
   ];
