@@ -72,10 +72,11 @@ export function ProfileForm() {
     }
   };
 
-  const handleSave = async () => {
+const handleSave = async () => {
   if (!profile || !user) return;
 
   setSaving(true);
+
   try {
     const updatedProfile = {
       id: user.id,
@@ -87,7 +88,7 @@ export function ProfileForm() {
       company: profile.company,
       role: profile.role,
       location: profile.location,
-      is_completed: true, // ✅ Added here!
+      is_completed: true,
     };
 
     console.log('Updating profile with data:', updatedProfile);
@@ -100,34 +101,19 @@ export function ProfileForm() {
 
     if (error) {
       console.error('Profile update error details:', error);
-      toast.error(`Update failed: ${error.message}`); // ✅ Shows Supabase error to user
+      toast.error(`Update failed: ${error.message}`);
     } else {
       toast.success('Profile updated successfully');
     }
-  } catch (err) {
-    console.error('Unexpected error during profile update:', err);
-    toast.error('An unexpected error occurred');
+
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    toast.error('Failed to update profile');
   } finally {
     setSaving(false);
   }
 };
 
-
-      console.log('Profile update result:', { error });
-
-      if (error) {
-        console.error('Profile update error details:', error);
-        throw error;
-      }
-
-      toast.success('Profile updated successfully');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const updateField = (field: keyof Profile, value: string) => {
     if (profile) {
