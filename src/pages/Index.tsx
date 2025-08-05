@@ -14,7 +14,7 @@ const Index = () => {
     </div>;
   }
 
-  if (!profile) {
+  if (!Profile) {
   return <div className="text-center p-6">No profile data.</div>;
   }
 
