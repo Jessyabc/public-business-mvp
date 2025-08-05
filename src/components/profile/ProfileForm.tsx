@@ -38,32 +38,14 @@ export function ProfileForm() {
   }, [user]);
 
   const fetchProfile = async () => {
-    if (!user?.id) return;
-    
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', user?.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.warn('Profile fetch error:', error);
-        // Create a default profile if there's an error
-        const defaultProfile = {
-          id: user.id,
-          display_name: user.user_metadata?.name || user.email?.split('@')[0] || '',
-          avatar_url: null,
-          bio: null,
-          website: null,
-          linkedin_url: null,
-          company: null,
-          role: null,
-          location: null,
-        };
-        setProfile(defaultProfile);
-        return;
-      }
+      if (error) throw error;
 
       if (data) {
         setProfile(data);
@@ -83,56 +65,53 @@ export function ProfileForm() {
         setProfile(newProfile);
       }
     } catch (error) {
-      console.warn('Error fetching profile, using fallback:', error);
-      // Fallback profile
-      const fallbackProfile = {
-        id: user?.id || '',
-        display_name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
-        avatar_url: null,
-        bio: null,
-        website: null,
-        linkedin_url: null,
-        company: null,
-        role: null,
-        location: null,
-      };
-      setProfile(fallbackProfile);
+      console.error('Error fetching profile:', error);
+      toast.error('Failed to load profile');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!profile || !user) return;
+  if (!profile || !user) return;
 
-    setSaving(true);
-    try {
-      console.log('Updating profile with data:', {
-        id: user.id,
-        display_name: profile.display_name,
-        avatar_url: profile.avatar_url,
-        bio: profile.bio,
-        website: profile.website,
-        linkedin_url: profile.linkedin_url,
-        company: profile.company,
-        role: profile.role,
-        location: profile.location,
-        is_completed: true,
-      });
+  setSaving(true);
+  try {
+    const updatedProfile = {
+      id: user.id,
+      display_name: profile.display_name,
+      avatar_url: profile.avatar_url,
+      bio: profile.bio,
+      website: profile.website,
+      linkedin_url: profile.linkedin_url,
+      company: profile.company,
+      role: profile.role,
+      location: profile.location,
+      is_completed: true, // ✅ Added here!
+    };
 
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          display_name: profile.display_name,
-          avatar_url: profile.avatar_url,
-          bio: profile.bio,
-          website: profile.website,
-          linkedin_url: profile.linkedin_url,
-          company: profile.company,
-          role: profile.role,
-          location: profile.location,
-        });
+    console.log('Updating profile with data:', updatedProfile);
+
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(updatedProfile);
+
+    console.log('Profile update result:', { error });
+
+    if (error) {
+      console.error('Profile update error details:', error);
+      toast.error(`Update failed: ${error.message}`); // ✅ Shows Supabase error to user
+    } else {
+      toast.success('Profile updated successfully');
+    }
+  } catch (err) {
+    console.error('Unexpected error during profile update:', err);
+    toast.error('An unexpected error occurred');
+  } finally {
+    setSaving(false);
+  }
+};
+
 
       console.log('Profile update result:', { error });
 
