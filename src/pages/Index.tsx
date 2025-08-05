@@ -14,10 +14,6 @@ const Index = () => {
     </div>;
   }
 
-  if (!Profile) {
-  return <div className="text-center p-6">No profile data.</div>;
-  }
-
   
   if (!user) {
     return <Landing />;
