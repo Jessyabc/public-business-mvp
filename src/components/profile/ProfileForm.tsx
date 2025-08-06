@@ -86,7 +86,6 @@ const handleSave = async () => {
       website: profile.website,
       linkedin_url: profile.linkedin_url,
       company: profile.company,
-      role: profile.role,
       location: profile.location,
       is_completed: true,
     };
