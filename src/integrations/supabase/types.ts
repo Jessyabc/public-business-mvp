@@ -232,7 +232,7 @@ export type Database = {
           is_completed: boolean | null
           linkedin_url: string | null
           location: string | null
-          role: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
           updated_at: string
           website: string | null
         }
@@ -246,7 +246,7 @@ export type Database = {
           is_completed?: boolean | null
           linkedin_url?: string | null
           location?: string | null
-          role?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string
           website?: string | null
         }
@@ -260,7 +260,7 @@ export type Database = {
           is_completed?: boolean | null
           linkedin_url?: string | null
           location?: string | null
-          role?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string
           website?: string | null
         }
