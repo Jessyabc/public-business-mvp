@@ -7,8 +7,10 @@ import { Separator } from '@/components/ui/separator';
 import { UserPlus, Mail, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useBusinessInvitations } from '@/hooks/useBusinessInvitations';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useToast } from '@/hooks/use-toast';
 
 export function BusinessInvitations() {
+  const { toast } = useToast();
   const { userRole } = useUserRoles();
   const {
     invitations,
@@ -39,7 +41,17 @@ export function BusinessInvitations() {
   };
 
   const handleAcceptInvitation = async (invitationId: string) => {
-    await acceptInvitation(invitationId);
+    try {
+      const success = await acceptInvitation(invitationId);
+      if (success) {
+        toast({
+          title: "Welcome to the Business!",
+          description: "You are now a Business Member with special privileges and access to business features.",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to accept invitation:', error);
+    }
   };
 
   const handleRejectInvitation = async (invitationId: string) => {

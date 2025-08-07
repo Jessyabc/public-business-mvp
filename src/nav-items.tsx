@@ -1,4 +1,4 @@
-import { Home, History as HistoryIcon, User, Compass, Users, Building2, Search, Bell, MessageSquare, FileText, Shield } from "lucide-react";
+import { Home, History as HistoryIcon, User, Compass, Users, Building2, Search, Bell, MessageSquare, FileText, Shield, Plus } from "lucide-react";
 import Index from "./pages/Index";
 import MyPosts from "./pages/MyPosts";
 import History from "./pages/History";
@@ -12,6 +12,8 @@ import BusinessProfile from "./pages/BusinessProfile";
 import { BusinessMembership } from "./pages/BusinessMembership";
 import SecurityDashboard from "./pages/SecurityDashboard";
 import { UserProfile } from "./components/auth/UserProfile";
+import CreateBusiness from "./pages/CreateBusiness";
+import BusinessDashboard from "./pages/BusinessDashboard";
 
 export const navItems = [
   {
@@ -79,6 +81,18 @@ export const navItems = [
     to: "/business-membership", 
     icon: <Building2 className="h-4 w-4" />,
     page: <BusinessMembership />,
+  },
+  {
+    title: "Create Business",
+    to: "/create-business",
+    icon: <Plus className="h-4 w-4" />,
+    page: <CreateBusiness />,
+  },
+  {
+    title: "Business Dashboard",
+    to: "/business-dashboard",
+    icon: <Building2 className="h-4 w-4" />,
+    page: <BusinessDashboard />,
   },
   {
     title: "Security",

@@ -3,15 +3,20 @@ import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User, Plu
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ComposerModal } from '@/components/composer/ComposerModal';
+import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
 
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const { user } = useAuth();
   const { mode, toggleMode } = useAppMode();
+  const { userRole } = useUserRoles();
   const location = useLocation();
+  
+  const isBusinessMember = userRole === 'business_member' || userRole === 'admin';
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
@@ -34,6 +39,23 @@ export function BottomNavigation() {
           : 'border-blue-200/30 bg-white/40'
       }`}>
         <div className="flex items-center space-x-3">
+          {/* Business Member Badge */}
+          {isBusinessMember && (
+            <div className="flex items-center gap-2">
+              <BusinessMemberBadge className="text-xs" />
+              <NavLink
+                to="/business-dashboard"
+                className={`flex items-center px-2 py-1 rounded-lg transition-all duration-300 ${
+                  location.pathname === '/business-dashboard'
+                    ? 'bg-blue-500/20 text-blue-600'
+                    : 'hover:bg-white/10 text-white/70 hover:text-white'
+                }`}
+              >
+                <Building2 className="w-4 h-4" />
+              </NavLink>
+            </div>
+          )}
+
           {/* Mode Toggle */}
           <button 
             onClick={toggleMode}
