@@ -1,0 +1,181 @@
+import { NavLink } from 'react-router-dom';
+import { Linkedin, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppMode } from '@/contexts/AppModeContext';
+
+export function Footer() {
+  const { user } = useAuth();
+  const { mode } = useAppMode();
+
+  if (user) return null; // Don't show footer when user is logged in
+
+  const currentYear = new Date().getFullYear();
+
+  const footerLinks = {
+    company: [
+      { label: 'About', to: '/about' },
+      { label: 'Features', to: '/features' },
+      { label: 'Careers', to: '/careers' },
+      { label: 'Contact', to: '/contact' },
+    ],
+    members: [
+      { label: 'Business Members', to: '/business-members' },
+      { label: 'Public Members', to: '/public-members' },
+      { label: 'Join Now', to: '/signup' },
+      { label: 'How it Works', to: '/how-it-works' },
+    ],
+    support: [
+      { label: 'Help Center', to: '/help' },
+      { label: 'FAQ', to: '/faq' },
+      { label: 'Blog', to: '/blog' },
+      { label: 'Community', to: '/community' },
+    ],
+    legal: [
+      { label: 'Privacy Policy', to: '/privacy' },
+      { label: 'Terms of Service', to: '/terms' },
+      { label: 'Cookie Policy', to: '/cookies' },
+      { label: 'Disclaimer', to: '/disclaimer' },
+    ],
+  };
+
+  return (
+    <footer className={`py-16 mt-32 ${
+      mode === 'public' 
+        ? 'bg-slate-900/50 backdrop-blur-xl border-t border-white/10' 
+        : 'bg-white/80 backdrop-blur-xl border-t border-blue-200/30'
+    }`}>
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+          {/* Brand Section */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center space-x-2 mb-6">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">PB</span>
+              </div>
+              <span className="text-xl font-bold text-foreground">Public Business</span>
+            </div>
+            <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+              Linking industries the right way. Engage, share, thrive with business leaders and thought partners.
+            </p>
+            <div className="flex space-x-4">
+              <a href="https://linkedin.com" className="text-muted-foreground hover:text-primary transition-colors">
+                <Linkedin className="h-5 w-5" />
+              </a>
+              <a href="https://twitter.com" className="text-muted-foreground hover:text-primary transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="mailto:contact@publicbusiness.com" className="text-muted-foreground hover:text-primary transition-colors">
+                <Mail className="h-5 w-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Company Links */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4">Company</h3>
+            <ul className="space-y-3">
+              {footerLinks.company.map((link) => (
+                <li key={link.to}>
+                  <NavLink 
+                    to={link.to} 
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Members Links */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4">Members</h3>
+            <ul className="space-y-3">
+              {footerLinks.members.map((link) => (
+                <li key={link.to}>
+                  <NavLink 
+                    to={link.to} 
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Support Links */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4">Support</h3>
+            <ul className="space-y-3">
+              {footerLinks.support.map((link) => (
+                <li key={link.to}>
+                  <NavLink 
+                    to={link.to} 
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4">Legal</h3>
+            <ul className="space-y-3">
+              {footerLinks.legal.map((link) => (
+                <li key={link.to}>
+                  <NavLink 
+                    to={link.to} 
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Contact Info */}
+        <div className="border-t border-border mt-12 pt-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="flex items-center space-x-3">
+              <Mail className="h-5 w-5 text-primary" />
+              <div>
+                <div className="font-medium text-foreground">Email</div>
+                <div className="text-sm text-muted-foreground">contact@publicbusiness.com</div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Phone className="h-5 w-5 text-primary" />
+              <div>
+                <div className="font-medium text-foreground">Phone</div>
+                <div className="text-sm text-muted-foreground">+1 (555) 123-4567</div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <MapPin className="h-5 w-5 text-primary" />
+              <div>
+                <div className="font-medium text-foreground">Location</div>
+                <div className="text-sm text-muted-foreground">San Francisco, CA</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            © {currentYear} Public Business. All rights reserved.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 md:mt-0">
+            Built with ❤️ for connecting industries
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}

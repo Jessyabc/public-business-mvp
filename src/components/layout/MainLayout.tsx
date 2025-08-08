@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -20,8 +22,11 @@ export function MainLayout({ children }: MainLayoutProps) {
         ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
         : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
     }`}>
+      {/* Header - only show when user is not logged in */}
+      <Header />
+      
       {/* Main Content with smooth transitions */}
-      <main className="min-h-screen">
+      <main className={user ? "min-h-screen" : "min-h-screen pt-20"}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -37,6 +42,9 @@ export function MainLayout({ children }: MainLayoutProps) {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Footer - only show when user is not logged in */}
+      <Footer />
 
       {/* Bottom Navigation - only show when user is logged in */}
       {user && <BottomNavigation />}

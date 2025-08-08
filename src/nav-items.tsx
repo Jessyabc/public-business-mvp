@@ -14,6 +14,7 @@ import SecurityDashboard from "./pages/SecurityDashboard";
 import { UserProfile } from "./components/auth/UserProfile";
 import CreateBusiness from "./pages/CreateBusiness";
 import BusinessDashboard from "./pages/BusinessDashboard";
+import Settings from "./pages/Settings";
 
 export const navItems = [
   {
@@ -99,6 +100,12 @@ export const navItems = [
     to: "/security",
     icon: <Shield className="h-4 w-4" />,
     page: <SecurityDashboard />,
+  },
+  {
+    title: "Settings",
+    to: "/settings",
+    icon: <Shield className="h-4 w-4" />,
+    page: <Settings />,
   },
   {
     title: "Not Found",
