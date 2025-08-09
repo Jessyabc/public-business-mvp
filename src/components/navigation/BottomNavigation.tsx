@@ -13,10 +13,10 @@ export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const { user } = useAuth();
   const { mode, toggleMode } = useAppMode();
-  const { userRole } = useUserRoles();
+  const { isBusinessMember, isAdmin } = useUserRoles();
   const location = useLocation();
   
-  const isBusinessMember = userRole === 'business_member' || userRole === 'admin';
+  const isBusinessMemberRole = isBusinessMember() || isAdmin();
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
@@ -40,7 +40,7 @@ export function BottomNavigation() {
       }`}>
         <div className="flex items-center space-x-3">
           {/* Business Member Badge */}
-          {isBusinessMember && (
+          {isBusinessMemberRole && (
             <div className="flex items-center gap-2">
               <BusinessMemberBadge className="text-xs" />
               <NavLink

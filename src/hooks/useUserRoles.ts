@@ -16,10 +16,10 @@ export function useUserRoles() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [canCreateBusinessPosts, setCanCreateBusinessPosts] = useState(false);
 
-  const fetchUserRole = async () => {
+  const fetchUserRoles = async () => {
     if (!user) return;
     
     setLoading(true);
@@ -27,21 +27,22 @@ export function useUserRoles() {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', user.id);
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error;
       }
       
-      const role = data?.role || 'public_user';
-      setUserRole(role);
-      setCanCreateBusinessPosts(role === 'business_member' || role === 'admin');
+      const roles = data?.map(d => d.role) || ['public_user'];
+      setUserRoles(roles);
+      setCanCreateBusinessPosts(
+        roles.includes('business_member') || roles.includes('admin')
+      );
     } catch (error: any) {
-      console.error('Error fetching user role:', error);
+      console.error('Error fetching user roles:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch user role",
+        description: "Failed to fetch user roles",
         variant: "destructive",
       });
     } finally {
@@ -65,21 +66,35 @@ export function useUserRoles() {
     }
   };
 
+  const hasRole = (role: UserRole) => {
+    return userRoles.includes(role);
+  };
+
+  const isPublicUser = () => hasRole('public_user');
+  const isBusinessMember = () => hasRole('business_member');
+  const isBusinessUser = () => hasRole('business_user');
+  const isAdmin = () => hasRole('admin');
+
   useEffect(() => {
     if (user) {
-      fetchUserRole();
+      fetchUserRoles();
     } else {
-      setUserRole(null);
+      setUserRoles([]);
       setCanCreateBusinessPosts(false);
     }
   }, [user]);
 
   return {
-    userRole,
+    userRoles,
+    hasRole,
+    isPublicUser,
+    isBusinessMember,
+    isBusinessUser,
+    isAdmin,
     canCreateBusinessPosts,
     loading,
-    fetchUserRole,
+    fetchUserRoles,
     checkBusinessPostPermission,
-    refetch: fetchUserRole,
+    refetch: fetchUserRoles,
   };
 }

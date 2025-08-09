@@ -17,7 +17,7 @@ interface SecurityCheck {
 
 export function SecurityVerification() {
   const { user, session } = useAuth();
-  const { userRole, canCreateBusinessPosts, loading: roleLoading } = useUserRoles();
+  const { userRoles, canCreateBusinessPosts, loading: roleLoading } = useUserRoles();
   const { receivedInvitations, loading: invitationLoading } = useBusinessInvitations();
   const [checks, setChecks] = useState<SecurityCheck[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,8 +44,8 @@ export function SecurityVerification() {
     if (user && !roleLoading) {
       newChecks.push({
         name: 'User Role Assignment',
-        status: userRole ? 'pass' : 'warning',
-        message: userRole ? `Role: ${userRole}` : 'No role assigned',
+        status: userRoles.length > 0 ? 'pass' : 'warning',
+        message: userRoles.length > 0 ? `Roles: ${userRoles.join(', ')}` : 'No roles assigned',
         icon: <Users className="w-4 h-4" />
       });
 
@@ -135,7 +135,7 @@ export function SecurityVerification() {
     if (!roleLoading && !invitationLoading) {
       runSecurityChecks();
     }
-  }, [user, session, userRole, roleLoading, invitationLoading]);
+  }, [user, session, userRoles, roleLoading, invitationLoading]);
 
   const getStatusIcon = (status: SecurityCheck['status']) => {
     switch (status) {

@@ -17,7 +17,7 @@ import { User, Bell, Shield, CreditCard, Palette, Globe, Building2 } from 'lucid
 export default function Settings() {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { userRole } = useUserRoles();
+  const { userRoles, isBusinessMember } = useUserRoles();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -110,8 +110,8 @@ export default function Settings() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{userRole?.replace('_', ' ') || 'Public User'}</Badge>
-                    {userRole === 'business_member' && (
+                    <Badge variant="secondary">{userRoles.length > 0 ? userRoles.join(', ').replace(/_/g, ' ') : 'Public User'}</Badge>
+                    {isBusinessMember() && (
                       <Badge variant="default">
                         <Building2 className="h-3 w-3 mr-1" />
                         Business Member
@@ -218,7 +218,7 @@ export default function Settings() {
                       onCheckedChange={(checked) => handleNotificationChange('email_mentions', checked)}
                     />
                   </div>
-                  {userRole === 'business_member' && (
+                   {isBusinessMember() && (
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>Business Updates</Label>
@@ -350,16 +350,16 @@ export default function Settings() {
               <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div>
                   <h3 className="font-medium">Current Plan</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {userRole === 'business_member' ? 'Business Member' : 'Free Plan'}
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     {isBusinessMember() ? 'Business Member' : 'Free Plan'}
+                   </p>
                 </div>
-                <Badge variant={userRole === 'business_member' ? 'default' : 'secondary'}>
-                  {userRole === 'business_member' ? 'Active' : 'Free'}
-                </Badge>
+                 <Badge variant={isBusinessMember() ? 'default' : 'secondary'}>
+                   {isBusinessMember() ? 'Active' : 'Free'}
+                 </Badge>
               </div>
 
-              {userRole !== 'business_member' && (
+              {!isBusinessMember() && (
                 <div className="space-y-4">
                   <h3 className="font-medium">Upgrade Options</h3>
                   <div className="grid gap-4">
@@ -380,7 +380,7 @@ export default function Settings() {
                 </div>
               )}
 
-              {userRole === 'business_member' && (
+              {isBusinessMember() && (
                 <div className="space-y-4">
                   <h3 className="font-medium">Payment Method</h3>
                   <div className="p-4 border border-border rounded-lg">

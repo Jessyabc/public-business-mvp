@@ -304,6 +304,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_roles: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
     }
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"

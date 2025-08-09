@@ -20,14 +20,14 @@ import {
 } from 'lucide-react';
 
 export function BusinessDashboard() {
-  const { userRole, canCreateBusinessPosts } = useUserRoles();
+  const { isBusinessMember, isAdmin, canCreateBusinessPosts } = useUserRoles();
   const { profile } = useBusinessProfile();
   const [showComposer, setShowComposer] = useState(false);
 
-  const isBusinessMember = userRole === 'business_member' || userRole === 'admin';
-  const isAdmin = userRole === 'admin';
+  const isBusinessMemberRole = isBusinessMember() || isAdmin();
+  const isAdminRole = isAdmin();
 
-  if (!isBusinessMember) {
+  if (!isBusinessMemberRole) {
     return (
       <div className="container mx-auto p-6">
         <Card>
@@ -53,7 +53,7 @@ export function BusinessDashboard() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold">Business Dashboard</h1>
-            <BusinessMemberBadge isAdmin={isAdmin} />
+            <BusinessMemberBadge />
           </div>
           {profile && (
             <p className="text-muted-foreground">
@@ -211,7 +211,7 @@ export function BusinessDashboard() {
                     <li>• Invite team members to your business</li>
                     <li>• Manage business member roles</li>
                     <li>• Control content permissions</li>
-                    {isAdmin && <li>• Admin privileges for approvals</li>}
+                    {isAdminRole && <li>• Admin privileges for approvals</li>}
                   </ul>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export function BusinessDashboard() {
                 <Button asChild variant="outline">
                   <a href="/business-profile">Edit Business Profile</a>
                 </Button>
-                {isAdmin && (
+                {isAdminRole && (
                   <div className="space-y-2">
                     <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                       <Crown className="h-3 w-3 mr-1" />

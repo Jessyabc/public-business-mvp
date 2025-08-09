@@ -5,17 +5,16 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 interface BusinessMemberBadgeProps {
   className?: string;
   showIcon?: boolean;
-  isAdmin?: boolean;
 }
 
-export function BusinessMemberBadge({ className, showIcon = true, isAdmin }: BusinessMemberBadgeProps) {
-  const { userRole } = useUserRoles();
+export function BusinessMemberBadge({ className, showIcon = true }: BusinessMemberBadgeProps) {
+  const { isBusinessMember, isAdmin } = useUserRoles();
   
-  if (userRole !== 'business_member' && userRole !== 'admin') {
+  if (!isBusinessMember() && !isAdmin()) {
     return null;
   }
 
-  const isAdminRole = isAdmin || userRole === 'admin';
+  const isAdminRole = isAdmin();
 
   return (
     <Badge 

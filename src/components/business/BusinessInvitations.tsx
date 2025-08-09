@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function BusinessInvitations() {
   const { toast } = useToast();
-  const { userRole } = useUserRoles();
+  const { isBusinessMember, isAdmin } = useUserRoles();
   const {
     invitations,
     receivedInvitations,
@@ -136,7 +136,7 @@ export function BusinessInvitations() {
       )}
 
       {/* Send Invitations (only for business members) */}
-      {(userRole === 'business_member' || userRole === 'admin') && (
+      {(isBusinessMember() || isAdmin()) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">

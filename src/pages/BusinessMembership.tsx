@@ -4,7 +4,7 @@ import { Users, Shield } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 export function BusinessMembership() {
-  const { userRole, canCreateBusinessPosts } = useUserRoles();
+  const { userRoles, canCreateBusinessPosts } = useUserRoles();
 
   return (
     <div className="min-h-screen p-6 space-y-6">
@@ -32,7 +32,7 @@ export function BusinessMembership() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Your Role: {userRole || 'Loading...'}</p>
+                <p className="font-medium">Your Roles: {userRoles.length > 0 ? userRoles.join(', ') : 'Loading...'}</p>
                 <p className="text-sm text-muted-foreground">
                   {canCreateBusinessPosts 
                     ? 'You can create and share business content' 

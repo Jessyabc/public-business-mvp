@@ -15,6 +15,7 @@ import { UserProfile } from "./components/auth/UserProfile";
 import CreateBusiness from "./pages/CreateBusiness";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 
 export const navItems = [
   {
@@ -69,7 +70,7 @@ export const navItems = [
     title: "Profile",
     to: "/profile",
     icon: <User className="h-4 w-4" />,
-    page: <UserProfile />,
+    page: <Profile />,
   },
   {
     title: "Business Profile",

@@ -29,9 +29,10 @@ type BusinessProfileFormData = z.infer<typeof businessProfileSchema>;
 
 interface BusinessProfileFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
-export function BusinessProfileForm({ onSuccess }: BusinessProfileFormProps) {
+export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormProps) {
   const { mode } = useAppMode();
   const { profile, industries, departments, loading, createProfile, updateProfile } = useBusinessProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
