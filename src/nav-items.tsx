@@ -7,6 +7,7 @@ import Research from "./pages/Research";
 import BetaFeedback from "./pages/BetaFeedback";
 import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
+import Features from "./pages/Features";
 import Community from "./pages/Community";
 import BusinessProfile from "./pages/BusinessProfile";
 import { BusinessMembership } from "./pages/BusinessMembership";
@@ -59,6 +60,12 @@ export const navItems = [
     to: "/explore",
     icon: <Compass className="h-4 w-4" />,
     page: <Explore />,
+  },
+  {
+    title: "Features",
+    to: "/features",
+    icon: <Search className="h-4 w-4" />,
+    page: <Features />,
   },
   {
     title: "Community",
