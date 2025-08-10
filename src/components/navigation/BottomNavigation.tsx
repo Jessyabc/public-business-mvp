@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Brain, Building2, User, Plus, Shield } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Brain, Building2, Plus, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';

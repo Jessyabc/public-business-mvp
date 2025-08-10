@@ -12,7 +12,7 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Bell, Shield, CreditCard, Palette, Globe, Building2 } from 'lucide-react';
+import { User, Bell, Shield, CreditCard, Palette, Building2 } from 'lucide-react';
 
 export default function Settings() {
   const { user } = useAuth();

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { toast } from "sonner";
-import { User, Mail, Building, MapPin, Globe, Linkedin, Save } from "lucide-react";
+import { User, Building, MapPin, Globe, Linkedin, Save } from "lucide-react";
 import { DisconnectButton } from "./DisconnectButton";
 
 interface Profile {
