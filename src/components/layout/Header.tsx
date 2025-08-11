@@ -53,19 +53,17 @@ export function Header() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        mode === 'public' 
-          ? 'glass-card border-white/20' 
-          : 'glass-business-header border-blue-200/30'
-      }`}>
-        <div className="container mx-auto px-6 py-4">
+      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-card border-blue-200/30 backdrop-blur-lg bg-blue-50/80">
+        <div className="container mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <NavLink to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PB</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">Public Business</span>
+            <NavLink to="/" className="flex items-center space-x-3">
+              <img 
+                src="/lovable-uploads/26ffd67e-8031-46ae-8964-c6b547a1238a.png" 
+                alt="Public Business U Logo" 
+                className="w-10 h-10 object-contain"
+              />
+              <span className="text-xl font-bold text-primary">Public Business</span>
             </NavLink>
 
             {/* Desktop Navigation */}

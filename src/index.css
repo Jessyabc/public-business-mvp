@@ -8,34 +8,34 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* visionOS-inspired theme */
-    --background: 240 10% 8%;
-    --foreground: 0 0% 98%;
+    /* Blue theme for non-connected interfaces */
+    --background: 0 0% 100%;
+    --foreground: 210 20% 15%;
 
-    --card: 240 10% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 15%;
 
-    --popover: 240 10% 12%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 15%;
 
-    --primary: 213 94% 68%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5% 26%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 210 20% 15%;
 
-    --muted: 240 5% 26%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 210 10% 50%;
 
-    --accent: 240 5% 26%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 210 20% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 5% 26%;
-    --input: 240 5% 26%;
-    --ring: 213 94% 68%;
+    --border: 210 30% 85%;
+    --input: 210 30% 85%;
+    --ring: 210 100% 50%;
 
     /* visionOS glassmorphism */
     --glass-bg: 0 0% 100% / 0.1;
@@ -107,9 +107,10 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Raleway', sans-serif;
     background: 
-      radial-gradient(ellipse 80% 80% at 50% -20%, hsl(213 94% 68% / 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse 80% 80% at 80% 50%, hsl(213 94% 68% / 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 50% -20%, hsl(210 100% 50% / 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 80% 50%, hsl(210 100% 50% / 0.1) 0%, transparent 50%),
       hsl(var(--background));
   }
 }
