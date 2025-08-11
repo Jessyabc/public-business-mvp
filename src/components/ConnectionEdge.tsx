@@ -40,29 +40,49 @@ function ConnectionEdgeComponent({
 
   const { connection } = data;
   
-  // Style based on connection type
+  // Enhanced interactive styling
   const edgeStyle = {
-    stroke: connection.type === 'inspiration' ? '#3B82F6' : '#F59E0B',
-    strokeWidth: Math.max(1, connection.strength * 3),
-    strokeOpacity: 0.6 + (connection.strength * 0.4),
+    stroke: connection.type === 'inspiration' ? '#489FE3' : '#F59E0B',
+    strokeWidth: Math.max(2, connection.strength * 4),
+    strokeOpacity: 0.7 + (connection.strength * 0.3),
+    filter: 'drop-shadow(0 0 4px rgba(72, 159, 227, 0.3))',
+    cursor: 'pointer',
   };
 
   const labelStyle = connection.type === 'inspiration' 
-    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
-    : 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+    ? 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 cursor-pointer' 
+    : 'bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/30 cursor-pointer';
+
+  const handleEdgeClick = () => {
+    console.log('Connection clicked:', connection);
+    // Add your click handler logic here
+  };
+
+  const handleLabelClick = () => {
+    console.log('Connection label clicked:', connection);
+    // Add your label click handler logic here
+  };
 
   return (
     <>
-      <BaseEdge path={edgePath} style={edgeStyle} />
+      <BaseEdge 
+        path={edgePath} 
+        style={edgeStyle}
+        className="hover:opacity-100 transition-opacity duration-200"
+        onClick={handleEdgeClick}
+      />
       <EdgeLabelRenderer>
         <div
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-auto"
           style={{
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
           }}
         >
-          <div className={`px-2 py-1 rounded text-xs font-medium border ${labelStyle}`}>
-            {connection.type === 'inspiration' ? 'Inspired' : 'Thread'}
+          <div 
+            className={`px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm transition-all duration-200 ${labelStyle}`}
+            onClick={handleLabelClick}
+          >
+            {connection.type === 'inspiration' ? '✨ Inspired' : '🔗 Thread'}
           </div>
         </div>
       </EdgeLabelRenderer>

@@ -20,18 +20,34 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
     return "bg-purple-500/20 text-purple-400 border-purple-500/30";
   };
 
+  const cardType = Math.random() > 0.5 ? 'spark' : Math.random() > 0.5 ? 'threadline' : 'echo';
+  
   return (
-    <div className="glass-card rounded-3xl border border-white/20 w-80 max-w-80 backdrop-blur-xl hover:border-[#489FE3]/50 transition-all duration-300 hover:scale-105">
+    <div className={`group relative w-80 max-w-80 backdrop-blur-xl transition-all duration-500 hover:scale-105 cursor-pointer ${
+      cardType === 'spark' ? 'glass-card rounded-3xl border border-white/20 hover:border-primary/50' :
+      cardType === 'threadline' ? 'glass-card rounded-2xl border border-primary/30 hover:border-primary/70' :
+      'glass-card rounded-xl border border-purple-400/30 hover:border-purple-400/70'
+    }`}>
       <Handle type="target" position={Position.Top} className="opacity-0" />
       <Handle type="source" position={Position.Bottom} className="opacity-0" />
       <Handle type="target" position={Position.Left} className="opacity-0" />
       <Handle type="source" position={Position.Right} className="opacity-0" />
       
+      {/* Card Header */}
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2 text-xs text-white/60">
-            <Clock className="w-3 h-3" />
-            {formatDistanceToNow(brainstorm.timestamp, { addSuffix: true })}
+          <div className="flex items-center gap-3">
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              cardType === 'spark' ? 'bg-primary/20 text-primary' :
+              cardType === 'threadline' ? 'bg-blue-500/20 text-blue-400' :
+              'bg-purple-500/20 text-purple-400'
+            }`}>
+              {cardType === 'spark' ? 'Spark' : cardType === 'threadline' ? 'Threadline' : 'Echo Note'}
+            </div>
+            <div className="flex items-center gap-1 text-xs text-white/60">
+              <Clock className="w-3 h-3" />
+              {formatDistanceToNow(brainstorm.timestamp, { addSuffix: true })}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge className={`text-xs rounded-full ${getBrainScoreColor(brainstorm.brainScore)}`}>
@@ -45,10 +61,24 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
           </div>
         </div>
         
-        <p className="text-white text-sm leading-relaxed font-medium">
+        {/* Content */}
+        <p className="text-white text-sm leading-relaxed font-medium mb-4">
           {brainstorm.content}
         </p>
+        
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2">
+          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">
+            Speculative
+          </span>
+          <span className="px-2 py-1 bg-purple-500/10 text-purple-400 text-xs rounded-full border border-purple-500/20">
+            Innovation
+          </span>
+        </div>
       </div>
+      
+      {/* Depth shadow */}
+      <div className="absolute inset-0 rounded-inherit bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
     </div>
   );
 }

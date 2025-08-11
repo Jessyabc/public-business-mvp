@@ -9,6 +9,7 @@ import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, ToggleLeft, Sparkles } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
+import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
 
 export function BusinessFeed() {
   const { toggleMode } = useAppMode();
@@ -156,6 +157,11 @@ export function BusinessFeed() {
               />
             ))
           )}
+        </div>
+
+        {/* Brainstorm Network Preview */}
+        <div className="mt-12">
+          <BrainstormPreview onExplore={() => window.location.href = "/"} />
         </div>
 
         {/* Load More Button */}

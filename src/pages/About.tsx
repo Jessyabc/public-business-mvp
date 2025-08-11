@@ -18,6 +18,7 @@ import {
   Zap
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
 
 export default function About() {
   const features = [
@@ -87,9 +88,9 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-background via-white to-primary/5">
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+      <section className="py-20 px-4 bg-gradient-to-r from-primary via-primary to-primary/80">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             Welcome to Public Business
@@ -238,8 +239,26 @@ export default function About() {
         </div>
       </section>
 
-      {/* Our Community */}
+      {/* Brainstorm Network Preview */}
       <section className="py-16 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4">
+              <Brain className="h-4 w-4 mr-2" />
+              Innovation Network
+            </Badge>
+            <h2 className="text-4xl font-bold text-slate-900 mb-8">See Ideas Come to Life</h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+              Experience our dynamic brainstorm network where ideas connect, evolve, and inspire new innovations.
+            </p>
+          </div>
+          
+          <BrainstormPreview onExplore={() => window.location.href = "/"} />
+        </div>
+      </section>
+
+      {/* Our Community */}
+      <section className="py-16 px-4 bg-white/50">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="mb-12">
             <Badge variant="secondary" className="mb-4">
@@ -258,7 +277,7 @@ export default function About() {
                 Join the conversation and be part of a community that's shaping the future of industries. Whether you're a business or an individual, Public Business is the place where ideas come to life.
               </p>
               <Link to="/community">
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
                   Explore Our Community
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
