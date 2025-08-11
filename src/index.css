@@ -8,34 +8,34 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Blue theme for non-connected interfaces */
+    /* Public Business brand colors */
     --background: 0 0% 100%;
-    --foreground: 210 20% 15%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 20% 15%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 15%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 210 100% 50%;
+    --primary: 206 74% 59%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 210 20% 15%;
+    --secondary: 206 30% 95%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 210 10% 50%;
+    --muted: 206 30% 95%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 210 20% 15%;
+    --accent: 206 30% 95%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 30% 85%;
-    --input: 210 30% 85%;
-    --ring: 210 100% 50%;
+    --border: 206 30% 85%;
+    --input: 206 30% 90%;
+    --ring: 206 74% 59%;
 
     /* visionOS glassmorphism */
     --glass-bg: 0 0% 100% / 0.1;
@@ -109,8 +109,8 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     font-family: 'Raleway', sans-serif;
     background: 
-      radial-gradient(ellipse 80% 80% at 50% -20%, hsl(210 100% 50% / 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse 80% 80% at 80% 50%, hsl(210 100% 50% / 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 50% -20%, hsl(206 74% 59% / 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 80% 50%, hsl(206 74% 59% / 0.1) 0%, transparent 50%),
       hsl(var(--background));
   }
 }

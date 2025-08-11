@@ -57,13 +57,12 @@ export function Header() {
         <div className="container mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <NavLink to="/" className="flex items-center space-x-3">
+            <NavLink to="/" className="flex items-center">
               <img 
-                src="/lovable-uploads/26ffd67e-8031-46ae-8964-c6b547a1238a.png" 
-                alt="Public Business U Logo" 
-                className="w-10 h-10 object-contain"
+                src="/lovable-uploads/2bfedb4e-d21c-44fe-b838-4297c0b4f4d7.png" 
+                alt="Public Business - Creating Collaboration" 
+                className="h-12 object-contain"
               />
-              <span className="text-xl font-bold text-primary">Public Business</span>
             </NavLink>
 
             {/* Desktop Navigation */}
