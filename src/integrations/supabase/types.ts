@@ -158,6 +158,45 @@ export type Database = {
         }
         Relationships: []
       }
+      post_relations: {
+        Row: {
+          child_post_id: string
+          created_at: string
+          id: string
+          parent_post_id: string
+          relation_type: string
+        }
+        Insert: {
+          child_post_id: string
+          created_at?: string
+          id?: string
+          parent_post_id: string
+          relation_type: string
+        }
+        Update: {
+          child_post_id?: string
+          created_at?: string
+          id?: string
+          parent_post_id?: string
+          relation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_relations_child_post_id_fkey"
+            columns: ["child_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_relations_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           comments_count: number | null

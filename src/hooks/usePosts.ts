@@ -138,6 +138,35 @@ export function usePosts() {
     }
   };
 
+  // Create a post and optionally link it to a parent via post_relations
+  const createPostWithRelation = async (
+    postData: CreatePostData,
+    relation?: { parent_post_id: string; relation_type: 'continuation' | 'linking' }
+  ) => {
+    const newPost = await createPost(postData);
+    if (!newPost || !relation) return newPost;
+
+    try {
+      const { error } = await supabase
+        .from('post_relations')
+        .insert({
+          parent_post_id: relation.parent_post_id,
+          child_post_id: (newPost as any).id,
+          relation_type: relation.relation_type,
+        });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error creating post relation:', error);
+      toast({
+        title: 'Relation not linked',
+        description: 'Your post was created but linking failed.',
+        variant: 'destructive',
+      });
+    }
+
+    return newPost;
+  };
+
   const updatePost = async (id: string, postData: Partial<CreatePostData>) => {
     if (!user) return null;
 
@@ -248,6 +277,7 @@ export function usePosts() {
     posts,
     loading,
     createPost,
+    createPostWithRelation,
     updatePost,
     deletePost,
     fetchPosts,

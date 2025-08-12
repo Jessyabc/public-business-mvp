@@ -107,7 +107,6 @@ export function BottomNavigation() {
             );
           })}
           
-          {/* Create Button */}
           <Button
             onClick={() => openComposer()}
             className={`w-10 h-10 rounded-full transition-all duration-300 hover:scale-110 ml-2 ${

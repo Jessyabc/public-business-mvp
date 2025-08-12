@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, User } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, User, Reply } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { Post } from "@/hooks/usePosts";
+import { useComposerStore } from "@/hooks/useComposerStore";
 
 interface PostReaderModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface PostReaderModalProps {
 
 export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps) {
   const { mode } = useAppMode();
+  const { openComposer } = useComposerStore();
 
   if (!post) return null;
 
@@ -150,6 +152,15 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
               </Button>
             </div>
             <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => openComposer({ parentPostId: post.id, relationType: 'continuation' })}
+              >
+                <Reply className="h-4 w-4 mr-2" />
+                Reply
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

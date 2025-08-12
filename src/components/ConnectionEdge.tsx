@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, Edge } from '@xyflow/react';
 import { BrainstormConnection } from '@/types/brainstorm';
+import { useComposerStore } from '@/hooks/useComposerStore';
 
 interface ConnectionEdgeData extends Record<string, unknown> {
   connection: BrainstormConnection;
@@ -53,16 +54,15 @@ function ConnectionEdgeComponent({
     ? 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 cursor-pointer' 
     : 'bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/30 cursor-pointer';
 
+  const { openComposer } = useComposerStore();
+
   const handleEdgeClick = () => {
-    console.log('Connection clicked:', connection);
-    // Add your click handler logic here
+    openComposer({ parentPostId: connection.toId, relationType: 'continuation' });
   };
 
   const handleLabelClick = () => {
-    console.log('Connection label clicked:', connection);
-    // Add your label click handler logic here
+    openComposer({ parentPostId: connection.fromId, relationType: 'linking' });
   };
-
   return (
     <>
       <BaseEdge 

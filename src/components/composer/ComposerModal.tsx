@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Sparkles, FileText, Lock } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Brain, Sparkles, FileText, Lock, Link2 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useComposerStore } from "@/hooks/useComposerStore";
 
 interface ComposerModalProps {
   isOpen: boolean;
@@ -17,14 +19,22 @@ interface ComposerModalProps {
 
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const { mode } = useAppMode();
-  const { createPost } = usePosts();
-  const { canCreateBusinessPosts, checkBusinessPostPermission } = useUserRoles();
+  const { createPost, createPostWithRelation } = usePosts();
+  const { canCreateBusinessPosts } = useUserRoles();
+  const { context, setContext } = useComposerStore();
   const [composerType, setComposerType] = useState<'brainstorm' | 'insight' | null>(null);
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [postType, setPostType] = useState<string>("");
   const [visibility, setVisibility] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [relationType, setRelationType] = useState<'continuation' | 'linking'>('continuation');
+
+  useEffect(() => {
+    if (context?.relationType) {
+      setRelationType(context.relationType);
+    }
+  }, [context?.relationType]);
 
   const handleClose = () => {
     setComposerType(null);
@@ -32,12 +42,13 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     setTitle("");
     setPostType("");
     setVisibility("");
+    setRelationType('continuation');
+    setContext(null);
     onClose();
   };
 
   const handleCreate = async () => {
     if (!content.trim()) return;
-    
     setIsSubmitting(true);
     try {
       const postData = {
@@ -48,7 +59,14 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         ...(composerType === 'insight' && title.trim() && { title: title.trim() }),
       };
 
-      await createPost(postData);
+      if (context?.parentPostId) {
+        await createPostWithRelation(postData, {
+          parent_post_id: context.parentPostId,
+          relation_type: relationType,
+        });
+      } else {
+        await createPost(postData);
+      }
       handleClose();
     } catch (error) {
       console.error('Error creating post:', error);
@@ -99,6 +117,24 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
             </div>
           </div>
         </Button>
+      </div>
+    </div>
+  );
+
+  const renderReplyContext = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm">
+        <Link2 className="w-4 h-4 text-primary" />
+        <span>
+          Linking to parent post
+        </span>
+      </div>
+      <div>
+        <Label>Choose link type</Label>
+        <ToggleGroup type="single" value={relationType} onValueChange={(v) => v && setRelationType(v as any)} className="mt-2">
+          <ToggleGroupItem value="continuation" className="px-3 py-2">Continuing Brainstorm</ToggleGroupItem>
+          <ToggleGroupItem value="linking" className="px-3 py-2">Linking Brainstorm</ToggleGroupItem>
+        </ToggleGroup>
       </div>
     </div>
   );
@@ -218,7 +254,8 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
             Create a new brainstorm or business insight
           </DialogDescription>
         </DialogHeader>
-        
+
+        {context?.parentPostId && renderReplyContext()}
         {!composerType && renderTypeSelection()}
         {composerType === 'brainstorm' && renderBrainstormComposer()}
         {composerType === 'insight' && renderInsightComposer()}

@@ -18,6 +18,7 @@ import CreateBusiness from "./pages/CreateBusiness";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import Auth from "./pages/Auth";
 
 export const navItems = [
   {
@@ -121,6 +122,11 @@ export const navItems = [
     to: "/settings",
     icon: <Shield className="h-4 w-4" />,
     page: <Settings />,
+  },
+  {
+    title: "Auth",
+    to: "/auth",
+    page: <Auth />,
   },
   {
     title: "Not Found",
