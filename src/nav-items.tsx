@@ -88,22 +88,10 @@ export const navItems = [
     page: <Profile />,
   },
   {
-    title: "Business Profile",
-    to: "/business-profile",
-    icon: <Building2 className="h-4 w-4" />,
-    page: <BusinessProfile />,
-  },
-  {
     title: "Business Membership",
     to: "/business-membership", 
     icon: <Building2 className="h-4 w-4" />,
     page: <BusinessMembership />,
-  },
-  {
-    title: "Create Business",
-    to: "/create-business",
-    icon: <Plus className="h-4 w-4" />,
-    page: <CreateBusiness />,
   },
   {
     title: "Business Dashboard",
@@ -124,7 +112,7 @@ export const navItems = [
     page: <Settings />,
   },
   {
-    title: "Auth",
+    title: "Sign Up / Sign In",
     to: "/auth",
     page: <Auth />,
   },
