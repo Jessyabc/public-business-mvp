@@ -13,6 +13,9 @@ import Community from "./pages/Community";
 import BusinessProfile from "./pages/BusinessProfile";
 import { BusinessMembership } from "./pages/BusinessMembership";
 import SecurityDashboard from "./pages/SecurityDashboard";
+import BusinessMembers from "./pages/BusinessMembers";
+import PublicMembers from "./pages/PublicMembers";
+import Contact from "./pages/Contact";
 import { UserProfile } from "./components/auth/UserProfile";
 import CreateBusiness from "./pages/CreateBusiness";
 import BusinessDashboard from "./pages/BusinessDashboard";
@@ -110,6 +113,24 @@ export const navItems = [
     to: "/settings",
     icon: <Shield className="h-4 w-4" />,
     page: <Settings />,
+  },
+  {
+    title: "Business Members",
+    to: "/business-members",
+    icon: <Building2 className="h-4 w-4" />,
+    page: <BusinessMembers />,
+  },
+  {
+    title: "Public Members", 
+    to: "/public-members",
+    icon: <Users className="h-4 w-4" />,
+    page: <PublicMembers />,
+  },
+  {
+    title: "Contact",
+    to: "/contact",
+    icon: <MessageSquare className="h-4 w-4" />,
+    page: <Contact />,
   },
   {
     title: "Sign Up / Sign In",

@@ -10,10 +10,12 @@ import { Search, Filter, ToggleLeft, Sparkles } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
 import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
+import { useNavigate } from "react-router-dom";
 
 export function BusinessFeed() {
   const { toggleMode } = useAppMode();
   const { posts, loading, fetchPosts } = usePosts();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<BusinessFeedFilters>({
     search: "",
     sortBy: "most_useful",
@@ -161,7 +163,7 @@ export function BusinessFeed() {
 
         {/* Brainstorm Network Preview */}
         <div className="mt-12">
-          <BrainstormPreview onExplore={() => window.location.href = "/"} />
+          <BrainstormPreview onExplore={() => navigate("/public-members")} />
         </div>
 
         {/* Load More Button */}

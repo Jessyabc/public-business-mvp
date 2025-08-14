@@ -17,10 +17,11 @@ import {
   ArrowRight,
   Zap
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
 
 export default function About() {
+  const navigate = useNavigate();
   const features = [
     {
       icon: <Users className="h-6 w-6" />,
@@ -253,7 +254,7 @@ export default function About() {
             </p>
           </div>
           
-          <BrainstormPreview onExplore={() => window.location.href = "/"} />
+          <BrainstormPreview onExplore={() => navigate("/public-members")} />
         </div>
       </section>
 
