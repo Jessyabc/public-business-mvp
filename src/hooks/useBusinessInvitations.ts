@@ -206,6 +206,48 @@ export function useBusinessInvitations() {
     }
   };
 
+  const consumeInvitationToken = async (token: string) => {
+    if (!user) return false;
+
+    setLoading(true);
+    try {
+      const { error } = await (supabase as any).rpc('consume_invite', { p_token: token });
+      if (error) {
+        console.error('Token consumption error:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Invalid or expired invite",
+          variant: "destructive",
+        });
+        return false;
+      } else {
+        toast({
+          title: "Success",
+          description: "You're in! Business Member access granted.",
+        });
+        
+        // Remove token from URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+        
+        // Refresh invitations to update UI
+        await fetchReceivedInvitations();
+        return true;
+      }
+    } catch (error: any) {
+      console.error('Error consuming invitation token:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process invitation",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchSentInvitations();
@@ -220,6 +262,7 @@ export function useBusinessInvitations() {
     createInvitation,
     acceptInvitation,
     rejectInvitation,
+    consumeInvitationToken,
     fetchSentInvitations,
     fetchReceivedInvitations,
     refetch: () => {
