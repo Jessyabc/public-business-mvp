@@ -19,34 +19,41 @@ export function BusinessInvitations() {
     createInvitation,
     acceptInvitation,
     rejectInvitation,
+    getInvitationStatus,
   } = useBusinessInvitations();
+
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
 
   const handleSendInvite = async () => {
-    if (!inviteEmail.trim()) return;
-    
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email) return;
     setIsInviting(true);
     try {
-      await createInvitation({
-        invited_email: inviteEmail,
-        invited_by_type: 'business_member',
-      });
-      setInviteEmail('');
-    } catch (error) {
-      // Error handled by hook
+      const row = await createInvitation({ invitee_email: email });
+      if (row) {
+        const url = `${window.location.origin}/accept-invite?token=${row.token}`;
+        await navigator.clipboard.writeText(url).catch(() => {});
+        toast({
+          title: 'Invite link copied',
+          description: url,
+        });
+        setInviteEmail('');
+      }
+    } catch {
+      // handled in hook
     } finally {
       setIsInviting(false);
     }
   };
 
-  const handleAcceptInvitation = async (invitationId: string) => {
+  const handleAcceptInvitation = async (token: string) => {
     try {
-      const success = await acceptInvitation(invitationId);
+      const success = await acceptInvitation(token);
       if (success) {
         toast({
-          title: "Welcome to the Business!",
-          description: "You are now a Business Member with special privileges and access to business features.",
+          title: 'Welcome to the Business!',
+          description: 'You are now a Business Member with access to business features.',
         });
       }
     } catch (error) {
@@ -58,7 +65,7 @@ export function BusinessInvitations() {
     await rejectInvitation(invitationId);
   };
 
-  const getStatusBadge = (status: string) => {
+  const renderStatusBadge = (status: 'pending' | 'used' | 'expired') => {
     switch (status) {
       case 'pending':
         return (
@@ -67,22 +74,20 @@ export function BusinessInvitations() {
             Pending
           </Badge>
         );
-      case 'accepted':
+      case 'used':
         return (
           <Badge variant="secondary" className="bg-green-100 text-green-700">
             <CheckCircle className="w-3 h-3 mr-1" />
-            Accepted
+            Used
           </Badge>
         );
-      case 'rejected':
+      case 'expired':
         return (
           <Badge variant="destructive">
             <XCircle className="w-3 h-3 mr-1" />
-            Rejected
+            Expired
           </Badge>
         );
-      default:
-        return null;
     }
   };
 
@@ -97,7 +102,7 @@ export function BusinessInvitations() {
               <span>Business Invitations</span>
             </CardTitle>
             <CardDescription>
-              You have pending invitations to become a Business member
+              You have pending invitations to become a Business Member
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -106,7 +111,7 @@ export function BusinessInvitations() {
                 <div>
                   <p className="font-medium">Business Membership Invitation</p>
                   <p className="text-sm text-muted-foreground">
-                    Invited by: {invitation.invited_by_type}
+                    Invite sent to: {invitation.invitee_email}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Expires: {new Date(invitation.expires_at).toLocaleDateString()}
@@ -115,7 +120,7 @@ export function BusinessInvitations() {
                 <div className="flex space-x-2">
                   <Button
                     size="sm"
-                    onClick={() => handleAcceptInvitation(invitation.id)}
+                    onClick={() => handleAcceptInvitation(invitation.token)}
                     disabled={loading}
                   >
                     Accept
@@ -135,7 +140,7 @@ export function BusinessInvitations() {
         </Card>
       )}
 
-      {/* Send Invitations (only for business members) */}
+      {/* Send Invitations (only for business members/admins) */}
       {(isBusinessMember() || isAdmin()) && (
         <Card>
           <CardHeader>
@@ -168,12 +173,15 @@ export function BusinessInvitations() {
                 <Separator />
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Sent Invitations</h4>
-                  {invitations.slice(0, 5).map((invitation) => (
-                    <div key={invitation.id} className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="text-sm">{invitation.invited_email}</span>
-                      {getStatusBadge(invitation.status)}
-                    </div>
-                  ))}
+                  {invitations.slice(0, 5).map((invitation) => {
+                    const status = getInvitationStatus(invitation);
+                    return (
+                      <div key={invitation.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span className="text-sm">{invitation.invitee_email}</span>
+                        {renderStatusBadge(status)}
+                      </div>
+                    );
+                  })}
                 </div>
               </>
             )}
