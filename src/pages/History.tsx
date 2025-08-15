@@ -237,30 +237,36 @@ const History = () => {
                 <select
                   value={filterMode}
                   onChange={(e) => setFilterMode(e.target.value as 'all' | 'public' | 'business')}
-                  className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm ${
+                  className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm z-50 ${
                     mode === 'public'
-                      ? 'bg-black/20 border-white/20 text-white'
-                      : 'bg-white/40 border-blue-200/30 text-slate-800'
+                      ? 'bg-slate-800/90 border-white/20 text-white'
+                      : 'bg-white/90 border-blue-200/30 text-slate-800'
                   }`}
+                  style={{
+                    backgroundImage: 'none',
+                  }}
                 >
-                  <option value="all" className="bg-background">All Modes</option>
-                  <option value="public" className="bg-background">Public Only</option>
-                  <option value="business" className="bg-background">Business Only</option>
+                  <option value="all" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>All Modes</option>
+                  <option value="public" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Public Only</option>
+                  <option value="business" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Business Only</option>
                 </select>
 
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value as 'all' | 'brainstorm' | 'report' | 'webinar')}
-                  className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm ${
+                  className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm z-50 ${
                     mode === 'public'
-                      ? 'bg-black/20 border-white/20 text-white'
-                      : 'bg-white/40 border-blue-200/30 text-slate-800'
+                      ? 'bg-slate-800/90 border-white/20 text-white'
+                      : 'bg-white/90 border-blue-200/30 text-slate-800'
                   }`}
+                  style={{
+                    backgroundImage: 'none',
+                  }}
                 >
-                  <option value="all" className="bg-background">All Types</option>
-                  <option value="brainstorm" className="bg-background">Brainstorms</option>
-                  <option value="report" className="bg-background">Reports</option>
-                  <option value="webinar" className="bg-background">Webinars</option>
+                  <option value="all" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>All Types</option>
+                  <option value="brainstorm" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Brainstorms</option>
+                  <option value="report" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Reports</option>
+                  <option value="webinar" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Webinars</option>
                 </select>
               </div>
             </div>
