@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Handle, Position, Node } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
 import { Brainstorm } from '@/types/brainstorm';
@@ -20,7 +20,15 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
     return "bg-purple-500/20 text-purple-400 border-purple-500/30";
   };
 
-  const cardType = Math.random() > 0.5 ? 'spark' : Math.random() > 0.5 ? 'threadline' : 'echo';
+  // Stable card type based on brainstorm ID to prevent constant re-renders
+  const cardType = useMemo(() => {
+    const hash = brainstorm.id.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    const types = ['spark', 'threadline', 'echo'];
+    return types[Math.abs(hash) % types.length];
+  }, [brainstorm.id]);
   
   return (
     <div className={`group relative w-80 max-w-80 backdrop-blur-xl transition-all duration-500 hover:scale-105 cursor-pointer ${

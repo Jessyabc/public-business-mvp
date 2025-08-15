@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, Edge } from '@xyflow/react';
 import { BrainstormConnection } from '@/types/brainstorm';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -56,13 +56,13 @@ function ConnectionEdgeComponent({
 
   const { openComposer } = useComposerStore();
 
-  const handleEdgeClick = () => {
+  const handleEdgeClick = useCallback(() => {
     openComposer({ parentPostId: connection.toId, relationType: 'continuation' });
-  };
+  }, [openComposer, connection.toId]);
 
-  const handleLabelClick = () => {
+  const handleLabelClick = useCallback(() => {
     openComposer({ parentPostId: connection.fromId, relationType: 'linking' });
-  };
+  }, [openComposer, connection.fromId]);
   return (
     <>
       <BaseEdge 

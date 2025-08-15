@@ -25,14 +25,21 @@ export default function FlowView() {
   // Get real-time brainstorm data
   const { nodes: initialNodes, edges: initialEdges } = useRealtimeBrainstorms();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Update nodes when new brainstorms are added
+  // Initialize nodes and edges only once to prevent constant updates
   React.useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+    if (nodes.length === 0 && initialNodes.length > 0) {
+      setNodes(initialNodes);
+    }
+  }, [initialNodes, nodes.length, setNodes]);
+
+  React.useEffect(() => {
+    if (edges.length === 0 && initialEdges.length > 0) {
+      setEdges(initialEdges);
+    }
+  }, [initialEdges, edges.length, setEdges]);
 
   const onConnect = useCallback(() => {
     // Disable manual connections for now

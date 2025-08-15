@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { Brainstorm } from '@/types/brainstorm';
 import { mockBrainstorms, mockConnections } from '@/data/brainstorms';
@@ -6,24 +6,26 @@ import { mockBrainstorms, mockConnections } from '@/data/brainstorms';
 export function useRealtimeBrainstorms() {
   const [brainstorms, setBrainstorms] = useState<Brainstorm[]>(mockBrainstorms);
   
-  // Convert brainstorms to flow nodes
-  const nodes: Node[] = brainstorms.map((brainstorm) => ({
-    id: brainstorm.id,
-    type: 'brainstorm',
-    position: brainstorm.position,
-    data: { brainstorm },
-    draggable: true,
-  }));
+  // Memoize nodes to prevent constant recalculation
+  const nodes: Node[] = useMemo(() => 
+    brainstorms.map((brainstorm) => ({
+      id: brainstorm.id,
+      type: 'brainstorm',
+      position: brainstorm.position,
+      data: { brainstorm },
+      draggable: true,
+    })), [brainstorms]);
 
-  // Convert connections to flow edges
-  const edges: Edge[] = mockConnections.map((connection, index) => ({
-    id: `edge-${index}`,
-    source: connection.fromId,
-    target: connection.toId,
-    type: 'connection',
-    data: { connection },
-    animated: connection.type === 'inspiration',
-  }));
+  // Memoize edges to prevent constant recalculation
+  const edges: Edge[] = useMemo(() => 
+    mockConnections.map((connection, index) => ({
+      id: `edge-${index}`,
+      source: connection.fromId,
+      target: connection.toId,
+      type: 'connection',
+      data: { connection },
+      animated: false, // Disable animation to reduce glitching
+    })), []);
 
   // Simulate real-time updates
   const addRandomBrainstorm = useCallback(() => {
@@ -44,16 +46,16 @@ export function useRealtimeBrainstorms() {
     console.log('New brainstorm added:', newBrainstorm.content);
   }, []);
 
-  // Start real-time simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% chance every 3 seconds
-        addRandomBrainstorm();
-      }
-    }, 3000);
+  // Disable real-time simulation to prevent glitching
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (Math.random() > 0.9) { // Reduced frequency to prevent glitching
+  //       addRandomBrainstorm();
+  //     }
+  //   }, 10000); // Increased interval to 10 seconds
 
-    return () => clearInterval(interval);
-  }, [addRandomBrainstorm]);
+  //   return () => clearInterval(interval);
+  // }, [addRandomBrainstorm]);
 
   return { nodes, edges, brainstorms };
 }
