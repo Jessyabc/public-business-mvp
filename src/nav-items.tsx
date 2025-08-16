@@ -22,6 +22,7 @@ import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import AllMembers from "./pages/AllMembers";
+import HowItWorks from "./pages/HowItWorks";
 import Auth from "./pages/Auth";
 
 export const navItems = [
@@ -132,6 +133,12 @@ export const navItems = [
     to: "/all-members",
     icon: <Users className="h-4 w-4" />,
     page: <AllMembers />,
+  },
+  {
+    title: "How It Works",
+    to: "/how-it-works",
+    icon: <Search className="h-4 w-4" />,
+    page: <HowItWorks />,
   },
   {
     title: "Contact",

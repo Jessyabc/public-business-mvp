@@ -41,55 +41,81 @@ export function GlobalNavigationMenu() {
   };
 
   const getMenuItems = () => {
-    const baseItems = [
-      { icon: Home, to: '/', label: 'Home' },
-      { icon: Compass, to: '/about', label: 'About' },
+    // All available pages from nav-items.tsx
+    const allPages = [
+      { icon: Home, to: '/', label: 'Feed' },
+      { icon: FileText, to: '/my-posts', label: 'My Posts' },
+      { icon: History, to: '/history', label: 'History' },
+      { icon: Bell, to: '/notifications', label: 'Notifications' },
+      { icon: Search, to: '/research', label: 'Research' },
+      { icon: MessageSquare, to: '/beta-feedback', label: 'Beta Feedback' },
+      { icon: Compass, to: '/explore', label: 'Explore' },
       { icon: Search, to: '/features', label: 'Features' },
+      { icon: Users, to: '/about', label: 'About' },
+      { icon: Users, to: '/community', label: 'Community' },
+      { icon: User, to: '/profile', label: 'Profile' },
+      { icon: Building2, to: '/business-membership', label: 'Business Membership' },
+      { icon: Building2, to: '/business-dashboard', label: 'Business Dashboard' },
+      { icon: Shield, to: '/security', label: 'Security' },
+      { icon: Settings, to: '/settings', label: 'Settings' },
+      { icon: Building2, to: '/business-members', label: 'Business Members' },
+      { icon: Users, to: '/public-members', label: 'Public Members' },
+      { icon: Users, to: '/all-members', label: 'All Members' },
+      { icon: MessageSquare, to: '/contact', label: 'Contact' },
+      { icon: Search, to: '/how-it-works', label: 'How It Works' },
+      { icon: Building2, to: '/create-business', label: 'Create Business' },
+    ];
+
+    // Filter based on user authentication and roles
+    if (!user) {
+      return [
+        { icon: Home, to: '/', label: 'Home' },
+        { icon: Users, to: '/about', label: 'About' },
+        { icon: Search, to: '/features', label: 'Features' },
+        { icon: Search, to: '/how-it-works', label: 'How It Works' },
+        { icon: Users, to: '/public-members', label: 'Public Members' },
+        { icon: Building2, to: '/business-members', label: 'Business Members' },
+        { icon: MessageSquare, to: '/contact', label: 'Contact' },
+        { icon: User, to: '/auth', label: 'Sign In / Sign Up' },
+      ];
+    }
+
+    // For authenticated users, show all relevant pages
+    let userPages = [
+      { icon: Home, to: '/', label: 'Feed' },
+      { icon: FileText, to: '/my-posts', label: 'My Posts' },
+      { icon: History, to: '/history', label: 'Profile & History' },
+      { icon: Bell, to: '/notifications', label: 'Notifications' },
+      { icon: Search, to: '/research', label: 'Research' },
+      { icon: Compass, to: '/explore', label: 'Explore' },
+      { icon: Users, to: '/community', label: 'Community' },
+      { icon: MessageSquare, to: '/beta-feedback', label: 'Beta Feedback' },
+      { icon: Shield, to: '/security', label: 'Security' },
+      { icon: User, to: '/profile', label: 'Profile' },
+      { icon: Settings, to: '/settings', label: 'Settings' },
+      { icon: Users, to: '/all-members', label: 'All Members' },
+      { icon: Users, to: '/public-members', label: 'Public Members' },
+      { icon: Building2, to: '/business-members', label: 'Business Members' },
+      { icon: Users, to: '/about', label: 'About' },
+      { icon: Search, to: '/features', label: 'Features' },
+      { icon: Search, to: '/how-it-works', label: 'How It Works' },
       { icon: MessageSquare, to: '/contact', label: 'Contact' },
     ];
 
-    if (user) {
-      const loggedInItems = [
-        { icon: Home, to: '/', label: 'Feed' },
-        { icon: History, to: '/history', label: 'Profile & History' },
-        { icon: FileText, to: '/my-posts', label: 'My Posts' },
-        { icon: Bell, to: '/notifications', label: 'Notifications' },
-        { icon: Search, to: '/research', label: 'Research' },
-        { icon: Compass, to: '/explore', label: 'Explore' },
-        { icon: Users, to: '/community', label: 'Community' },
-        { icon: MessageSquare, to: '/beta-feedback', label: 'Beta Feedback' },
-        { icon: Shield, to: '/security', label: 'Security' },
-        { icon: User, to: '/profile', label: 'Profile' },
-        { icon: Settings, to: '/settings', label: 'Settings' },
-      ];
-
-      // Add business-specific items
-      if (isBusinessMember() || isAdmin()) {
-        loggedInItems.push(
-          { icon: Building2, to: '/business-dashboard', label: 'Business Dashboard' },
-          { icon: Building2, to: '/business-membership', label: 'Business Membership' },
-          { icon: Users, to: '/business-members', label: 'Business Members' }
-        );
-      }
-
-      // Add members pages
-      loggedInItems.push(
-        { icon: Users, to: '/all-members', label: 'All Members' },
-        { icon: Users, to: '/public-members', label: 'Public Members' }
+    // Add business-specific pages for business members
+    if (isBusinessMember() || isAdmin()) {
+      userPages.push(
+        { icon: Building2, to: '/business-dashboard', label: 'Business Dashboard' },
+        { icon: Building2, to: '/business-membership', label: 'Business Membership' },
+        { icon: Building2, to: '/create-business', label: 'Create Business' }
       );
-
-      return loggedInItems;
     }
 
-    return [
-      ...baseItems,
-      { icon: Users, to: '/public-members', label: 'Public Members' },
-      { icon: Building2, to: '/business-members', label: 'Business Members' },
-    ];
+    return userPages;
   };
 
   return (
-    <div className="fixed top-6 right-6 z-50">
+    <div className="fixed top-6 right-6 z-[9999]">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -105,12 +131,13 @@ export function GlobalNavigationMenu() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
-          className={`w-72 mr-4 backdrop-blur-xl border shadow-xl ${
+          className={`w-80 mr-4 backdrop-blur-xl border shadow-2xl max-h-96 overflow-y-auto ${
             mode === 'public'
-              ? 'bg-slate-900/90 border-white/20'
-              : 'bg-white/90 border-blue-200/30'
+              ? 'bg-slate-900/95 border-white/20'
+              : 'bg-white/95 border-blue-200/30'
           }`} 
           align="end"
+          sideOffset={8}
         >
           <DropdownMenuLabel className={`px-4 py-3 ${
             mode === 'public' ? 'text-white' : 'text-slate-700'
@@ -119,7 +146,12 @@ export function GlobalNavigationMenu() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={mode === 'public' ? 'bg-white/20' : 'bg-slate-200/50'} />
           
-          <div className="max-h-80 overflow-y-auto">
+          <div className="py-2">
+            <div className={`px-4 py-2 text-xs font-semibold ${
+              mode === 'public' ? 'text-white/70' : 'text-slate-500'
+            }`}>
+              All Pages ({getMenuItems().length})
+            </div>
             {getMenuItems().map((item) => {
               const IconComponent = item.icon;
               return (
