@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -16,34 +16,34 @@ export type Database = {
     Tables: {
       business_invitations: {
         Row: {
+          consumed_at: string | null
           created_at: string
           expires_at: string
           id: string
-          invited_by_type: string
-          invited_by_user_id: string
-          invited_email: string
-          status: string
-          updated_at: string
+          invitee_email: string
+          inviter_id: string
+          role: string
+          token: string
         }
         Insert: {
+          consumed_at?: string | null
           created_at?: string
           expires_at?: string
           id?: string
-          invited_by_type: string
-          invited_by_user_id: string
-          invited_email: string
-          status?: string
-          updated_at?: string
+          invitee_email: string
+          inviter_id: string
+          role?: string
+          token: string
         }
         Update: {
+          consumed_at?: string | null
           created_at?: string
           expires_at?: string
           id?: string
-          invited_by_type?: string
-          invited_by_user_id?: string
-          invited_email?: string
-          status?: string
-          updated_at?: string
+          invitee_email?: string
+          inviter_id?: string
+          role?: string
+          token?: string
         }
         Relationships: []
       }
@@ -58,6 +58,8 @@ export type Database = {
           department_id: string | null
           id: string
           industry_id: string | null
+          invited_at: string | null
+          invited_by: string | null
           linkedin_url: string | null
           phone: string | null
           status: string
@@ -75,6 +77,8 @@ export type Database = {
           department_id?: string | null
           id?: string
           industry_id?: string | null
+          invited_at?: string | null
+          invited_by?: string | null
           linkedin_url?: string | null
           phone?: string | null
           status?: string
@@ -92,6 +96,8 @@ export type Database = {
           department_id?: string | null
           id?: string
           industry_id?: string | null
+          invited_at?: string | null
+          invited_by?: string | null
           linkedin_url?: string | null
           phone?: string | null
           status?: string
@@ -339,6 +345,21 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      consume_invite: {
+        Args: { p_token: string }
+        Returns: undefined
+      }
+      create_business_invite: {
+        Args: { p_invitee_email: string; p_role?: string; p_ttl_days?: number }
+        Returns: {
+          expires_at: string
+          token: string
+        }[]
+      }
+      get_my_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -346,6 +367,14 @@ export type Database = {
       get_user_roles: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      grant_role: {
+        Args: { p_role: string; p_user: string }
+        Returns: undefined
+      }
+      is_admin: {
+        Args: { uid: string }
+        Returns: boolean
       }
     }
     Enums: {
