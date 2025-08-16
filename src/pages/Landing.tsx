@@ -19,15 +19,15 @@ export function Landing() {
       </div>
 
       {/* Logo and Header */}
-      <div className="text-center mb-16 glass-business-header rounded-3xl p-8">
-        <div className="flex items-center justify-center mb-6">
-          <img 
-            src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
-            alt="Public Business - Creating Collaboration" 
-            className="w-[500px] max-w-full object-contain"
-          />
-        </div>
+     
+      <div className="flex items-center justify-center mb-6">
+        <img 
+          src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
+          alt="Public Business - Creating Collaboration" 
+          className="w-[500px] max-w-full object-contain"
+        />
       </div>
+     
 
       {/* Main Content */}
       <div className="text-center mb-16 max-w-4xl glass-business-header rounded-3xl p-12">
