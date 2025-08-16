@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
+import { GlobalNavigationMenu } from '@/components/navigation/GlobalNavigationMenu';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useLocation } from 'react-router-dom';
@@ -22,6 +23,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
         : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
     }`}>
+      {/* Global Navigation Menu - always visible */}
+      <GlobalNavigationMenu />
+      
       {/* Header - only show when user is not logged in */}
       <Header />
       

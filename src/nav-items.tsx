@@ -21,6 +21,7 @@ import CreateBusiness from "./pages/CreateBusiness";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import AllMembers from "./pages/AllMembers";
 import Auth from "./pages/Auth";
 
 export const navItems = [
@@ -125,6 +126,12 @@ export const navItems = [
     to: "/public-members",
     icon: <Users className="h-4 w-4" />,
     page: <PublicMembers />,
+  },
+  {
+    title: "All Members",
+    to: "/all-members",
+    icon: <Users className="h-4 w-4" />,
+    page: <AllMembers />,
   },
   {
     title: "Contact",
