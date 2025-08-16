@@ -22,7 +22,7 @@ export function Landing() {
      
       <div className="flex items-center justify-center mb-6">
         <img 
-          src="C:\Users\Jessy Beaudoin\Downloads\Fiverr Premium Kit\Fiverr Premium Kit\PNG Logo Files\Transparent Logo.png" 
+          src="Jessyabc/public-business-mvp/public/lovable-uploads/1a58e202-c32a-4b09-89d8-ff1eb22b437d.png" 
           alt="Public Business - Creating Collaboration" 
           className="w-[500px] max-w-full object-contain"
         />
