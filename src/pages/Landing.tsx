@@ -24,7 +24,7 @@ export function Landing() {
         <img 
           src="/lovable-uploads/1a58e202-c32a-4b09-89d8-ff1eb22b437d.png" 
           alt="Public Business - Creating Collaboration" 
-          className="w-[750px] max-w-full object-contain"
+          className="w-[900px] max-w-full object-contain"
         />
       </div>
      
