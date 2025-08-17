@@ -270,12 +270,7 @@ export default function Features() {
           <div className="flex gap-4 justify-center flex-wrap">
             <Link to="/auth">
               <Button size="lg" variant="secondary">
-                Join Public Business
-              </Button>
-            </Link>
-            <Link to="/create-business">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-                Create Business Account
+                Join as Public Member
               </Button>
             </Link>
           </div>
