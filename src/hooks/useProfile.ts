@@ -49,27 +49,71 @@ export function useProfile() {
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user || !profile) return { error: new Error("No user or profile found") };
+  if (!user) return { error: new Error("No user found") };
 
-    try {
-      const updatedProfile = { ...profile, ...updates };
-      
-      const { error } = await supabase
+  try {
+    const payload = {
+      id: user.id,
+      // keep existing fields if we have them, otherwise undefined (upsert fills what you pass)
+      ...profile,
+      ...updates,
+      // optional: automatically mark completed if core fields present
+      is_completed:
+        updates.is_completed ??
+        (("display_name" in updates || "bio" in updates || "location" in updates) 
+          ? true 
+          : profile?.is_completed ?? null),
+    };
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert(payload, { onConflict: 'id' })
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+
+    setProfile(data ?? payload);
+    return { error: null };
+  } catch (err: any) {
+    console.error('Error updating profile:', err);
+    return { error: err };
+  }
+};
+  
+const fetchProfile = async () => {
+  if (!user) { setProfile(null); setLoading(false); return; }
+  try {
+    setLoading(true); setError(null);
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      // create an empty row so UI is ready for editing
+      const { data: created, error: upsertErr } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          ...updatedProfile,
-        });
-
-      if (error) throw error;
-
-      setProfile(updatedProfile);
-      return { error: null };
-    } catch (err: any) {
-      console.error('Error updating profile:', err);
-      return { error: err };
+        .upsert({ id: user.id })
+        .select()
+        .maybeSingle();
+      if (upsertErr) throw upsertErr;
+      setProfile(created ?? { id: user.id } as any);
+    } else {
+      setProfile(data);
     }
-  };
+  } catch (err: any) {
+    console.error('Error fetching profile:', err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchProfile();
