@@ -82,7 +82,8 @@ export function usePosts() {
 
     // Check if user can create business posts
     if (postData.mode === 'business' && postData.type !== 'brainstorm') {
-      const { data: canCreate } = await supabase.rpc('can_create_business_posts', { user_uuid: user.id });
+      const { rpcCanCreateBusinessPosts } = await import('@/integrations/supabase/rpc');
+      const { data: canCreate } = await rpcCanCreateBusinessPosts(user.id);
       
       if (!canCreate) {
         toast({

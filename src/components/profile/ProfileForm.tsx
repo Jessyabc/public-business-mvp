@@ -14,6 +14,7 @@ import { DisconnectButton } from "./DisconnectButton";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { BusinessMemberBadge } from "@/components/business/BusinessMemberBadge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { safeUrlOrEmpty } from "@/lib/validators";
 
 interface Profile {
   id: string;
@@ -97,8 +98,8 @@ const handleSave = async () => {
       display_name: profile.display_name,
       avatar_url: profile.avatar_url,
       bio: profile.bio,
-      website: profile.website,
-      linkedin_url: profile.linkedin_url,
+      website: safeUrlOrEmpty(profile.website),
+      linkedin_url: safeUrlOrEmpty(profile.linkedin_url),
       company: profile.company,
       location: profile.location,
       is_completed: true,

@@ -13,6 +13,7 @@ import { Building2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { BusinessProfile } from '@/types/database';
+import { safeUrlOrEmpty } from '@/lib/validators';
 
 const businessProfileSchema = z.object({
   company_name: z.string().min(2, 'Company name must be at least 2 characters'),
@@ -54,6 +55,8 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
   const onSubmit = async (data: BusinessProfileFormData) => {
     setIsSubmitting(true);
     try {
+      data.website = safeUrlOrEmpty(data.website);
+      data.linkedin_url = safeUrlOrEmpty(data.linkedin_url);
       if (profile) {
         await updateProfile(data);
       } else {

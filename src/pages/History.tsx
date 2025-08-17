@@ -3,7 +3,6 @@ import { useAppMode } from '@/contexts/AppModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProfileForm } from '@/components/profile/ProfileForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Brain, Building2, User, History as HistoryIcon, Clock, Bookmark, Plus, Eye, MessageCircle, Share2, Video, FileText, TrendingUp, Filter, Calendar, BarChart3 } from 'lucide-react';
@@ -100,8 +99,8 @@ const History = () => {
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <User className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-light text-foreground mb-2">Sign in to view your profile</h2>
-          <p className="text-muted-foreground">Manage your profile and track your content history</p>
+          <h2 className="text-2xl font-light text-foreground mb-2">Sign in to view your history</h2>
+          <p className="text-muted-foreground">Track your content history and activity</p>
         </div>
       </div>
     );
@@ -143,257 +142,230 @@ const History = () => {
               : 'border-blue-200/30 bg-white/40'
           }`}>
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <User className={`w-8 h-8 ${mode === 'public' ? 'text-[#489FE3]' : 'text-blue-600'}`} />
+              <HistoryIcon className={`w-8 h-8 ${mode === 'public' ? 'text-[#489FE3]' : 'text-blue-600'}`} />
               <h1 className={`text-4xl font-light tracking-wide ${
                 mode === 'public' ? 'text-white' : 'text-slate-800'
               }`}>
-                Profile & History
+                History
               </h1>
             </div>
             <p className={`mt-2 font-light max-w-2xl mx-auto text-center ${
               mode === 'public' ? 'text-white/80' : 'text-slate-600'
             }`}>
-              Manage your profile and view your content history
+              View your content history and activity
             </p>
           </div>
         </header>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-2 glass-card backdrop-blur-xl ${
+        <div className="space-y-6">
+          {/* Create New Content Section */}
+          <Card className={`glass-card backdrop-blur-xl transition-all duration-700 ${
             mode === 'public'
-              ? 'bg-black/20 border-white/20'
-              : 'bg-white/40 border-blue-200/30'
+              ? 'border-white/20 bg-black/20'
+              : 'border-blue-200/30 bg-white/40'
           }`}>
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Profile
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <HistoryIcon className="w-4 h-4" />
-              History
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="profile">
-            <ProfileForm />
-          </TabsContent>
-
-          <TabsContent value="history" className="space-y-6">
-            {/* Create New Content Section */}
-            <Card className={`glass-card backdrop-blur-xl transition-all duration-700 ${
-              mode === 'public'
-                ? 'border-white/20 bg-black/20'
-                : 'border-blue-200/30 bg-white/40'
-            }`}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className={`text-lg font-semibold ${
-                      mode === 'public' ? 'text-white' : 'text-slate-800'
-                    }`}>
-                      Create New Content
-                    </h3>
-                    <p className={`text-sm ${
-                      mode === 'public' ? 'text-white/70' : 'text-slate-600'
-                    }`}>
-                      Share your ideas and insights with the community
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => openComposer()}
-                    className={`transition-all duration-300 ${
-                      mode === 'public'
-                        ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
-                        : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
-                    } glass-card backdrop-blur-xl`}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Post
-                  </Button>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className={`text-lg font-semibold ${
+                    mode === 'public' ? 'text-white' : 'text-slate-800'
+                  }`}>
+                    Create New Content
+                  </h3>
+                  <p className={`text-sm ${
+                    mode === 'public' ? 'text-white/70' : 'text-slate-600'
+                  }`}>
+                    Share your ideas and insights with the community
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* View Toggle and Filters */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <Tabs value={viewType} onValueChange={(value) => setViewType(value as 'chronological' | 'popular')}>
-                <TabsList className={`glass-card backdrop-blur-xl ${
-                  mode === 'public'
-                    ? 'bg-black/20 border-white/20'
-                    : 'bg-white/40 border-blue-200/30'
-                }`}>
-                  <TabsTrigger value="chronological" className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Chronological</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="popular" className="flex items-center space-x-2">
-                    <TrendingUp className="w-4 h-4" />
-                    <span>Popular</span>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-
-              <div className="flex space-x-2">
-                <select
-                  value={filterMode}
-                  onChange={(e) => setFilterMode(e.target.value as 'all' | 'public' | 'business')}
-                  className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm z-50 ${
+                <Button 
+                  onClick={() => openComposer()}
+                  className={`transition-all duration-300 ${
                     mode === 'public'
-                      ? 'bg-slate-800/90 border-white/20 text-white'
-                      : 'bg-white/90 border-blue-200/30 text-slate-800'
-                  }`}
-                  style={{
-                    backgroundImage: 'none',
-                  }}
+                      ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
+                      : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
+                  } glass-card backdrop-blur-xl`}
                 >
-                  <option value="all" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>All Modes</option>
-                  <option value="public" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Public Only</option>
-                  <option value="business" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Business Only</option>
-                </select>
-
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as 'all' | 'brainstorm' | 'report' | 'webinar')}
-                  className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm z-50 ${
-                    mode === 'public'
-                      ? 'bg-slate-800/90 border-white/20 text-white'
-                      : 'bg-white/90 border-blue-200/30 text-slate-800'
-                  }`}
-                  style={{
-                    backgroundImage: 'none',
-                  }}
-                >
-                  <option value="all" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>All Types</option>
-                  <option value="brainstorm" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Brainstorms</option>
-                  <option value="report" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Reports</option>
-                  <option value="webinar" className={mode === 'public' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}>Webinars</option>
-                </select>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Post
+                </Button>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* History Items */}
-            <div className="space-y-4">
-              {filteredHistory.length === 0 ? (
-                <div className="text-center py-12">
-                  <Filter className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No items found with current filters</p>
-                </div>
-              ) : (
-                filteredHistory.map((item) => {
-                  const isPublic = item.mode === 'public';
-                  const score = item.tScore || item.uScore;
-                  
-                  return (
-                    <Card key={item.id} className={`glass-card backdrop-blur-xl transition-all duration-300 hover:border-opacity-50 ${
-                      mode === 'public'
-                        ? 'border-white/20 bg-black/20 hover:bg-black/30'
-                        : 'border-blue-200/30 bg-white/40 hover:bg-white/50'
-                    } ${isPublic 
-                        ? 'border-l-4 border-l-primary/50' 
-                        : 'border-l-4 border-l-blue-500/50'
-                      }`}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            {getItemIcon(item.type)}
-                            <div>
-                              <CardTitle className={`text-lg ${
-                                mode === 'public' ? 'text-white' : 'text-slate-800'
+          {/* View Toggle and Filters */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <Tabs value={viewType} onValueChange={(value) => setViewType(value as 'chronological' | 'popular')}>
+              <TabsList className={`glass-card backdrop-blur-xl ${
+                mode === 'public'
+                  ? 'bg-black/20 border-white/20'
+                  : 'bg-white/40 border-blue-200/30'
+              }`}>
+                <TabsTrigger value="chronological" className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>Chronological</span>
+                </TabsTrigger>
+                <TabsTrigger value="popular" className="flex items-center space-x-2">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Popular</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="flex space-x-2">
+              <select
+                value={filterMode}
+                onChange={(e) => setFilterMode(e.target.value as 'all' | 'public' | 'business')}
+                className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm z-50 ${
+                  mode === 'public'
+                    ? 'bg-slate-800/90 border-white/20 text-white'
+                    : 'bg-white/90 border-blue-200/30 text-slate-800'
+                }`}
+              >
+                <option value="all">All Modes</option>
+                <option value="public">Public Only</option>
+                <option value="business">Business Only</option>
+              </select>
+
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as 'all' | 'brainstorm' | 'report' | 'webinar')}
+                className={`glass-card backdrop-blur-xl border rounded-md px-3 py-2 text-sm z-50 ${
+                  mode === 'public'
+                    ? 'bg-slate-800/90 border-white/20 text-white'
+                    : 'bg-white/90 border-blue-200/30 text-slate-800'
+                }`}
+              >
+                <option value="all">All Types</option>
+                <option value="brainstorm">Brainstorms</option>
+                <option value="report">Reports</option>
+                <option value="webinar">Webinars</option>
+              </select>
+            </div>
+          </div>
+
+          {/* History Items */}
+          <div className="space-y-4">
+            {filteredHistory.length === 0 ? (
+              <div className="text-center py-12">
+                <Filter className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">No items found with current filters</p>
+              </div>
+            ) : (
+              filteredHistory.map((item) => {
+                const isPublic = item.mode === 'public';
+                const score = item.tScore || item.uScore;
+                
+                return (
+                  <Card key={item.id} className={`glass-card backdrop-blur-xl transition-all duration-300 hover:border-opacity-50 ${
+                    mode === 'public'
+                      ? 'border-white/20 bg-black/20 hover:bg-black/30'
+                      : 'border-blue-200/30 bg-white/40 hover:bg-white/50'
+                  } ${isPublic 
+                      ? 'border-l-4 border-l-primary/50' 
+                      : 'border-l-4 border-l-blue-500/50'
+                    }`}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          {getItemIcon(item.type)}
+                          <div>
+                            <CardTitle className={`text-lg ${
+                              mode === 'public' ? 'text-white' : 'text-slate-800'
+                            }`}>
+                              {item.title}
+                            </CardTitle>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getItemBadge(item.type)}
+                              <Badge className={`text-xs ${
+                                isPublic 
+                                  ? 'bg-primary/20 text-primary border-primary/20'
+                                  : 'bg-blue-500/20 text-blue-600 border-blue-500/20'
                               }`}>
-                                {item.title}
-                              </CardTitle>
-                              <div className="flex items-center gap-2 mt-1">
-                                {getItemBadge(item.type)}
-                                <Badge className={`text-xs ${
-                                  isPublic 
-                                    ? 'bg-primary/20 text-primary border-primary/20'
-                                    : 'bg-blue-500/20 text-blue-600 border-blue-500/20'
-                                }`}>
-                                  {isPublic ? 'Public' : 'Business'}
-                                </Badge>
-                                <div className={`flex items-center gap-1 text-xs ${
-                                  mode === 'public' ? 'text-white/60' : 'text-slate-500'
-                                }`}>
-                                  <Clock className="w-3 h-3" />
-                                  {formatDistanceToNow(item.timestamp, { addSuffix: true })}
-                                </div>
+                                {isPublic ? 'Public' : 'Business'}
+                              </Badge>
+                              <div className={`flex items-center gap-1 text-xs ${
+                                mode === 'public' ? 'text-white/60' : 'text-slate-500'
+                              }`}>
+                                <Clock className="w-3 h-3" />
+                                {formatDistanceToNow(item.timestamp, { addSuffix: true })}
                               </div>
                             </div>
                           </div>
-                          {score && (
-                            <div className="flex flex-col items-center">
-                              <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${getScoreColor(score, isPublic)}`}>
-                                <span className="text-sm font-bold">{score}</span>
-                              </div>
-                              <span className="text-xs text-muted-foreground mt-1">
-                                {isPublic ? 'T-Score' : 'U-Score'}
-                              </span>
-                            </div>
-                          )}
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className={`text-sm mb-4 line-clamp-2 ${
-                          mode === 'public' ? 'text-white/80' : 'text-slate-600'
-                        }`}>
-                          {item.content}
-                        </p>
-                        
-                        {item.author && (
-                          <p className={`text-xs mb-3 ${
-                            mode === 'public' ? 'text-white/60' : 'text-slate-500'
-                          }`}>
-                            by {item.author}
-                          </p>
+                        {score && (
+                          <div className="flex flex-col items-center">
+                            <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${getScoreColor(score, isPublic)}`}>
+                              <span className="text-sm font-bold">{score}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground mt-1">
+                              {isPublic ? 'T-Score' : 'U-Score'}
+                            </span>
+                          </div>
                         )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className={`text-sm mb-4 line-clamp-2 ${
+                        mode === 'public' ? 'text-white/80' : 'text-slate-600'
+                      }`}>
+                        {item.content}
+                      </p>
+                      
+                      {item.author && (
+                        <p className={`text-xs mb-3 ${
+                          mode === 'public' ? 'text-white/60' : 'text-slate-500'
+                        }`}>
+                          by {item.author}
+                        </p>
+                      )}
 
-                        <div className="flex items-center justify-between">
-                          <div className={`flex items-center gap-4 text-xs ${
-                            mode === 'public' ? 'text-white/60' : 'text-slate-500'
-                          }`}>
-                            <div className="flex items-center gap-1">
-                              <Eye className="w-3 h-3" />
-                              {item.views}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MessageCircle className="w-3 h-3" />
-                              {item.interactions}
-                            </div>
+                      <div className="flex items-center justify-between">
+                        <div className={`flex items-center gap-4 text-xs ${
+                          mode === 'public' ? 'text-white/60' : 'text-slate-500'
+                        }`}>
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {item.views}
                           </div>
-                          
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className={`text-xs ${
-                                mode === 'public'
-                                  ? 'text-primary hover:text-primary/80 hover:bg-primary/10' 
-                                  : 'text-blue-600 hover:text-blue-700 hover:bg-blue-500/10'
-                              }`}
-                            >
-                              Edit
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className={`text-xs ${
-                                mode === 'public'
-                                  ? 'text-primary hover:text-primary/80 hover:bg-primary/10' 
-                                  : 'text-blue-600 hover:text-blue-700 hover:bg-blue-500/10'
-                              }`}
-                            >
-                              View
-                            </Button>
+                          <div className="flex items-center gap-1">
+                            <MessageCircle className="w-3 h-3" />
+                            {item.interactions}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+                        
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className={`text-xs ${
+                              mode === 'public'
+                                ? 'text-primary hover:text-primary/80 hover:bg-primary/10' 
+                                : 'text-blue-600 hover:text-blue-700 hover:bg-blue-500/10'
+                            }`}
+                          >
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className={`text-xs ${
+                              mode === 'public'
+                                ? 'text-primary hover:text-primary/80 hover:bg-primary/10' 
+                                : 'text-blue-600 hover:text-blue-700 hover:bg-blue-500/10'
+                            }`}
+                          >
+                            <Share2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -102,10 +102,8 @@ export function useBusinessInvitations() {
     }
     setLoading(true);
     try {
-      // Use type assertion to work around missing RPC types
-      const { data, error } = await (supabase as any).rpc('create_business_invite', {
-        p_invitee_email: input.invitee_email,
-      });
+      const { rpcCreateBusinessInvite } = await import('@/integrations/supabase/rpc');
+      const { data, error } = await rpcCreateBusinessInvite(input.invitee_email);
       if (error) throw error;
 
       // Re-fetch to include the fresh row created by RPC
@@ -138,7 +136,8 @@ export function useBusinessInvitations() {
     if (!user) return false;
     setLoading(true);
     try {
-      const { error } = await (supabase as any).rpc('consume_invite', { p_token: token });
+      const { rpcConsumeInvite } = await import('@/integrations/supabase/rpc');
+      const { error } = await rpcConsumeInvite(token);
       if (error) throw error;
 
       toast({
@@ -201,46 +200,7 @@ export function useBusinessInvitations() {
     }
   };
 
-  // Auto-consume invite from URL token
-  const consumeInviteFromUrl = async () => {
-    if (!user) return;
-    
-    const token = new URLSearchParams(window.location.search).get('token');
-    if (!token) return;
-
-    try {
-      const { error } = await (supabase as any).rpc('consume_invite', { p_token: token });
-      if (error) {
-        console.error('Error consuming invite:', error);
-        toast({
-          title: 'Error',
-          description: error.message || 'Invalid or expired invitation',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Welcome!',
-          description: "You're in! Business Member access granted.",
-        });
-        
-        // Clear the token from URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        window.history.replaceState({}, '', url.toString());
-        
-        // Refresh data
-        await fetchSentInvitations();
-        await fetchReceivedInvitations();
-      }
-    } catch (error: any) {
-      console.error('Error consuming invite:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to process invitation',
-        variant: 'destructive',
-      });
-    }
-  };
+  // Token processing now only occurs on /accept-invite page
 
   // Expose a convenience status helper if you want it in the UI
   const getInvitationStatus = (inv: BusinessInvitation) => computeStatus(inv);
@@ -249,7 +209,6 @@ export function useBusinessInvitations() {
     if (user) {
       fetchSentInvitations();
       fetchReceivedInvitations();
-      consumeInviteFromUrl(); // Check for URL token
     }
   }, [user]);
 
@@ -262,7 +221,6 @@ export function useBusinessInvitations() {
     rejectInvitation,
     fetchSentInvitations,
     fetchReceivedInvitations,
-    consumeInviteFromUrl,
     refetch: () => {
       fetchSentInvitations();
       fetchReceivedInvitations();

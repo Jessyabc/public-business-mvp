@@ -19,10 +19,10 @@ import Contact from "./pages/Contact";
 import { UserProfile } from "./components/auth/UserProfile";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
 import AllMembers from "./pages/AllMembers";
 import HowItWorks from "./pages/HowItWorks";
 import Auth from "./pages/Auth";
+import AcceptInvite from "./pages/AcceptInvite";
 
 export const navItems = [
   {
@@ -86,12 +86,6 @@ export const navItems = [
     page: <Community />,
   },
   {
-    title: "Profile",
-    to: "/profile",
-    icon: <User className="h-4 w-4" />,
-    page: <Profile />,
-  },
-  {
     title: "Business Membership",
     to: "/business-membership", 
     icon: <Building2 className="h-4 w-4" />,
@@ -149,6 +143,11 @@ export const navItems = [
     title: "Sign Up / Sign In",
     to: "/auth",
     page: <Auth />,
+  },
+  {
+    title: "Accept Invite",
+    to: "/accept-invite",
+    page: <AcceptInvite />,
   },
   {
     title: "Not Found",

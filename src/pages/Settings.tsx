@@ -11,12 +11,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { ProfileForm } from '@/components/profile/ProfileForm';
+import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
 import { User, Bell, Shield, CreditCard, Palette, Building2 } from 'lucide-react';
 
 export default function Settings() {
   const { user } = useAuth();
-  const { profile } = useProfile();
   const { userRoles, isBusinessMember } = useUserRoles();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -63,11 +63,13 @@ export default function Settings() {
     }
   };
 
+  const isBusiness = userRoles.includes('business_member') || userRoles.includes('admin');
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
-        <p className="text-muted-foreground">Manage your account preferences and settings</p>
+        <p className="text-muted-foreground">Manage your profile, business information, and preferences</p>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
@@ -75,6 +77,10 @@ export default function Settings() {
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             Profile
+          </TabsTrigger>
+          <TabsTrigger value="business" className="flex items-center gap-2" disabled={!isBusiness}>
+            <Building2 className="h-4 w-4" />
+            Business
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
@@ -84,10 +90,6 @@ export default function Settings() {
             <Shield className="h-4 w-4" />
             Privacy
           </TabsTrigger>
-          <TabsTrigger value="subscription" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            Billing
-          </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             Preferences
@@ -96,83 +98,28 @@ export default function Settings() {
 
         {/* Profile Settings */}
         <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Profile Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
-                  <User className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{userRoles.length > 0 ? userRoles.join(', ').replace(/_/g, ' ') : 'Public User'}</Badge>
-                    {isBusinessMember() && (
-                      <Badge variant="default">
-                        <Building2 className="h-3 w-3 mr-1" />
-                        Business Member
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
-                </div>
-              </div>
+          <ProfileForm />
+        </TabsContent>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="display_name">Display Name</Label>
-                  <Input 
-                    id="display_name"
-                    defaultValue={profile?.display_name || ''}
-                    placeholder="Enter your display name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input 
-                    id="location"
-                    defaultValue={profile?.location || ''}
-                    placeholder="Your location"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <textarea 
-                  id="bio"
-                  className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  defaultValue={profile?.bio || ''}
-                  placeholder="Tell us about yourself..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input 
-                    id="website"
-                    defaultValue={profile?.website || ''}
-                    placeholder="https://yourwebsite.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="linkedin">LinkedIn</Label>
-                  <Input 
-                    id="linkedin"
-                    defaultValue={profile?.linkedin_url || ''}
-                    placeholder="https://linkedin.com/in/yourprofile"
-                  />
-                </div>
-              </div>
-
-              <Button>Save Changes</Button>
-            </CardContent>
-          </Card>
+        {/* Business Settings */}
+        <TabsContent value="business">
+          {isBusiness ? (
+            <BusinessProfileForm />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Business Membership Required
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Business membership is required to access this section. Business membership is invite-only.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Notification Settings */}
@@ -337,72 +284,6 @@ export default function Settings() {
           </Card>
         </TabsContent>
 
-        {/* Subscription Settings */}
-        <TabsContent value="subscription">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Subscription & Billing
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                <div>
-                  <h3 className="font-medium">Current Plan</h3>
-                   <p className="text-sm text-muted-foreground">
-                     {isBusinessMember() ? 'Business Member' : 'Free Plan'}
-                   </p>
-                </div>
-                 <Badge variant={isBusinessMember() ? 'default' : 'secondary'}>
-                   {isBusinessMember() ? 'Active' : 'Free'}
-                 </Badge>
-              </div>
-
-              {!isBusinessMember() && (
-                <div className="space-y-4">
-                  <h3 className="font-medium">Upgrade Options</h3>
-                  <div className="grid gap-4">
-                    <div className="p-4 border border-border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">Business Membership</h4>
-                        <span className="text-xl font-bold">$29/mo</span>
-                      </div>
-                      <ul className="text-sm text-muted-foreground space-y-1 mb-4">
-                        <li>• Create business posts and insights</li>
-                        <li>• Access to investor reports</li>
-                        <li>• Advanced analytics</li>
-                        <li>• Priority support</li>
-                      </ul>
-                      <Button>Upgrade to Business</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isBusinessMember() && (
-                <div className="space-y-4">
-                  <h3 className="font-medium">Payment Method</h3>
-                  <div className="p-4 border border-border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary/20 rounded flex items-center justify-center">
-                          <CreditCard className="h-4 w-4 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">•••• •••• •••• 4242</p>
-                          <p className="text-sm text-muted-foreground">Expires 12/25</p>
-                        </div>
-                      </div>
-                      <Button variant="outline">Update</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* Preferences Settings */}
         <TabsContent value="preferences">
           <Card>
@@ -423,15 +304,15 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Reduced Motion</Label>
-                    <p className="text-sm text-muted-foreground">Reduce animations and transitions</p>
+                    <Label>Compact View</Label>
+                    <p className="text-sm text-muted-foreground">Show more content in less space</p>
                   </div>
                   <Switch />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Auto-play Videos</Label>
-                    <p className="text-sm text-muted-foreground">Automatically play videos in feed</p>
+                    <Label>Auto-refresh Feed</Label>
+                    <p className="text-sm text-muted-foreground">Automatically refresh the feed for new content</p>
                   </div>
                   <Switch defaultChecked />
                 </div>
@@ -444,21 +325,20 @@ export default function Settings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Language</Label>
-                    <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                    <select className="w-full p-2 border rounded-md bg-background">
                       <option>English (US)</option>
                       <option>English (UK)</option>
                       <option>Spanish</option>
                       <option>French</option>
-                      <option>German</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <Label>Time Zone</Label>
-                    <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                      <option>Pacific Time (PT)</option>
-                      <option>Eastern Time (ET)</option>
-                      <option>Central Time (CT)</option>
-                      <option>Mountain Time (MT)</option>
+                    <select className="w-full p-2 border rounded-md bg-background">
+                      <option>UTC-08:00 (Pacific Time)</option>
+                      <option>UTC-05:00 (Eastern Time)</option>
+                      <option>UTC+00:00 (GMT)</option>
+                      <option>UTC+01:00 (CET)</option>
                     </select>
                   </div>
                 </div>

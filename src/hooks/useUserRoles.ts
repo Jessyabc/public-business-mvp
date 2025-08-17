@@ -24,25 +24,18 @@ export function useUserRoles() {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_my_roles');
+      const { rpcGetMyRoles } = await import('@/integrations/supabase/rpc');
+      const { data, error } = await rpcGetMyRoles();
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
-      const roles = (data ?? []) as UserRole[];
-      const finalRoles: UserRole[] = roles.length ? roles : ['public_user'];
-      setUserRoles(finalRoles);
-      setCanCreateBusinessPosts(
-        finalRoles.includes('business_member') || finalRoles.includes('admin')
-      );
+      const roles = (data ?? []) as Array<'admin'|'business_user'|'public_user'|'business_member'>;
+      setUserRoles(roles.length ? roles : ['public_user']);
+      setCanCreateBusinessPosts(roles.includes('business_member') || roles.includes('admin'));
     } catch (error: any) {
       console.error('Error fetching user roles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch user roles",
-        variant: "destructive",
-      });
+      // Default to public_user if there's an error
+      setUserRoles(['public_user']);
     } finally {
       setLoading(false);
     }

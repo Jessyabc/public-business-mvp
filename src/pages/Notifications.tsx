@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { Card } from '@/components/ui/card';
 import { Bell, Brain, Building2 } from 'lucide-react';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 
 const Notifications = () => {
   const { mode } = useAppMode();
+  const [activeTab, setActiveTab] = useState<'public' | 'business'>('public');
 
   return (
     <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
@@ -45,17 +47,25 @@ const Notifications = () => {
               : 'border-blue-200/30 bg-white/40'
           }`}>
             <div className="flex space-x-1">
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
-                mode === 'public'
-                  ? 'bg-[#489FE3]/20 text-[#489FE3]'
-                  : 'bg-blue-100/40 text-blue-600'
-              }`}>
+              <button 
+                onClick={() => setActiveTab('public')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                  activeTab === 'public'
+                    ? (mode === 'public' ? 'bg-[#489FE3]/20 text-[#489FE3]' : 'bg-blue-100/40 text-blue-600')
+                    : (mode === 'public' ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-700')
+                }`}
+              >
                 <Brain className="w-4 h-4" />
                 <span className="text-sm font-medium">Public</span>
               </button>
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
-                mode === 'public' ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-700'
-              }`}>
+              <button 
+                onClick={() => setActiveTab('business')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                  activeTab === 'business'
+                    ? (mode === 'public' ? 'bg-[#489FE3]/20 text-[#489FE3]' : 'bg-blue-100/40 text-blue-600')
+                    : (mode === 'public' ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-700')
+                }`}
+              >
                 <Building2 className="w-4 h-4" />
                 <span className="text-sm font-medium">Business</span>
               </button>
@@ -74,7 +84,7 @@ const Notifications = () => {
               <p className={`text-lg ${
                 mode === 'public' ? 'text-white/70' : 'text-slate-600'
               }`}>
-                No notifications yet.
+                No {activeTab} notifications yet.
               </p>
             </div>
           </Card>

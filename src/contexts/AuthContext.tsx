@@ -32,11 +32,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Get user type from metadata
         setUserType(session.user.user_metadata?.user_type || 'public');
         
-        // Check for invitation token in URL after user is authenticated
-        setTimeout(() => {
-          const token = new URLSearchParams(window.location.search).get('token');
-          if (token) {
-            consumeInvitationToken(token);
+        // After user signs in, if we stored an invite token before sign-in, consume it here once.
+        setTimeout(async () => {
+          const pending = sessionStorage.getItem("pending_invite_token");
+          if (pending) {
+            sessionStorage.removeItem("pending_invite_token");
+            try {
+              const { rpcConsumeInvite } = await import("@/integrations/supabase/rpc");
+              const { error } = await rpcConsumeInvite(pending);
+              if (!error) {
+                console.log("Invite consumed post-login");
+              }
+            } catch { /* no-op; UI toasts handled on /accept-invite page */ }
           }
         }, 0);
       }
@@ -54,11 +61,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setUserType(session.user.user_metadata?.user_type || 'public');
           
-          // Check for invitation token in URL when user signs in
-          setTimeout(() => {
-            const token = new URLSearchParams(window.location.search).get('token');
-            if (token) {
-              consumeInvitationToken(token);
+          // Check for pending token after sign-in
+          setTimeout(async () => {
+            const pending = sessionStorage.getItem("pending_invite_token");
+            if (pending) {
+              sessionStorage.removeItem("pending_invite_token");
+              try {
+                const { rpcConsumeInvite } = await import("@/integrations/supabase/rpc");
+                const { error } = await rpcConsumeInvite(pending);
+                if (!error) {
+                  console.log("Invite consumed post-login");
+                }
+              } catch { /* no-op; UI toasts handled on /accept-invite page */ }
             }
           }, 0);
         } else {
@@ -71,25 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const consumeInvitationToken = async (token: string) => {
-    try {
-      const { error } = await (supabase as any).rpc('consume_invite', { p_token: token });
-      if (error) {
-        console.error('Token consumption error:', error);
-        // Show friendly error message - could add toast here if imported
-      } else {
-        // Success: they're now a Business Member
-        console.log("Business Member access granted via token");
-        // Remove token from URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        window.history.replaceState({}, document.title, url.pathname + url.search);
-        // Could add success toast here if imported
-      }
-    } catch (error) {
-      console.error('Error consuming invitation token:', error);
-    }
-  };
+  // Remove consumeInvitationToken - now handled by AcceptInvite page
 
   const signUp = async (email: string, password: string, userType: 'public' | 'business') => {
     // Validate email format
