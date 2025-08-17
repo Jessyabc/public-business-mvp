@@ -24,19 +24,17 @@ export function useUserRoles() {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
-
+      const { data, error } = await supabase.rpc('get_my_roles');
+      
       if (error) {
         throw error;
       }
       
-      const roles = data?.map(d => d.role) || ['public_user'];
-      setUserRoles(roles);
+      const roles = (data ?? []) as UserRole[];
+      const finalRoles: UserRole[] = roles.length ? roles : ['public_user'];
+      setUserRoles(finalRoles);
       setCanCreateBusinessPosts(
-        roles.includes('business_member') || roles.includes('admin')
+        finalRoles.includes('business_member') || finalRoles.includes('admin')
       );
     } catch (error: any) {
       console.error('Error fetching user roles:', error);

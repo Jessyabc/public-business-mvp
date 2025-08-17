@@ -1,5 +1,4 @@
 import { ProfileForm } from "@/components/profile/ProfileForm";
-import { BusinessAccountRequest } from "@/components/profile/BusinessAccountRequest";
 
 export default function Profile() {
   return (
@@ -18,9 +17,6 @@ export default function Profile() {
         
         {/* User Profile */}
         <ProfileForm />
-        
-        {/* Business Account Request */}
-        <BusinessAccountRequest />
       </div>
     </div>
   );

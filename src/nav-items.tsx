@@ -17,7 +17,6 @@ import BusinessMembers from "./pages/BusinessMembers";
 import PublicMembers from "./pages/PublicMembers";
 import Contact from "./pages/Contact";
 import { UserProfile } from "./components/auth/UserProfile";
-import CreateBusiness from "./pages/CreateBusiness";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";

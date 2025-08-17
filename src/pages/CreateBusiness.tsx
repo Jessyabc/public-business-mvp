@@ -10,13 +10,35 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
-import { Building2, Users, Award } from 'lucide-react';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { Building2, Users, Award, AlertTriangle } from 'lucide-react';
 
 export function CreateBusiness() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { industries, departments } = useBusinessProfile();
+  const { isAdmin } = useUserRoles();
+
+  // Only admins can access this page
+  if (!isAdmin()) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
+            <p className="text-muted-foreground mb-4">
+              This page is only accessible to administrators. Business membership is now invite-only.
+            </p>
+            <Button onClick={() => navigate('/')}>
+              Return Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -56,15 +78,8 @@ export function CreateBusiness() {
 
       if (profileError) throw profileError;
 
-      // Update user role to business_member with admin privileges
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: user.id,
-          role: 'business_member'
-        });
-
-      if (roleError) throw roleError;
+      // Note: Role insertion will be handled by server-side triggers
+      // Admins creating businesses will automatically get business_member role
 
       toast({
         title: "Business Created Successfully!",
