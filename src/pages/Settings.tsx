@@ -1,3 +1,4 @@
+// src/pages/Settings.tsx
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
@@ -33,7 +33,6 @@ export default function Settings() {
 
   const handleNotificationChange = async (key: string, value: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: value }));
-    // Here you would save to the database
     toast({
       title: "Settings Updated",
       description: "Notification preferences have been saved.",
@@ -44,10 +43,9 @@ export default function Settings() {
     if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       return;
     }
-
     setLoading(true);
     try {
-      // Implementation would depend on your business logic
+      // Your deletion flow here
       toast({
         title: "Account Deletion Request",
         description: "Your account deletion request has been submitted. We'll process it within 24 hours.",
