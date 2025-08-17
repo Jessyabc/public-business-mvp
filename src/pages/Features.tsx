@@ -273,11 +273,6 @@ export default function Features() {
                 Join as Public Member
               </Button>
             </Link>
-            <Link to="/create-business">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-                Create Business Account
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
