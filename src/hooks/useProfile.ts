@@ -12,7 +12,6 @@ export type Profile = {
   website: string | null;
   linkedin_url: string | null;
   company: string | null;
-  role: string | null;
   location: string | null;
   is_completed?: boolean | null;
 };
@@ -25,7 +24,6 @@ const makeEmptyProfile = (id: string, fallbackName?: string | null): Profile => 
   website: null,
   linkedin_url: null,
   company: null,
-  role: null,
   location: null,
   is_completed: false,
 });
@@ -68,7 +66,6 @@ export function useProfile() {
           website: p.website ?? null,
           linkedin_url: p.linkedin_url ?? null,
           company: p.company ?? null,
-          role: p.role ?? null,
           location: p.location ?? null,
           is_completed: p.is_completed ?? null,
         });
@@ -100,7 +97,6 @@ export function useProfile() {
             (updates.linkedin_url ?? current.linkedin_url) as string | null | undefined
           ),
           company: updates.company ?? current.company ?? null,
-          role: updates.role ?? current.role ?? null,
           location: updates.location ?? current.location ?? null,
           is_completed:
             updates.is_completed ??

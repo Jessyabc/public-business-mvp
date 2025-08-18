@@ -356,9 +356,13 @@ export type Database = {
           token: string
         }[]
       }
+      current_user_email: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_my_roles: {
         Args: Record<PropertyKey, never>
-        Returns: string[]
+        Returns: Database["public"]["Enums"]["app_role"][]
       }
       get_user_role: {
         Args: { user_uuid: string }

@@ -55,7 +55,7 @@ export function ProfileForm() {
       website: form.website,
       linkedin_url: form.linkedin_url,
       company: form.company,
-      role: form.role,
+      
       location: form.location,
       is_completed: true,
     });
@@ -173,44 +173,25 @@ export function ProfileForm() {
           />
         </div>
 
-        {/* Pro info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="company" className={`flex items-center gap-2 ${
-              mode === "public" ? "text-white" : "text-slate-700"
-            }`}>
-              <Building className={`w-4 h-4 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
-              Company
-            </Label>
-            <Input
-              id="company"
-              value={form.company ?? ""}
-              onChange={(e) => updateField("company", e.target.value)}
-              placeholder="Your company"
-              className={`backdrop-blur-sm transition-all duration-300 ${
-                mode === "public"
-                  ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-              }`}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role" className={mode === "public" ? "text-white" : "text-slate-700"}>
-              Role
-            </Label>
-            <Input
-              id="role"
-              value={form.role ?? ""}
-              onChange={(e) => updateField("role", e.target.value)}
-              placeholder="Your role/title"
-              className={`backdrop-blur-sm transition-all duration-300 ${
-                mode === "public"
-                  ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-              }`}
-            />
-          </div>
+        {/* Company */}
+        <div className="space-y-2">
+          <Label htmlFor="company" className={`flex items-center gap-2 ${
+            mode === "public" ? "text-white" : "text-slate-700"
+          }`}>
+            <Building className={`w-4 h-4 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
+            Company
+          </Label>
+          <Input
+            id="company"
+            value={form.company ?? ""}
+            onChange={(e) => updateField("company", e.target.value)}
+            placeholder="Your company"
+            className={`backdrop-blur-sm transition-all duration-300 ${
+              mode === "public"
+                ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
+            }`}
+          />
         </div>
 
         {/* Location */}
