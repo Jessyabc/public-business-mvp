@@ -3,6 +3,7 @@ import { Node, Edge } from '@xyflow/react';
 import { Brainstorm } from '@/types/brainstorm';
 
 export function useRealtimeBrainstorms() {
+  console.log('useRealtimeBrainstorms loaded - cache refresh'); // Force cache refresh
   const [brainstorms, setBrainstorms] = useState<Brainstorm[]>([]);
   
   // Memoize nodes to prevent constant recalculation
