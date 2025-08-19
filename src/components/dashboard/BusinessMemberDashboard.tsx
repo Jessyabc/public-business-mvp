@@ -26,54 +26,20 @@ export function BusinessMemberDashboard() {
   const { profile } = useProfile();
   const { profile: businessProfile } = useBusinessProfile();
 
-  // Mock data - in real app, fetch from your API
+  // Initial default values - will be replaced with real data from posts
   const businessStats = {
-    uScore: 89,
-    activePosts: 8,
-    totalViews: 1247,
-    totalEngagement: 324,
-    monthlyGrowth: 12.5,
-    reportDownloads: 45,
-    followerCount: 189,
-    impressions: 5420,
-    avgEngagementRate: 4.2,
-    thisMonthPosts: 12,
-    pendingInvitations: 3,
+    uScore: 0,
+    activePosts: 0,
+    totalViews: 0,
+    totalEngagement: 0,
+    monthlyGrowth: 0,
+    reportDownloads: 0,
+    followerCount: 0,
+    impressions: 0,
+    avgEngagementRate: 0,
+    thisMonthPosts: 0,
+    pendingInvitations: 0,
   };
-
-  const recentPosts = [
-    {
-      title: "Q3 Market Analysis Report",
-      type: "report",
-      views: 156,
-      engagement: 23,
-      date: "2 days ago",
-      status: "published"
-    },
-    {
-      title: "Industry Insights: AI in Manufacturing",
-      type: "insight",
-      views: 89,
-      engagement: 15,
-      date: "5 days ago",
-      status: "published"
-    },
-    {
-      title: "Sustainability Initiative Update",
-      type: "update",
-      views: 203,
-      engagement: 31,
-      date: "1 week ago",
-      status: "published"
-    }
-  ];
-
-  const analyticsData = [
-    { metric: "Post Reach", value: "2.3K", change: "+15%" },
-    { metric: "Profile Views", value: "456", change: "+8%" },
-    { metric: "Engagement Rate", value: "4.2%", change: "+12%" },
-    { metric: "Report Downloads", value: "45", change: "+23%" },
-  ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -241,31 +207,16 @@ export function BusinessMemberDashboard() {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentPosts.map((post, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-blue-50/50 rounded-lg border">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm">{post.title}</h4>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{post.date}</span>
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" /> {post.views}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="h-3 w-3" /> {post.engagement}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="capitalize">
-                      {post.status}
-                    </Badge>
-                  </div>
-                ))}
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <FileText className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">No posts yet</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Start creating business insights and reports to see them here
+                </p>
+                <Button size="sm">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Create Your First Post
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -286,16 +237,12 @@ export function BusinessMemberDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {analyticsData.map((item, index) => (
-                <div key={index} className="text-center p-4 bg-blue-50/30 rounded-lg">
-                  <h3 className="text-sm font-medium text-muted-foreground">{item.metric}</h3>
-                  <div className="text-2xl font-bold text-blue-600 my-2">{item.value}</div>
-                  <Badge variant="secondary" className="text-green-600">
-                    {item.change}
-                  </Badge>
-                </div>
-              ))}
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">Analytics Coming Soon</h3>
+              <p className="text-sm text-muted-foreground">
+                Start posting to see your performance metrics here
+              </p>
             </div>
           </CardContent>
         </Card>

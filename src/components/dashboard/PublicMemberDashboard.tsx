@@ -11,43 +11,18 @@ export function PublicMemberDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
 
-  // Mock data - in real app, fetch from your API
+  // Default values - will be replaced with real data from posts
   const userStats = {
-    tScore: 75,
-    uScore: 82,
-    brainstormsContributed: 12,
-    totalInteractions: 248,
-    activeBrainstorms: 5,
-    completedBrainstorms: 7,
-    influence: 'Growing',
-    rankThisWeek: 3,
-    industryContributions: [
-      { name: 'Technology', count: 5, score: 85 },
-      { name: 'Healthcare', count: 3, score: 72 },
-      { name: 'Finance', count: 4, score: 78 },
-    ]
+    tScore: 0,
+    uScore: 0,
+    brainstormsContributed: 0,
+    totalInteractions: 0,
+    activeBrainstorms: 0,
+    completedBrainstorms: 0,
+    influence: 'New',
+    rankThisWeek: 0,
+    industryContributions: []
   };
-
-  const recentActivity = [
-    { 
-      type: 'brainstorm', 
-      title: 'Contributing to "Sustainable Manufacturing"', 
-      time: '2 hours ago',
-      score: '+5 T-Score'
-    },
-    { 
-      type: 'comment', 
-      title: 'Replied to automation discussion', 
-      time: '5 hours ago',
-      score: '+2 U-Score'
-    },
-    { 
-      type: 'like', 
-      title: 'Your idea gained 10 new likes', 
-      time: '1 day ago',
-      score: '+3 T-Score'
-    },
-  ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -201,29 +176,17 @@ export function PublicMemberDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                        {activity.type === 'brainstorm' && <Brain className="h-4 w-4 text-primary" />}
-                        {activity.type === 'comment' && <MessageSquare className="h-4 w-4 text-blue-500" />}
-                        {activity.type === 'like' && <Star className="h-4 w-4 text-yellow-500" />}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{activity.title}</p>
-                        <p className="text-xs text-muted-foreground">{activity.time}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-green-600">
-                      {activity.score}
-                    </Badge>
-                  </div>
-                ))}
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Activity className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">No activity yet</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Start brainstorming to see your activity here
+                </p>
+                <Button size="sm">
+                  <Brain className="h-4 w-4 mr-2" />
+                  Create Your First Brainstorm
+                </Button>
               </div>
-              <Button className="w-full mt-4" variant="outline">
-                View All Activity
-              </Button>
             </CardContent>
           </Card>
         </motion.div>
@@ -243,22 +206,12 @@ export function PublicMemberDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {userStats.industryContributions.map((industry, index) => (
-                <div key={index} className="p-4 bg-muted/30 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">{industry.name}</h3>
-                    <Badge variant="secondary">{industry.count}</Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Impact Score</span>
-                      <span className="font-medium">{industry.score}</span>
-                    </div>
-                    <Progress value={industry.score} className="h-2" />
-                  </div>
-                </div>
-              ))}
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <TrendingUp className="h-12 w-12 text-muted-foreground/30 mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">No contributions yet</h3>
+              <p className="text-sm text-muted-foreground">
+                Contribute to different industries to build your profile
+              </p>
             </div>
           </CardContent>
         </Card>

@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { Brainstorm } from '@/types/brainstorm';
-import { mockBrainstorms, mockConnections } from '@/data/brainstorms';
 
 export function useRealtimeBrainstorms() {
-  const [brainstorms, setBrainstorms] = useState<Brainstorm[]>(mockBrainstorms);
+  const [brainstorms, setBrainstorms] = useState<Brainstorm[]>([]);
   
   // Memoize nodes to prevent constant recalculation
   const nodes: Node[] = useMemo(() => 
@@ -17,15 +16,7 @@ export function useRealtimeBrainstorms() {
     })), [brainstorms]);
 
   // Memoize edges to prevent constant recalculation
-  const edges: Edge[] = useMemo(() => 
-    mockConnections.map((connection, index) => ({
-      id: `edge-${index}`,
-      source: connection.fromId,
-      target: connection.toId,
-      type: 'connection',
-      data: { connection },
-      animated: false, // Disable animation to reduce glitching
-    })), []);
+  const edges: Edge[] = useMemo(() => [], []);
 
   // Simulate real-time updates
   const addRandomBrainstorm = useCallback(() => {
