@@ -41,65 +41,41 @@ export function GlobalNavigationMenu() {
   };
 
   const getMenuItems = () => {
-    // All available pages from nav-items.tsx
-    const allPages = [
+    // Core navigation items for all users
+    const corePages = [
       { icon: Home, to: '/', label: 'Feed' },
-      { icon: FileText, to: '/my-posts', label: 'My Posts' },
-      { icon: History, to: '/history', label: 'History' },
-      { icon: Bell, to: '/notifications', label: 'Notifications' },
+      { icon: Search, to: '/brainstorm', label: 'Brainstorm Map' },
       { icon: Search, to: '/research', label: 'Research' },
-      { icon: MessageSquare, to: '/beta-feedback', label: 'Beta Feedback' },
-      { icon: Compass, to: '/explore', label: 'Explore' },
-      { icon: Search, to: '/features', label: 'Features' },
       { icon: Users, to: '/about', label: 'About' },
-      { icon: Users, to: '/community', label: 'Community' },
-      { icon: User, to: '/profile', label: 'Profile' },
-      { icon: Building2, to: '/business-membership', label: 'Business Membership' },
-      { icon: Building2, to: '/business-dashboard', label: 'Business Dashboard' },
-      { icon: Shield, to: '/security', label: 'Security' },
-      { icon: Settings, to: '/settings', label: 'Settings' },
-      { icon: Building2, to: '/business-members', label: 'Business Members' },
-      { icon: Users, to: '/public-members', label: 'Public Members' },
-      { icon: Users, to: '/all-members', label: 'All Members' },
-      { icon: MessageSquare, to: '/contact', label: 'Contact' },
+      { icon: Search, to: '/features', label: 'Features' },
       { icon: Search, to: '/how-it-works', label: 'How It Works' },
-      { icon: Building2, to: '/create-business', label: 'Create Business' },
+      { icon: MessageSquare, to: '/contact', label: 'Contact' },
     ];
 
-    // Filter based on user authentication and roles
+    // For non-authenticated users
     if (!user) {
       return [
-        { icon: Home, to: '/', label: 'Home' },
-        { icon: Users, to: '/about', label: 'About' },
-        { icon: Search, to: '/features', label: 'Features' },
-        { icon: Search, to: '/how-it-works', label: 'How It Works' },
+        ...corePages,
         { icon: Users, to: '/public-members', label: 'Public Members' },
         { icon: Building2, to: '/business-members', label: 'Business Members' },
-        { icon: MessageSquare, to: '/contact', label: 'Contact' },
         { icon: User, to: '/auth', label: 'Sign In / Sign Up' },
       ];
     }
 
-    // For authenticated users, show all relevant pages
+    // For authenticated users
     let userPages = [
-      { icon: Home, to: '/', label: 'Feed' },
+      ...corePages,
       { icon: FileText, to: '/my-posts', label: 'My Posts' },
-      { icon: History, to: '/history', label: 'Profile & History' },
+      { icon: User, to: '/profile', label: 'Profile & History' },
       { icon: Bell, to: '/notifications', label: 'Notifications' },
-      { icon: Search, to: '/research', label: 'Research' },
       { icon: Compass, to: '/explore', label: 'Explore' },
       { icon: Users, to: '/community', label: 'Community' },
       { icon: MessageSquare, to: '/beta-feedback', label: 'Beta Feedback' },
-      { icon: Shield, to: '/security', label: 'Security' },
-      { icon: User, to: '/profile', label: 'Profile' },
       { icon: Settings, to: '/settings', label: 'Settings' },
       { icon: Users, to: '/all-members', label: 'All Members' },
       { icon: Users, to: '/public-members', label: 'Public Members' },
       { icon: Building2, to: '/business-members', label: 'Business Members' },
-      { icon: Users, to: '/about', label: 'About' },
-      { icon: Search, to: '/features', label: 'Features' },
-      { icon: Search, to: '/how-it-works', label: 'How It Works' },
-      { icon: MessageSquare, to: '/contact', label: 'Contact' },
+      { icon: Shield, to: '/security', label: 'Security' },
     ];
 
     // Add business-specific pages for business members
@@ -107,8 +83,15 @@ export function GlobalNavigationMenu() {
       userPages.push(
         { icon: Building2, to: '/business-dashboard', label: 'Business Dashboard' },
         { icon: Building2, to: '/business-membership', label: 'Business Membership' },
-        { icon: Building2, to: '/create-business', label: 'Create Business' }
+        { icon: Building2, to: '/business-profile', label: 'Business Profile' }
       );
+      
+      // Only admins can create businesses
+      if (isAdmin()) {
+        userPages.push(
+          { icon: Building2, to: '/create-business', label: 'Create Business' }
+        );
+      }
     }
 
     return userPages;

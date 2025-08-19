@@ -30,25 +30,11 @@ const Index = () => {
     return <Landing />;
   }
 
-  // If user is connected, show the feeds with a button to access profile
+  // If user is connected, show the feeds
   const feedContent = mode === 'business' ? <BusinessFeed /> : <PublicFeed />;
   
   return (
     <div className="relative">
-      {/* Return to Profile Button */}
-      <div className="fixed top-20 right-6 z-40">
-        <Button
-          onClick={() => navigate('/profile')}
-          variant="outline"
-          className={`backdrop-blur-xl transition-all duration-300 shadow-lg hover:scale-105 ${
-            mode === 'public'
-              ? 'bg-black/20 border-white/20 text-white hover:bg-white/10'
-              : 'bg-white/40 border-blue-200/30 text-slate-600 hover:bg-white/60'
-          }`}
-        >
-          Back to Profile
-        </Button>
-      </div>
       {feedContent}
     </div>
   );

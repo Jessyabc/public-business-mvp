@@ -1,4 +1,4 @@
-import { Home, History as HistoryIcon, User, Compass, Users, Building2, Search, Bell, MessageSquare, FileText, Shield, Plus } from "lucide-react";
+import { Home, History as HistoryIcon, User, Compass, Users, Building2, Search, Bell, MessageSquare, FileText, Shield, Plus, Brain } from "lucide-react";
 import Index from "./pages/Index";
 import MyPosts from "./pages/MyPosts";
 import History from "./pages/History";
@@ -16,13 +16,15 @@ import SecurityDashboard from "./pages/SecurityDashboard";
 import BusinessMembers from "./pages/BusinessMembers";
 import PublicMembers from "./pages/PublicMembers";
 import Contact from "./pages/Contact";
-import { UserProfile } from "./components/auth/UserProfile";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Settings from "./pages/Settings";
 import AllMembers from "./pages/AllMembers";
 import HowItWorks from "./pages/HowItWorks";
 import Auth from "./pages/Auth";
 import AcceptInvite from "./pages/AcceptInvite";
+import Profile from "./pages/Profile";
+import CreateBusiness from "./pages/CreateBusiness";
+import Brainstorm from "./pages/Brainstorm";
 
 export const navItems = [
   {
@@ -32,16 +34,22 @@ export const navItems = [
     page: <Index />,
   },
   {
+    title: "Brainstorm Map",
+    to: "/brainstorm",
+    icon: <Brain className="h-4 w-4" />,
+    page: <Brainstorm />,
+  },
+  {
     title: "My Posts",
     to: "/my-posts",
     icon: <FileText className="h-4 w-4" />,
     page: <MyPosts />,
   },
   {
-    title: "History", 
-    to: "/history",
-    icon: <HistoryIcon className="h-4 w-4" />,
-    page: <History />,
+    title: "Profile & History", 
+    to: "/profile",
+    icon: <User className="h-4 w-4" />,
+    page: <Profile />,
   },
   {
     title: "Notifications",
@@ -138,6 +146,18 @@ export const navItems = [
     to: "/contact",
     icon: <MessageSquare className="h-4 w-4" />,
     page: <Contact />,
+  },
+  {
+    title: "Business Profile",
+    to: "/business-profile",
+    icon: <Building2 className="h-4 w-4" />,
+    page: <BusinessProfile />,
+  },
+  {
+    title: "Create Business",
+    to: "/create-business",
+    icon: <Building2 className="h-4 w-4" />,
+    page: <CreateBusiness />,
   },
   {
     title: "Sign Up / Sign In",

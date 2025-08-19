@@ -20,11 +20,11 @@ export function BottomNavigation() {
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
-    { to: '/history', icon: History, label: 'History', badge: null },
+    { to: '/brainstorm', icon: Brain, label: 'Map', badge: null },
+    { to: '/profile', icon: History, label: 'Profile', badge: null },
     { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
-    { to: '/settings', icon: Shield, label: 'Settings', badge: null },
     { to: '/research', icon: Search, label: 'Research', badge: null },
-    { to: '/beta-feedback', icon: MessageSquare, label: 'PB', badge: null }
+    { to: '/beta-feedback', icon: MessageSquare, label: 'Feedback', badge: null }
   ];
 
   if (!user) {
