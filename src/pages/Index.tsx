@@ -3,9 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Landing } from './Landing';
-import { PublicFeed } from "@/components/feeds/PublicFeed";
+import { BrainstormFeed } from "@/components/feeds/BrainstormFeed";
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
-import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const { mode } = useAppMode();
@@ -31,7 +30,7 @@ const Index = () => {
   }
 
   // If user is connected, show the feeds
-  const feedContent = mode === 'business' ? <BusinessFeed /> : <PublicFeed />;
+  const feedContent = mode === 'business' ? <BusinessFeed /> : <BrainstormFeed />;
   
   return (
     <div className="relative">

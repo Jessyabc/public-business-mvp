@@ -163,7 +163,7 @@ export function BusinessFeed() {
 
         {/* Brainstorm Network Preview */}
         <div className="mt-12">
-          <BrainstormPreview onExplore={() => navigate("/public-members")} />
+          <BrainstormPreview onExplore={() => navigate("/")} />
         </div>
 
         {/* Load More Button */}

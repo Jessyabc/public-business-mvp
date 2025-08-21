@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Brain, Building2, Plus, Shield } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Building2, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -20,11 +20,10 @@ export function BottomNavigation() {
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },
-    { to: '/brainstorm', icon: Brain, label: 'Map', badge: null },
+    { to: '/my-posts', icon: MessageSquare, label: 'My Posts', badge: null },
     { to: '/profile', icon: History, label: 'Profile', badge: null },
     { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
-    { to: '/research', icon: Search, label: 'Research', badge: null },
-    { to: '/beta-feedback', icon: MessageSquare, label: 'Feedback', badge: null }
+    { to: '/research', icon: Search, label: 'Research', badge: null }
   ];
 
   if (!user) {
@@ -66,7 +65,7 @@ export function BottomNavigation() {
             }`}
           >
             {mode === 'public' ? (
-              <Brain className="w-4 h-4 text-[#489FE3] transition-all duration-300" />
+              <Home className="w-4 h-4 text-[#489FE3] transition-all duration-300" />
             ) : (
               <Building2 className="w-4 h-4 text-blue-600 transition-all duration-300" />
             )}

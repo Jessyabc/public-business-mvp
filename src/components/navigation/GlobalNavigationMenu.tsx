@@ -44,7 +44,6 @@ export function GlobalNavigationMenu() {
     // Core navigation items for all users
     const corePages = [
       { icon: Home, to: '/', label: 'Feed' },
-      { icon: Search, to: '/brainstorm', label: 'Brainstorm Map' },
       { icon: Search, to: '/research', label: 'Research' },
       { icon: Users, to: '/about', label: 'About' },
       { icon: Search, to: '/features', label: 'Features' },
@@ -56,8 +55,6 @@ export function GlobalNavigationMenu() {
     if (!user) {
       return [
         ...corePages,
-        { icon: Users, to: '/public-members', label: 'Public Members' },
-        { icon: Building2, to: '/business-members', label: 'Business Members' },
         { icon: User, to: '/auth', label: 'Sign In / Sign Up' },
       ];
     }
@@ -66,16 +63,11 @@ export function GlobalNavigationMenu() {
     let userPages = [
       ...corePages,
       { icon: FileText, to: '/my-posts', label: 'My Posts' },
-      { icon: User, to: '/profile', label: 'Profile & History' },
+      { icon: User, to: '/profile', label: 'Profile' },
       { icon: Bell, to: '/notifications', label: 'Notifications' },
       { icon: Compass, to: '/explore', label: 'Explore' },
       { icon: Users, to: '/community', label: 'Community' },
-      { icon: MessageSquare, to: '/beta-feedback', label: 'Beta Feedback' },
       { icon: Settings, to: '/settings', label: 'Settings' },
-      { icon: Users, to: '/all-members', label: 'All Members' },
-      { icon: Users, to: '/public-members', label: 'Public Members' },
-      { icon: Building2, to: '/business-members', label: 'Business Members' },
-      { icon: Shield, to: '/security', label: 'Security' },
     ];
 
     // Add business-specific pages for business members

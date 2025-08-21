@@ -1,177 +1,137 @@
-import { Home, History as HistoryIcon, User, Compass, Users, Building2, Search, Bell, MessageSquare, FileText, Shield, Plus, Brain } from "lucide-react";
+import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2 } from "lucide-react";
 import Index from "./pages/Index";
-import MyPosts from "./pages/MyPosts";
-import History from "./pages/History";
-import Notifications from "./pages/Notifications";
-import Research from "./pages/Research";
-import BetaFeedback from "./pages/BetaFeedback";
 import NotFound from "./pages/NotFound";
-import Explore from "./pages/Explore";
-import Features from "./pages/Features";
-import About from "./pages/About";
-import Community from "./pages/Community";
-import BusinessProfile from "./pages/BusinessProfile";
-import { BusinessMembership } from "./pages/BusinessMembership";
-import SecurityDashboard from "./pages/SecurityDashboard";
-import BusinessMembers from "./pages/BusinessMembers";
-import PublicMembers from "./pages/PublicMembers";
-import Contact from "./pages/Contact";
-import BusinessDashboard from "./pages/BusinessDashboard";
-import Settings from "./pages/Settings";
-import AllMembers from "./pages/AllMembers";
-import HowItWorks from "./pages/HowItWorks";
 import Auth from "./pages/Auth";
-import AcceptInvite from "./pages/AcceptInvite";
 import Profile from "./pages/Profile";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Features from "./pages/Features";
+import HowItWorks from "./pages/HowItWorks";
+import Explore from "./pages/Explore";
+import Community from "./pages/Community";
+import Settings from "./pages/Settings";
+import BusinessDashboard from "./pages/BusinessDashboard";
+import BusinessMembership from "./pages/BusinessMembership";
 import CreateBusiness from "./pages/CreateBusiness";
-import Brainstorm from "./pages/Brainstorm";
+import MyPosts from "./pages/MyPosts";
+import Notifications from "./pages/Notifications";
+import AcceptInvite from "./pages/AcceptInvite";
+import Research from "./pages/Research";
+import BusinessProfile from "./pages/BusinessProfile";
 
 export const navItems = [
   {
-    title: "Feed",
+    title: "Home",
     to: "/",
-    icon: <Home className="h-4 w-4" />,
+    icon: Home,
     page: <Index />,
   },
   {
-    title: "Brainstorm Map",
-    to: "/brainstorm",
-    icon: <Brain className="h-4 w-4" />,
-    page: <Brainstorm />,
+    title: "Auth",
+    to: "/auth",
+    icon: User,
+    page: <Auth />,
+  },
+  {
+    title: "Profile",
+    to: "/profile",
+    icon: User,
+    page: <Profile />,
+  },
+  {
+    title: "Settings",
+    to: "/settings",
+    icon: Settings2,
+    page: <Settings />,
+  },
+  {
+    title: "Business Profile",
+    to: "/business-profile", 
+    icon: Building2,
+    page: <BusinessProfile />,
+  },
+  {
+    title: "Business Dashboard",
+    to: "/business-dashboard",
+    icon: Building2,
+    page: <BusinessDashboard />,
+  },
+  {
+    title: "Business Membership",
+    to: "/business-membership",
+    icon: Crown,
+    page: <BusinessMembership />,
+  },
+  {
+    title: "Create Business",
+    to: "/create-business",
+    icon: Plus,
+    page: <CreateBusiness />,
   },
   {
     title: "My Posts",
     to: "/my-posts",
-    icon: <FileText className="h-4 w-4" />,
+    icon: FileText,
     page: <MyPosts />,
-  },
-  {
-    title: "Profile & History", 
-    to: "/profile",
-    icon: <User className="h-4 w-4" />,
-    page: <Profile />,
   },
   {
     title: "Notifications",
     to: "/notifications",
-    icon: <Bell className="h-4 w-4" />,
+    icon: Bell,
     page: <Notifications />,
   },
   {
     title: "Research",
     to: "/research",
-    icon: <Search className="h-4 w-4" />,
+    icon: Search,
     page: <Research />,
   },
   {
-    title: "Beta Feedback",
-    to: "/beta-feedback",
-    icon: <MessageSquare className="h-4 w-4" />,
-    page: <BetaFeedback />,
-  },
-  {
-    title: "Explore",
-    to: "/explore",
-    icon: <Compass className="h-4 w-4" />,
-    page: <Explore />,
-  },
-  {
-    title: "Features",
-    to: "/features",
-    icon: <Search className="h-4 w-4" />,
-    page: <Features />,
+    title: "Accept Invite",
+    to: "/accept-invite/:token",
+    icon: UserPlus,
+    page: <AcceptInvite />,
   },
   {
     title: "About",
     to: "/about",
-    icon: <Users className="h-4 w-4" />,
+    icon: Info,
     page: <About />,
-  },
-  {
-    title: "Community",
-    to: "/community",
-    icon: <Users className="h-4 w-4" />,
-    page: <Community />,
-  },
-  {
-    title: "Business Membership",
-    to: "/business-membership", 
-    icon: <Building2 className="h-4 w-4" />,
-    page: <BusinessMembership />,
-  },
-  {
-    title: "Business Dashboard",
-    to: "/business-dashboard",
-    icon: <Building2 className="h-4 w-4" />,
-    page: <BusinessDashboard />,
-  },
-  {
-    title: "Security",
-    to: "/security",
-    icon: <Shield className="h-4 w-4" />,
-    page: <SecurityDashboard />,
-  },
-  {
-    title: "Settings",
-    to: "/settings",
-    icon: <Shield className="h-4 w-4" />,
-    page: <Settings />,
-  },
-  {
-    title: "Business Members",
-    to: "/business-members",
-    icon: <Building2 className="h-4 w-4" />,
-    page: <BusinessMembers />,
-  },
-  {
-    title: "Public Members", 
-    to: "/public-members",
-    icon: <Users className="h-4 w-4" />,
-    page: <PublicMembers />,
-  },
-  {
-    title: "All Members",
-    to: "/all-members",
-    icon: <Users className="h-4 w-4" />,
-    page: <AllMembers />,
-  },
-  {
-    title: "How It Works",
-    to: "/how-it-works",
-    icon: <Search className="h-4 w-4" />,
-    page: <HowItWorks />,
   },
   {
     title: "Contact",
     to: "/contact",
-    icon: <MessageSquare className="h-4 w-4" />,
+    icon: Phone,
     page: <Contact />,
   },
   {
-    title: "Business Profile",
-    to: "/business-profile",
-    icon: <Building2 className="h-4 w-4" />,
-    page: <BusinessProfile />,
+    title: "Features",
+    to: "/features",
+    icon: Zap,
+    page: <Features />,
   },
   {
-    title: "Create Business",
-    to: "/create-business",
-    icon: <Building2 className="h-4 w-4" />,
-    page: <CreateBusiness />,
+    title: "How It Works",
+    to: "/how-it-works",
+    icon: HelpCircle,
+    page: <HowItWorks />,
   },
   {
-    title: "Sign Up / Sign In",
-    to: "/auth",
-    page: <Auth />,
+    title: "Explore",
+    to: "/explore",
+    icon: Compass,
+    page: <Explore />,
   },
   {
-    title: "Accept Invite",
-    to: "/accept-invite",
-    page: <AcceptInvite />,
+    title: "Community",
+    to: "/community",
+    icon: Users,
+    page: <Community />,
   },
   {
-    title: "Not Found",
+    title: "404",
     to: "*",
+    icon: AlertCircle,
     page: <NotFound />,
   },
 ];
