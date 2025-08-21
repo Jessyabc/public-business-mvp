@@ -24,8 +24,7 @@ export function useUserRoles() {
     
     setLoading(true);
     try {
-      const { rpcGetMyRoles } = await import('@/integrations/supabase/rpc');
-      const { data, error } = await rpcGetMyRoles();
+      const { data, error } = await supabase.rpc('get_my_roles');
       
       if (error) throw error;
       
