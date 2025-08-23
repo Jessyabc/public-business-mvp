@@ -19,22 +19,21 @@ export function Footer() {
       { label: 'Contact', to: '/contact' },
     ],
     members: [
-      { label: 'Business Members', to: '/business-members' },
-      { label: 'Public Members', to: '/public-members' },
-      { label: 'Join Now', to: '/signup' },
+      { label: 'Business Members', to: '/members/business-members' },
+      { label: 'Public Members', to: '/members/public-members' },
       { label: 'How it Works', to: '/how-it-works' },
     ],
     support: [
-      { label: 'Help Center', to: '/help' },
-      { label: 'FAQ', to: '/faq' },
-      { label: 'Blog', to: '/blog' },
-      { label: 'Community', to: '/community' },
+      { label: 'Help Center', to: '/support/help-center' },
+      { label: 'FAQ', to: '/support/faq' },
+      { label: 'Blog', to: '/support/blog' },
+      { label: 'Community', to: '/support/community' },
     ],
     legal: [
-      { label: 'Privacy Policy', to: '/privacy' },
-      { label: 'Terms of Service', to: '/terms' },
-      { label: 'Cookie Policy', to: '/cookies' },
-      { label: 'Disclaimer', to: '/disclaimer' },
+      { label: 'Privacy Policy', to: '/legal/privacy-policy' },
+      { label: 'Terms of Service', to: '/legal/terms-of-service' },
+      { label: 'Cookie Policy', to: '/legal/cookie-policy' },
+      { label: 'Disclaimer', to: '/legal/disclaimer' },
     ],
   };
 
@@ -58,10 +57,10 @@ export function Footer() {
               Linking industries the right way. Engage, share, thrive with business leaders and thought partners.
             </p>
             <div className="flex space-x-4">
-              <a href="https://linkedin.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
               <a href="mailto:contact@publicbusiness.com" className="text-muted-foreground hover:text-primary transition-colors">
@@ -160,7 +159,7 @@ export function Footer() {
               <MapPin className="h-5 w-5 text-primary" />
               <div>
                 <div className="font-medium text-foreground">Location</div>
-                <div className="text-sm text-muted-foreground">San Francisco, CA</div>
+                <div className="text-sm text-muted-foreground">Mascouche, QC, Canada (Remote-first)</div>
               </div>
             </div>
           </div>

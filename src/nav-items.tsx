@@ -1,4 +1,4 @@
-import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2 } from "lucide-react";
+import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2, BookOpen, MessageCircle, Briefcase, Scale, Shield } from "lucide-react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -18,6 +18,16 @@ import Notifications from "./pages/Notifications";
 import AcceptInvite from "./pages/AcceptInvite";
 import Research from "./pages/Research";
 import BusinessProfile from "./pages/BusinessProfile";
+import Careers from "./pages/Careers";
+import BusinessMembers from "./pages/BusinessMembers";
+import PublicMembers from "./pages/PublicMembers";
+import HelpCenter from "./pages/HelpCenter";
+import FAQ from "./pages/FAQ";
+import Blog from "./pages/Blog";
+import SupportCommunity from "./pages/SupportCommunity";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
 
 export const navItems = [
   {
@@ -123,10 +133,70 @@ export const navItems = [
     page: <Explore />,
   },
   {
+    title: "Careers",
+    to: "/careers",
+    icon: Briefcase,
+    page: <Careers />,
+  },
+  {
+    title: "Business Members",
+    to: "/members/business-members",
+    icon: Crown,
+    page: <BusinessMembers />,
+  },
+  {
+    title: "Public Members",
+    to: "/members/public-members",
+    icon: Users,
+    page: <PublicMembers />,
+  },
+  {
+    title: "Help Center",
+    to: "/support/help-center",
+    icon: HelpCircle,
+    page: <HelpCenter />,
+  },
+  {
+    title: "FAQ",
+    to: "/support/faq",
+    icon: MessageCircle,
+    page: <FAQ />,
+  },
+  {
+    title: "Blog",
+    to: "/support/blog",
+    icon: BookOpen,
+    page: <Blog />,
+  },
+  {
+    title: "Support Community",
+    to: "/support/community",
+    icon: Users,
+    page: <SupportCommunity />,
+  },
+  {
     title: "Community",
     to: "/community",
     icon: Users,
     page: <Community />,
+  },
+  {
+    title: "Privacy Policy",
+    to: "/legal/privacy-policy",
+    icon: Shield,
+    page: <PrivacyPolicy />,
+  },
+  {
+    title: "Terms of Service",
+    to: "/legal/terms-of-service",
+    icon: Scale,
+    page: <TermsOfService />,
+  },
+  {
+    title: "Cookie Policy",
+    to: "/legal/cookie-policy",
+    icon: Shield,
+    page: <CookiePolicy />,
   },
   {
     title: "404",
