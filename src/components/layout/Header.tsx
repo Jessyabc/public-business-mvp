@@ -44,8 +44,8 @@ export function Header() {
     { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
     { to: '/features', label: 'Features' },
-    { to: '/business-members', label: 'Business Members' },
-    { to: '/public-members', label: 'Public Members' },
+    { to: '/members/business-members', label: 'Business Members' },
+    { to: '/members/public-members', label: 'Public Members' },
     { to: '/contact', label: 'Contact' },
   ];
 
