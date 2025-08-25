@@ -10,6 +10,7 @@ const BrainstormDetail = lazy(() => import('./public/BrainstormDetail').then(m =
 const BusinessDashboard = lazy(() => import('./business/Dashboard').then(m => ({ default: m.BusinessDashboard })));
 const BusinessReports = lazy(() => import('./business/Reports').then(m => ({ default: m.BusinessReports })));
 const Notifications = lazy(() => import('./shared/Notifications').then(m => ({ default: m.Notifications })));
+const Admin = lazy(() => import('@/pages/Admin'));
 
 // Keep existing pages for non-shell routes
 import { Landing } from '@/pages/Landing';
@@ -109,6 +110,16 @@ export const router = createBrowserRouter([
             ),
           },
         ],
+      },
+      
+      // Admin routes
+      {
+        path: 'admin',
+        element: (
+          <LazyWrapper>
+            <Admin />
+          </LazyWrapper>
+        ),
       },
     ],
   },
