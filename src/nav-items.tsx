@@ -28,6 +28,9 @@ import SupportCommunity from "./pages/SupportCommunity";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import Industries from "./pages/Industries";
+import FormsShowcase from "./pages/FormsShowcase";
+import ComponentsShowcase from "./pages/ComponentsShowcase";
 
 export const navItems = [
   {
@@ -197,6 +200,24 @@ export const navItems = [
     to: "/legal/cookie-policy",
     icon: Shield,
     page: <CookiePolicy />,
+  },
+  {
+    title: "Industries",
+    to: "/industries",
+    icon: Building2,
+    page: <Industries />,
+  },
+  {
+    title: "Forms Showcase",
+    to: "/dev/forms",
+    icon: FileText,
+    page: <FormsShowcase />,
+  },
+  {
+    title: "Components Showcase",
+    to: "/dev/components",
+    icon: Palette,
+    page: <ComponentsShowcase />,
   },
   {
     title: "404",

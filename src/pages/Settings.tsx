@@ -13,7 +13,8 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
-import { User, Bell, Shield, CreditCard, Palette, Building2 } from 'lucide-react';
+import { User, Bell, Shield, CreditCard, Palette, Building2, BookOpen } from 'lucide-react';
+import Resources from './Resources';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -71,7 +72,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             Profile
@@ -91,6 +92,10 @@ export default function Settings() {
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             Preferences
+          </TabsTrigger>
+          <TabsTrigger value="resources" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Resources
           </TabsTrigger>
         </TabsList>
 
@@ -343,6 +348,11 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Resources Tab */}
+        <TabsContent value="resources">
+          <Resources />
         </TabsContent>
       </Tabs>
     </div>

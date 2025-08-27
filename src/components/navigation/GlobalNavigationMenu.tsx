@@ -43,11 +43,10 @@ export function GlobalNavigationMenu() {
   const getMenuItems = () => {
     // Core navigation items for all users
     const corePages = [
-      { icon: Home, to: '/', label: 'Feed' },
-      { icon: Search, to: '/research', label: 'Research' },
+      { icon: Home, to: '/', label: 'Home' },
+      { icon: Building2, to: '/industries', label: 'Industries' },
       { icon: Users, to: '/about', label: 'About' },
-      { icon: Search, to: '/features', label: 'Features' },
-      { icon: Search, to: '/how-it-works', label: 'How It Works' },
+      { icon: Zap, to: '/features', label: 'Features' },
       { icon: MessageSquare, to: '/contact', label: 'Contact' },
     ];
 
@@ -62,12 +61,9 @@ export function GlobalNavigationMenu() {
     // For authenticated users
     let userPages = [
       ...corePages,
-      { icon: FileText, to: '/my-posts', label: 'My Posts' },
       { icon: User, to: '/profile', label: 'Profile' },
-      { icon: Bell, to: '/notifications', label: 'Notifications' },
-      { icon: Compass, to: '/explore', label: 'Explore' },
-      { icon: Users, to: '/community', label: 'Community' },
       { icon: Settings, to: '/settings', label: 'Settings' },
+      { icon: Bell, to: '/notifications', label: 'Notifications' },
     ];
 
     // Add business-specific pages for business members
@@ -78,10 +74,12 @@ export function GlobalNavigationMenu() {
         { icon: Building2, to: '/business-profile', label: 'Business Profile' }
       );
       
-      // Only admins can create businesses
+      // Only admins get development pages
       if (isAdmin()) {
         userPages.push(
-          { icon: Building2, to: '/create-business', label: 'Create Business' }
+          { icon: Building2, to: '/create-business', label: 'Create Business' },
+          { icon: FileText, to: '/dev/forms', label: 'Forms Showcase' },
+          { icon: Plus, to: '/dev/components', label: 'Components Showcase' }
         );
       }
     }
