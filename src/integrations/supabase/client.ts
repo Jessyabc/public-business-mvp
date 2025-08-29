@@ -20,9 +20,13 @@ export const supabase = createClient<Database>(
   SUPABASE_URL || "https://opjltuyirkbbpwgkavjq.supabase.co",
   SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wamx0dXlpcmtiYnB3Z2thdmpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MjEyMjcsImV4cCI6MjA2ODI5NzIyN30.LEiJvfprvGbLk7ni4SavBQJl8SYc32ugdCQUGg8DTaQ",
   {
+    db: {
+      schema: 'public'
+    },
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true
     }
   }
 );

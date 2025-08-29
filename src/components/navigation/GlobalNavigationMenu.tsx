@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAppMode } from '@/contexts/AppModeContext';
-import { Menu, X, LogOut, User, Settings, Home, History, Bell, Search, MessageSquare, Building2, Users, Compass, FileText, Shield, Plus, Zap } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Home, History, Bell, Search, MessageSquare, Building2, Users, Compass, FileText, Shield, Plus, Zap, Layers } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +55,7 @@ export function GlobalNavigationMenu() {
       return [
         ...corePages,
         { icon: User, to: '/auth', label: 'Sign In / Sign Up' },
+        { icon: Layers, to: '/dev/components', label: 'Components Showcase' },
       ];
     }
 
@@ -79,7 +80,7 @@ export function GlobalNavigationMenu() {
         userPages.push(
           { icon: Building2, to: '/create-business', label: 'Create Business' },
           { icon: FileText, to: '/dev/forms', label: 'Forms Showcase' },
-          { icon: Plus, to: '/dev/components', label: 'Components Showcase' }
+          { icon: Layers, to: '/dev/components', label: 'Components Showcase' }
         );
       }
     }
