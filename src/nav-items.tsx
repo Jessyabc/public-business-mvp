@@ -1,4 +1,4 @@
-import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2, BookOpen, MessageCircle, Briefcase, Scale, Shield } from "lucide-react";
+import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2, BookOpen, MessageCircle, Briefcase, Scale, Shield, Palette } from "lucide-react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
