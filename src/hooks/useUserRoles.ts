@@ -24,11 +24,15 @@ export function useUserRoles() {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_my_roles');
+      // Direct table query instead of RPC
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
       
       if (error) throw error;
       
-      const roles = (data ?? []) as Array<'admin'|'business_user'|'public_user'|'business_member'>;
+      const roles = (data || []).map(row => row.role) as Array<'admin'|'business_user'|'public_user'|'business_member'>;
       setUserRoles(roles.length ? roles : ['public_user']);
       setCanCreateBusinessPosts(roles.includes('business_member') || roles.includes('admin'));
     } catch (error: any) {

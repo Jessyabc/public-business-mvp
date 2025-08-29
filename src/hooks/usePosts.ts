@@ -40,9 +40,11 @@ export function usePosts() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = async (mode?: 'public' | 'business') => {
     setLoading(true);
+    setError(null);
     try {
       let query = supabase
         .from('posts')
@@ -58,8 +60,9 @@ export function usePosts() {
 
       if (error) throw error;
       setPosts((data as Post[]) || []);
-    } catch (error: any) {
-      console.error('Error fetching posts:', error);
+    } catch (err: any) {
+      console.error('Error fetching posts:', err);
+      setError(err.message || 'Failed to fetch posts');
       toast({
         title: "Error",
         description: "Failed to fetch posts",
@@ -246,6 +249,7 @@ export function usePosts() {
     if (!user) return;
     
     setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('posts')
@@ -256,8 +260,9 @@ export function usePosts() {
 
       if (error) throw error;
       setPosts((data as Post[]) || []);
-    } catch (error: any) {
-      console.error('Error fetching user posts:', error);
+    } catch (err: any) {
+      console.error('Error fetching user posts:', err);
+      setError(err.message || 'Failed to fetch your posts');
       toast({
         title: "Error",
         description: "Failed to fetch your posts",
@@ -277,12 +282,13 @@ export function usePosts() {
   return {
     posts,
     loading,
+    error,
+    fetchPosts,
+    fetchUserPosts,
     createPost,
     createPostWithRelation,
     updatePost,
     deletePost,
-    fetchPosts,
-    fetchUserPosts,
     refetch: fetchPosts,
   };
 }
