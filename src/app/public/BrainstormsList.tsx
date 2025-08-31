@@ -1,57 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpDown, Filter } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useBrainstormsStore } from '@/stores/brainstormsStore';
+import { useFreeBrainstorms } from '@/hooks/useOpenIdeas';
 import { BrainstormCard } from '@/components/BrainstormCard';
-import { BrainstormComposer } from './BrainstormComposer';
 import { SkeletonList } from '@/ui/feedback/Skeleton';
 import { Page } from '@/ui/layouts/Page';
-import { trackBrainstormListViewed } from '@/lib/track';
 
 export function BrainstormsList() {
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<'recent' | 'score'>('recent');
   
-  const { 
-    loading, 
-    error, 
-    optimisticInserts,
-    loadRoots, 
-    createBrainstorm, 
-    clearError,
-    getRootBrainstorms
-  } = useBrainstormsStore();
-
-  const brainstorms = getRootBrainstorms(sortBy);
-
-  useEffect(() => {
-    loadRoots();
-    trackBrainstormListViewed(sortBy, brainstorms.length);
-  }, [loadRoots, sortBy, brainstorms.length]);
-
-  const handleNewBrainstorm = async (text: string) => {
-    await createBrainstorm({ text });
-  };
+  const { data: brainstorms = [], isLoading: loading } = useFreeBrainstorms();
 
   const handleBrainstormClick = (id: string) => {
-    // Navigate to most recent if default route
-    if (window.location.pathname === '/public/brainstorms' && brainstorms.length > 0) {
-      navigate(`/public/brainstorms/${brainstorms[0].id}`, { replace: true });
-    } else {
-      navigate(`/public/brainstorms/${id}`);
-    }
+    navigate(`/brainstorm/${id}`);
   };
 
-  if (loading && brainstorms.length === 0) {
+  if (loading) {
     return (
       <Page>
         <div className="space-y-6 pt-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Brainstorms</h1>
-            <p className="text-muted-foreground">Loading ideas...</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Free Brainstorms</h1>
+            <p className="text-muted-foreground">Loading brainstorms...</p>
           </div>
-          <SkeletonList count={6} />
+          <SkeletonList count={3} />
         </div>
       </Page>
     );
@@ -62,48 +36,24 @@ export function BrainstormsList() {
       <div className="space-y-6 pt-8" role="main">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Brainstorms</h1>
-          <p className="text-muted-foreground">Explore ideas and join the conversation</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Free Brainstorms</h1>
+          <p className="text-muted-foreground">Explore the latest brainstorms on curated ideas</p>
         </div>
 
         {/* Controls */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSortBy(sortBy === 'recent' ? 'score' : 'recent')}
-              className="flex items-center gap-2"
-            >
-              <ArrowUpDown className="w-4 h-4" />
-              {sortBy === 'recent' ? 'Most Recent' : 'Highest T-Score'}
-            </Button>
-          </div>
           <div className="text-sm text-muted-foreground">
-            {brainstorms.length} brainstorms
+            {brainstorms.length} brainstorms available
           </div>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-center justify-between">
-            <p className="text-destructive text-sm">{error}</p>
-            <Button variant="outline" size="sm" onClick={clearError}>
-              Dismiss
-            </Button>
-          </div>
-        )}
-
-        {/* Composer */}
-        <BrainstormComposer onSubmit={handleNewBrainstorm} />
-
         {/* Brainstorms List */}
-        <div className="space-y-4" aria-live="polite" aria-label="Brainstorms list">
+        <div className="space-y-4" aria-live="polite" aria-label="Free brainstorms list">
           {brainstorms.map((brainstorm) => (
             <BrainstormCard
               key={brainstorm.id}
               brainstorm={brainstorm}
-              isOptimistic={optimisticInserts.has(brainstorm.id)}
+              showFreeBadge={true}
               onClick={() => handleBrainstormClick(brainstorm.id)}
             />
           ))}
@@ -111,7 +61,7 @@ export function BrainstormsList() {
 
         {brainstorms.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No brainstorms yet. Be the first to share an idea!</p>
+            <p className="text-muted-foreground mb-4">No free brainstorms available yet.</p>
           </div>
         )}
       </div>
