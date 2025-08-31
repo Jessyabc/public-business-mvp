@@ -1,6 +1,6 @@
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GlassCard } from '@/ui/components/GlassCard';
 import { Brain, Building2, Plus, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -24,11 +24,9 @@ const MyPosts = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <p>Please sign in to view your posts.</p>
-          </CardContent>
-        </Card>
+        <GlassCard className="glass-ios-triple glass-corner-distort text-center" padding="lg">
+          <p>Please sign in to view your posts.</p>
+        </GlassCard>
       </div>
     );
   }
@@ -42,18 +40,18 @@ const MyPosts = () => {
   };
 
   return (
-    <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out glass-distort ${
-      mode === 'public' 
-        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
-    }`}>
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen p-6 pb-32 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+
+      <div className="relative z-10 max-w-4xl mx-auto">
         <header className="mb-8">
-          <div className={`glass-card rounded-3xl p-8 backdrop-blur-xl transition-all duration-700 ${
+          <GlassCard className={`rounded-3xl glass-ios-triple glass-corner-distort transition-all duration-700 ${
             mode === 'public'
-              ? 'border-white/20 bg-black/20'
-              : 'border-blue-200/30 bg-white/40'
-          }`}>
+              ? 'border-white/20'
+              : 'border-blue-200/30'
+          }`} padding="lg">
             <div className="flex items-center justify-center space-x-3 mb-4">
               {mode === 'public' ? (
                 <Brain className="w-8 h-8 text-[#489FE3]" />
@@ -74,36 +72,34 @@ const MyPosts = () => {
                 : 'Your business posts, insights, and professional content'
               }
             </p>
-          </div>
+          </GlassCard>
         </header>
 
         {/* Loading State */}
         {loading && (
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className={`transition-all duration-700 ${
+              <GlassCard key={i} className={`glass-ios-triple transition-all duration-700 ${
                 mode === 'public'
-                  ? 'glass-card border-white/20 bg-black/20'
-                  : 'border-blue-200/30 bg-white/40'
+                  ? 'border-white/20'
+                  : 'border-blue-200/30'
               }`}>
-                <CardContent className="p-6">
-                  <Skeleton className="h-6 w-3/4 mb-4" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-2/3" />
-                </CardContent>
-              </Card>
+                <Skeleton className="h-6 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </GlassCard>
             ))}
           </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <Card className={`transition-all duration-700 ${
+          <GlassCard className={`glass-ios-triple glass-corner-distort transition-all duration-700 ${
             mode === 'public'
-              ? 'glass-card border-red-500/20 bg-red-500/10'
-              : 'border-red-200/30 bg-red-50/40'
+              ? 'border-red-500/20'
+              : 'border-red-200/30'
           }`}>
-            <CardContent className="p-8 text-center">
+            <div className="text-center">
               <AlertCircle className={`w-12 h-12 mx-auto mb-4 ${
                 mode === 'public' ? 'text-red-400' : 'text-red-600'
               }`} />
@@ -120,16 +116,16 @@ const MyPosts = () => {
               <Button 
                 onClick={() => fetchUserPosts()}
                 variant="outline"
-                className={
+                className={`glass-ios-triple ${
                   mode === 'public'
                     ? 'border-red-400/50 text-red-400 hover:bg-red-400/10'
                     : 'border-red-600 text-red-600 hover:bg-red-50'
-                }
+                }`}
               >
                 Try Again
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         )}
 
         {/* Content Area */}
@@ -137,11 +133,11 @@ const MyPosts = () => {
           <div className="space-y-6">
             {posts.length === 0 ? (
               /* Empty State */
-              <Card className={`p-8 text-center transition-all duration-700 ${
+              <GlassCard className={`text-center glass-ios-triple glass-corner-distort transition-all duration-700 ${
                 mode === 'public'
-                  ? 'glass-card border-white/20 bg-black/20'
-                  : 'border-blue-200/30 bg-white/40'
-              }`}>
+                  ? 'border-white/20'
+                  : 'border-blue-200/30'
+              }`} padding="lg">
                 <div className="space-y-4">
                   <FileText className={`w-16 h-16 mx-auto ${
                     mode === 'public' ? 'text-white/40' : 'text-slate-400'
@@ -161,17 +157,17 @@ const MyPosts = () => {
                   </p>
                   <Button 
                     onClick={() => openComposer()}
-                    className={`transition-all duration-300 ${
+                    className={`glass-ios-triple transition-all duration-300 ${
                       mode === 'public'
                         ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
                         : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
-                    } glass-card backdrop-blur-xl`}
+                    }`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Post
                   </Button>
                 </div>
-              </Card>
+              </GlassCard>
             ) : (
               /* Posts List */
               <>
@@ -184,11 +180,11 @@ const MyPosts = () => {
                   <Button 
                     onClick={() => openComposer()}
                     size="sm"
-                    className={`transition-all duration-300 ${
+                    className={`glass-ios-triple transition-all duration-300 ${
                       mode === 'public'
                         ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
                         : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
-                    } glass-card backdrop-blur-xl`}
+                    }`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     New Post
@@ -196,12 +192,12 @@ const MyPosts = () => {
                 </div>
 
                 {posts.map((post) => (
-                  <Card key={post.id} className={`transition-all duration-700 hover:scale-[1.02] ${
+                  <GlassCard key={post.id} className={`glass-ios-triple glass-corner-distort transition-all duration-700 hover:scale-[1.02] ${
                     mode === 'public'
-                      ? 'glass-card border-white/20 bg-black/20 hover:bg-black/30'
-                      : 'border-blue-200/30 bg-white/40 hover:bg-white/60'
+                      ? 'border-white/20 hover:border-white/30'
+                      : 'border-blue-200/30 hover:border-blue-300/40'
                   }`}>
-                    <CardHeader>
+                    <div className="pb-3">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -216,11 +212,11 @@ const MyPosts = () => {
                             </Badge>
                           </div>
                           {post.title && (
-                            <CardTitle className={`mb-2 ${
+                            <h3 className={`text-lg font-semibold mb-2 ${
                               mode === 'public' ? 'text-white' : 'text-slate-800'
                             }`}>
                               {post.title}
-                            </CardTitle>
+                            </h3>
                           )}
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -228,8 +224,9 @@ const MyPosts = () => {
                           {formatDate(post.created_at)}
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+                    
+                    <div className="pt-0">
                       <p className={`mb-4 line-clamp-3 ${
                         mode === 'public' ? 'text-white/80' : 'text-slate-700'
                       }`}>
@@ -251,8 +248,8 @@ const MyPosts = () => {
                           {post.comments_count || 0}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </GlassCard>
                 ))}
               </>
             )}
