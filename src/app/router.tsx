@@ -117,25 +117,14 @@ export const router = createBrowserRouter([
         ],
       },
       
-      // Admin routes
-      {
-        path: 'admin',
-        element: (
-          <LazyWrapper>
-            <Admin />
-          </LazyWrapper>
-        ),
-      },
     ],
   },
   
-  // Landing page (unauthenticated)
+  // Landing page and public routes (outside shell)
   {
     path: '/landing',
     element: <Landing />,
   },
-
-  // New idea and brainstorm pages
   {
     path: '/idea/:id',
     element: <LazyWrapper><IdeaDetail /></LazyWrapper>,
@@ -147,6 +136,10 @@ export const router = createBrowserRouter([
   {
     path: '/brainstorm/:id',
     element: <LazyWrapper><BrainstormDetailPage /></LazyWrapper>,
+  },
+  {
+    path: '/admin',
+    element: <LazyWrapper><Admin /></LazyWrapper>,
   },
   
   // Keep all existing routes from nav-items for compatibility

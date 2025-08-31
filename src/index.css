@@ -129,6 +129,63 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Glass morphism effects with iOS triple layer distortion */
+  .glass-ios-triple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-ios-triple::before,
+  .glass-ios-triple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  .glass-ios-triple::before {
+    background: linear-gradient(135deg, 
+      hsla(var(--primary), 0.1) 0%,
+      hsla(var(--primary), 0.05) 50%,
+      transparent 100%);
+    backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+  }
+
+  .glass-ios-triple::after {
+    background: radial-gradient(circle at 30% 30%, 
+      hsla(var(--accent), 0.15) 0%,
+      transparent 70%);
+    backdrop-filter: blur(30px) saturate(200%) hue-rotate(10deg);
+  }
+
+  .glass-ios-triple > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Corner distortion effects */
+  .glass-corner-distort {
+    position: relative;
+  }
+
+  .glass-corner-distort::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: conic-gradient(from 0deg at 50% 50%, 
+      hsla(var(--primary), 0.3) 0deg,
+      transparent 90deg,
+      hsla(var(--accent), 0.2) 180deg,
+      transparent 270deg);
+    border-radius: inherit;
+    z-index: -1;
+    filter: blur(1px);
+  }
+
   .glass {
     background: linear-gradient(
       135deg, 

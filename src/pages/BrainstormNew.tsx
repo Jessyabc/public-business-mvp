@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GlassCard } from "@/ui/components/GlassCard";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useOpenIdea } from "@/hooks/useOpenIdeas";
@@ -119,7 +119,7 @@ export function BrainstormNew() {
         <Button
           onClick={() => navigate(`/idea/${ideaId}`)}
           variant="outline"
-          className="glass-business-card mb-8"
+          className="glass-ios-triple mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Idea
@@ -127,79 +127,75 @@ export function BrainstormNew() {
 
         {/* Reference Idea */}
         {idea && (
-          <Card className="glass-business-card border-primary/20 mb-8">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <Lightbulb className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Brainstorming on:</p>
-                  <p className="text-foreground leading-relaxed">{idea.content}</p>
-                </div>
+          <GlassCard className="border-primary/20 mb-8 glass-ios-triple glass-corner-distort">
+            <div className="flex items-start gap-4">
+              <Lightbulb className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Brainstorming on:</p>
+                <p className="text-foreground leading-relaxed">{idea.content}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         )}
 
         {/* Brainstorm Form */}
-        <Card className="glass-business-card border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Start Your Brainstorm</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Title
-                </label>
-                <Input
-                  placeholder="Give your brainstorm a catchy title..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="glass-business-card border-primary/20"
-                  maxLength={80}
-                  required
-                />
-                <div className="text-sm text-muted-foreground mt-1">
-                  {title.length}/80 characters
-                </div>
+        <GlassCard className="border-primary/20 glass-ios-triple glass-corner-distort" padding="lg">
+          <div className="mb-6">
+            <h2 className="text-2xl text-center font-semibold text-foreground">Start Your Brainstorm</h2>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Title
+              </label>
+              <Input
+                placeholder="Give your brainstorm a catchy title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="glass-ios-triple border-primary/20"
+                maxLength={80}
+                required
+              />
+              <div className="text-sm text-muted-foreground mt-1">
+                {title.length}/80 characters
               </div>
+            </div>
 
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Your Brainstorm
-                </label>
-                <Textarea
-                  placeholder="Share your thoughts, ideas, solutions, or questions about this idea..."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[200px] glass-business-card border-primary/20 resize-none"
-                  required
-                />
-              </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Your Brainstorm
+              </label>
+              <Textarea
+                placeholder="Share your thoughts, ideas, solutions, or questions about this idea..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-[200px] glass-ios-triple border-primary/20 resize-none"
+                required
+              />
+            </div>
 
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Display Name
-                </label>
-                <Input
-                  placeholder="How should we credit you?"
-                  value={authorDisplayName}
-                  onChange={(e) => setAuthorDisplayName(e.target.value)}
-                  className="glass-business-card border-primary/20"
-                  required
-                />
-              </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Display Name
+              </label>
+              <Input
+                placeholder="How should we credit you?"
+                value={authorDisplayName}
+                onChange={(e) => setAuthorDisplayName(e.target.value)}
+                className="glass-ios-triple border-primary/20"
+                required
+              />
+            </div>
 
-              <Button
-                type="submit"
-                disabled={isSubmitting || title.length < 3 || title.length > 80 || !content.trim()}
-                className="w-full glass-business-card bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
-              >
-                {isSubmitting ? "Creating..." : "Share Your Brainstorm"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <Button
+              type="submit"
+              disabled={isSubmitting || title.length < 3 || title.length > 80 || !content.trim()}
+              className="w-full glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+            >
+              {isSubmitting ? "Creating..." : "Share Your Brainstorm"}
+            </Button>
+          </form>
+        </GlassCard>
       </div>
     </div>
   );

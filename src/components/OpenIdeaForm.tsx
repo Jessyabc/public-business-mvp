@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { GlassCard } from "@/ui/components/GlassCard";
 import { Lightbulb } from "lucide-react";
 
 interface OpenIdeaFormProps {
@@ -90,7 +91,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
 
   if (submitted) {
     return (
-      <div className="glass-business-card rounded-3xl p-8 text-center">
+      <GlassCard className="rounded-3xl text-center glass-ios-triple glass-corner-distort" padding="lg">
         <div className="mb-4">
           <Lightbulb className="w-16 h-16 text-primary mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-foreground mb-2">
@@ -107,23 +108,23 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
             setEmail("");
           }}
           variant="outline"
-          className="glass-business-card"
+          className="glass-ios-triple"
         >
           Share Another Idea
         </Button>
-      </div>
+      </GlassCard>
     );
   }
 
   return (
-    <div className="glass-business-card rounded-3xl p-8">
+    <GlassCard className="rounded-3xl glass-ios-triple glass-corner-distort" padding="lg">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <Textarea
             placeholder="What's the question you can't stop thinking about?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[120px] glass-business-card border-primary/20 resize-none"
+            className="min-h-[120px] glass-ios-triple border-primary/20 resize-none"
             maxLength={280}
             required
           />
@@ -139,7 +140,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
             placeholder="Email for updates (optional)"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="glass-business-card border-primary/20"
+            className="glass-ios-triple border-primary/20"
           />
         </div>
 
@@ -158,11 +159,11 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
         <Button
           type="submit"
           disabled={isSubmitting || content.length < 10 || content.length > 280}
-          className="w-full glass-business-card bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+          className="w-full glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
         >
           {isSubmitting ? "Planting..." : "Drop Your Idea"}
         </Button>
       </form>
-    </div>
+    </GlassCard>
   );
 }

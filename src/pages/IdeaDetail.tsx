@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useOpenIdea, useIdeaBrainstorms } from "@/hooks/useOpenIdeas";
 import { BrainstormCard } from "@/components/BrainstormCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { GlassCard } from "@/ui/components/GlassCard";
 import { Lightbulb, Plus, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -45,36 +45,34 @@ export function IdeaDetail() {
 
       <div className="relative z-10 max-w-4xl mx-auto pt-20">
         {/* Idea Card */}
-        <Card className="glass-business-card border-primary/20 mb-8">
-          <CardContent className="p-8">
-            <div className="flex items-start gap-4 mb-6">
-              <Lightbulb className="w-12 h-12 text-primary flex-shrink-0 mt-1" />
-              <div className="flex-1">
-                <p className="text-xl text-foreground leading-relaxed mb-4">
-                  {idea.content}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <MessageSquare className="w-4 h-4" />
-                    <span>{idea.linked_brainstorms_count} brainstorms</span>
-                  </div>
-                  <span>•</span>
-                  <span>{formatDistanceToNow(new Date(idea.created_at))} ago</span>
+        <GlassCard className="border-primary/20 mb-8 glass-ios-triple glass-corner-distort" padding="lg">
+          <div className="flex items-start gap-4 mb-6">
+            <Lightbulb className="w-12 h-12 text-primary flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <p className="text-xl text-foreground leading-relaxed mb-4">
+                {idea.content}
+              </p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>{idea.linked_brainstorms_count} brainstorms</span>
                 </div>
+                <span>•</span>
+                <span>{formatDistanceToNow(new Date(idea.created_at))} ago</span>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-center">
-              <Button
-                onClick={() => navigate(`/brainstorm/new?ideaId=${idea.id}`)}
-                className="glass-business-card bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-8 py-3 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Start a Brainstorm
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex justify-center">
+            <Button
+              onClick={() => navigate(`/brainstorm/new?ideaId=${idea.id}`)}
+              className="glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-8 py-3 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Start a Brainstorm
+            </Button>
+          </div>
+        </GlassCard>
 
         {/* Brainstorms Section */}
         <div>
@@ -103,7 +101,7 @@ export function IdeaDetail() {
               <Button
                 onClick={() => navigate(`/brainstorm/new?ideaId=${idea.id}`)}
                 variant="outline"
-                className="glass-business-card"
+                className="glass-ios-triple"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Start Brainstorming

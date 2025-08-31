@@ -1,242 +1,185 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUserRoles } from '@/hooks/useUserRoles';
-import { Page } from '@/ui/layouts/Page';
-import { GlassCard } from '@/ui/components/GlassCard';
-import { Button } from '@/components/ui/button';
-import { 
-  Users, 
-  Building2, 
-  FileText, 
-  BarChart3, 
-  Settings, 
-  HelpCircle,
-  Shield,
-  Database,
-  Mail,
-  Globe
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/ui/components/GlassCard";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
+import { Lightbulb, Settings } from "lucide-react";
 
-interface AdminSectionProps {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  links: { label: string; to: string; external?: boolean }[];
+interface OpenIdea {
+  id: string;
+  content: string;
+  is_curated: boolean;
+  linked_brainstorms_count: number;
+  created_at: string;
 }
 
-function AdminSection({ title, description, icon: Icon, links }: AdminSectionProps) {
-  const navigate = useNavigate();
-  
-  return (
-    <GlassCard className="p-6">
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-primary/10 rounded-lg">
-          <Icon className="w-6 h-6 text-primary" />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-          <p className="text-muted-foreground mb-4">{description}</p>
-          <div className="flex flex-wrap gap-2">
-            {links.map((link) => (
-              <Button
-                key={link.to}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (link.external) {
-                    window.open(link.to, '_blank');
-                  } else {
-                    navigate(link.to);
-                  }
-                }}
-              >
-                {link.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </GlassCard>
-  );
-}
-
-export default function Admin() {
-  const { isAdmin, loading } = useUserRoles();
-  const navigate = useNavigate();
+export function Admin() {
+  const [ideas, setIdeas] = useState<OpenIdea[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!loading && !isAdmin()) {
-      navigate('/public/profile', { replace: true });
+    if (isAuthenticated) {
+      fetchIdeas();
     }
-  }, [loading, isAdmin, navigate]);
+  }, [isAuthenticated]);
 
-  if (loading) {
+  const fetchIdeas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("open_ideas")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setIdeas(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch ideas.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleCurated = async (ideaId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("open_ideas")
+        .update({ is_curated: !currentStatus })
+        .eq("id", ideaId);
+
+      if (error) throw error;
+
+      setIdeas(ideas.map(idea => 
+        idea.id === ideaId 
+          ? { ...idea, is_curated: !currentStatus }
+          : idea
+      ));
+
+      toast({
+        title: "Success",
+        description: `Idea ${!currentStatus ? "added to" : "removed from"} curated feed.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update idea.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLogin = () => {
+    // Simple password check - in production, use proper authentication
+    if (password === "admin123") {
+      setIsAuthenticated(true);
+      toast({
+        title: "Welcome",
+        description: "Admin access granted.",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Invalid password.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!isAuthenticated) {
     return (
-      <Page>
-        <div className="pt-8 text-center">
-          <p className="text-muted-foreground">Loading admin panel...</p>
-        </div>
-      </Page>
-    );
-  }
+      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
 
-  if (!isAdmin()) {
-    return null;
-  }
-
-  const adminSections = [
-    {
-      title: 'User Management',
-      description: 'Manage user accounts, roles, and permissions.',
-      icon: Users,
-      links: [
-        { label: 'All Users', to: '/admin/users' },
-        { label: 'User Roles', to: '/admin/roles' },
-        { label: 'Public Members', to: '/members/public-members' },
-        { label: 'Business Members', to: '/members/business-members' },
-      ],
-    },
-    {
-      title: 'Business Management',
-      description: 'Oversee business profiles, invitations, and approvals.',
-      icon: Building2,
-      links: [
-        { label: 'Business Profiles', to: '/admin/business-profiles' },
-        { label: 'Pending Approvals', to: '/admin/approvals' },
-        { label: 'Invitations', to: '/admin/invitations' },
-        { label: 'Create Business', to: '/create-business' },
-      ],
-    },
-    {
-      title: 'Content Management',
-      description: 'Manage posts, brainstorms, reports, and content moderation.',
-      icon: FileText,
-      links: [
-        { label: 'All Posts', to: '/admin/posts' },
-        { label: 'Brainstorms', to: '/public/brainstorms' },
-        { label: 'Reports', to: '/business/reports' },
-        { label: 'Content Moderation', to: '/admin/moderation' },
-      ],
-    },
-    {
-      title: 'Analytics & Insights',
-      description: 'View platform analytics, user engagement, and performance metrics.',
-      icon: BarChart3,
-      links: [
-        { label: 'Dashboard', to: '/business/dashboard' },
-        { label: 'User Analytics', to: '/admin/analytics/users' },
-        { label: 'Content Analytics', to: '/admin/analytics/content' },
-        { label: 'Performance', to: '/admin/analytics/performance' },
-      ],
-    },
-    {
-      title: 'Platform Settings',
-      description: 'Configure platform settings, features, and system preferences.',
-      icon: Settings,
-      links: [
-        { label: 'General Settings', to: '/admin/settings' },
-        { label: 'Feature Flags', to: '/admin/features' },
-        { label: 'Email Templates', to: '/admin/email-templates' },
-        { label: 'Site Configuration', to: '/admin/site-config' },
-      ],
-    },
-    {
-      title: 'Support & Help',
-      description: 'Manage support tickets, help documentation, and user assistance.',
-      icon: HelpCircle,
-      links: [
-        { label: 'Help Center', to: '/support/help-center' },
-        { label: 'Support Tickets', to: '/admin/support/tickets' },
-        { label: 'FAQ Management', to: '/support/faq' },
-        { label: 'Community Guidelines', to: '/support/community' },
-      ],
-    },
-    {
-      title: 'Security & Privacy',
-      description: 'Monitor security, manage privacy settings, and handle security incidents.',
-      icon: Shield,
-      links: [
-        { label: 'Security Logs', to: '/admin/security/logs' },
-        { label: 'Privacy Settings', to: '/admin/privacy' },
-        { label: 'Data Export', to: '/admin/data-export' },
-        { label: 'Incident Reports', to: '/admin/security/incidents' },
-      ],
-    },
-    {
-      title: 'Database & System',
-      description: 'Database administration, backups, and system monitoring.',
-      icon: Database,
-      links: [
-        { label: 'Supabase Dashboard', to: 'https://supabase.com/dashboard/project/opjltuyirkbbpwgkavjq', external: true },
-        { label: 'Database Health', to: '/admin/database/health' },
-        { label: 'System Status', to: '/admin/system/status' },
-        { label: 'Backup Management', to: '/admin/backups' },
-      ],
-    },
-  ];
-
-  return (
-    <Page>
-      <div className="space-y-6 pt-8" role="main">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-            <Shield className="w-8 h-8 text-primary" />
-            Admin Panel
-          </h1>
-          <p className="text-muted-foreground">
-            Comprehensive administrative controls for Public Business platform
-          </p>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <GlassCard className="p-4 text-center">
-            <Users className="w-6 h-6 text-primary mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">--</div>
-            <div className="text-sm text-muted-foreground">Total Users</div>
-          </GlassCard>
-          <GlassCard className="p-4 text-center">
-            <Building2 className="w-6 h-6 text-primary mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">--</div>
-            <div className="text-sm text-muted-foreground">Businesses</div>
-          </GlassCard>
-          <GlassCard className="p-4 text-center">
-            <FileText className="w-6 h-6 text-primary mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">--</div>
-            <div className="text-sm text-muted-foreground">Posts</div>
-          </GlassCard>
-          <GlassCard className="p-4 text-center">
-            <BarChart3 className="w-6 h-6 text-primary mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">--</div>
-            <div className="text-sm text-muted-foreground">Active Today</div>
-          </GlassCard>
-        </div>
-
-        {/* Admin Sections */}
-        <div className="space-y-6">
-          {adminSections.map((section) => (
-            <AdminSection key={section.title} {...section} />
-          ))}
-        </div>
-
-        {/* Footer Info */}
-        <GlassCard className="p-6 text-center">
-          <Globe className="w-6 h-6 text-primary mx-auto mb-2" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">Platform Access</h3>
-          <p className="text-muted-foreground mb-4">
-            As an admin, you have access to all platform features and can switch between Public and Business modes.
-          </p>
-          <div className="flex justify-center gap-2">
-            <Button variant="outline" onClick={() => navigate('/public/profile')}>
-              Public View
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/business/dashboard')}>
-              Business View
+        <GlassCard className="max-w-md w-full glass-ios-triple glass-corner-distort" padding="lg">
+          <div className="text-center mb-6">
+            <Settings className="w-16 h-16 text-primary mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground">Admin Access</h1>
+            <p className="text-muted-foreground">Enter password to manage curated ideas</p>
+          </div>
+          
+          <div className="space-y-4">
+            <input
+              type="password"
+              placeholder="Admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 rounded-xl glass-ios-triple border border-primary/20 bg-transparent text-foreground placeholder:text-muted-foreground"
+              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+            />
+            <Button
+              onClick={handleLogin}
+              className="w-full glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+            >
+              Access Admin Panel
             </Button>
           </div>
         </GlassCard>
       </div>
-    </Page>
+    );
+  }
+
+  return (
+    <div className="min-h-screen p-6 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+
+      <div className="relative z-10 max-w-6xl mx-auto pt-20">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Admin Panel</h1>
+          <p className="text-muted-foreground">Manage curated ideas for the homepage</p>
+        </div>
+
+        {isLoading ? (
+          <div className="text-center py-12">
+            <Lightbulb className="w-16 h-16 text-primary animate-pulse mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading ideas...</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {ideas.map((idea) => (
+              <GlassCard
+                key={idea.id}
+                className="border-primary/20 glass-ios-triple glass-corner-distort"
+                padding="lg"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-foreground leading-relaxed mb-4">
+                      {idea.content}
+                    </p>
+                    <div className="text-sm text-muted-foreground">
+                      {idea.linked_brainstorms_count} brainstorms • 
+                      Created {new Date(idea.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <span className={`text-sm font-medium ${idea.is_curated ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {idea.is_curated ? 'Curated' : 'Not Curated'}
+                    </span>
+                    <Switch
+                      checked={idea.is_curated}
+                      onCheckedChange={() => toggleCurated(idea.id, idea.is_curated)}
+                    />
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
+
+export default Admin;

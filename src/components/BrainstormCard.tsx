@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { User, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GlassCard } from "@/ui/components/GlassCard";
 
 interface IdeaBrainstorm {
   id: string;
@@ -19,8 +19,8 @@ interface BrainstormCardProps {
 
 export function BrainstormCard({ brainstorm, onClick, showFreeBadge }: BrainstormCardProps) {
   return (
-    <Card 
-      className="glass-business-card cursor-pointer hover:scale-105 transition-all duration-300 border-primary/20 relative"
+    <GlassCard 
+      className="cursor-pointer hover:scale-105 transition-all duration-300 border-primary/20 relative glass-ios-triple glass-corner-distort"
       onClick={onClick}
     >
       {showFreeBadge && (
@@ -29,13 +29,13 @@ export function BrainstormCard({ brainstorm, onClick, showFreeBadge }: Brainstor
         </div>
       )}
       
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-foreground leading-tight">
+      <div className="pb-3">
+        <h3 className="text-lg font-semibold text-foreground leading-tight mb-3">
           {brainstorm.title}
-        </CardTitle>
-      </CardHeader>
+        </h3>
+      </div>
       
-      <CardContent className="pt-0">
+      <div className="pt-0">
         <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-3">
           {brainstorm.content.substring(0, 150)}
           {brainstorm.content.length > 150 && "..."}
@@ -51,7 +51,7 @@ export function BrainstormCard({ brainstorm, onClick, showFreeBadge }: Brainstor
             <span>{formatDistanceToNow(new Date(brainstorm.created_at))} ago</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </GlassCard>
   );
 }
