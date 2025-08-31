@@ -12,6 +12,11 @@ const BusinessReports = lazy(() => import('./business/Reports').then(m => ({ def
 const Notifications = lazy(() => import('./shared/Notifications').then(m => ({ default: m.Notifications })));
 const Admin = lazy(() => import('@/pages/Admin'));
 
+// New idea and brainstorm components
+const IdeaDetail = lazy(() => import('@/pages/IdeaDetail').then(m => ({ default: m.IdeaDetail })));
+const BrainstormNew = lazy(() => import('@/pages/BrainstormNew').then(m => ({ default: m.BrainstormNew })));
+const BrainstormDetailPage = lazy(() => import('@/pages/BrainstormDetail').then(m => ({ default: m.BrainstormDetail })));
+
 // Keep existing pages for non-shell routes
 import { Landing } from '@/pages/Landing';
 import { navItems } from '@/nav-items';
@@ -39,7 +44,7 @@ export const router = createBrowserRouter([
       // Default redirect
       {
         index: true,
-        element: <Navigate to="/public/profile" replace />,
+        element: <Navigate to="/landing" replace />,
       },
       
       // Public mode routes
@@ -128,6 +133,20 @@ export const router = createBrowserRouter([
   {
     path: '/landing',
     element: <Landing />,
+  },
+
+  // New idea and brainstorm pages
+  {
+    path: '/idea/:id',
+    element: <LazyWrapper><IdeaDetail /></LazyWrapper>,
+  },
+  {
+    path: '/brainstorm/new',
+    element: <LazyWrapper><BrainstormNew /></LazyWrapper>,
+  },
+  {
+    path: '/brainstorm/:id',
+    element: <LazyWrapper><BrainstormDetailPage /></LazyWrapper>,
   },
   
   // Keep all existing routes from nav-items for compatibility

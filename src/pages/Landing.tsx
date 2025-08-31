@@ -1,85 +1,79 @@
-import { Button } from "@/components/ui/button";
-import { Brain, Building2, Lightbulb, FileText, Network } from "lucide-react";
-import { useState } from "react";
-import { AuthModal } from "@/components/auth/AuthModal";
+import { Lightbulb } from "lucide-react";
+import { OpenIdeaForm } from "@/components/OpenIdeaForm";
+import { IdeaCard } from "@/components/IdeaCard";
+import { BrainstormCard } from "@/components/BrainstormCard";
+import { useCuratedIdeas, useFreeBrainstorms } from "@/hooks/useOpenIdeas";
+import { useNavigate } from "react-router-dom";
 
 export function Landing() {
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
-  const handleSignUp = () => {
-    setShowAuthModal(true);
-  };
+  const navigate = useNavigate();
+  const { data: curatedIdeas = [] } = useCuratedIdeas();
+  const { data: freeBrainstorms = [] } = useFreeBrainstorms();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden pb-32">
+    <div className="min-h-screen p-6 relative overflow-hidden">
       {/* Background Elements */}
-      <div className="glass-business-card">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-      </div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
 
-      {/* Logo and Header */}
-     
-      <div className="flex items-center justify-center mb-6">
-        <img 
-          src="/lovable-uploads/1a58e202-c32a-4b09-89d8-ff1eb22b437d.png" 
-          alt="Public Business - Creating Collaboration" 
-          className="w-[900px] max-w-full object-contain"
-        />
-      </div>
-     
-
-      {/* Main Content */}
-      <div className="text-center mb-16 max-w-4xl glass-business-header rounded-3xl p-12">
-        <h2 className="text-5xl font-bold text-foreground mb-6 leading-tight">
-          A place for everyone<br />
-          to collaborate
-        </h2>
-        <p className="text-xl text-muted-foreground mb-12">
-          Share your ideas, discover projects, and<br />
-          work together.
-        </p>
-
-        {/* Illustration Elements */}
-        <div className="flex justify-center items-center mb-16 space-x-8">
-          {/* Left side - Public member */}
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative glass-business-card rounded-full p-8">
-              <div className="w-24 h-24 rounded-full flex items-center justify-center">
-                <Brain className="w-12 h-12 text-primary" />
-              </div>
-              <Lightbulb className="absolute -top-2 -left-2 w-8 h-8 text-primary glass-business-card rounded-full p-1" />
-              <FileText className="absolute -bottom-2 -left-2 w-8 h-8 text-primary glass-business-card rounded-full p-1" />
-            </div>
-          </div>
-
-          {/* Right side - Business member */}
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative glass-business-card rounded-full p-8">
-              <div className="w-24 h-24 rounded-full flex items-center justify-center">
-                <Building2 className="w-12 h-12 text-primary" />
-              </div>
-              <Network className="absolute -top-2 -right-2 w-8 h-8 text-primary glass-business-card rounded-full p-1" />
-              <FileText className="absolute -bottom-2 -right-2 w-8 h-8 text-primary glass-business-card rounded-full p-1" />
-            </div>
-          </div>
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Hero Section */}
+        <div className="text-center mb-16 pt-20">
+          <h1 className="text-7xl font-bold text-foreground mb-6 leading-tight">
+            Drop an idea.<br />
+            Watch it grow.
+          </h1>
         </div>
 
-        {/* Single Join Button */}
-        <div className="flex justify-center">
-          <Button
-            onClick={handleSignUp}
-            className="glass-business-card bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-12 py-4 text-lg font-medium rounded-2xl h-auto transition-all duration-300 hover:scale-105"
-          >
-            JOIN AS PUBLIC MEMBER
-          </Button>
+        {/* Open Idea Form */}
+        <div className="max-w-2xl mx-auto mb-20">
+          <OpenIdeaForm 
+            onSuccess={(ideaId) => navigate(`/idea/${ideaId}`)}
+          />
         </div>
-      </div>
 
-      <AuthModal 
-        open={showAuthModal} 
-        onOpenChange={(open) => setShowAuthModal(open)}
-      />
+        {/* Curated Ideas Feed */}
+        <div className="mb-20">
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+            Ideas Growing Right Now
+          </h2>
+          {curatedIdeas.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {curatedIdeas.map((idea) => (
+                <IdeaCard
+                  key={idea.id}
+                  idea={idea}
+                  onClick={() => navigate(`/idea/${idea.id}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-12">
+              <Lightbulb className="w-16 h-16 mx-auto mb-4 text-primary/50" />
+              <p>No curated ideas yet. Be the first to drop an idea!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Free Brainstorms */}
+        {freeBrainstorms.length > 0 && (
+          <div className="mb-20">
+            <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+              Free Brainstorms
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {freeBrainstorms.map((brainstorm) => (
+                <BrainstormCard
+                  key={brainstorm.id}
+                  brainstorm={brainstorm}
+                  showFreeBadge={true}
+                  onClick={() => navigate(`/brainstorm/${brainstorm.id}`)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

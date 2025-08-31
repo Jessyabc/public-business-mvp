@@ -143,6 +143,47 @@ export type Database = {
         }
         Relationships: []
       }
+      idea_brainstorms: {
+        Row: {
+          author_display_name: string
+          author_user_id: string | null
+          content: string
+          created_at: string
+          id: string
+          idea_id: string | null
+          is_public: boolean
+          title: string
+        }
+        Insert: {
+          author_display_name?: string
+          author_user_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          idea_id?: string | null
+          is_public?: boolean
+          title: string
+        }
+        Update: {
+          author_display_name?: string
+          author_user_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          idea_id?: string | null
+          is_public?: boolean
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_brainstorms_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "open_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       industries: {
         Row: {
           created_at: string
@@ -161,6 +202,57 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      open_ideas: {
+        Row: {
+          content: string
+          created_at: string
+          email: string | null
+          id: string
+          is_curated: boolean
+          linked_brainstorms_count: number
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_curated?: boolean
+          linked_brainstorms_count?: number
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_curated?: boolean
+          linked_brainstorms_count?: number
+          updated_at?: string
         }
         Relationships: []
       }
