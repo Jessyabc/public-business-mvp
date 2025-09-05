@@ -1,20 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrainstormCard } from "@/components/BrainstormCard";
 import { BrainstormModal } from "@/components/BrainstormModal";
 import { useFreeBrainstorms } from "@/hooks/useOpenIdeas";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { Lightbulb } from "lucide-react";
 
 export function BrainstormPreviewList() {
   const { data: freeBrainstorms = [] } = useFreeBrainstorms();
   const [selectedBrainstorm, setSelectedBrainstorm] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const analytics = useAnalytics();
+
+  const limitedBrainstorms = freeBrainstorms.slice(0, 3);
 
   const handleCardClick = (brainstorm: any) => {
+    analytics.trackTeaserClick(brainstorm.id);
     setSelectedBrainstorm(brainstorm);
     setIsModalOpen(true);
   };
 
-  const limitedBrainstorms = freeBrainstorms.slice(0, 3);
+  // Track teaser impressions
+  useEffect(() => {
+    limitedBrainstorms.forEach(brainstorm => {
+      analytics.trackTeaserImpression(brainstorm.id);
+    });
+  }, [limitedBrainstorms, analytics]);
 
   if (limitedBrainstorms.length === 0) {
     return (

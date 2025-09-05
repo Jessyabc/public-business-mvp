@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -27,10 +28,11 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const analytics = useAnalytics();
 
   // Character limits (configurable)
-  const MIN_CHARS = 20;
-  const MAX_CHARS = 600;
+  const MIN_CHARS = 10;
+  const MAX_CHARS = 280;
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,9 +41,14 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
   // Show email field when user starts typing
   useEffect(() => {
     if (content.length > 0 && !showEmailField && !user) {
-      setShowEmailField(true);
+      analytics.trackComposerStartedTyping();
+      const timer = setTimeout(() => {
+        setShowEmailField(true);
+        analytics.trackEmailShown();
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [content.length, showEmailField, user]);
+  }, [content.length, showEmailField, user, analytics]);
 
   // Show checkboxes when email field is visible
   useEffect(() => {
@@ -53,11 +60,15 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
   // Show account CTA when valid email is entered
   useEffect(() => {
     if (isValidEmail && !showAccountCTA && !user) {
-      setTimeout(() => setShowAccountCTA(true), 300);
+      analytics.trackEmailValid();
+      setTimeout(() => {
+        setShowAccountCTA(true);
+        analytics.trackCreateAccountShown();
+      }, 300);
     } else if (!isValidEmail && showAccountCTA) {
       setShowAccountCTA(false);
     }
-  }, [isValidEmail, showAccountCTA, user]);
+  }, [isValidEmail, showAccountCTA, user, analytics]);
 
   // Prefill email if user is logged in
   useEffect(() => {
@@ -90,60 +101,34 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
     }
 
     setIsSubmitting(true);
+    analytics.trackShareAttempt();
 
     try {
-      // Submit open idea
-      const { data: idea, error: ideaError } = await supabase
-        .from('open_ideas')
-        .insert({
-          content,
+      // Use the edge function for submission
+      const { data, error } = await supabase.functions.invoke('submit-open-idea', {
+        body: {
+          content: content.trim(),
           email: email || null,
           notify_on_interaction: notifyInteraction,
           subscribe_newsletter: subscribeNews,
-          user_id: user?.id || null,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (ideaError) throw ideaError;
-
-      // Store email as lead if provided
-      if (email) {
-        await supabase
-          .from('leads')
-          .insert({
-            email,
-            source: 'open_idea'
-          });
-
-        // Store email subscription preferences
-        if (subscribeNews) {
-          await supabase
-            .from('email_subscriptions')
-            .upsert({
-              email,
-              subscribed_to_news: true
-            });
+          session_id: (analytics as any).sessionId
         }
-      }
-
-      setSubmitted(true);
-      toast({
-        title: 'Spark shared! 🌱',
-        description: 'We\'ll let you know when it gets action.',
       });
 
-      // Analytics event
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'share_success', {
-          event_category: 'engagement',
-          event_label: email ? 'with_email' : 'anonymous',
-          value: content.length
+      if (error) throw error;
+
+      if (data?.success) {
+        setSubmitted(true);
+        toast({
+          title: 'Spark shared! 🌱',
+          description: data.message || 'We\'ll let you know when it gets action.',
         });
+      } else {
+        throw new Error(data?.error || 'Unknown error');
       }
 
     } catch (error: any) {
+      console.error('Error submitting idea:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to submit idea. Please try again.',
@@ -285,7 +270,10 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setShowAuthModal(true)}
+                    onClick={() => {
+                      analytics.trackCreateAccountClick();
+                      setShowAuthModal(true);
+                    }}
                     className="w-full bg-white/80 text-ink-base border border-black/10 hover:bg-white/90"
                   >
                     Create your PB account

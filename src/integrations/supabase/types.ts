@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          ip_hash: string | null
+          properties: Json | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          ip_hash?: string | null
+          properties?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          ip_hash?: string | null
+          properties?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       business_invitations: {
         Row: {
           consumed_at: string | null
@@ -544,6 +574,10 @@ export type Database = {
       grant_role: {
         Args: { p_role: string; p_user: string }
         Returns: undefined
+      }
+      hash_ip: {
+        Args: { ip_address: string }
+        Returns: string
       }
       is_admin: {
         Args: { uid: string }
