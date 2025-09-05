@@ -30,13 +30,13 @@ export function NewLanding() {
     <div className="min-h-screen relative">
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 relative">
-        {/* Parallax logo */}
+        {/* Logo with highlight background */}
         <div className="mb-8 transform transition-transform duration-300 hover:scale-105 relative">
-          <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-2xl -m-4"></div>
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-3xl -m-6 shadow-2xl"></div>
           <img 
             src="/lovable-uploads/7b84831f-eb6d-4acd-bf51-5d3d7be705ba.png" 
             alt="Public Business - Creating Collaboration" 
-            className="h-32 md:h-40 object-contain relative z-10"
+            className="h-20 md:h-24 object-contain relative z-10 px-6 py-4"
           />
         </div>
         
