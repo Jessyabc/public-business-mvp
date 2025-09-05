@@ -59,12 +59,15 @@ export function GlobalNavigationMenu() {
       ];
     }
 
-    // For authenticated users
+    // For authenticated users - connected interface navigation
     let userPages = [
-      ...corePages,
+      { icon: Home, to: '/', label: 'Home Feed' },
       { icon: User, to: '/profile', label: 'Profile' },
       { icon: Settings, to: '/settings', label: 'Settings' },
       { icon: Bell, to: '/notifications', label: 'Notifications' },
+      { icon: MessageSquare, to: '/my-posts', label: 'My Posts' },
+      { icon: Search, to: '/research', label: 'Research' },
+      ...corePages.filter(page => page.to !== '/'), // Add core pages except home (already added)
     ];
 
     // Add business-specific pages for business members

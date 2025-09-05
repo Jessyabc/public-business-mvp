@@ -15,6 +15,7 @@ import { ProfileForm } from '@/components/profile/ProfileForm';
 import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
 import { User, Bell, Shield, CreditCard, Palette, Building2, BookOpen } from 'lucide-react';
 import Resources from './Resources';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -65,7 +66,8 @@ export default function Settings() {
   const isBusiness = userRoles.includes('business_member') || userRoles.includes('admin');
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <ProtectedRoute requireAuth={true}>
+      <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
         <p className="text-muted-foreground">Manage your profile, business information, and preferences</p>
@@ -355,6 +357,7 @@ export default function Settings() {
           <Resources />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -26,11 +26,11 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Global Navigation Menu - always visible */}
       <GlobalNavigationMenu />
       
-      {/* Header - always visible for navigation */}
-      <Header />
+      {/* Header - only show when user is not logged in */}
+      {!user && <Header />}
       
       {/* Main Content with smooth transitions */}
-      <main className="min-h-screen pt-28">
+      <main className={user ? "min-h-screen" : "min-h-screen pt-28"}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

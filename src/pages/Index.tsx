@@ -6,6 +6,7 @@ import { Landing } from './Landing';
 import { BrainstormFeed } from "@/components/feeds/BrainstormFeed";
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
 import { MainLayout } from '@/components/layout/MainLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const Index = () => {
   const { mode } = useAppMode();
@@ -38,9 +39,11 @@ const Index = () => {
   const feedContent = mode === 'business' ? <BusinessFeed /> : <BrainstormFeed />;
   
   return (
-    <div className="relative">
-      {feedContent}
-    </div>
+    <ProtectedRoute requireAuth={true}>
+      <div className="relative">
+        {feedContent}
+      </div>
+    </ProtectedRoute>
   );
 };
 

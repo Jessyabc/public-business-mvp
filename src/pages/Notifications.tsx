@@ -3,17 +3,19 @@ import { useAppMode } from '@/contexts/AppModeContext';
 import { Card } from '@/components/ui/card';
 import { Bell, Brain, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const Notifications = () => {
   const { mode } = useAppMode();
   const [activeTab, setActiveTab] = useState<'public' | 'business'>('public');
 
   return (
-    <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
-      mode === 'public' 
-        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
-    }`}>
+    <ProtectedRoute requireAuth={true}>
+      <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
+        mode === 'public' 
+          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+      }`}>
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
           <div className={`glass-card rounded-3xl p-8 backdrop-blur-xl transition-all duration-700 ${
@@ -91,6 +93,7 @@ const Notifications = () => {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 

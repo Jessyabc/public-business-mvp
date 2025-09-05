@@ -50,7 +50,7 @@ export function Header() {
     { to: '/contact', label: 'Contact' },
   ];
 
-  if (!user) return null; // Only show header when user is not logged in
+  if (user) return null; // Don't show header when user is logged in (they have connected interface navigation)
 
   return (
     <>

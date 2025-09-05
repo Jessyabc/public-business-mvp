@@ -8,6 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { ComposerModal } from "@/components/composer/ComposerModal";
 import { useState } from "react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -16,13 +17,9 @@ export default function Profile() {
   const { isBusinessMember, isAdmin } = useUserRoles();
   const [showComposer, setShowComposer] = useState(false);
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
-
   return (
-    <div className="min-h-screen p-6 relative overflow-hidden">
+    <ProtectedRoute requireAuth={true}>
+      <div className="min-h-screen p-6 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
@@ -102,6 +99,7 @@ export default function Profile() {
         isOpen={showComposer} 
         onClose={() => setShowComposer(false)} 
       />
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

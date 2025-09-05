@@ -26,8 +26,9 @@ export function BottomNavigation() {
     { to: '/research', icon: Search, label: 'Research', badge: null }
   ];
 
+  // Only show navigation for logged-in users
   if (!user) {
-    return null; // Don't show navigation when not logged in
+    return null;
   }
 
   return (
