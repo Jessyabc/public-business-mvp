@@ -12,6 +12,6 @@ export interface Brainstorm {
 export interface BrainstormConnection {
   fromId: string;
   toId: string;
-  type: 'inspiration' | 'continuation'; // inspiration = fresh idea, continuation = thread
+  type: 'inspiration' | 'continuation' | 'linking'; // inspiration = fresh idea, continuation = thread, linking = manual connection
   strength: number; // 0-1, how strongly connected the ideas are
 }

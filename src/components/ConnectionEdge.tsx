@@ -43,16 +43,22 @@ function ConnectionEdgeComponent({
   
   // Enhanced interactive styling
   const edgeStyle = {
-    stroke: connection.type === 'inspiration' ? '#489FE3' : '#F59E0B',
+    stroke: connection.type === 'inspiration' ? '#489FE3' : 
+            connection.type === 'continuation' ? '#F59E0B' : '#8B5CF6',
     strokeWidth: Math.max(2, connection.strength * 4),
     strokeOpacity: 0.7 + (connection.strength * 0.3),
-    filter: 'drop-shadow(0 0 4px rgba(72, 159, 227, 0.3))',
+    filter: `drop-shadow(0 0 4px ${
+      connection.type === 'inspiration' ? 'rgba(72, 159, 227, 0.3)' :
+      connection.type === 'continuation' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(139, 92, 246, 0.3)'
+    })`,
     cursor: 'pointer',
   };
 
   const labelStyle = connection.type === 'inspiration' 
-    ? 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 cursor-pointer' 
-    : 'bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/30 cursor-pointer';
+    ? 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 cursor-pointer'
+    : connection.type === 'continuation'
+    ? 'bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/30 cursor-pointer'
+    : 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:bg-purple-500/30 cursor-pointer';
 
   const { openComposer } = useComposerStore();
 
@@ -82,7 +88,8 @@ function ConnectionEdgeComponent({
             className={`px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm transition-all duration-200 ${labelStyle}`}
             onClick={handleLabelClick}
           >
-            {connection.type === 'inspiration' ? '✨ Inspired' : '🔗 Thread'}
+            {connection.type === 'inspiration' ? '✨ Inspired' : 
+             connection.type === 'continuation' ? '🔗 Thread' : '🔀 Link'}
           </div>
         </div>
       </EdgeLabelRenderer>
