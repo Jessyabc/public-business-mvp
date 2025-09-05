@@ -1,6 +1,17 @@
 import { create } from 'zustand';
-import { brainstormService, type Brainstorm } from '@/services/mock/brainstorms';
-import { trackBrainstormCreated, trackBrainstormFailed, trackBrainstormReply } from '@/lib/track';
+
+export interface Brainstorm {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  parent_id?: string;
+  likes_count: number;
+  comments_count: number;
+  branches?: Brainstorm[];
+}
 
 interface BrainstormsState {
   // Data
@@ -37,11 +48,9 @@ export const useBrainstormsStore = create<BrainstormsState>((set, get) => ({
     set({ loading: true, error: null });
     
     try {
-      // Simulate loading delay for skeleton demo
+      // TODO: Replace with real API call
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const roots = brainstormService.listRootBrainstorms();
-      set({ roots, loading: false });
+      set({ roots: [], loading: false });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to load brainstorms',
@@ -58,9 +67,9 @@ export const useBrainstormsStore = create<BrainstormsState>((set, get) => ({
     if (branches[rootId]) return;
     
     try {
-      const branchList = brainstormService.listBranches(rootId);
+      // TODO: Replace with real API call
       set({ 
-        branches: { ...branches, [rootId]: branchList }
+        branches: { ...branches, [rootId]: [] }
       });
     } catch (error) {
       console.error('Failed to load branches:', error);
@@ -75,13 +84,14 @@ export const useBrainstormsStore = create<BrainstormsState>((set, get) => ({
     const optimisticId = `temp-${Date.now()}`;
     const optimisticBrainstorm: Brainstorm = {
       id: optimisticId,
-      text: text.trim(),
-      authorId: 'user-current',
-      authorName: 'You',
-      tScore: 5, // Start with low score
-      replyCount: 0,
-      createdAt: new Date().toISOString(),
-      parentId,
+      title: text.trim(),
+      content: text.trim(),
+      user_id: 'current-user',
+      likes_count: 0,
+      comments_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      parent_id: parentId,
     };
 
     // Optimistically update UI
@@ -105,46 +115,13 @@ export const useBrainstormsStore = create<BrainstormsState>((set, get) => ({
     }
 
     try {
-      // Create brainstorm via service
-      const realBrainstorm = await brainstormService.createBrainstormAsync({ text, parentId });
+      // TODO: Replace with real API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Replace optimistic with real data
+      // For now, keep the optimistic version
       const newOptimistic = new Set(optimisticInserts);
       newOptimistic.delete(optimisticId);
-      
-      if (parentId) {
-        const currentBranches = branches[parentId] || [];
-        const updatedBranches = currentBranches.map(b => 
-          b.id === optimisticId ? realBrainstorm : b
-        );
-        
-        // Also update parent's reply count and T-score
-        const updatedRoots = roots.map(root => {
-          if (root.id === parentId) {
-            const parent = brainstormService.getBrainstorm(parentId);
-            return parent || root;
-          }
-          return root;
-        });
-        
-        set({
-          roots: updatedRoots,
-          branches: { ...branches, [parentId]: updatedBranches },
-          optimisticInserts: newOptimistic,
-        });
-
-        trackBrainstormReply(realBrainstorm.id, parentId, realBrainstorm.replyCount);
-      } else {
-        const updatedRoots = roots.map(r => 
-          r.id === optimisticId ? realBrainstorm : r
-        );
-        set({ 
-          roots: updatedRoots,
-          optimisticInserts: newOptimistic,
-        });
-      }
-
-      trackBrainstormCreated(realBrainstorm.id, text.length, parentId);
+      set({ optimisticInserts: newOptimistic });
       
     } catch (error) {
       // Rollback optimistic update
@@ -167,12 +144,6 @@ export const useBrainstormsStore = create<BrainstormsState>((set, get) => ({
           error: error instanceof Error ? error.message : 'Failed to create brainstorm',
         });
       }
-
-      trackBrainstormFailed(
-        error instanceof Error ? error.message : 'Unknown error',
-        text.length,
-        parentId
-      );
     }
   },
 
@@ -199,12 +170,12 @@ export const useBrainstormsStore = create<BrainstormsState>((set, get) => ({
     const { roots } = get();
     
     if (sortBy === 'score') {
-      return [...roots].sort((a, b) => b.tScore - a.tScore);
+      return [...roots].sort((a, b) => b.likes_count - a.likes_count);
     }
     
     // Default: sort by recency
     return [...roots].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   },
 
