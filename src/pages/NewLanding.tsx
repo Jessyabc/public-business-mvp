@@ -1,60 +1,43 @@
-// app/(site)/NewLanding.tsx (or wherever your component lives)
-
 import { useState, useEffect } from "react";
 import { TimelineSection } from "@/components/landing/TimelineSection";
 import { ComposerSection } from "@/components/landing/ComposerSection";
 import { BrainstormPreviewList } from "@/components/BrainstormPreviewList";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
-/** BackgroundGlow
- * Layered, animated radial glows for contrast behind dark UI.
- * - Center radial: main light behind logo/headline
- * - Corner blobs: ambient color washes
- */
+/** Layered animated glows for contrast behind dark UI */
 function BackgroundGlow() {
   return (
     <div
       className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       aria-hidden="true"
     >
-      {/* CENTER GLOW behind logo/headline */}
+      {/* Center radial behind logo/headline */}
       <div
         className="
           absolute left-1/2 top-[36%] -translate-x-1/2 -translate-y-1/2
-          w-[130vw] h-[130vw]
-          bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),rgba(56,189,248,0.35)_18%,rgba(99,102,241,0.28)_36%,transparent_64%)]
-          blur-[140px] opacity-90
-          animate-[glow_7s_ease-in-out_infinite]
+          w=[130vw] h=[130vw]
+          bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),rgba(56,189,248,0.40)_18%,rgba(99,102,241,0.32)_36%,transparent_64%)]
+          blur-[140px] opacity-90 mix-blend-screen
+          animate-glow-center motion-reduce:animate-none
         "
       />
-
-      {/* CORNER BLOBS (amped up) */}
+      {/* Corner blobs */}
       <div
         className="
           absolute top-[18%] left-[12%]
           w-[48rem] h-[48rem]
-          bg-blue-500/22 rounded-full blur-3xl
-          animate-[glow_8.5s_ease-in-out_infinite]
+          bg-blue-500/22 rounded-full blur-3xl mix-blend-screen
+          animate-glow motion-reduce:animate-none
         "
       />
       <div
         className="
           absolute bottom-[14%] right-[10%]
           w-[50rem] h-[50rem]
-          bg-purple-500/20 rounded-full blur-3xl
-          animate-[glow_9s_ease-in-out_infinite]
+          bg-purple-500/20 rounded-full blur-3xl mix-blend-screen
+          animate-glow motion-reduce:animate-none
         "
         style={{ animationDelay: "2.1s" }}
-      />
-
-      {/* OPTIONAL: faint rim light at very top for depth */}
-      <div
-        className="
-          absolute top-0 left-1/2 -translate-x-1/2
-          w-[120vw] h-[40vh]
-          bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.10),transparent_60%)]
-          blur-[80px]
-        "
       />
     </div>
   );
@@ -72,7 +55,6 @@ export function NewLanding() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
-        {/* Glows behind everything */}
         <BackgroundGlow />
 
         {/* Logo */}
@@ -83,7 +65,7 @@ export function NewLanding() {
             className="
               h-52 sm:h-64 lg:h-80 xl:h-96
               object-contain mx-auto
-              drop-shadow-[0_0_40px_rgba(59,130,246,0.35)]
+              drop-shadow-brand
             "
           />
         </div>
@@ -120,7 +102,7 @@ export function NewLanding() {
       {/* Timeline Section */}
       <TimelineSection onComplete={() => setShowComposer(true)} />
 
-      {/* Composer Section (slightly lighter bg for contrast) */}
+      {/* Composer Section */}
       <section className="bg-gradient-to-b from-slate-700 to-slate-600">
         <ComposerSection isVisible={showComposer} />
       </section>
