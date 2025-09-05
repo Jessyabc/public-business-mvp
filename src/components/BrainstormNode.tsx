@@ -1,20 +1,25 @@
 import { memo, useMemo } from 'react';
 import { Handle, Position, Node } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Post } from '@/hooks/usePosts';
-import { Brain, MessageCircle, Clock } from 'lucide-react';
+import { Brain, MessageCircle, Clock, ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-interface BrainstormNodeData extends Record<string, unknown> {
+export interface BrainstormNodeData extends Record<string, unknown> {
   post: Post;
   onContinue?: () => void;
   onLink?: () => void;
+  onExpandSubflow?: () => void;
+  subflowDepth?: number;
+  hasSubflows?: boolean;
+  parentId?: string;
 }
 
 export type BrainstormNode = Node<BrainstormNodeData>;
 
 function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
-  const { post } = data;
+  const { post, subflowDepth = 0, hasSubflows = false, onExpandSubflow } = data;
 
   const getBrainScoreColor = (score: number) => {
     if (score >= 90) return "bg-green-500/20 text-green-400 border-green-500/30";
@@ -38,12 +43,23 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
     return types[Math.abs(hash) % types.length];
   }, [post.id]);
   
+  const nodeScale = 1 - (subflowDepth * 0.15);
+  const nodeOpacity = 1 - (subflowDepth * 0.1);
+  
   return (
-    <div className={`group relative w-80 max-w-80 backdrop-blur-xl transition-all duration-500 hover:scale-105 cursor-pointer ${
-      cardType === 'spark' ? 'glass-card rounded-3xl border border-white/20 hover:border-primary/50' :
-      cardType === 'threadline' ? 'glass-card rounded-2xl border border-primary/30 hover:border-primary/70' :
-      'glass-card rounded-xl border border-purple-400/30 hover:border-purple-400/70'
-    }`}>
+    <div 
+      className={`group relative backdrop-blur-xl transition-all duration-500 hover:scale-105 cursor-pointer ${
+        subflowDepth > 0 ? 'w-64 max-w-64' : 'w-80 max-w-80'
+      } ${
+        cardType === 'spark' ? 'glass-card rounded-3xl border border-white/20 hover:border-primary/50' :
+        cardType === 'threadline' ? 'glass-card rounded-2xl border border-primary/30 hover:border-primary/70' :
+        'glass-card rounded-xl border border-purple-400/30 hover:border-purple-400/70'
+      } ${subflowDepth > 0 ? 'border-l-4 border-l-primary/60' : ''}`}
+      style={{ 
+        transform: `scale(${nodeScale})`,
+        opacity: nodeOpacity,
+      }}
+    >
       <Handle type="target" position={Position.Top} className="opacity-0" />
       <Handle type="source" position={Position.Bottom} className="opacity-0" />
       <Handle type="target" position={Position.Left} className="opacity-0" />
@@ -82,14 +98,36 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
           {post.content}
         </p>
         
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">
-            Speculative
-          </span>
-          <span className="px-2 py-1 bg-purple-500/10 text-purple-400 text-xs rounded-full border border-purple-500/20">
-            Innovation
-          </span>
+        {/* Tags and Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            {subflowDepth > 0 && (
+              <span className="px-2 py-1 bg-orange-500/10 text-orange-400 text-xs rounded-full border border-orange-500/20 flex items-center gap-1">
+                <Layers className="w-3 h-3" />
+                L{subflowDepth}
+              </span>
+            )}
+            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">
+              Speculative
+            </span>
+            <span className="px-2 py-1 bg-purple-500/10 text-purple-400 text-xs rounded-full border border-purple-500/20">
+              Innovation
+            </span>
+          </div>
+          
+          {hasSubflows && subflowDepth === 0 && onExpandSubflow && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExpandSubflow();
+              }}
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 text-primary hover:bg-primary/20"
+            >
+              <ChevronDown className="w-3 h-3" />
+            </Button>
+          )}
         </div>
       </div>
       

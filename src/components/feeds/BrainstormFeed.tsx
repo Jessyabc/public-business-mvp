@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { ReactFlow, Node, Edge, Controls, Background, BackgroundVariant, useNodesState, useEdgesState, addEdge, Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import '@xyflow/react/dist/base.css';
+import '../styles/react-flow-turbo.css';
 import { usePosts } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
-import BrainstormNodeComponent from '@/components/BrainstormNode';
+import BrainstormNodeComponent, { BrainstormNodeData } from '@/components/BrainstormNode';
 import ConnectionEdgeComponent from '@/components/ConnectionEdge';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { toast } from 'sonner';
@@ -29,6 +31,8 @@ export function BrainstormFeed() {
   const navigate = useNavigate();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedSubflow, setSelectedSubflow] = useState<string | null>(null);
+  const [subflowDepth, setSubflowDepth] = useState(0);
   const initialized = useRef(false);
 
   // Fetch brainstorm posts
@@ -63,9 +67,13 @@ export function BrainstormFeed() {
             onLink: () => openComposer({ 
               parentPostId: post.id, 
               relationType: 'linking' 
-            })
+            }),
+            onExpandSubflow: () => handleExpandSubflow(post.id),
+            subflowDepth: 0,
+            hasSubflows: posts.some(p => p.metadata?.parentId === post.id)
           },
           draggable: true,
+          className: 'animate-fade-in',
         };
       });
 
@@ -160,6 +168,73 @@ export function BrainstormFeed() {
     openComposer({});
   };
 
+  const handleExpandSubflow = useCallback((postId: string) => {
+    setSelectedSubflow(selectedSubflow === postId ? null : postId);
+    
+    if (selectedSubflow !== postId) {
+      // Find continuation posts for this brainstorm
+      const continuationPosts = posts.filter(p => p.metadata?.parentId === postId);
+      
+      if (continuationPosts.length > 0) {
+        // Create subflow nodes arranged in a hierarchical layout
+        const subflowNodes: Node[] = continuationPosts.map((post, index) => {
+          const parentNode = nodes.find(n => n.id === postId);
+          if (!parentNode) return null;
+          
+          const offsetX = (index % 3) * 200 - 200;
+          const offsetY = Math.floor(index / 3) * 150 + 200;
+          
+          return {
+            id: `${postId}-subflow-${post.id}`,
+            type: 'brainstorm',
+            position: { 
+              x: parentNode.position.x + offsetX, 
+              y: parentNode.position.y + offsetY 
+            },
+            data: { 
+              post,
+              subflowDepth: 1,
+              parentId: postId,
+              onContinue: () => openComposer({ 
+                parentPostId: post.id, 
+                relationType: 'continuation' 
+              }),
+            },
+            draggable: true,
+            className: 'animate-scale-in',
+          };
+        }).filter(Boolean) as Node[];
+        
+         // Create connecting edges from parent to subflow nodes
+         const subflowEdges: Edge[] = subflowNodes.map(node => ({
+           id: `edge-${postId}-${node.id}`,
+           source: postId,
+           target: node.id,
+           type: 'connection',
+           data: { 
+             connection: {
+               fromId: postId,
+               toId: (node.data as BrainstormNodeData).post.id,
+               type: 'continuation' as const,
+               strength: 0.9
+             }
+           },
+           animated: true,
+           className: 'animate-fade-in',
+         }));
+        
+        setNodes(prev => [...prev, ...subflowNodes]);
+        setEdges(prev => [...prev, ...subflowEdges]);
+        setSubflowDepth(1);
+      }
+    } else {
+      // Collapse subflow - remove subflow nodes and edges
+      setNodes(prev => prev.filter(node => !node.id.includes(`${postId}-subflow`)));
+      setEdges(prev => prev.filter(edge => !edge.id.includes(`edge-${postId}`)));
+      setSubflowDepth(0);
+    }
+  }, [selectedSubflow, posts, nodes, openComposer, setNodes, setEdges]);
+
   if (loading && posts.length === 0) {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
@@ -240,6 +315,8 @@ export function BrainstormFeed() {
           nodesConnectable={true}
           elementsSelectable={true}
           selectNodesOnDrag={false}
+          className="react-flow-turbo"
+          colorMode="dark"
         >
           <Background
             color="rgba(72, 159, 227, 0.15)" 
