@@ -18,7 +18,12 @@ const Index = () => {
       navigate('/profile');
       return;
     }
-  }, [user, navigate]);
+    // Also redirect to profile after regular login
+    if (user && window.location.pathname === '/' && !loading) {
+      navigate('/profile');
+      return;
+    }
+  }, [user, navigate, loading]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">

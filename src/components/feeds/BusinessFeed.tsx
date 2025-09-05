@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,21 +6,70 @@ import { Badge } from "@/components/ui/badge";
 import { PostCard as BusinessPostCard } from "@/components/business/PostCard";
 import { PostCard } from "@/components/posts/PostCard";
 import { BusinessFeedFilters } from "@/types/business-post";
-import { Search, Filter, ToggleLeft, Sparkles } from "lucide-react";
+import { Search, Filter, ToggleLeft, Sparkles, Plus } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
 import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
 import { useNavigate } from "react-router-dom";
+import { useComposerStore } from "@/hooks/useComposerStore";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function BusinessFeed() {
   const { toggleMode } = useAppMode();
   const { posts, loading, fetchPosts } = usePosts();
+  const { openComposer } = useComposerStore();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<BusinessFeedFilters>({
     search: "",
     sortBy: "most_useful",
     industries: []
   });
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchPosts('business');
+  }, []);
+
+  // Infinite scroll observer
+  const lastPostRef = useCallback((node: HTMLDivElement) => {
+    if (loading || isLoadingMore || !hasMore) return;
+    if (observerRef.current) observerRef.current = null;
+    
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        handleLoadMore();
+      }
+    });
+    
+    if (node) {
+      observer.observe(node);
+      observerRef.current = node;
+    }
+  }, [loading, isLoadingMore, hasMore]);
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    // In a real implementation, you'd fetch more posts here
+    setTimeout(() => {
+      setPage(prev => prev + 1);
+      setIsLoadingMore(false);
+      // Set hasMore to false when no more posts
+      if (page >= 3) setHasMore(false);
+    }, 1000);
+  };
+
+  const handleCreatePost = () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    openComposer({});
+  };
 
   useEffect(() => {
     fetchPosts('business');
@@ -80,16 +129,27 @@ export function BusinessFeed() {
               </h1>
             </div>
             
-            {/* Mode Toggle */}
-            <Button
-              onClick={toggleMode}
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-            >
-              <ToggleLeft className="w-4 h-4" />
-              Switch to Public
-            </Button>
+            {/* Mode Toggle and Create Button */}
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={toggleMode}
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary"
+              >
+                <ToggleLeft className="w-4 h-4" />
+                Switch to Public
+              </Button>
+              
+              <Button
+                onClick={handleCreatePost}
+                className="bg-primary hover:bg-primary/90 text-white"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Post
+              </Button>
+            </div>
           </div>
 
           {/* Search and Filters Row */}
@@ -146,12 +206,21 @@ export function BusinessFeed() {
         <div className="max-w-4xl mx-auto">
           <div className="space-y-4">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-pulse">
-                  <Sparkles className="w-8 h-8 mx-auto mb-4 text-primary/50" />
-                  <div className="text-muted-foreground">Loading business posts...</div>
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="glass-business-card p-6 animate-pulse">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-white/10 rounded-full"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 bg-white/10 rounded w-3/4"></div>
+                      <div className="h-3 bg-white/5 rounded w-1/2"></div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-white/5 rounded"></div>
+                        <div className="h-3 bg-white/5 rounded w-4/5"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))
             ) : filteredPosts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="glass-business-card rounded-2xl p-8">
@@ -162,22 +231,34 @@ export function BusinessFeed() {
               </div>
             ) : (
               <>
-                {filteredPosts.map((post) => (
-                  <div key={post.id} className="transform hover:scale-[1.01] transition-transform duration-200">
+                {filteredPosts.map((post, index) => (
+                  <div 
+                    key={post.id} 
+                    className="transform hover:scale-[1.01] transition-transform duration-200"
+                    ref={index === filteredPosts.length - 1 ? lastPostRef : undefined}
+                  >
                     <PostCard post={post} />
                   </div>
                 ))}
                 
-                {/* Load More Button */}
-                <div className="text-center pt-6">
-                  <Button 
-                    variant="outline" 
-                    className="glass-business-card hover:glass-business"
-                    size="lg"
-                  >
-                    Load More Posts
-                  </Button>
-                </div>
+                {/* Loading more indicator */}
+                {isLoadingMore && (
+                  <div className="text-center py-6">
+                    <div className="glass-business-card p-4 animate-pulse">
+                      <Sparkles className="w-6 h-6 mx-auto mb-2 text-primary/50" />
+                      <div className="text-muted-foreground text-sm">Loading more posts...</div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* End of feed message */}
+                {!hasMore && filteredPosts.length > 0 && (
+                  <div className="text-center py-6">
+                    <div className="glass-business-card p-4">
+                      <div className="text-muted-foreground text-sm">You've reached the end of the feed</div>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
