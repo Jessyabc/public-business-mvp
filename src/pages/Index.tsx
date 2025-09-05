@@ -40,9 +40,9 @@ const Index = () => {
   
   return (
     <ProtectedRoute requireAuth={true}>
-      <div className="relative">
+      <MainLayout>
         {feedContent}
-      </div>
+      </MainLayout>
     </ProtectedRoute>
   );
 };

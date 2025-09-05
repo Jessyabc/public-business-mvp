@@ -34,6 +34,12 @@ export const router = createBrowserRouter([
     path: '/',
     element: <Index />,
   },
+  
+  // Brainstorm feed route
+  {
+    path: '/brainstorm',
+    element: <Index />,
+  },
 
   // Landing page and public routes (outside shell)  
   {
