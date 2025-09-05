@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAppMode } from '@/contexts/AppModeContext';
-import { Menu, X, LogOut, User, Settings, Home, History, Bell, Search, MessageSquare, Building2, Users, Compass, FileText, Shield, Plus, Zap, Layers } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ToggleLeft, User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Search, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
+import { useComposerStore } from '@/hooks/useComposerStore';
 
 export function GlobalNavigationMenu() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { isBusinessMember, isAdmin } = useUserRoles();
-  const { mode } = useAppMode();
+  const { mode, toggleMode } = useAppMode();
+  const { openComposer } = useComposerStore();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,138 +36,205 @@ export function GlobalNavigationMenu() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to sign out",
+        description: "Failed to sign out",
         variant: "destructive",
       });
     }
   };
 
-  const getMenuItems = () => {
-    // Core navigation items for all users
-    const corePages = [
-      { icon: Home, to: '/', label: 'Home' },
-      { icon: Building2, to: '/industries', label: 'Industries' },
-      { icon: Users, to: '/about', label: 'About' },
-      { icon: Zap, to: '/features', label: 'Features' },
-      { icon: MessageSquare, to: '/contact', label: 'Contact' },
-    ];
-
-    // For non-authenticated users
+  const handleCreateContent = () => {
     if (!user) {
-      return [
-        ...corePages,
-        { icon: User, to: '/auth', label: 'Sign In / Sign Up' },
-        { icon: Layers, to: '/dev/components', label: 'Components Showcase' },
-      ];
+      navigate('/auth');
+      return;
     }
-
-    // For authenticated users - connected interface navigation
-    let userPages = [
-      { icon: Home, to: '/', label: 'Home Feed' },
-      { icon: User, to: '/profile', label: 'Profile' },
-      { icon: Settings, to: '/settings', label: 'Settings' },
-      { icon: Bell, to: '/notifications', label: 'Notifications' },
-      { icon: MessageSquare, to: '/my-posts', label: 'My Posts' },
-      { icon: Search, to: '/research', label: 'Research' },
-      ...corePages.filter(page => page.to !== '/'), // Add core pages except home (already added)
-    ];
-
-    // Add business-specific pages for business members
-    if (isBusinessMember() || isAdmin()) {
-      userPages.push(
-        { icon: Building2, to: '/business-dashboard', label: 'Business Dashboard' },
-        { icon: Building2, to: '/business-membership', label: 'Business Membership' },
-        { icon: Building2, to: '/business-profile', label: 'Business Profile' }
-      );
-      
-      // Only admins get development pages
-      if (isAdmin()) {
-        userPages.push(
-          { icon: Building2, to: '/create-business', label: 'Create Business' },
-          { icon: FileText, to: '/dev/forms', label: 'Forms Showcase' },
-          { icon: Layers, to: '/dev/components', label: 'Components Showcase' }
-        );
-      }
-    }
-
-    return userPages;
+    openComposer({});
   };
 
+  if (!user) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 bg-black/20 backdrop-blur-xl border-b border-white/10">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => navigate('/')}
+          >
+            <Brain className="w-8 h-8 text-primary" />
+            <span className="text-xl font-bold text-white">PublicBusiness</span>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={() => navigate('/auth')} className="text-white hover:bg-white/10">
+              Sign In
+            </Button>
+            <Button onClick={() => navigate('/auth')} className="bg-primary hover:bg-primary/90">
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
-    <div className="fixed top-6 right-6 z-[9999]">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+    <nav className={`fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-xl border-b ${
+      mode === 'public' 
+        ? 'bg-black/20 border-white/10' 
+        : 'bg-white/20 border-slate-200/20'
+    }`}>
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        {/* Left side - Logo and Navigation */}
+        <div className="flex items-center gap-6">
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => navigate('/')}
+          >
+            <Brain className={`w-8 h-8 ${mode === 'public' ? 'text-primary' : 'text-blue-600'}`} />
+            <span className={`text-xl font-bold ${mode === 'public' ? 'text-white' : 'text-slate-800'}`}>
+              PublicBusiness
+            </span>
+          </div>
+          
+          {/* Mode indicator */}
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
+            mode === 'public' 
+              ? 'bg-primary/20 border-primary/30 text-primary' 
+              : 'bg-blue-600/20 border-blue-600/30 text-blue-600'
+          }`}>
+            {mode === 'public' ? (
+              <>
+                <Brain className="w-4 h-4" />
+                <span className="text-sm font-medium">Public Mode</span>
+              </>
+            ) : (
+              <>
+                <Building2 className="w-4 h-4" />
+                <span className="text-sm font-medium">Business Mode</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right side - Actions and Profile */}
+        <div className="flex items-center gap-3">
+          {/* Mode Toggle */}
           <Button
-            variant="outline" 
-            size="icon"
-            className={`w-12 h-12 rounded-full backdrop-blur-xl transition-all duration-300 shadow-lg hover:scale-105 ${
-              mode === 'public'
-                ? 'bg-black/20 border-white/20 text-white hover:bg-white/10'
-                : 'bg-white/40 border-blue-200/30 text-slate-600 hover:bg-white/60'
+            onClick={toggleMode}
+            variant="ghost"
+            size="sm"
+            className={`flex items-center gap-2 ${
+              mode === 'public' 
+                ? 'text-white hover:bg-white/10' 
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <Menu className="h-5 w-5" />
+            <ToggleLeft className="w-4 h-4" />
+            Switch to {mode === 'public' ? 'Business' : 'Public'}
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          className={`w-80 mr-4 backdrop-blur-xl border shadow-2xl max-h-96 overflow-y-auto ${
-            mode === 'public'
-              ? 'bg-slate-900/95 border-white/20'
-              : 'bg-white/95 border-blue-200/30'
-          }`} 
-          align="end"
-          sideOffset={8}
-        >
-          <DropdownMenuLabel className={`px-4 py-3 ${
-            mode === 'public' ? 'text-white' : 'text-slate-700'
-          }`}>
-            Navigation Menu
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator className={mode === 'public' ? 'bg-white/20' : 'bg-slate-200/50'} />
-          
-          <div className="py-2">
-            <div className={`px-4 py-2 text-xs font-semibold ${
-              mode === 'public' ? 'text-white/70' : 'text-slate-500'
-            }`}>
-              All Pages ({getMenuItems().length})
-            </div>
-            {getMenuItems().map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <DropdownMenuItem
-                  key={item.to}
-                  onClick={() => navigate(item.to)}
-                  className={`px-4 py-3 cursor-pointer transition-all duration-200 ${
-                    mode === 'public'
-                      ? 'text-white/90 hover:bg-white/10 focus:bg-white/10'
-                      : 'text-slate-700 hover:bg-blue-50/50 focus:bg-blue-50/50'
-                  }`}
-                >
-                  <IconComponent className="mr-3 h-4 w-4" />
-                  <span>{item.label}</span>
-                </DropdownMenuItem>
-              );
-            })}
-          </div>
 
-          {user && (
-            <>
-              <DropdownMenuSeparator className={mode === 'public' ? 'bg-white/20' : 'bg-slate-200/50'} />
-              <DropdownMenuItem
-                onClick={handleSignOut}
-                className={`px-4 py-3 cursor-pointer transition-all duration-200 ${
-                  mode === 'public'
-                    ? 'text-red-400 hover:bg-red-500/20 focus:bg-red-500/20'
-                    : 'text-red-600 hover:bg-red-50/50 focus:bg-red-50/50'
+          {/* Create Content Button */}
+          <Button
+            onClick={handleCreateContent}
+            size="sm"
+            className={
+              mode === 'public'
+                ? 'bg-primary hover:bg-primary/90 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create
+          </Button>
+
+          {/* Profile Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className={`relative h-8 w-8 rounded-full ${
+                  mode === 'public' ? 'hover:bg-white/10' : 'hover:bg-slate-100'
                 }`}
               >
-                <LogOut className="mr-3 h-4 w-4" />
-                <span>Sign Out</span>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || 'User'} />
+                  <AvatarFallback className={
+                    mode === 'public' 
+                      ? 'bg-primary/20 text-primary' 
+                      : 'bg-blue-600/20 text-blue-600'
+                  }>
+                    {profile?.display_name?.[0] || user?.email?.[0] || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              className="w-56" 
+              align="end" 
+              forceMount
+              side="bottom"
+            >
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {profile?.display_name || 'User'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {/* Role indicators */}
+              <div className="px-2 py-1.5">
+                <div className="flex flex-wrap gap-1">
+                  {isAdmin() && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full">
+                      <Shield className="w-3 h-3" />
+                      Admin
+                    </span>
+                  )}
+                  {isBusinessMember() && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                      <Building2 className="w-3 h-3" />
+                      Business
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
+                    <UserCheck className="w-3 h-3" />
+                    Public
+                  </span>
+                </div>
+              </div>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
               </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+              
+              <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              
+              {isAdmin() && (
+                <DropdownMenuItem onClick={() => navigate('/admin')}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Admin Panel</span>
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </nav>
   );
 }

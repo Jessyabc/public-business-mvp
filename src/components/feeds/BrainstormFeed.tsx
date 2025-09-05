@@ -249,38 +249,7 @@ export function BrainstormFeed() {
   const brainstormPosts = posts.filter(post => post.type === 'brainstorm' && post.mode === 'public');
 
   return (
-    <div className="w-full h-screen relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header Controls */}
-      <div className="absolute top-6 left-6 z-10 flex items-center gap-3">
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-3">
-            <div>
-              <h1 className="text-xl font-bold text-white">Brainstorm Network</h1>
-              <p className="text-sm text-blue-200">Explore connected ideas</p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={toggleMode}
-                variant="ghost"
-                size="sm"
-                className="text-blue-200 hover:text-white hover:bg-white/10"
-              >
-                <ToggleLeft className="w-4 h-4 mr-2" />
-                Switch to Business
-              </Button>
-              <Button
-                onClick={handleCreateBrainstorm}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="w-full h-screen relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-16">
       {brainstormPosts.length === 0 ? (
         <div className="flex items-center justify-center h-full">
           <div className="text-center glass-card p-8 m-6">

@@ -1,94 +1,60 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-
-export type UserRole = 'admin' | 'business_user' | 'public_user' | 'business_member';
-
-export interface UserRoleData {
-  id: string;
-  user_id: string;
-  role: UserRole;
-  created_at: string;
-}
+import { supabase } from '@/integrations/supabase/client';
 
 export function useUserRoles() {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [canCreateBusinessPosts, setCanCreateBusinessPosts] = useState(false);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fetchUserRoles = async () => {
-    if (!user) return;
-    
-    setLoading(true);
+  const fetchRoles = async () => {
+    if (!user) {
+      setRoles([]);
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Direct table query instead of RPC
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
+      // Use the RPC function to get user roles
+      const { data, error } = await supabase.rpc('get_my_roles');
       
-      if (error) throw error;
-      
-      const roles = (data || []).map(row => row.role) as Array<'admin'|'business_user'|'public_user'|'business_member'>;
-      setUserRoles(roles.length ? roles : ['public_user']);
-      setCanCreateBusinessPosts(roles.includes('business_member') || roles.includes('admin'));
-    } catch (error: any) {
-      console.error('Error fetching user roles:', error);
-      // Default to public_user if there's an error
-      setUserRoles(['public_user']);
+      if (error) {
+        console.error('Error fetching user roles:', error);
+        setRoles([]);
+      } else {
+        setRoles(data || []);
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching roles:', error);
+      setRoles([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const checkBusinessPostPermission = async () => {
-    if (!user) return false;
-    
-    try {
-      const { data, error } = await supabase.rpc('can_create_business_posts', { 
-        user_uuid: user.id 
-      });
-      
-      if (error) throw error;
-      return data || false;
-    } catch (error: any) {
-      console.error('Error checking business post permission:', error);
-      return false;
-    }
-  };
-
-  const hasRole = (role: UserRole) => {
-    return userRoles.includes(role);
-  };
-
-  const isPublicUser = () => hasRole('public_user');
-  const isBusinessMember = () => hasRole('business_member');
-  const isBusinessUser = () => hasRole('business_user');
-  const isAdmin = () => hasRole('admin');
-
   useEffect(() => {
-    if (user) {
-      fetchUserRoles();
-    } else {
-      setUserRoles([]);
-      setCanCreateBusinessPosts(false);
-    }
+    fetchRoles();
   }, [user]);
 
+  const hasRole = (role: string) => roles.includes(role);
+  const hasAnyRole = (roleList: string[]) => roleList.some(role => roles.includes(role));
+  
   return {
-    userRoles,
-    hasRole,
-    isPublicUser,
-    isBusinessMember,
-    isBusinessUser,
-    isAdmin,
-    canCreateBusinessPosts,
+    roles,
     loading,
-    fetchUserRoles,
-    checkBusinessPostPermission,
-    refetch: fetchUserRoles,
+    hasRole,
+    hasAnyRole,
+    isAdmin: () => hasRole('admin'),
+    isBusinessMember: () => hasRole('business_member'),
+    isPublicUser: () => hasRole('public_user'),
+    canCreateBusinessPosts: hasAnyRole(['admin', 'business_member']),
+    // Backward compatibility
+    userRoles: roles,
+    refetch: () => {
+      // Re-trigger the effect by updating user dependency
+      if (user) {
+        fetchRoles();
+      }
+    },
   };
 }

@@ -111,7 +111,7 @@ export function BusinessFeed() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen pt-16">
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
@@ -121,34 +121,12 @@ export function BusinessFeed() {
       {/* Fixed Header */}
       <header className="shrink-0 p-6 pb-4 relative z-10">
         <div className="glass-business-header rounded-3xl p-6 backdrop-blur-xl max-w-4xl mx-auto">
-          {/* Top bar with search and filters */}
+          {/* Top bar with title */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-light text-foreground tracking-wide">
                 Business Feed
               </h1>
-            </div>
-            
-            {/* Mode Toggle and Create Button */}
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={toggleMode}
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-              >
-                <ToggleLeft className="w-4 h-4" />
-                Switch to Public
-              </Button>
-              
-              <Button
-                onClick={handleCreatePost}
-                className="bg-primary hover:bg-primary/90 text-white"
-                size="sm"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Post
-              </Button>
             </div>
           </div>
 
