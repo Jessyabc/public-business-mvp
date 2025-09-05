@@ -18,12 +18,12 @@ export function NewLanding() {
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
         {/* Logo */}
-        <div className="mb-8 z-10">
+        <div className="mb-14 z-10">
           <img 
-            src="/lovable-uploads/7b84831f-eb6d-4acd-bf51-5d3d7be705ba.png" 
-            alt="Public Business" 
-            className="h-16 md:h-20 object-contain"
-          />
+              src="/lovable-uploads/7b84831f-eb6d-4acd-bf51-5d3d7be705ba.png" 
+              alt="Public Business" 
+              className="h-52 sm:h-64 lg:h-80 xl:h-96 object-contain mx-auto"
+            />
         </div>
         
         {/* Main Headline */}
