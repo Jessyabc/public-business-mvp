@@ -53,8 +53,8 @@ export function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-card border-blue-200/30 backdrop-blur-lg bg-blue-50/80">
-        <div className="container mx-auto px-8 py-6">
+      <header className="glass-header border-pb-blue/20">
+        <div className="container mx-auto px-8 py-6 glass-content">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <NavLink to="/" className="flex items-center">
@@ -72,8 +72,8 @@ export function Header() {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `text-sm font-medium transition-colors hover:text-primary ${
-                      isActive ? 'text-primary' : 'text-muted-foreground'
+                    `text-sm font-medium transition-colors duration-med hover:text-pb-blue ${
+                      isActive ? 'text-pb-blue' : 'text-pb-text2'
                     }`
                   }
                 >
@@ -86,17 +86,17 @@ export function Header() {
             <div className="hidden lg:flex items-center space-x-4">
               {!user ? (
                 <>
-                  <Button variant="ghost" onClick={() => setShowAuthModal(true)}>
+                  <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="glass-button">
                     Login
                   </Button>
-                  <Button onClick={() => setShowAuthModal(true)}>
+                  <Button onClick={() => setShowAuthModal(true)} className="glass-button bg-pb-blue/20 text-pb-blue">
                     Sign Up
                   </Button>
                 </>
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full glass-button">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={profile?.avatar_url || ''} />
                         <AvatarFallback>
@@ -105,7 +105,7 @@ export function Header() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 glass-modal" align="end" forceMount>
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" />
                       Profile
@@ -127,7 +127,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
-              className="lg:hidden"
+              className="lg:hidden glass-button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -143,8 +143,8 @@ export function Header() {
                     key={item.to}
                     to={item.to}
                     className={({ isActive }) =>
-                      `px-3 py-2 text-sm font-medium rounded-md transition-colors hover:text-primary ${
-                        isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground'
+                      `px-3 py-2 text-sm font-medium rounded-md transition-colors duration-med hover:text-pb-blue ${
+                        isActive ? 'text-pb-blue bg-pb-blue/10' : 'text-pb-text2'
                       }`
                     }
                     onClick={() => setMobileMenuOpen(false)}
@@ -152,27 +152,27 @@ export function Header() {
                     {item.label}
                   </NavLink>
                 ))}
-                <div className="flex flex-col space-y-2 pt-4 border-t border-border">
+                <div className="flex flex-col space-y-2 pt-4 border-t border-pb-blue/20">
                   {!user ? (
                     <>
-                      <Button variant="ghost" onClick={() => setShowAuthModal(true)}>
+                      <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="glass-button">
                         Login
                       </Button>
-                      <Button onClick={() => setShowAuthModal(true)}>
+                      <Button onClick={() => setShowAuthModal(true)} className="glass-button bg-pb-blue/20 text-pb-blue">
                         Sign Up
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button variant="ghost" onClick={() => navigate('/profile')}>
+                      <Button variant="ghost" onClick={() => navigate('/profile')} className="glass-button">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Button>
-                      <Button variant="ghost" onClick={() => navigate('/settings')}>
+                      <Button variant="ghost" onClick={() => navigate('/settings')} className="glass-button">
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Button>
-                      <Button variant="destructive" onClick={handleSignOut}>
+                      <Button variant="destructive" onClick={handleSignOut} className="glass-button">
                         <LogOut className="mr-2 h-4 w-4" />
                         Sign Out
                       </Button>

@@ -39,6 +39,24 @@ export function MainShell() {
 
   return (
     <Page className="pb-20"> {/* Add bottom padding for nav bar */}
+      {/* SVG Filter Definition for Glass Displacement Effect */}
+      <svg className="glass-filter-sprite" aria-hidden="true">
+        <defs>
+          <filter id="glass-displace">
+            <feTurbulence
+              baseFrequency="0.04"
+              numOctaves="3"
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="8"
+            />
+          </filter>
+        </defs>
+      </svg>
+
       {/* Mode Switcher */}
       <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40">
         <ModeSwitcher />

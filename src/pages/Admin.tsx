@@ -99,11 +99,11 @@ export function Admin() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
 
-        <GlassCard className="max-w-md w-full glass-ios-triple glass-corner-distort" padding="lg">
+        <GlassCard className="max-w-md w-full glass-card glass-content" padding="lg">
           <div className="text-center mb-6">
-            <Settings className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-foreground">Admin Access</h1>
-            <p className="text-muted-foreground">Enter password to manage curated ideas</p>
+            <Settings className="w-16 h-16 text-pb-blue mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-pb-text0">Admin Access</h1>
+            <p className="text-pb-text2">Enter password to manage curated ideas</p>
           </div>
           
           <div className="space-y-4">
@@ -112,12 +112,12 @@ export function Admin() {
               placeholder="Admin password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-xl glass-ios-triple border border-primary/20 bg-transparent text-foreground placeholder:text-muted-foreground"
+              className="w-full p-3 rounded-xl glass-input border border-pb-blue/20 bg-transparent text-pb-text0 placeholder:text-pb-text2"
               onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
             />
             <Button
               onClick={handleLogin}
-              className="w-full glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+              className="w-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass"
             >
               Access Admin Panel
             </Button>

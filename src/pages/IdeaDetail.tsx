@@ -45,14 +45,14 @@ export function IdeaDetail() {
 
       <div className="relative z-10 max-w-4xl mx-auto pt-20">
         {/* Idea Card */}
-        <GlassCard className="border-primary/20 mb-8 glass-ios-triple glass-corner-distort" padding="lg">
+        <GlassCard className="border-pb-blue/20 mb-8 glass-card glass-content" padding="lg">
           <div className="flex items-start gap-4 mb-6">
-            <Lightbulb className="w-12 h-12 text-primary flex-shrink-0 mt-1" />
+            <Lightbulb className="w-12 h-12 text-pb-blue flex-shrink-0 mt-1" />
             <div className="flex-1">
-              <p className="text-xl text-foreground leading-relaxed mb-4">
+              <p className="text-xl text-pb-text0 leading-relaxed mb-4">
                 {idea.content}
               </p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4 text-sm text-pb-text2">
                 <div className="flex items-center gap-1">
                   <MessageSquare className="w-4 h-4" />
                   <span>{idea.linked_brainstorms_count} brainstorms</span>
@@ -66,7 +66,7 @@ export function IdeaDetail() {
           <div className="flex justify-center">
             <Button
               onClick={() => navigate(`/brainstorm/new?ideaId=${idea.id}`)}
-              className="glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-8 py-3 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+              className="glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 px-8 py-3 text-lg font-medium rounded-xl interactive-glass"
             >
               <Plus className="w-5 h-5 mr-2" />
               Start a Brainstorm

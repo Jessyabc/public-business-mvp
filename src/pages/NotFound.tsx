@@ -19,12 +19,12 @@ const NotFound = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
 
-      <GlassCard className="text-center max-w-md glass-ios-triple glass-corner-distort" padding="lg">
+      <GlassCard className="text-center max-w-md glass-card glass-content" padding="lg">
         <h1 className="text-4xl font-bold mb-4 text-foreground">404</h1>
         <p className="text-xl text-muted-foreground mb-6">Oops! Page not found</p>
         <Button
           onClick={() => window.location.href = '/'}
-          className="glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 transition-all duration-300 hover:scale-105"
+          className="glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 interactive-glass"
         >
           Return to Home
         </Button>

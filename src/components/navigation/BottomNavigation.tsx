@@ -31,12 +31,8 @@ export function BottomNavigation() {
   }
 
   return (
-    <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-700 ease-in-out">
-      <div className={`glass-card rounded-full px-4 py-3 backdrop-blur-xl border transition-all duration-700 ease-in-out ${
-        mode === 'public' 
-          ? 'border-white/20 bg-black/20' 
-          : 'border-blue-200/30 bg-white/40'
-      }`}>
+    <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-slow ease-pb">
+      <div className="glass-card rounded-full px-4 py-3 glass-content">
         <div className="flex items-center space-x-3">
           {/* Business Member Badge */}
           {isBusinessMemberRole && (
@@ -44,10 +40,10 @@ export function BottomNavigation() {
               <BusinessMemberBadge className="text-xs" />
               <NavLink
                 to="/business-dashboard"
-                className={`flex items-center px-2 py-1 rounded-lg transition-all duration-300 ${
+                className={`flex items-center px-2 py-1 rounded-lg transition-all duration-med ${
                   location.pathname === '/business-dashboard'
-                    ? 'bg-blue-500/20 text-blue-600'
-                    : 'hover:bg-white/10 text-white/70 hover:text-white'
+                    ? 'bg-pb-blue/20 text-pb-blue'
+                    : 'hover:bg-white/10 text-pb-text2 hover:text-pb-text0'
                 }`}
               >
                 <Building2 className="w-4 h-4" />
@@ -58,20 +54,14 @@ export function BottomNavigation() {
           {/* Mode Toggle */}
           <button 
             onClick={toggleMode}
-            className={`flex items-center space-x-2 px-3 py-2 glass-card rounded-full border transition-all duration-500 ease-in-out ${
-              mode === 'public'
-                ? 'border-[#489FE3]/30 hover:bg-[#489FE3]/10'
-                : 'border-blue-300/40 hover:bg-blue-100/20 bg-white/30'
-            }`}
+            className="glass-button glass-nav-item"
           >
             {mode === 'public' ? (
-              <Home className="w-4 h-4 text-[#489FE3] transition-all duration-300" />
+              <Home className="w-4 h-4 text-pb-blue transition-all duration-med" />
             ) : (
-              <Building2 className="w-4 h-4 text-blue-600 transition-all duration-300" />
+              <Building2 className="w-4 h-4 text-pb-blue transition-all duration-med" />
             )}
-            <span className={`text-xs font-medium transition-all duration-300 ${
-              mode === 'public' ? 'text-[#489FE3]' : 'text-blue-600'
-            }`}>
+            <span className="text-xs font-medium text-pb-blue transition-all duration-med ml-2">
               {mode === 'public' ? 'Public' : 'Business'}
             </span>
           </button>
@@ -85,20 +75,16 @@ export function BottomNavigation() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`relative flex flex-col items-center space-y-1 px-2 py-2 rounded-xl transition-all duration-300 ${
+                className={`relative flex flex-col items-center space-y-1 px-2 py-2 rounded-xl transition-all duration-med ${
                   isActive 
-                    ? mode === 'public'
-                      ? 'glass-card bg-[#489FE3]/20 text-[#489FE3]'
-                      : 'glass-card bg-blue-100/40 text-blue-600'
-                    : mode === 'public'
-                      ? 'text-white/70 hover:text-white hover:bg-white/10'
-                      : 'text-slate-600 hover:text-slate-700 hover:bg-white/20'
+                    ? 'glass-nav-item bg-pb-blue/20 text-pb-blue'
+                    : 'text-pb-text2 hover:text-pb-text0 hover:bg-white/10'
                 }`}
               >
-                <IconComponent className="w-4 h-4 transition-all duration-300" />
-                <span className="text-xs font-medium transition-all duration-300 whitespace-nowrap">{item.label}</span>
+                <IconComponent className="w-4 h-4 transition-all duration-med" />
+                <span className="text-xs font-medium transition-all duration-med whitespace-nowrap">{item.label}</span>
                 {item.badge && (
-                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs transition-all duration-300">
+                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs transition-all duration-med">
                     {item.badge}
                   </Badge>
                 )}
@@ -108,11 +94,7 @@ export function BottomNavigation() {
           
           <Button
             onClick={() => openComposer()}
-            className={`w-10 h-10 rounded-full transition-all duration-300 hover:scale-110 ml-2 ${
-              mode === 'public'
-                ? 'bg-primary/20 hover:bg-primary/30 text-primary border-primary/30'
-                : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 border-blue-500/30'
-            } glass-card backdrop-blur-xl border`}
+            className="w-10 h-10 rounded-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border-pb-blue/30 interactive-glass ml-2"
             size="icon"
           >
             <Plus className="w-4 h-4" />

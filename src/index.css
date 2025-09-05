@@ -111,16 +111,23 @@
   /* Interactive Elements */
   .glass-button {
     @apply glass-card;
-    @apply px-6 py-3 font-medium transition-all duration-med ease-pb;
+    @apply px-6 py-3 font-medium transition-all;
     @apply hover:scale-105 active:scale-95;
     cursor: pointer;
+    transition-duration: var(--t-med);
+    transition-timing-function: var(--ease);
   }
   
   .glass-input {
     @apply glass-card;
     @apply px-4 py-3 bg-white/10 border border-white/20;
-    @apply focus:border-pb-blue/50 focus:outline-none;
+    @apply focus:outline-none;
     backdrop-filter: blur(8px);
+  }
+  
+  .glass-input:focus {
+    border-color: var(--pb-blue);
+    box-shadow: 0 0 0 2px rgba(72, 159, 227, 0.1);
   }
   
   /* Layout Components */
