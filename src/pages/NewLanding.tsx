@@ -35,7 +35,7 @@ export function NewLanding() {
           <img 
             src="/lovable-uploads/7b84831f-eb6d-4acd-bf51-5d3d7be705ba.png" 
             alt="Public Business - Creating Collaboration" 
-            className="h-20 md:h-24 object-contain relative z-10 px-60 py-40"
+            className="h-20 md:h-24 object-contain relative z-10 px6 py4"
           />
         </div>
         
