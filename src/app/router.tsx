@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainShell } from './shell/MainShell';
+import { MainLayout } from '@/components/layout/MainLayout';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // Lazy load components for code splitting
@@ -120,33 +121,53 @@ export const router = createBrowserRouter([
     ],
   },
   
-  // Landing page and public routes (outside shell)
+  // Landing page and public routes (outside shell)  
   {
     path: '/landing',
-    element: <Landing />,
+    element: (
+      <MainLayout>
+        <Landing />
+      </MainLayout>
+    ),
   },
   {
     path: '/idea/:id',
-    element: <LazyWrapper><IdeaDetail /></LazyWrapper>,
+    element: (
+      <MainLayout>
+        <LazyWrapper><IdeaDetail /></LazyWrapper>
+      </MainLayout>
+    ),
   },
   {
     path: '/brainstorm/new',
-    element: <LazyWrapper><BrainstormNew /></LazyWrapper>,
+    element: (
+      <MainLayout>
+        <LazyWrapper><BrainstormNew /></LazyWrapper>
+      </MainLayout>
+    ),
   },
   {
     path: '/brainstorm/:id',
-    element: <LazyWrapper><BrainstormDetailPage /></LazyWrapper>,
+    element: (
+      <MainLayout>
+        <LazyWrapper><BrainstormDetailPage /></LazyWrapper>
+      </MainLayout>
+    ),
   },
   {
     path: '/admin',
-    element: <LazyWrapper><Admin /></LazyWrapper>,
+    element: (
+      <MainLayout>
+        <LazyWrapper><Admin /></LazyWrapper>
+      </MainLayout>
+    ),
   },
   
-  // Keep all existing routes from nav-items for compatibility
+  // Keep all existing routes from nav-items for compatibility - wrap with MainLayout
   ...navItems
     .filter(item => !['/', '/public/*', '/business/*'].includes(item.to))
     .map(({ to, page }) => ({
       path: to,
-      element: page,
+      element: <MainLayout>{page}</MainLayout>,
     })),
 ]);

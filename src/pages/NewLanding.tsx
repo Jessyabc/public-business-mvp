@@ -31,11 +31,12 @@ export function NewLanding() {
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 relative">
         {/* Parallax logo */}
-        <div className="mb-8 transform transition-transform duration-300 hover:scale-105">
+        <div className="mb-8 transform transition-transform duration-300 hover:scale-105 relative">
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-2xl -m-4"></div>
           <img 
-            src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
+            src="/lovable-uploads/7b84831f-eb6d-4acd-bf51-5d3d7be705ba.png" 
             alt="Public Business - Creating Collaboration" 
-            className="h-24 md:h-32 object-contain opacity-90"
+            className="h-32 md:h-40 object-contain relative z-10"
           />
         </div>
         

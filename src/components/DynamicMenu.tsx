@@ -3,7 +3,7 @@ import { GlassCard } from "@/ui/components/GlassCard";
 
 export default function DynamicMenu() {
   return (
-    <div className="fixed bottom-6 left-6 right-6 z-50">
+    <div className="fixed bottom-6 left-6 right-6 z-30">
       <GlassCard className="glass-card border-0 max-w-screen-xl mx-auto">
         <Input
           placeholder="Ready to share a Brainstorm?"

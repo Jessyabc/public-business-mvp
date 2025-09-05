@@ -1,29 +1,25 @@
+import { useState } from 'react';
 import { Page } from '@/ui/layouts/Page';
 import { GlassCard } from '@/ui/components/GlassCard';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
-  Building2, 
-  Stethoscope, 
-  Laptop, 
-  Banknote, 
+  Cpu, 
+  DollarSign, 
+  Heart, 
   Factory, 
-  Truck, 
+  ShoppingBag, 
   GraduationCap, 
-  Zap, 
-  Leaf, 
-  ShoppingCart, 
-  Plane, 
-  Home,
-  Car,
-  Smartphone,
-  Shield,
-  Camera
+  Truck, 
+  Megaphone, 
+  Shield, 
+  Users 
 } from 'lucide-react';
 
 interface Industry {
   id: string;
   name: string;
-  icon: any;
+  icon: React.ReactNode;
   description: string;
   importance: string;
   keyInsights: string[];
@@ -32,252 +28,264 @@ interface Industry {
 
 const industries: Industry[] = [
   {
-    id: 'healthcare',
-    name: 'Healthcare & Medical',
-    icon: Stethoscope,
-    description: 'Healthcare encompasses medical services, pharmaceuticals, biotechnology, and medical devices focused on improving patient outcomes and advancing medical research.',
-    importance: 'Essential for human wellbeing and quality of life, driving innovation in treatments, diagnostics, and preventive care.',
-    keyInsights: ['Patient-centered care trends', 'Digital health innovations', 'Regulatory compliance updates', 'Medical breakthrough analysis'],
-    gradient: 'from-emerald-500 to-teal-600'
+    id: "technology",
+    name: "Technology",
+    icon: <Cpu className="h-8 w-8" />,
+    description: "Innovation drives progress in digital transformation, AI, and software development.",
+    importance: "Technology shapes how we work, communicate, and solve complex problems across all industries.",
+    keyInsights: [
+      "Rapid adoption of AI and machine learning",
+      "Remote work transformation",
+      "Cloud-first architecture becoming standard",
+      "Cybersecurity as business priority"
+    ],
+    gradient: "from-blue-500 to-cyan-500"
   },
   {
-    id: 'technology',
-    name: 'Technology & Software',
-    icon: Laptop,
-    description: 'The technology sector drives digital transformation through software development, artificial intelligence, cloud computing, and emerging technologies.',
-    importance: 'Powers modern business operations and enables innovation across all other industries through digital solutions.',
-    keyInsights: ['AI and machine learning trends', 'Cybersecurity developments', 'Cloud migration strategies', 'Tech talent market analysis'],
-    gradient: 'from-blue-500 to-indigo-600'
+    id: "finance",
+    name: "Finance",
+    icon: <DollarSign className="h-8 w-8" />,
+    description: "Digital banking, fintech innovation, and sustainable finance reshape monetary systems.",
+    importance: "Financial services enable economic growth and provide access to capital for businesses and individuals.",
+    keyInsights: [
+      "Digital payment systems expansion",
+      "Cryptocurrency and blockchain adoption",
+      "ESG investment criteria",
+      "Regulatory technology (RegTech) growth"
+    ],
+    gradient: "from-green-500 to-emerald-500"
   },
   {
-    id: 'finance',
-    name: 'Financial Services',
-    icon: Banknote,
-    description: 'Financial services include banking, investment, insurance, and fintech solutions that facilitate economic transactions and wealth management.',
-    importance: 'Fundamental to economic stability and growth, enabling capital flow and risk management across global markets.',
-    keyInsights: ['Fintech disruption analysis', 'Regulatory changes impact', 'Investment market trends', 'Digital banking evolution'],
-    gradient: 'from-yellow-500 to-orange-600'
+    id: "healthcare",
+    name: "Healthcare",
+    icon: <Heart className="h-8 w-8" />,
+    description: "Telemedicine, personalized treatments, and health tech improve patient outcomes.",
+    importance: "Healthcare innovation directly impacts quality of life and population health outcomes.",
+    keyInsights: [
+      "Telemedicine mainstream adoption",
+      "Personalized medicine advancement",
+      "AI-driven diagnostics",
+      "Digital health records integration"
+    ],
+    gradient: "from-red-500 to-pink-500"
   },
   {
-    id: 'manufacturing',
-    name: 'Manufacturing & Industrial',
-    icon: Factory,
-    description: 'Manufacturing transforms raw materials into finished products through industrial processes, automation, and supply chain management.',
-    importance: 'Backbone of economic production, creating jobs and driving technological advancement in production methods.',
-    keyInsights: ['Industry 4.0 adoption', 'Supply chain optimization', 'Sustainability initiatives', 'Automation ROI analysis'],
-    gradient: 'from-gray-500 to-slate-600'
+    id: "manufacturing",
+    name: "Manufacturing",
+    icon: <Factory className="h-8 w-8" />,
+    description: "Industry 4.0, automation, and sustainable production transform manufacturing.",
+    importance: "Manufacturing drives economic growth and job creation while adapting to sustainability demands.",
+    keyInsights: [
+      "Smart factory implementation",
+      "Supply chain resilience focus",
+      "Sustainable manufacturing practices",
+      "Robotics and automation integration"
+    ],
+    gradient: "from-orange-500 to-amber-500"
   },
   {
-    id: 'logistics',
-    name: 'Logistics & Transportation',
-    icon: Truck,
-    description: 'Logistics manages the flow of goods and services from origin to consumption, including warehousing, transportation, and distribution.',
-    importance: 'Critical for global trade and e-commerce, ensuring efficient movement of goods and services worldwide.',
-    keyInsights: ['Last-mile delivery innovations', 'Autonomous vehicle impact', 'Sustainability in shipping', 'Supply chain resilience'],
-    gradient: 'from-purple-500 to-violet-600'
+    id: "retail",
+    name: "Retail",
+    icon: <ShoppingBag className="h-8 w-8" />,
+    description: "Omnichannel experiences and sustainable commerce redefine retail landscapes.",
+    importance: "Retail evolution affects consumer behavior and drives innovation in customer experience.",
+    keyInsights: [
+      "Omnichannel customer experience",
+      "Social commerce growth",
+      "Sustainable product demand",
+      "AR/VR shopping experiences"
+    ],
+    gradient: "from-purple-500 to-violet-500"
   },
   {
-    id: 'education',
-    name: 'Education & Training',
-    icon: GraduationCap,
-    description: 'Education sector encompasses academic institutions, e-learning platforms, and professional development programs.',
-    importance: 'Develops human capital and drives societal progress through knowledge transfer and skill development.',
-    keyInsights: ['EdTech innovation trends', 'Remote learning strategies', 'Skill gap analysis', 'Future of work preparation'],
-    gradient: 'from-rose-500 to-pink-600'
+    id: "education",
+    name: "Education",
+    icon: <GraduationCap className="h-8 w-8" />,
+    description: "Digital learning platforms and personalized education transform knowledge delivery.",
+    importance: "Education shapes future workforce capabilities and drives societal advancement.",
+    keyInsights: [
+      "Hybrid learning models",
+      "Personalized learning paths",
+      "Skills-based education focus",
+      "Educational technology integration"
+    ],
+    gradient: "from-indigo-500 to-blue-500"
   },
   {
-    id: 'energy',
-    name: 'Energy & Utilities',
-    icon: Zap,
-    description: 'Energy sector includes renewable energy, traditional utilities, and emerging technologies for power generation and distribution.',
-    importance: 'Powers all economic activity and is central to addressing climate change through clean energy transitions.',
-    keyInsights: ['Renewable energy adoption', 'Grid modernization trends', 'Energy storage solutions', 'Carbon reduction strategies'],
-    gradient: 'from-amber-500 to-yellow-600'
+    id: "logistics",
+    name: "Logistics",
+    icon: <Truck className="h-8 w-8" />,
+    description: "Smart logistics, last-mile delivery innovation, and supply chain optimization.",
+    importance: "Efficient logistics enable global trade and just-in-time business models.",
+    keyInsights: [
+      "Last-mile delivery innovation",
+      "Autonomous vehicle integration",
+      "Real-time tracking systems",
+      "Sustainable logistics practices"
+    ],
+    gradient: "from-teal-500 to-cyan-500"
   },
   {
-    id: 'agriculture',
-    name: 'Agriculture & Food',
-    icon: Leaf,
-    description: 'Agriculture produces food, fiber, and other goods through farming, livestock, and food processing industries.',
-    importance: 'Fundamental for food security and nutrition, increasingly important as global population grows.',
-    keyInsights: ['Precision agriculture tech', 'Sustainable farming practices', 'Food safety innovations', 'Supply chain traceability'],
-    gradient: 'from-green-500 to-emerald-600'
+    id: "marketing",
+    name: "Marketing",
+    icon: <Megaphone className="h-8 w-8" />,
+    description: "Data-driven marketing, privacy-first approaches, and authentic brand connections.",
+    importance: "Marketing drives business growth and shapes consumer relationships in digital-first world.",
+    keyInsights: [
+      "Privacy-first marketing strategies",
+      "Influencer marketing evolution",
+      "AI-powered personalization",
+      "Authentic brand storytelling"
+    ],
+    gradient: "from-pink-500 to-rose-500"
   },
   {
-    id: 'retail',
-    name: 'Retail & E-commerce',
-    icon: ShoppingCart,
-    description: 'Retail involves selling goods and services to consumers through physical stores, online platforms, and omnichannel experiences.',
-    importance: 'Drives consumer economy and reflects changing shopping behaviors and preferences.',
-    keyInsights: ['Omnichannel strategies', 'Consumer behavior analysis', 'Digital transformation', 'Personalization trends'],
-    gradient: 'from-cyan-500 to-blue-600'
+    id: "cybersecurity",
+    name: "Cybersecurity",
+    icon: <Shield className="h-8 w-8" />,
+    description: "Zero-trust security, threat intelligence, and cyber resilience protect digital assets.",
+    importance: "Cybersecurity ensures business continuity and protects sensitive data in digital economy.",
+    keyInsights: [
+      "Zero-trust security models",
+      "AI-powered threat detection",
+      "Cyber resilience strategies",
+      "Compliance automation"
+    ],
+    gradient: "from-slate-500 to-gray-500"
   },
   {
-    id: 'hospitality',
-    name: 'Hospitality & Travel',
-    icon: Plane,
-    description: 'Hospitality includes hotels, restaurants, tourism, and travel services focused on customer experience and service.',
-    importance: 'Significant contributor to global economy and cultural exchange, highly sensitive to economic and social trends.',
-    keyInsights: ['Travel recovery patterns', 'Sustainability in tourism', 'Digital guest experiences', 'Workforce challenges'],
-    gradient: 'from-teal-500 to-cyan-600'
-  },
-  {
-    id: 'realestate',
-    name: 'Real Estate & Construction',
-    icon: Home,
-    description: 'Real estate encompasses property development, construction, property management, and real estate investment.',
-    importance: 'Provides essential infrastructure and housing, major component of personal and institutional wealth.',
-    keyInsights: ['PropTech innovations', 'Sustainable building trends', 'Market cycle analysis', 'Urban development patterns'],
-    gradient: 'from-stone-500 to-gray-600'
-  },
-  {
-    id: 'automotive',
-    name: 'Automotive & Transportation',
-    icon: Car,
-    description: 'Automotive industry designs, manufactures, and sells vehicles, including the transition to electric and autonomous vehicles.',
-    importance: 'Major economic driver and indicator of technological advancement, especially in electrification and automation.',
-    keyInsights: ['EV adoption trends', 'Autonomous vehicle development', 'Mobility-as-a-Service', 'Supply chain challenges'],
-    gradient: 'from-red-500 to-rose-600'
-  },
-  {
-    id: 'telecommunications',
-    name: 'Telecommunications',
-    icon: Smartphone,
-    description: 'Telecommunications provides communication services through networks, internet infrastructure, and mobile technologies.',
-    importance: 'Enables global connectivity and digital economy, critical infrastructure for modern society.',
-    keyInsights: ['5G network deployment', 'Edge computing trends', 'Network security concerns', 'Digital divide solutions'],
-    gradient: 'from-indigo-500 to-purple-600'
-  },
-  {
-    id: 'defense',
-    name: 'Defense & Security',
-    icon: Shield,
-    description: 'Defense sector includes military equipment, cybersecurity, and national security technologies and services.',
-    importance: 'Critical for national security and technological leadership, driving innovation in advanced technologies.',
-    keyInsights: ['Cybersecurity threats', 'Defense tech innovations', 'Geopolitical impact analysis', 'Public-private partnerships'],
-    gradient: 'from-slate-500 to-gray-700'
-  },
-  {
-    id: 'media',
-    name: 'Media & Entertainment',
-    icon: Camera,
-    description: 'Media and entertainment creates, distributes, and monetizes content across digital and traditional platforms.',
-    importance: 'Shapes culture and public opinion while driving innovation in content creation and distribution technologies.',
-    keyInsights: ['Streaming market evolution', 'Content monetization strategies', 'Social media trends', 'Creator economy growth'],
-    gradient: 'from-pink-500 to-rose-600'
+    id: "hr",
+    name: "Human Resources",
+    icon: <Users className="h-8 w-8" />,
+    description: "People analytics, remote workforce management, and employee experience innovation.",
+    importance: "HR transformation drives organizational success and employee engagement in modern workplace.",
+    keyInsights: [
+      "People analytics adoption",
+      "Remote workforce optimization",
+      "Employee experience platforms",
+      "Skills-based hiring practices"
+    ],
+    gradient: "from-emerald-500 to-teal-500"
   }
 ];
 
 export default function Industries() {
+  const [selectedIndustry, setSelectedIndustry] = useState<Industry | null>(null);
+
   return (
     <Page maxWidth="xl" padding="lg">
-      <div className="space-y-12">
-        {/* Hero Section */}
-        <div className="text-center space-y-6">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Industry Insights
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            We provide comprehensive insights across all major industries, helping you stay ahead of trends, 
-            understand market dynamics, and make informed decisions in your sector.
+      {/* Hero Section */}
+      <section className="text-center mb-16">
+        <h1 className="text-4xl md:text-6xl font-bold text-ink-base mb-6">
+          Industries We Serve
+        </h1>
+        <p className="text-xl text-ink-base/70 max-w-3xl mx-auto">
+          Discover how innovation and collaboration transform every sector of the economy.
+        </p>
+      </section>
+
+      {/* Industries Grid */}
+      <section className="mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {industries.map((industry) => (
+            <GlassCard
+              key={industry.id}
+              className="p-6 hover:scale-105 transition-all duration-300 cursor-pointer group"
+              onClick={() => setSelectedIndustry(industry)}
+            >
+              <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${industry.gradient} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                {industry.icon}
+              </div>
+              <h3 className="text-xl font-bold text-ink-base mb-3">
+                {industry.name}
+              </h3>
+              <p className="text-ink-base/70 leading-relaxed">
+                {industry.description}
+              </p>
+              <div className="mt-4">
+                <Button variant="ghost" className="text-pb-blue hover:text-pb-blue/80 p-0 h-auto font-medium">
+                  Learn More →
+                </Button>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="text-center">
+        <GlassCard className="p-12 max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-ink-base mb-4">
+            Ready to Transform Your Industry?
+          </h2>
+          <p className="text-lg text-ink-base/70 mb-8">
+            Join thousands of professionals collaborating to shape the future of their industries.
           </p>
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="secondary" className="text-sm px-3 py-1">
-              {industries.length} Industries Covered
-            </Badge>
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              Real-time Market Analysis
-            </Badge>
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              Expert Insights
-            </Badge>
-          </div>
-        </div>
-
-        {/* Industries Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {industries.map((industry) => {
-            const IconComponent = industry.icon;
-            return (
-              <GlassCard 
-                key={industry.id} 
-                className="h-full group glass-liquid hover:scale-105 transition-all duration-500"
-                padding="lg"
-              >
-                <div className="space-y-4 h-full flex flex-col">
-                  {/* Industry Header */}
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-2xl bg-gradient-to-br ${industry.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                        {industry.name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-muted-foreground text-sm leading-relaxed flex-1">
-                    {industry.description}
-                  </p>
-
-                  {/* Importance */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-foreground">Why It Matters:</h4>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      {industry.importance}
-                    </p>
-                  </div>
-
-                  {/* Key Insights */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-foreground">Key Insights We Provide:</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {industry.keyInsights.map((insight, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="secondary" 
-                          className="text-xs px-2 py-0.5 opacity-80 hover:opacity-100 transition-opacity"
-                        >
-                          {insight}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-            );
-          })}
-        </div>
-
-        {/* CTA Section */}
-        <GlassCard className="text-center glass-distort" padding="lg">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">
-              Ready to Get Industry-Specific Insights?
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join our platform to access real-time analysis, expert commentary, and actionable insights 
-              tailored to your industry. Stay ahead of the curve with data-driven intelligence.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-              <a 
-                href="/auth" 
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-              >
-                Get Started Today
-              </a>
-              <a 
-                href="/contact" 
-                className="px-6 py-3 border border-border rounded-lg font-medium hover:bg-accent transition-colors"
-              >
-                Contact Sales
-              </a>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="bg-pb-blue hover:bg-pb-blue/90 text-white">
+              Join Public Business
+            </Button>
+            <Button size="lg" variant="outline">
+              Explore Features
+            </Button>
           </div>
         </GlassCard>
-      </div>
+      </section>
+
+      {/* Industry Detail Modal */}
+      <Dialog open={!!selectedIndustry} onOpenChange={() => setSelectedIndustry(null)}>
+        <DialogContent className="max-w-2xl">
+          {selectedIndustry && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${selectedIndustry.gradient} flex items-center justify-center text-white`}>
+                    {selectedIndustry.icon}
+                  </div>
+                  <div>
+                    <DialogTitle className="text-2xl font-bold">
+                      {selectedIndustry.name}
+                    </DialogTitle>
+                    <DialogDescription className="text-lg">
+                      {selectedIndustry.description}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold mb-3 text-ink-base">Why This Industry Matters</h4>
+                  <p className="text-ink-base/70 leading-relaxed">
+                    {selectedIndustry.importance}
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold mb-3 text-ink-base">Key Insights & Trends</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedIndustry.keyInsights.map((insight, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-pb-blue rounded-full mt-2 flex-shrink-0"></div>
+                        <span className="text-sm text-ink-base/80">{insight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <Button 
+                    onClick={() => setSelectedIndustry(null)}
+                    className="w-full bg-pb-blue hover:bg-pb-blue/90 text-white"
+                  >
+                    Explore {selectedIndustry.name} Collaborations
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Page>
   );
 }
