@@ -14,13 +14,13 @@ export function AdaptiveBottomBar() {
   // Base tabs for each mode
   const publicTabs = [
     { icon: User, label: 'Profile', to: '/public/profile' },
-    { icon: Brain, label: 'Brainstorms', to: '/public/brainstorms' },
+    { icon: Brain, label: 'Brainstorms', to: '/public' },
     { icon: Bell, label: 'Notifications', to: '/public/notifications' },
   ];
 
   const businessTabs = [
     { icon: BarChart3, label: 'Dashboard', to: '/business/dashboard' },
-    { icon: FileText, label: 'Reports', to: '/business/reports' },
+    { icon: FileText, label: 'Feed', to: '/business' },
     { icon: Bell, label: 'Notifications', to: '/business/notifications' },
   ];
 
