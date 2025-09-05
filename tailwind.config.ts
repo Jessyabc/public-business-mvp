@@ -13,9 +13,7 @@ export default {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      screens: { "2xl": "1400px" },
     },
     extend: {
       colors: {
@@ -28,7 +26,7 @@ export default {
           base: "var(--text-ink)",
           dark: "var(--text-ink-d)",
         },
-        
+
         // Legacy support for existing components
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -84,6 +82,11 @@ export default {
         pbmd: "var(--shadow-md)",
         pblg: "var(--shadow-lg)",
       },
+      // Soft emissive logo glows
+      dropShadow: {
+        brand: "0 0 40px rgba(59,130,246,0.35)",           // blue-ish
+        "brand-strong": "0 0 60px rgba(99,102,241,0.40)",  // indigo-ish
+      },
       transitionTimingFunction: {
         pb: "var(--ease)",
       },
@@ -100,10 +103,28 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        // Center glow (keeps translate baked-in)
+        "glow-center": {
+          "0%, 100%": {
+            transform: "translate(-50%, -50%) scale(1)",
+            opacity: "0.9",
+          },
+          "50%": {
+            transform: "translate(-50%, -50%) scale(1.06)",
+            opacity: "1",
+          },
+        },
+        // Corner blobs
+        glow: {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.9" },
+          "50%": { transform: "scale(1.06)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glow-center": "glow-center 7s ease-in-out infinite",
+        glow: "glow 8.5s ease-in-out infinite",
       },
     },
   },
