@@ -20,8 +20,8 @@ export const useUIModeStore = create<UIModeStore>()(
         document.body.setAttribute('data-mode', mode);
       },
       lastVisitedTab: {
-        public: '/public/profile',
-        business: '/business/dashboard',
+        public: '/public',
+        business: '/business',
       },
       setLastVisitedTab: (mode: UIMode, tab: string) => {
         set({ 

@@ -19,7 +19,7 @@ export function MainShell() {
     // If we're on root path, redirect to last visited tab for current mode
     if (location.pathname === '/' || location.pathname === '') {
       if (user) {
-        navigate(lastVisitedTab[uiMode] || `/${uiMode}/profile`);
+        navigate(lastVisitedTab[uiMode] || `/${uiMode}`);
       } else {
         navigate('/landing');
       }
@@ -59,7 +59,7 @@ export function MainShell() {
       </div>
 
       {/* Main Content */}
-      <main className="content-wrap pt-6">
+      <main className="content-wrap">
         <ErrorBoundary>
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[400px]">
