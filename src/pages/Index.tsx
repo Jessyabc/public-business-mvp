@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { Landing } from './Landing';
 import { BrainstormFeed } from "@/components/feeds/BrainstormFeed";
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
+import { MainLayout } from '@/components/layout/MainLayout';
 
 const Index = () => {
   const { mode } = useAppMode();
@@ -26,7 +27,11 @@ const Index = () => {
   }
 
   if (!user) {
-    return <Landing />;
+    return (
+      <MainLayout>
+        <Landing />
+      </MainLayout>
+    );
   }
 
   // If user is connected, show the feeds

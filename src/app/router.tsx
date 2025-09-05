@@ -164,9 +164,9 @@ export const router = createBrowserRouter([
     ),
   },
   
-  // Keep existing routes from nav-items for compatibility
+  // Keep existing routes from nav-items for compatibility - wrap all with MainLayout
   ...navItems.map(({ to, page }) => ({
     path: to,
-    element: page,
+    element: <MainLayout>{page}</MainLayout>,
   })),
 ]);
