@@ -37,7 +37,7 @@ export const navItems = [
     title: "Home",
     to: "/landing",
     icon: Home,
-    page: <Index />,
+    page: <Landing />,
   },
   {
     title: "Auth",
