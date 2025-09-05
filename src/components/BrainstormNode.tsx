@@ -1,18 +1,20 @@
 import { memo, useMemo } from 'react';
 import { Handle, Position, Node } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
-import { Brainstorm } from '@/types/brainstorm';
+import { Post } from '@/hooks/usePosts';
 import { Brain, MessageCircle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface BrainstormNodeData extends Record<string, unknown> {
-  brainstorm: Brainstorm;
+  post: Post;
+  onContinue?: () => void;
+  onLink?: () => void;
 }
 
 export type BrainstormNode = Node<BrainstormNodeData>;
 
 function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
-  const { brainstorm } = data;
+  const { post } = data;
 
   const getBrainScoreColor = (score: number) => {
     if (score >= 90) return "bg-green-500/20 text-green-400 border-green-500/30";
@@ -20,15 +22,21 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
     return "bg-purple-500/20 text-purple-400 border-purple-500/30";
   };
 
-  // Stable card type based on brainstorm ID to prevent constant re-renders
+  // Generate a brain score based on post engagement
+  const brainScore = useMemo(() => {
+    const baseScore = Math.min(90, (post.likes_count || 0) * 5 + (post.comments_count || 0) * 10 + (post.views_count || 0) * 2);
+    return Math.max(20, baseScore);
+  }, [post.likes_count, post.comments_count, post.views_count]);
+
+  // Stable card type based on post ID to prevent constant re-renders
   const cardType = useMemo(() => {
-    const hash = brainstorm.id.split('').reduce((a, b) => {
+    const hash = post.id.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0);
     const types = ['spark', 'threadline', 'echo'];
     return types[Math.abs(hash) % types.length];
-  }, [brainstorm.id]);
+  }, [post.id]);
   
   return (
     <div className={`group relative w-80 max-w-80 backdrop-blur-xl transition-all duration-500 hover:scale-105 cursor-pointer ${
@@ -54,24 +62,24 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
             </div>
             <div className="flex items-center gap-1 text-xs text-white/60">
               <Clock className="w-3 h-3" />
-              {formatDistanceToNow(brainstorm.timestamp, { addSuffix: true })}
+              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={`text-xs rounded-full ${getBrainScoreColor(brainstorm.brainScore)}`}>
+            <Badge className={`text-xs rounded-full ${getBrainScoreColor(brainScore)}`}>
               <Brain className="w-3 h-3 mr-1" />
-              {brainstorm.brainScore}
+              {brainScore}
             </Badge>
             <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs rounded-full">
               <MessageCircle className="w-3 h-3 mr-1" />
-              {brainstorm.threadCount}
+              {post.comments_count || 0}
             </Badge>
           </div>
         </div>
         
         {/* Content */}
         <p className="text-white text-sm leading-relaxed font-medium mb-4">
-          {brainstorm.content}
+          {post.content}
         </p>
         
         {/* Tags */}
