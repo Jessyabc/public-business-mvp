@@ -30,7 +30,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {!user && <Header />}
       
       {/* Main Content with smooth transitions */}
-      <main className={user ? "min-h-screen" : "min-h-screen pt-28"}>
+      <main className={user ? "min-h-screen pt-20" : "min-h-screen pt-32"}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
