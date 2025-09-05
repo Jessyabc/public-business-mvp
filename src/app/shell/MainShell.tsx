@@ -63,7 +63,7 @@ export function MainShell() {
       </div>
 
       {/* Main Content */}
-      <main className="content-wrap pt-16"> {/* Add top padding for mode switcher */}
+      <main className="content-wrap">
         <ErrorBoundary>
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[400px]">

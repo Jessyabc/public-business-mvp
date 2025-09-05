@@ -78,15 +78,17 @@ export default function Auth() {
   };
 
   return (
-    <main className="container mx-auto max-w-xl px-4 py-12">
+    <main className="container mx-auto max-w-xl px-4 py-12 mt-24">
       <header className="text-center mb-8">
-        <h1 className="text-3xl font-semibold flex items-center justify-center gap-2">
-          <Brain className="w-6 h-6 text-primary" /> Sign in or Create account
+        <h1 className="text-3xl font-semibold flex items-center justify-center gap-2 text-ink-base">
+          <Brain className="w-6 h-6 text-pb-blue" /> Sign in or Create account
         </h1>
-        <p className="text-muted-foreground mt-2">Access brainstorms and business insights.</p>
+        <p className="text-ink-base/70 mt-2">Access brainstorms and business insights.</p>
       </header>
 
       <section className="glass-card border rounded-xl p-6">
+        <div className="scrim" />
+        <div className="relative z-10">
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -141,7 +143,7 @@ export default function Auth() {
             
             {/* Personal Profile Fields */}
             <div className="space-y-4">
-              <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Profile Information (Optional)</h3>
+              <h3 className="font-medium text-sm text-ink-base/70 uppercase tracking-wide">Profile Information (Optional)</h3>
               
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
@@ -179,6 +181,7 @@ export default function Auth() {
             </Button>
           </TabsContent>
         </Tabs>
+        </div>
       </section>
     </main>
   );

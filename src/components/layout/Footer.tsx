@@ -38,12 +38,9 @@ export function Footer() {
   };
 
   return (
-    <footer className={`py-16 mt-32 ${
-      mode === 'public' 
-        ? 'bg-slate-900/50 backdrop-blur-xl border-t border-white/10' 
-        : 'bg-white/80 backdrop-blur-xl border-t border-blue-200/30'
-    }`}>
-      <div className="container mx-auto px-6">
+    <footer className="glass-card py-16 mt-32 border-t border-pb-blue/20">
+      <div className="scrim" />
+      <div className="container mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-1">
@@ -51,19 +48,19 @@ export function Footer() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">PB</span>
               </div>
-              <span className="text-xl font-bold text-foreground">Public Business</span>
+              <span className="text-xl font-bold text-ink-base">Public Business</span>
             </div>
-            <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            <p className="text-ink-base/70 text-sm mb-6 leading-relaxed">
               Linking industries the right way. Engage, share, thrive with business leaders and thought partners.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-ink-base/70 hover:text-pb-blue transition-colors">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-ink-base/70 hover:text-pb-blue transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="mailto:contact@public-business.ca" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="mailto:contact@public-business.ca" className="text-ink-base/70 hover:text-pb-blue transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
@@ -71,13 +68,13 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Company</h3>
+            <h3 className="font-semibold text-ink-base mb-4">Company</h3>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -88,13 +85,13 @@ export function Footer() {
 
           {/* Members Links */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Members</h3>
+            <h3 className="font-semibold text-ink-base mb-4">Members</h3>
             <ul className="space-y-3">
               {footerLinks.members.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -105,13 +102,13 @@ export function Footer() {
 
           {/* Support Links */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Support</h3>
+            <h3 className="font-semibold text-ink-base mb-4">Support</h3>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -122,13 +119,13 @@ export function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Legal</h3>
+            <h3 className="font-semibold text-ink-base mb-4">Legal</h3>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -142,24 +139,24 @@ export function Footer() {
         <div className="border-t border-border mt-12 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="flex items-center space-x-3">
-              <Mail className="h-5 w-5 text-primary" />
+              <Mail className="h-5 w-5 text-pb-blue" />
               <div>
-                <div className="font-medium text-foreground">Email</div>
-                <div className="text-sm text-muted-foreground">contact@public-business.ca</div>
+                <div className="font-medium text-ink-base">Email</div>
+                <div className="text-sm text-ink-base/70">contact@public-business.ca</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Phone className="h-5 w-5 text-primary" />
+              <Phone className="h-5 w-5 text-pb-blue" />
               <div>
-                <div className="font-medium text-foreground">Phone</div>
-                <div className="text-sm text-muted-foreground">+1 (555) 123-4567</div>
+                <div className="font-medium text-ink-base">Phone</div>
+                <div className="text-sm text-ink-base/70">+1 (555) 123-4567</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <MapPin className="h-5 w-5 text-primary" />
+              <MapPin className="h-5 w-5 text-pb-blue" />
               <div>
-                <div className="font-medium text-foreground">Location</div>
-                <div className="text-sm text-muted-foreground">Mascouche, QC, Canada (Remote-first)</div>
+                <div className="font-medium text-ink-base">Location</div>
+                <div className="text-sm text-ink-base/70">Mascouche, QC, Canada (Remote-first)</div>
               </div>
             </div>
           </div>
@@ -167,10 +164,10 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-ink-base/70">
             © {currentYear} Public Business. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground mt-2 md:mt-0">
+          <p className="text-sm text-ink-base/70 mt-2 md:mt-0">
             Built with ❤️ for connecting industries
           </p>
         </div>

@@ -44,6 +44,7 @@ export function Header() {
     { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
     { to: '/features', label: 'Features' },
+    { to: '/industries', label: 'Industries' },
     { to: '/members/business-members', label: 'Business Members' },
     { to: '/members/public-members', label: 'Public Members' },
     { to: '/contact', label: 'Contact' },
@@ -53,8 +54,9 @@ export function Header() {
 
   return (
     <>
-      <header className="glass-header border-pb-blue/20">
-        <div className="container mx-auto px-8 py-6 glass-content">
+      <header className="glass-card border border-pb-blue/20 fixed top-4 left-4 right-4 z-40 rounded-xl">
+        <div className="scrim" />
+        <div className="container mx-auto px-8 py-6 relative z-10">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <NavLink to="/" className="flex items-center">
@@ -73,7 +75,7 @@ export function Header() {
                   to={item.to}
                   className={({ isActive }) =>
                     `text-sm font-medium transition-colors duration-med hover:text-pb-blue ${
-                      isActive ? 'text-pb-blue' : 'text-pb-text2'
+                      isActive ? 'text-pb-blue' : 'text-ink-base'
                     }`
                   }
                 >
@@ -86,10 +88,10 @@ export function Header() {
             <div className="hidden lg:flex items-center space-x-4">
               {!user ? (
                 <>
-                  <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="glass-button">
+                  <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="bg-white/80 text-ink-base border border-black/10 hover:bg-white/90">
                     Login
                   </Button>
-                  <Button onClick={() => setShowAuthModal(true)} className="glass-button bg-pb-blue/20 text-pb-blue">
+                  <Button onClick={() => setShowAuthModal(true)} className="bg-pb-blue text-white shadow-pbmd hover:shadow-pblg">
                     Sign Up
                   </Button>
                 </>
@@ -144,7 +146,7 @@ export function Header() {
                     to={item.to}
                     className={({ isActive }) =>
                       `px-3 py-2 text-sm font-medium rounded-md transition-colors duration-med hover:text-pb-blue ${
-                        isActive ? 'text-pb-blue bg-pb-blue/10' : 'text-pb-text2'
+                        isActive ? 'text-pb-blue bg-pb-blue/10' : 'text-ink-base'
                       }`
                     }
                     onClick={() => setMobileMenuOpen(false)}

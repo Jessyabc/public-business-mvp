@@ -74,3 +74,7 @@ body[data-bg="dark"] .glass-card {
   height: var(--dock-h);
   z-index: 50;
 }
+
+.pb-dock-safe {
+  padding-bottom: calc(var(--dock-h) + max(var(--dock-gap), env(safe-area-inset-bottom)));
+}

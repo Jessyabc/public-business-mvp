@@ -143,6 +143,30 @@ export type Database = {
         }
         Relationships: []
       }
+      email_subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          subscribed_to_news: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          subscribed_to_news?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          subscribed_to_news?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       idea_brainstorms: {
         Row: {
           author_display_name: string
@@ -177,6 +201,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "idea_brainstorms_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "open_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idea_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          idea_id: string
+          metadata: Json | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_id: string
+          metadata?: Json | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_id?: string
+          metadata?: Json | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_interactions_idea_id_fkey"
             columns: ["idea_id"]
             isOneToOne: false
             referencedRelation: "open_ideas"
@@ -232,27 +291,45 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          ip_hash: string | null
           is_curated: boolean
           linked_brainstorms_count: number
+          notify_on_interaction: boolean | null
+          represented_org_id: string | null
+          status: string | null
+          subscribe_newsletter: boolean | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           content: string
           created_at?: string
           email?: string | null
           id?: string
+          ip_hash?: string | null
           is_curated?: boolean
           linked_brainstorms_count?: number
+          notify_on_interaction?: boolean | null
+          represented_org_id?: string | null
+          status?: string | null
+          subscribe_newsletter?: boolean | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           content?: string
           created_at?: string
           email?: string | null
           id?: string
+          ip_hash?: string | null
           is_curated?: boolean
           linked_brainstorms_count?: number
+          notify_on_interaction?: boolean | null
+          represented_org_id?: string | null
+          status?: string | null
+          subscribe_newsletter?: boolean | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
