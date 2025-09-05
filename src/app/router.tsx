@@ -163,11 +163,9 @@ export const router = createBrowserRouter([
     ),
   },
   
-  // Keep all existing routes from nav-items for compatibility - wrap with MainLayout
-  ...navItems
-    .filter(item => !['/', '/public/*', '/business/*'].includes(item.to))
-    .map(({ to, page }) => ({
-      path: to,
-      element: <MainLayout>{page}</MainLayout>,
-    })),
+  // Keep existing routes from nav-items for compatibility
+  ...navItems.map(({ to, page }) => ({
+    path: to,
+    element: page,
+  })),
 ]);
