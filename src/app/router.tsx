@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainShell } from './shell/MainShell';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import Index from '@/pages/Index';
 
 // Lazy load components for code splitting
 const PublicProfile = lazy(() => import('./public/Profile').then(m => ({ default: m.PublicProfile })));
@@ -37,18 +38,18 @@ function LazyWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export const router = createBrowserRouter([
-  // Main app shell routes (authenticated experience)
+  // Main feed route (shows BrainstormFeed/BusinessFeed based on mode)
   {
     path: '/',
+    element: <Index />,
+  },
+
+  // Shell routes for specific authenticated sections
+  {
+    path: '/app',
     element: <MainShell />,
     children: [
-      // Default redirect
-      {
-        index: true,
-        element: <Navigate to="/landing" replace />,
-      },
-      
-      // Public mode routes
+      // Public mode routes  
       {
         path: 'public',
         children: [
