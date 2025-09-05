@@ -42,30 +42,27 @@ export function AdaptiveBottomBar() {
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-      <GlassCard className={cn(
-        "flex items-center space-x-1 px-2 py-2",
-        isAdmin() && "max-w-screen-sm overflow-x-auto"
-      )}>
+    <div className="pb-dock">
+      <div className="glass-card flex items-center space-x-1 px-2 py-2 max-w-md mx-auto">
         <div className={cn(
           "flex items-center space-x-1",
-          isAdmin() && "min-w-max"
+          isAdmin() && "overflow-x-auto min-w-max"
         )}>
           {tabs.map((tab, index) => (
             <NavLink
               key={tab.to}
               to={tab.to}
               className={({ isActive }) => cn(
-                'flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]',
+                'flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-med ease-pb min-w-[56px]',
                 isActive
-                  ? 'text-primary font-semibold'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'text-pb-blue font-semibold'
+                  : 'text-ink-base/60 hover:text-ink-base'
               )}
             >
               {({ isActive }) => (
                 <>
                   <tab.icon className={cn(
-                    'w-4 h-4 mb-1',
+                    'w-4 h-4 mb-1 transition-transform duration-fast',
                     isActive && 'scale-110'
                   )} />
                   <span className="text-xs">{tab.label}</span>
@@ -78,20 +75,23 @@ export function AdaptiveBottomBar() {
           {uiMode === 'public' && (
             <button
               onClick={() => openComposer()}
-              className="flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px] text-primary hover:text-primary/80"
+              className="flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-med ease-pb min-w-[56px] text-pb-blue hover:text-pb-blue/80"
             >
-              <div className="w-4 h-4 mb-1 bg-primary rounded-full flex items-center justify-center">
-                <Plus className="w-3 h-3 text-primary-foreground" />
+              <div className="w-4 h-4 mb-1 bg-pb-blue rounded-full flex items-center justify-center">
+                <Plus className="w-3 h-3 text-white" />
               </div>
               <span className="text-xs font-medium">New</span>
             </button>
           )}
         </div>
-      </GlassCard>
+        
+        {/* Scrim for readability */}
+        <div className="scrim" />
+      </div>
       
       {/* Admin indicator */}
       {isAdmin() && (
-        <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+        <div className="absolute -top-2 -right-2 bg-pb-blue text-white text-xs px-2 py-1 rounded-full font-medium shadow-pbmd">
           Admin
         </div>
       )}

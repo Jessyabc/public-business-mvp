@@ -38,7 +38,7 @@ export function MainShell() {
   }, [location.pathname, uiMode, setLastVisitedTab]);
 
   return (
-    <Page className="pb-20"> {/* Add bottom padding for nav bar */}
+    <div className="stage">
       {/* SVG Filter Definition for Glass Displacement Effect */}
       <svg className="glass-filter-sprite" aria-hidden="true">
         <defs>
@@ -63,7 +63,7 @@ export function MainShell() {
       </div>
 
       {/* Main Content */}
-      <div className="pt-16"> {/* Add top padding for mode switcher */}
+      <main className="content-wrap pt-16"> {/* Add top padding for mode switcher */}
         <ErrorBoundary>
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[400px]">
@@ -73,10 +73,10 @@ export function MainShell() {
             <Outlet />
           </Suspense>
         </ErrorBoundary>
-      </div>
+      </main>
 
-      {/* Adaptive Bottom Navigation */}
+      {/* Adaptive Bottom Navigation with proper dock styling */}
       <AdaptiveBottomBar />
-    </Page>
+    </div>
   );
 }
