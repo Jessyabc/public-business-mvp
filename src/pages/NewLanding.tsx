@@ -39,11 +39,11 @@ export function NewLanding() {
           />
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-bold text-ink-base mb-6 text-center leading-tight">
+        <h1 className="text-5xl md:text-7xl font-bold text-black mb-6 text-center leading-tight">
           Curiosity deserves a stage.
         </h1>
         
-        <p className="text-xl md:text-2xl text-ink-base/70 mb-12 text-center max-w-3xl leading-relaxed">
+        <p className="text-xl md:text-2xl text-black/70 mb-12 text-center max-w-3xl leading-relaxed">
           Share an idea. Watch it branch into something useful.
         </p>
 
