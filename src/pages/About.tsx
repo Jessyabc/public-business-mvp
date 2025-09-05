@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 export default function About() {
   const navigate = useNavigate();
@@ -89,7 +90,8 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-white to-primary/5">
+    <MainLayout>
+      <div className="min-h-screen bg-gradient-to-br from-background via-white to-primary/5">
       {/* Hero Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-primary via-primary to-primary/80">
         <div className="container mx-auto max-w-4xl text-center text-white">
@@ -333,6 +335,7 @@ export default function About() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

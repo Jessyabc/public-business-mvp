@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Timeline } from "@/components/Timeline";
+import { TimelineSection } from "@/components/landing/TimelineSection";
 import { ComposerSection } from "@/components/landing/ComposerSection";
 import { BrainstormPreviewList } from "@/components/BrainstormPreviewList";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -50,9 +50,7 @@ export function NewLanding() {
       </section>
 
       {/* Timeline Section */}
-      <section className="bg-gradient-to-b from-slate-800 to-slate-700 py-20">
-        <Timeline onComplete={() => setShowComposer(true)} />
-      </section>
+      <TimelineSection onComplete={() => setShowComposer(true)} />
 
       {/* Composer Section */}
       <section className="bg-gradient-to-b from-slate-700 to-slate-600">
