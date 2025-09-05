@@ -119,7 +119,7 @@ export function BrainstormNew() {
         <Button
           onClick={() => navigate(`/idea/${ideaId}`)}
           variant="outline"
-          className="glass-ios-triple mb-8"
+          className="glass-button mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Idea
@@ -127,62 +127,62 @@ export function BrainstormNew() {
 
         {/* Reference Idea */}
         {idea && (
-          <GlassCard className="border-primary/20 mb-8 glass-ios-triple glass-corner-distort">
+          <GlassCard className="border-pb-blue/20 mb-8 glass-card glass-content">
             <div className="flex items-start gap-4">
-              <Lightbulb className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+              <Lightbulb className="w-8 h-8 text-pb-blue flex-shrink-0 mt-1" />
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Brainstorming on:</p>
-                <p className="text-foreground leading-relaxed">{idea.content}</p>
+                <p className="text-sm text-pb-text2 mb-2">Brainstorming on:</p>
+                <p className="text-pb-text0 leading-relaxed">{idea.content}</p>
               </div>
             </div>
           </GlassCard>
         )}
 
         {/* Brainstorm Form */}
-        <GlassCard className="border-primary/20 glass-ios-triple glass-corner-distort" padding="lg">
+        <GlassCard className="border-pb-blue/20 glass-card glass-content" padding="lg">
           <div className="mb-6">
-            <h2 className="text-2xl text-center font-semibold text-foreground">Start Your Brainstorm</h2>
+            <h2 className="text-2xl text-center font-semibold text-pb-text0">Start Your Brainstorm</h2>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
+              <label className="text-sm font-medium text-pb-text0 mb-2 block">
                 Title
               </label>
               <Input
                 placeholder="Give your brainstorm a catchy title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="glass-ios-triple border-primary/20"
+                className="glass-input border-pb-blue/20 focus-glass"
                 maxLength={80}
                 required
               />
-              <div className="text-sm text-muted-foreground mt-1">
+              <div className="text-sm text-pb-text2 mt-1">
                 {title.length}/80 characters
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
+              <label className="text-sm font-medium text-pb-text0 mb-2 block">
                 Your Brainstorm
               </label>
               <Textarea
                 placeholder="Share your thoughts, ideas, solutions, or questions about this idea..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[200px] glass-ios-triple border-primary/20 resize-none"
+                className="min-h-[200px] glass-input border-pb-blue/20 resize-none focus-glass"
                 required
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
+              <label className="text-sm font-medium text-pb-text0 mb-2 block">
                 Display Name
               </label>
               <Input
                 placeholder="How should we credit you?"
                 value={authorDisplayName}
                 onChange={(e) => setAuthorDisplayName(e.target.value)}
-                className="glass-ios-triple border-primary/20"
+                className="glass-input border-pb-blue/20 focus-glass"
                 required
               />
             </div>
@@ -190,7 +190,7 @@ export function BrainstormNew() {
             <Button
               type="submit"
               disabled={isSubmitting || title.length < 3 || title.length > 80 || !content.trim()}
-              className="w-full glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+              className="w-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass"
             >
               {isSubmitting ? "Creating..." : "Share Your Brainstorm"}
             </Button>

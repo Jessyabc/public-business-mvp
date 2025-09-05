@@ -91,7 +91,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
 
   if (submitted) {
     return (
-      <GlassCard className="rounded-3xl text-center glass-ios-triple glass-corner-distort" padding="lg">
+      <GlassCard className="glass-card rounded-3xl text-center" padding="lg">
         <div className="mb-4">
           <Lightbulb className="w-16 h-16 text-primary mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-foreground mb-2">
@@ -108,7 +108,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
             setEmail("");
           }}
           variant="outline"
-          className="glass-ios-triple"
+          className="glass-button bg-white/10 hover:bg-white/20 border border-white/30"
         >
           Share Another Idea
         </Button>
@@ -117,18 +117,18 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
   }
 
   return (
-    <GlassCard className="rounded-3xl glass-ios-triple glass-corner-distort" padding="lg">
+    <GlassCard className="glass-card rounded-3xl" padding="lg">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <Textarea
             placeholder="What's the question you can't stop thinking about?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[120px] glass-ios-triple border-primary/20 resize-none"
+            className="min-h-[120px] glass-input border-pb-blue/20 resize-none focus-glass"
             maxLength={280}
             required
           />
-          <div className="flex justify-between text-sm text-muted-foreground mt-2">
+          <div className="flex justify-between text-sm text-pb-text2 mt-2">
             <span>{content.length < 10 ? `${10 - content.length} more needed` : "Perfect length"}</span>
             <span>{content.length}/280</span>
           </div>
@@ -140,7 +140,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
             placeholder="Email for updates (optional)"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="glass-ios-triple border-primary/20"
+            className="glass-input border-pb-blue/20 focus-glass"
           />
         </div>
 
@@ -159,7 +159,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
         <Button
           type="submit"
           disabled={isSubmitting || content.length < 10 || content.length > 280}
-          className="w-full glass-ios-triple bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105"
+          className="w-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass"
         >
           {isSubmitting ? "Planting..." : "Drop Your Idea"}
         </Button>

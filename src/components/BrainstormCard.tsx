@@ -20,11 +20,11 @@ interface BrainstormCardProps {
 export function BrainstormCard({ brainstorm, onClick, showFreeBadge }: BrainstormCardProps) {
   return (
     <GlassCard 
-      className="cursor-pointer hover:scale-105 transition-all duration-300 border-primary/20 relative glass-ios-triple glass-corner-distort"
+      className="glass-card interactive-glass cursor-pointer border-pb-blue/20"
       onClick={onClick}
     >
       {showFreeBadge && (
-        <div className="absolute top-4 right-4 bg-primary/20 text-primary px-2 py-1 rounded-full text-xs font-medium border border-primary/30">
+        <div className="absolute top-4 right-4 bg-pb-blue/20 text-pb-blue px-2 py-1 rounded-full text-xs font-medium border border-pb-blue/30">
           Free
         </div>
       )}

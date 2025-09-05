@@ -18,7 +18,7 @@ interface IdeaCardProps {
 export function IdeaCard({ idea, onClick }: IdeaCardProps) {
   return (
     <GlassCard 
-      className="cursor-pointer hover:scale-105 transition-all duration-300 border-primary/20 glass-ios-triple glass-corner-distort"
+      className="glass-card interactive-glass cursor-pointer border-pb-blue/20"
       onClick={onClick}
     >
       <p className="text-foreground leading-relaxed mb-4">

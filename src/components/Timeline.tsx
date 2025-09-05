@@ -63,7 +63,7 @@ export function Timeline() {
           {timelineSteps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <GlassCard 
-                className="min-w-[280px] glass-ios-triple glass-corner-distort hover:scale-105 transition-all duration-300"
+                className="min-w-[280px] glass-card glass-content hover-glass"
                 padding="lg"
               >
                 <div className="text-center">
