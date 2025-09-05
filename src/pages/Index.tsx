@@ -12,18 +12,13 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to profile after login/signup
+  // Redirect to profile only after signup, not regular login
   useEffect(() => {
     if (user && window.location.search.includes('type=signup')) {
       navigate('/profile');
       return;
     }
-    // Also redirect to profile after regular login
-    if (user && window.location.pathname === '/' && !loading) {
-      navigate('/profile');
-      return;
-    }
-  }, [user, navigate, loading]);
+  }, [user, navigate]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
