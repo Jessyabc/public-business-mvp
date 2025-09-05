@@ -8,7 +8,7 @@ import { GlassCard } from "@/ui/components/GlassCard";
 import { ReactFlow, Node, Edge, Controls, Background, BackgroundVariant, useNodesState, useEdgesState } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import '@xyflow/react/dist/base.css';
-import '../../styles/react-flow-turbo.css';
+import '../styles/react-flow-turbo.css';
 import BrainstormNodeComponent, { BrainstormNodeData } from '@/components/BrainstormNode';
 import ConnectionEdgeComponent from '@/components/ConnectionEdge';
 import { Brain, User, Clock, ArrowLeft, Plus, Network } from "lucide-react";
