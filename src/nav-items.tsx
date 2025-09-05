@@ -1,6 +1,5 @@
 import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2, BookOpen, MessageCircle, Briefcase, Scale, Shield, Layers } from "lucide-react";
 import Index from "./pages/Index";
-import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -36,9 +35,9 @@ import ComponentsShowcase from "./pages/ComponentsShowcase";
 export const navItems = [
   {
     title: "Home",
-    to: "/landing",
+    to: "/",
     icon: Home,
-    page: <Landing />,
+    page: <Index />,
   },
   {
     title: "Auth",

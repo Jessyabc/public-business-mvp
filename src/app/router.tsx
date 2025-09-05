@@ -19,7 +19,7 @@ const BrainstormNew = lazy(() => import('@/pages/BrainstormNew').then(m => ({ de
 const BrainstormDetailPage = lazy(() => import('@/pages/BrainstormDetail').then(m => ({ default: m.BrainstormDetail })));
 
 // Keep existing pages for non-shell routes
-import Landing from '@/pages/Landing';
+import { Landing } from '@/pages/Landing';
 import { navItems } from '@/nav-items';
 
 // Fallback component for loading
@@ -166,10 +166,6 @@ export const router = createBrowserRouter([
   // Keep existing routes from nav-items for compatibility
   ...navItems.map(({ to, page }) => ({
     path: to,
-    element: (
-      <MainLayout>
-        {page}
-      </MainLayout>
-    ),
+    element: page,
   })),
 ]);
