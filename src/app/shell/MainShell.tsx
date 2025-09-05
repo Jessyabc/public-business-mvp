@@ -1,7 +1,7 @@
 import { useEffect, Suspense } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useUIModeStore } from '@/stores/uiModeStore';
-import { useAuth } from '@/contexts/AuthContext';
+import { profileService } from '@/services/mock';
 import { Page } from '@/ui/layouts/Page';
 import { ModeSwitcher } from './ModeSwitcher';
 import { AdaptiveBottomBar } from './AdaptiveBottomBar';
@@ -10,21 +10,25 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export function MainShell() {
   const { uiMode, lastVisitedTab, setLastVisitedTab } = useUIModeStore();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle first visit and navigation
+  // Initialize user profile and handle first visit
   useEffect(() => {
+    let profile = profileService.getProfile();
+    
+    // If no profile exists, create default and redirect to profile
+    if (!profile) {
+      profile = profileService.createDefaultProfile();
+      navigate('/public/profile');
+      return;
+    }
+
     // If we're on root path, redirect to last visited tab for current mode
     if (location.pathname === '/' || location.pathname === '') {
-      if (user) {
-        navigate(lastVisitedTab[uiMode] || `/${uiMode}/profile`);
-      } else {
-        navigate('/landing');
-      }
+      navigate(lastVisitedTab[uiMode]);
     }
-  }, [navigate, location.pathname, uiMode, lastVisitedTab, user]);
+  }, [navigate, location.pathname, uiMode, lastVisitedTab]);
 
   // Track visited tabs
   useEffect(() => {

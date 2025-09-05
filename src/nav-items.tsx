@@ -35,7 +35,7 @@ import ComponentsShowcase from "./pages/ComponentsShowcase";
 export const navItems = [
   {
     title: "Home",
-    to: "/landing",
+    to: "/",
     icon: Home,
     page: <Index />,
   },
