@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Brain, Sparkles, FileText, Lock, Link2 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
-import { usePosts } from "@/hooks/usePosts";
+import { supabase } from '@/integrations/supabase/client';
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
+import { toast } from 'sonner';
 
 interface ComposerModalProps {
   isOpen: boolean;
@@ -19,7 +20,6 @@ interface ComposerModalProps {
 
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const { mode } = useAppMode();
-  const { createPost, createPostWithRelation } = usePosts();
   const { canCreateBusinessPosts } = useUserRoles();
   const { context, setContext } = useComposerStore();
   const [composerType, setComposerType] = useState<'brainstorm' | 'insight' | null>(null);
@@ -51,25 +51,75 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     if (!content.trim()) return;
     setIsSubmitting(true);
     try {
+      // Map composer types to post kinds
+      let kind: string;
+      if (composerType === 'brainstorm') {
+        kind = context?.parentPostId ? 'brainstorm_continue' : 'brainstorm';
+      } else {
+        // Map post types to kinds
+        const typeMap: Record<string, string> = {
+          'insight': 'insight',
+          'report': 'insight',
+          'whitepaper': 'white_paper',
+          'webinar': 'insight',
+          'video': mode === 'public' ? 'video_brainstorm' : 'video_insight',
+        };
+        kind = typeMap[postType] || 'insight';
+      }
+
       const postData = {
+        kind,
         content: content.trim(),
-        type: composerType === 'brainstorm' ? 'brainstorm' as const : postType as any,
-        mode: mode,
-        visibility: (visibility || 'public') as 'public' | 'my_business' | 'other_businesses' | 'draft',
-        ...(composerType === 'insight' && title.trim() && { title: title.trim() }),
+        ...(title.trim() && { title: title.trim() }),
+        ...(context?.parentPostId && { parent_post_id: context.parentPostId }),
+        tags: [], // Could be added in future
+        meta: {
+          visibility: visibility || 'public',
+          mode: mode,
+          composer_type: composerType,
+          post_type: postType,
+        },
       };
 
-      if (context?.parentPostId) {
-        await createPostWithRelation(postData, {
-          parent_post_id: context.parentPostId,
-          relation_type: relationType,
-        });
-      } else {
-        await createPost(postData);
+      console.log('Creating post via edge function:', postData);
+
+      const { data, error } = await supabase.functions.invoke('create-post', {
+        body: postData,
+      });
+
+      if (error) {
+        console.error('Error creating post:', error);
+        toast.error('Failed to create post');
+        return;
       }
+
+      console.log('Post created successfully:', data);
+      toast.success(`${composerType === 'brainstorm' ? 'Brainstorm' : 'Post'} created successfully and is pending approval`);
+      
+      // If this is a relation (continuation/linking), create the post relation
+      if (context?.parentPostId && data?.post_id) {
+        try {
+          const { error: relationError } = await supabase
+            .from('post_relations')
+            .insert({
+              parent_post_id: context.parentPostId,
+              child_post_id: data.post_id,
+              relation_type: relationType,
+            });
+          
+          if (relationError) {
+            console.error('Error creating post relation:', relationError);
+            toast.error('Post created but linking failed');
+          }
+        } catch (relationErr) {
+          console.error('Relation creation error:', relationErr);
+        }
+      }
+      
       handleClose();
     } catch (error) {
       console.error('Error creating post:', error);
+      toast.error('Failed to create post');
     } finally {
       setIsSubmitting(false);
     }

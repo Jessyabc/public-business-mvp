@@ -579,6 +579,18 @@ export type Database = {
         Args: { ip_address: string }
         Returns: string
       }
+      increment_post_comments: {
+        Args: { post_id: string }
+        Returns: undefined
+      }
+      increment_post_likes: {
+        Args: { post_id: string }
+        Returns: undefined
+      }
+      increment_post_views: {
+        Args: { post_id: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: { uid: string }
         Returns: boolean
