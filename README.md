@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://public-business.ca/
+**URL**: https://www.public-business.ca/
 
 ## How can I edit this code?
 
@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://public-business.ca/) and start prompting.
+Simply visit the [Lovable Project](https://www.public-business.ca/) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 

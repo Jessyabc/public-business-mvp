@@ -63,7 +63,7 @@ export function Footer() {
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="mailto:contact@publicbusiness.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="mailto:contact@public-business.ca" className="text-muted-foreground hover:text-primary transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
@@ -145,7 +145,7 @@ export function Footer() {
               <Mail className="h-5 w-5 text-primary" />
               <div>
                 <div className="font-medium text-foreground">Email</div>
-                <div className="text-sm text-muted-foreground">contact@publicbusiness.com</div>
+                <div className="text-sm text-muted-foreground">contact@public-business.ca</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
