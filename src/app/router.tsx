@@ -11,10 +11,6 @@ const BrainstormDetail = lazy(() => import('./public/BrainstormDetail').then(m =
 const BusinessDashboard = lazy(() => import('./business/Dashboard').then(m => ({ default: m.BusinessDashboard })));
 const BusinessReports = lazy(() => import('./business/Reports').then(m => ({ default: m.BusinessReports })));
 const Notifications = lazy(() => import('./shared/Notifications').then(m => ({ default: m.Notifications })));
-
-// Feed components
-const BrainstormFeed = lazy(() => import('@/components/feeds/BrainstormFeed').then(m => ({ default: m.BrainstormFeed })));
-const BusinessFeed = lazy(() => import('@/components/feeds/BusinessFeed').then(m => ({ default: m.BusinessFeed })));
 const Admin = lazy(() => import('@/pages/Admin'));
 
 // New idea and brainstorm components
@@ -56,15 +52,6 @@ export const router = createBrowserRouter([
       {
         path: 'public',
         children: [
-          // Default public route shows the brainstorm feed
-          {
-            index: true,
-            element: (
-              <LazyWrapper>
-                <BrainstormFeed />
-              </LazyWrapper>
-            ),
-          },
           {
             path: 'profile',
             element: (
@@ -104,15 +91,6 @@ export const router = createBrowserRouter([
       {
         path: 'business',
         children: [
-          // Default business route shows the business feed
-          {
-            index: true,
-            element: (
-              <LazyWrapper>
-                <BusinessFeed />
-              </LazyWrapper>
-            ),
-          },
           {
             path: 'dashboard',
             element: (
@@ -185,9 +163,9 @@ export const router = createBrowserRouter([
     ),
   },
   
-  // Keep existing routes from nav-items for compatibility - wrap with MainLayout
+  // Keep existing routes from nav-items for compatibility
   ...navItems.map(({ to, page }) => ({
     path: to,
-    element: <MainLayout>{page}</MainLayout>,
+    element: page,
   })),
 ]);

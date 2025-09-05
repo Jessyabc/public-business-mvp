@@ -41,7 +41,7 @@ export function Header() {
   };
 
   const navItems = [
-    { to: '/landing', label: 'Home' },
+    { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
     { to: '/features', label: 'Features' },
     { to: '/industries', label: 'Industries' },
