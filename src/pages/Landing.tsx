@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { NewLanding } from "./NewLanding";
 
-export function Landing() {
+export default function Landing() {
   const { user } = useAuth();
   
   // For now, always show the new landing page to test

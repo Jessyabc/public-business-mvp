@@ -2,7 +2,7 @@ import { useAppMode } from '@/contexts/AppModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Landing } from './Landing';
+import Landing from './Landing';
 import { BrainstormFeed } from "@/components/feeds/BrainstormFeed";
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
 
