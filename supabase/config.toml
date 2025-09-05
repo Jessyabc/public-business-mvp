@@ -50,5 +50,11 @@ enable_signup = true
 double_confirm_changes = true  
 enable_confirmations = false
 
+[functions.create-post]
+verify_jwt = false
+
+[functions.interact-post]
+verify_jwt = false
+
 [functions.submit-open-idea]
 verify_jwt = false

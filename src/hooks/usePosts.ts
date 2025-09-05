@@ -245,6 +245,47 @@ export function usePosts() {
     }
   };
 
+  const fetchPostById = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .eq('status', 'active')
+        .single();
+
+      if (error) throw error;
+      return data as Post;
+    } catch (err: any) {
+      console.error('Error fetching post:', err);
+      setError(err.message || 'Failed to fetch post');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPostRelations = async (postId: string) => {
+    try {
+      // Fetch child posts (continuations/links)
+      const { data: relations, error } = await supabase
+        .from('post_relations')
+        .select(`
+          *,
+          child_post:posts!post_relations_child_post_id_fkey(*)
+        `)
+        .eq('parent_post_id', postId);
+
+      if (error) throw error;
+      return relations || [];
+    } catch (err: any) {
+      console.error('Error fetching post relations:', err);
+      return [];
+    }
+  };
+
   const fetchUserPosts = async () => {
     if (!user) return;
     
@@ -285,6 +326,8 @@ export function usePosts() {
     error,
     fetchPosts,
     fetchUserPosts,
+    fetchPostById,
+    fetchPostRelations,
     createPost,
     createPostWithRelation,
     updatePost,
