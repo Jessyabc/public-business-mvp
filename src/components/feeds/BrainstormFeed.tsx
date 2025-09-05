@@ -237,10 +237,10 @@ export function BrainstormFeed() {
 
   if (loading && posts.length === 0) {
     return (
-      <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="w-full h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Sparkles className="w-8 h-8 mx-auto mb-4 text-blue-400 animate-pulse" />
-          <div className="text-blue-200">Loading brainstorms...</div>
+          <Sparkles className="w-8 h-8 mx-auto mb-4 text-pb-blue animate-pulse" />
+          <div className="text-ink-base">Loading brainstorms...</div>
         </div>
       </div>
     );
@@ -249,14 +249,14 @@ export function BrainstormFeed() {
   const brainstormPosts = posts.filter(post => post.type === 'brainstorm' && post.mode === 'public');
 
   return (
-    <div className="w-full h-screen relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-16">
+    <div className="w-full h-screen relative bg-background pt-16">
       {brainstormPosts.length === 0 ? (
         <div className="flex items-center justify-center h-full">
           <div className="text-center glass-card p-8 m-6">
-            <Sparkles className="w-12 h-12 mx-auto mb-4 text-blue-400" />
-            <h3 className="text-xl font-medium text-white mb-2">No brainstorms yet</h3>
-            <p className="text-blue-200 mb-6">Be the first to share an idea and start the network!</p>
-            <Button onClick={handleCreateBrainstorm} className="bg-blue-600 hover:bg-blue-700">
+            <Sparkles className="w-12 h-12 mx-auto mb-4 text-pb-blue" />
+            <h3 className="text-xl font-medium text-ink-base mb-2">No brainstorms yet</h3>
+            <p className="text-ink-base/70 mb-6">Be the first to share an idea and start the network!</p>
+            <Button onClick={handleCreateBrainstorm} className="bg-pb-blue text-white hover:bg-pb-blue/90">
               Start Your First Brainstorm
             </Button>
           </div>
@@ -294,7 +294,7 @@ export function BrainstormFeed() {
             variant={BackgroundVariant.Dots}
           />
           <Controls 
-            className="bg-slate-800/90 backdrop-blur-xl border border-blue-400/30 rounded-lg shadow-lg"
+            className="glass-card border-pb-blue/30 rounded-lg shadow-lg"
             showZoom={true}
             showFitView={true}
             showInteractive={false}
