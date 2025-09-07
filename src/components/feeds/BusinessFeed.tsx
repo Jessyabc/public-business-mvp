@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { PostCard as BusinessPostCard } from "@/components/business/PostCard";
-import { PostCard } from "@/components/posts/PostCard";
 import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, ToggleLeft, Sparkles, Plus } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
@@ -215,7 +214,15 @@ export function BusinessFeed() {
                     className="transform hover:scale-[1.01] transition-transform duration-200"
                     ref={index === filteredPosts.length - 1 ? lastPostRef : undefined}
                   >
-                    <PostCard post={post} />
+                    {/* Temporary simple card until proper business post mapping is implemented */}
+                    <div className="glass-business-card rounded-2xl p-6 mb-4">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">{post.title}</h3>
+                      <p className="text-muted-foreground mb-4 line-clamp-3">{post.content}</p>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>T-Score: {post.t_score || 'N/A'}</span>
+                        <span>Views: {post.views_count || 0}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
                 

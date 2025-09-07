@@ -28,6 +28,8 @@ function LazyWrapper({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>;
 }
 
+const DemoCards = lazy(() => import('@/pages/DemoCards'));
+
 export const router = createBrowserRouter([
   // Main feed route (shows BrainstormFeed/BusinessFeed based on mode)
   {
@@ -88,4 +90,14 @@ export const router = createBrowserRouter([
     path: to,
     element: <MainLayout>{page}</MainLayout>,
   })),
+  
+  // Demo route for PostCard showcase
+  {
+    path: '/demo/cards',
+    element: (
+      <MainLayout>
+        <LazyWrapper><DemoCards /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
 ]);

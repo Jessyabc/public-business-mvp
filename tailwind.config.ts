@@ -19,12 +19,26 @@ export default {
       colors: {
         // PB Brand Colors - New system
         pb: {
-          blue: "var(--pb-blue)",
-          blueSoft: "var(--pb-blue-soft)",
+          blue: "hsl(var(--pb-blue))",
+          blueSoft: "hsl(var(--pb-blue-soft))",
         },
         ink: {
-          base: "var(--text-ink)",
-          dark: "var(--text-ink-d)",
+          base: "hsl(var(--text-ink))",
+          dark: "hsl(var(--text-ink-d))",
+        },
+        
+        // Post Type Accents
+        accent: {
+          open: "hsl(var(--pb-accent-open))",
+          brainstorm: "hsl(var(--pb-accent-brainstorm))",
+          insight: "hsl(var(--pb-accent-insight))",
+          video: "hsl(var(--pb-accent-video))",
+        },
+        
+        // Score Tones
+        tone: {
+          t: "hsl(var(--tone-t))",
+          u: "hsl(var(--tone-u))",
         },
 
         // Legacy support for existing components

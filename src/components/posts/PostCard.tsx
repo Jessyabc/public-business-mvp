@@ -1,161 +1,291 @@
-import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, FileText, Eye, MessageCircle, Heart, Share2, MoreHorizontal } from 'lucide-react';
-import { useAppMode } from '@/contexts/AppModeContext';
-import { Post } from '@/hooks/usePosts';
-import { PostReaderModal } from './PostReaderModal';
+import { 
+  Lightbulb, 
+  Brain, 
+  Zap, 
+  BarChart3, 
+  FileText, 
+  Video,
+  Eye,
+  MessageCircle,
+  Share2,
+  CheckCircle
+} from 'lucide-react';
+import { PBPost, PBPostType } from '@/types/pb';
+import { cn } from '@/lib/utils';
 
 interface PostCardProps {
-  post: Post;
-  onEdit?: (post: Post) => void;
-  onDelete?: (post: Post) => void;
+  post: PBPost;
+  className?: string;
+  onClick?: () => void;
 }
 
-export function PostCard({ post, onEdit, onDelete }: PostCardProps) {
-  const { mode } = useAppMode();
-  const [showReader, setShowReader] = useState(false);
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'brainstorm':
-        return <Brain className="w-4 h-4 text-primary" />;
-      default:
-        return <FileText className="w-4 h-4 text-blue-600" />;
+const getPostTypeConfig = (type: PBPostType) => {
+  const configs = {
+    open_idea: {
+      icon: Lightbulb,
+      label: 'Open Idea',
+      accent: 'accent-open',
+      bgAccent: 'bg-accent-open/10',
+      borderAccent: 'border-accent-open/20',
+      textAccent: 'text-accent-open'
+    },
+    brainstorm: {
+      icon: Brain,
+      label: 'Brainstorm',
+      accent: 'accent-brainstorm',
+      bgAccent: 'bg-accent-brainstorm/10',
+      borderAccent: 'border-accent-brainstorm/20',
+      textAccent: 'text-accent-brainstorm'
+    },
+    brainstorm_continue: {
+      icon: Zap,
+      label: 'Continue',
+      accent: 'accent-brainstorm',
+      bgAccent: 'bg-accent-brainstorm/10',
+      borderAccent: 'border-accent-brainstorm/20',
+      textAccent: 'text-accent-brainstorm'
+    },
+    insight: {
+      icon: BarChart3,
+      label: 'Insight',
+      accent: 'accent-insight',
+      bgAccent: 'bg-accent-insight/10',
+      borderAccent: 'border-accent-insight/20',
+      textAccent: 'text-accent-insight'
+    },
+    insight_report: {
+      icon: FileText,
+      label: 'Report',
+      accent: 'accent-insight',
+      bgAccent: 'bg-accent-insight/10',
+      borderAccent: 'border-accent-insight/20',
+      textAccent: 'text-accent-insight'
+    },
+    insight_white_paper: {
+      icon: FileText,
+      label: 'White Paper',
+      accent: 'accent-insight',
+      bgAccent: 'bg-accent-insight/10',
+      borderAccent: 'border-accent-insight/20',
+      textAccent: 'text-accent-insight'
+    },
+    video_open_idea: {
+      icon: Video,
+      label: 'Video Idea',
+      accent: 'accent-video',
+      bgAccent: 'bg-accent-video/10',
+      borderAccent: 'border-accent-video/20',
+      textAccent: 'text-accent-video'
+    },
+    video_brainstorm: {
+      icon: Video,
+      label: 'Video Brainstorm',
+      accent: 'accent-video',
+      bgAccent: 'bg-accent-video/10',
+      borderAccent: 'border-accent-video/20',
+      textAccent: 'text-accent-video'
+    },
+    video_insight: {
+      icon: Video,
+      label: 'Video Insight',
+      accent: 'accent-video',
+      bgAccent: 'bg-accent-video/10',
+      borderAccent: 'border-accent-video/20',
+      textAccent: 'text-accent-video'
     }
   };
+  
+  return configs[type];
+};
 
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case 'brainstorm':
-        return <Badge className="bg-primary/20 text-primary border-primary/20">Brainstorm</Badge>;
-      case 'insight':
-        return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/20">Insight</Badge>;
-      case 'report':
-        return <Badge className="bg-green-500/20 text-green-600 border-green-500/20">Report</Badge>;
-      default:
-        return <Badge className="bg-gray-500/20 text-gray-600 border-gray-500/20">{type}</Badge>;
-    }
-  };
+const formatMetric = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
+};
 
-  const cardClass = mode === 'public' 
-    ? 'glass-ios-card hover:glass-ios-widget transition-all duration-300' 
-    : 'glass-business-card hover:glass-business transition-all duration-300';
+export function PostCard({ post, className, onClick }: PostCardProps) {
+  const config = getPostTypeConfig(post.type);
+  const Icon = config.icon;
 
   return (
-    <Card className={cardClass}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+    <div
+      className={cn(
+        "group relative overflow-hidden rounded-2xl",
+        "backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)]",
+        "border border-[var(--glass-border)]",
+        "transition-all duration-300 ease-out",
+        "hover:transform hover:-translate-y-1 hover:shadow-xl",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pb-blue focus-visible:ring-offset-2",
+        "cursor-pointer",
+        className
+      )}
+      onClick={onClick}
+      tabIndex={0}
+      role="article"
+    >
+      {/* Top accent bar */}
+      <div className={cn("h-1 w-full", `bg-${config.accent}`)} />
+      
+      <div className="p-6">
+        {/* Header with type badge and author */}
+        <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            {getTypeIcon(post.type)}
+            <div className={cn(
+              "w-10 h-10 rounded-xl flex items-center justify-center",
+              config.bgAccent,
+              `border ${config.borderAccent}`
+            )}>
+              <Icon className={cn("w-5 h-5", config.textAccent)} />
+            </div>
             <div>
-              {post.title && (
-                <CardTitle className={`text-lg ${
-                  mode === 'public' ? 'text-white' : 'text-slate-800'
-                }`}>
-                  {post.title}
-                </CardTitle>
-              )}
+              <Badge 
+                variant="secondary" 
+                className={cn(
+                  "text-xs font-medium",
+                  config.bgAccent,
+                  config.textAccent,
+                  `border-${config.accent}/20`
+                )}
+              >
+                {config.label}
+              </Badge>
               <div className="flex items-center gap-2 mt-1">
-                {getTypeBadge(post.type)}
-                <Badge className={`text-xs ${
-                  post.mode === 'public' 
-                    ? 'bg-primary/20 text-primary border-primary/20'
-                    : 'bg-blue-500/20 text-blue-600 border-blue-500/20'
-                }`}>
-                  {post.mode === 'public' ? 'Public' : 'Business'}
+                <Badge variant="outline" className="text-xs">
+                  {post.isPublic ? 'Public' : 'Business'}
                 </Badge>
-                <span className={`text-xs ${
-                  mode === 'public' ? 'text-white/60' : 'text-slate-500'
-                }`}>
-                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                <span className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                 </span>
               </div>
             </div>
           </div>
           
-          {(post.t_score || post.u_score) && (
-            <div className="flex flex-col items-center">
-              <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${
-                mode === 'public' 
-                  ? 'text-primary border-primary/30 bg-primary/20'
-                  : 'text-blue-600 border-blue-500/30 bg-blue-500/20'
-              }`}>
-                <span className="text-sm font-bold">{post.t_score || post.u_score}</span>
+          {/* Author */}
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={post.author.avatar} alt={post.author.name} />
+              <AvatarFallback className="text-xs">
+                {post.author.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-right">
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-medium text-ink-base">
+                  {post.author.name}
+                </span>
+                {post.author.verified && (
+                  <CheckCircle className="w-3 h-3 text-pb-blue" />
+                )}
               </div>
-              <span className="text-xs text-muted-foreground mt-1">
-                {post.t_score ? 'T-Score' : 'U-Score'}
-              </span>
-            </div>
-          )}
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <div 
-          className={`text-sm mb-4 line-clamp-3 cursor-pointer ${
-            mode === 'public' ? 'text-white/80' : 'text-slate-600'
-          }`}
-          onClick={() => setShowReader(true)}
-        >
-          {post.content}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-4 text-xs ${
-            mode === 'public' ? 'text-white/60' : 'text-slate-500'
-          }`}>
-            <div className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              {post.views_count}
-            </div>
-            <div className="flex items-center gap-1">
-              <Heart className="w-3 h-3" />
-              {post.likes_count}
-            </div>
-            <div className="flex items-center gap-1">
-              <MessageCircle className="w-3 h-3" />
-              {post.comments_count}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-1">
+        </div>
+
+        {/* Content */}
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-ink-base mb-2 line-clamp-2">
+            {post.title}
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-3">
+            {post.content}
+          </p>
+        </div>
+
+        {/* Thumbnail */}
+        {post.thumbnail && (
+          <div className="mb-4 rounded-xl overflow-hidden">
+            <img 
+              src={post.thumbnail} 
+              alt="" 
+              className="w-full h-32 object-cover"
+            />
+          </div>
+        )}
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {post.tags.slice(0, 3).map((tag) => (
+              <Badge 
+                key={tag} 
+                variant="outline" 
+                className="text-xs text-muted-foreground"
+              >
+                #{tag}
+              </Badge>
+            ))}
+            {post.tags.length > 3 && (
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                +{post.tags.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Metrics */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Scores */}
+            {post.metrics.tScore && (
+              <div className="flex items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-tone-t/20 border border-tone-t/30 flex items-center justify-center">
+                  <span className="text-xs font-bold text-tone-t">T</span>
+                </div>
+                <span className="text-sm font-medium text-tone-t">
+                  {post.metrics.tScore}
+                </span>
+              </div>
+            )}
+            
+            {post.metrics.uScore && (
+              <div className="flex items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-tone-u/20 border border-tone-u/30 flex items-center justify-center">
+                  <span className="text-xs font-bold text-tone-u">U</span>
+                </div>
+                <span className="text-sm font-medium text-tone-u">
+                  {post.metrics.uScore}
+                </span>
+              </div>
+            )}
+
+            {/* Engagement metrics */}
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                <span className="text-xs">{formatMetric(post.metrics.views)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <MessageCircle className="w-3 h-3" />
+                <span className="text-xs">{formatMetric(post.metrics.replies)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1">
             <Button 
               variant="ghost" 
               size="sm" 
-              className={`text-xs p-1 h-8 w-8 ${
-                mode === 'public'
-                  ? 'text-white/60 hover:text-white hover:bg-white/10' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
-              }`}
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-ink-base"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle share
+              }}
             >
               <Share2 className="w-3 h-3" />
             </Button>
-            
-            {(onEdit || onDelete) && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={`text-xs p-1 h-8 w-8 ${
-                  mode === 'public'
-                    ? 'text-white/60 hover:text-white hover:bg-white/10' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
-                }`}
-              >
-                <MoreHorizontal className="w-3 h-3" />
-              </Button>
-            )}
           </div>
         </div>
-      </CardContent>
-
-      <PostReaderModal 
-        isOpen={showReader}
-        onClose={() => setShowReader(false)}
-        post={post}
-      />
-    </Card>
+      </div>
+    </div>
   );
 }

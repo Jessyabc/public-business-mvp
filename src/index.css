@@ -2,6 +2,7 @@
 @import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/glass.css';
+@import './styles/postcards.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -47,6 +48,27 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* PB Design System */
+    --pb-blue: 202 72% 63%;
+    --pb-blue-soft: 210 100% 85%;
+    --text-ink: 212 84% 7%;
+    --text-ink-d: 210 40% 98%;
+    
+    /* Post Type Accents */
+    --pb-accent-open: 142 76% 36%;        /* Green for open ideas */
+    --pb-accent-brainstorm: 271 81% 56%;  /* Purple for brainstorms */
+    --pb-accent-insight: 221 83% 53%;     /* Blue for insights */
+    --pb-accent-video: 0 84% 60%;         /* Red for video content */
+    
+    /* Score Tones */
+    --tone-t: 142 76% 36%;                /* Green for T-Score */
+    --tone-u: 221 83% 53%;                /* Blue for U-Score */
+    
+    /* Glass System */
+    --glass-bg: 0 0% 100% / 0.8;
+    --glass-border: 0 0% 100% / 0.2;
+    --glass-blur: 16px;
   }
 
   .dark {
@@ -77,5 +99,11 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark Mode Overrides */
+    --text-ink: 210 40% 98%;
+    --text-ink-d: 222 84% 5%;
+    --glass-bg: 222 84% 5% / 0.8;
+    --glass-border: 210 40% 98% / 0.1;
   }
 }

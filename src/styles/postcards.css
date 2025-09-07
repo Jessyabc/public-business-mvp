@@ -1,0 +1,44 @@
+/* PostCard Glass Styles */
+.pb-post-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  backdrop-filter: blur(var(--glass-blur));
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease-out;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.pb-post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.pb-post-card:focus-visible {
+  outline: none;
+  ring: 2px solid hsl(var(--pb-blue));
+  ring-offset: 2px;
+}
+
+/* Post type accent bars */
+.pb-accent-bar-open { background: hsl(var(--pb-accent-open)); }
+.pb-accent-bar-brainstorm { background: hsl(var(--pb-accent-brainstorm)); }
+.pb-accent-bar-insight { background: hsl(var(--pb-accent-insight)); }
+.pb-accent-bar-video { background: hsl(var(--pb-accent-video)); }
+
+/* Score badges */
+.pb-score-t {
+  background: hsl(var(--tone-t) / 0.2);
+  border: 1px solid hsl(var(--tone-t) / 0.3);
+  color: hsl(var(--tone-t));
+}
+
+.pb-score-u {
+  background: hsl(var(--tone-u) / 0.2);
+  border: 1px solid hsl(var(--tone-u) / 0.3);
+  color: hsl(var(--tone-u)); 
+}
