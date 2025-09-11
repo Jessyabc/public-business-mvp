@@ -44,6 +44,30 @@ export type Database = {
         }
         Relationships: []
       }
+      api_hits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: number
+          ip_hash: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: never
+          ip_hash: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: never
+          ip_hash?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       business_invitations: {
         Row: {
           consumed_at: string | null
@@ -236,6 +260,13 @@ export type Database = {
             referencedRelation: "open_ideas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "idea_brainstorms_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "open_ideas_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       idea_interactions: {
@@ -269,6 +300,13 @@ export type Database = {
             columns: ["idea_id"]
             isOneToOne: false
             referencedRelation: "open_ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idea_interactions_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "open_ideas_public"
             referencedColumns: ["id"]
           },
         ]
@@ -510,6 +548,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_consent: {
+        Row: {
+          consent_type: string
+          created_at: string
+          granted: boolean
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          consent_type: string
+          created_at?: string
+          granted?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          consent_type?: string
+          created_at?: string
+          granted?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -533,7 +598,111 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      business_profiles_public: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          department_id: string | null
+          id: string | null
+          industry_id: string | null
+          linkedin_url: string | null
+          status: string | null
+          website: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          linkedin_url?: string | null
+          status?: string | null
+          website?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          linkedin_url?: string | null
+          status?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_profiles_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_profiles_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      open_ideas_public: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string | null
+          is_curated: boolean | null
+          linked_brainstorms_count: number | null
+          status: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_curated?: boolean | null
+          linked_brainstorms_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_curated?: boolean | null
+          linked_brainstorms_count?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      profile_cards: {
+        Row: {
+          bio: string | null
+          company: string | null
+          display_name: string | null
+          id: string | null
+          linkedin_url: string | null
+          location: string | null
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          company?: string | null
+          display_name?: string | null
+          id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          company?: string | null
+          display_name?: string | null
+          id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_business_invitation: {
@@ -606,8 +775,16 @@ export type Database = {
         Returns: undefined
       }
       is_admin: {
+        Args: Record<PropertyKey, never> | { uid: string }
+        Returns: boolean
+      }
+      is_business_member: {
         Args: { uid: string }
         Returns: boolean
+      }
+      obfuscate_email: {
+        Args: { email: string }
+        Returns: string
       }
     }
     Enums: {
