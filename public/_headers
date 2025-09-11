@@ -1,0 +1,31 @@
+# Security Headers for All Pages
+/*
+  # Content Security Policy - Prevent XSS attacks
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://api.github.com; connect-src 'self' https://*.supabase.co https://api.github.com https://api.pwnedpasswords.com; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests
+
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+  
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+  
+  # Control referrer information
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Restrict dangerous permissions
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  
+  # Prevent XSS attacks
+  X-XSS-Protection: 1; mode=block
+  
+  # Force HTTPS
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# API endpoints - additional restrictions
+/api/*
+  # More restrictive CSP for API endpoints
+  Content-Security-Policy: default-src 'none'; script-src 'none'
+  
+# Admin pages - extra security
+/admin/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'

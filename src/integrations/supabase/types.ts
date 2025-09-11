@@ -728,6 +728,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_client_ip: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_my_roles: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["app_role"][]
