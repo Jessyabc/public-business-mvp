@@ -176,6 +176,48 @@ export type Database = {
           },
         ]
       }
+      contact_requests: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          ip_hash: string
+          message: string
+          name: string
+          phone: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          ip_hash: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          ip_hash?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           created_at: string
@@ -264,7 +306,21 @@ export type Database = {
             foreignKeyName: "idea_brainstorms_idea_id_fkey"
             columns: ["idea_id"]
             isOneToOne: false
+            referencedRelation: "open_ideas_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idea_brainstorms_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
             referencedRelation: "open_ideas_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idea_brainstorms_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "open_ideas_teaser"
             referencedColumns: ["id"]
           },
         ]
@@ -306,7 +362,21 @@ export type Database = {
             foreignKeyName: "idea_interactions_idea_id_fkey"
             columns: ["idea_id"]
             isOneToOne: false
+            referencedRelation: "open_ideas_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idea_interactions_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
             referencedRelation: "open_ideas_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idea_interactions_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "open_ideas_teaser"
             referencedColumns: ["id"]
           },
         ]
@@ -598,6 +668,14 @@ export type Database = {
       }
     }
     Views: {
+      brainstorm_stats: {
+        Row: {
+          brainstorm_id: string | null
+          comments_count: number | null
+          likes_count: number | null
+        }
+        Relationships: []
+      }
       business_profiles_public: {
         Row: {
           company_name: string | null
@@ -646,6 +724,33 @@ export type Database = {
           },
         ]
       }
+      open_ideas_members: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string | null
+          is_curated: boolean | null
+          linked_brainstorms_count: number | null
+          status: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_curated?: boolean | null
+          linked_brainstorms_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_curated?: boolean | null
+          linked_brainstorms_count?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       open_ideas_public: {
         Row: {
           content: string | null
@@ -670,6 +775,27 @@ export type Database = {
           is_curated?: boolean | null
           linked_brainstorms_count?: number | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      open_ideas_teaser: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_curated: boolean | null
+          preview: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_curated?: boolean | null
+          preview?: never
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_curated?: boolean | null
+          preview?: never
         }
         Relationships: []
       }
@@ -783,7 +909,7 @@ export type Database = {
         Returns: boolean
       }
       is_business_member: {
-        Args: { uid: string }
+        Args: Record<PropertyKey, never> | { uid: string }
         Returns: boolean
       }
       obfuscate_email: {

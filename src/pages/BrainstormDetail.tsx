@@ -1,353 +1,258 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
-import { usePosts, Post } from "@/hooks/usePosts";
-import { useComposerStore } from "@/hooks/useComposerStore";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { GlassCard } from "@/ui/components/GlassCard";
-import { ReactFlow, Node, Edge, Controls, Background, BackgroundVariant, useNodesState, useEdgesState } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import '@xyflow/react/dist/base.css';
-import '../styles/react-flow-turbo.css';
-import BrainstormNodeComponent, { BrainstormNodeData } from '@/components/BrainstormNode';
-import ConnectionEdgeComponent from '@/components/ConnectionEdge';
-import { Brain, User, Clock, ArrowLeft, Plus, Network } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { BrainstormConnection } from '@/types/brainstorm';
-import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
+import { ArrowLeft, Heart, MessageCircle, Edit, Trash2, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useBrainstorms, useBrainstormInteractions, type Brainstorm } from '@/hooks/useBrainstorms';
+import { useAuth } from '@/contexts/AuthContext';
+import { formatContent, sanitizeText } from '@/lib/sanitize';
 
-const nodeTypes = {
-  brainstorm: BrainstormNodeComponent,
-};
-
-const edgeTypes = {
-  connection: ConnectionEdgeComponent,
-};
-
-export function BrainstormDetail() {
+export default function BrainstormDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { fetchPostById, fetchPostRelations, loading } = usePosts();
-  const { openComposer } = useComposerStore();
+  const [brainstorm, setBrainstorm] = useState<Brainstorm | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
   
-  const [brainstorm, setBrainstorm] = useState<Post | null>(null);
-  const [relations, setRelations] = useState<any[]>([]);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [viewMode, setViewMode] = useState<'detail' | 'network'>('detail');
-
-  const loadBrainstormData = useCallback(async () => {
-    if (!id) return;
-    
-    try {
-      const post = await fetchPostById(id);
-      setBrainstorm(post);
-      
-      // Fetch related posts (continuations, links)
-      const relationData = await fetchPostRelations(id);
-      setRelations(relationData);
-      
-      // Create nodes for network view
-      const mainNode: Node = {
-        id: post.id,
-        type: 'brainstorm',
-        position: { x: 400, y: 200 },
-        data: {
-          post,
-          onContinue: () => handleCreateContinuation(post.id),
-          subflowDepth: 0,
-        } as BrainstormNodeData,
-        draggable: true,
-      };
-      
-      const childNodes: Node[] = relationData.map((relation, index) => {
-        const angle = (index / relationData.length) * 2 * Math.PI;
-        const radius = 300;
-        const x = Math.cos(angle) * radius + 400;
-        const y = Math.sin(angle) * radius + 200;
-        
-        return {
-          id: relation.child_post.id,
-          type: 'brainstorm',
-          position: { x, y },
-          data: {
-            post: relation.child_post,
-            onContinue: () => handleCreateContinuation(relation.child_post.id),
-            subflowDepth: 1,
-            parentId: post.id,
-          } as BrainstormNodeData,
-          draggable: true,
-        };
-      });
-      
-      const childEdges: Edge[] = relationData.map(relation => ({
-        id: `edge-${post.id}-${relation.child_post.id}`,
-        source: post.id,
-        target: relation.child_post.id,
-        type: 'connection',
-        data: {
-          connection: {
-            fromId: post.id,
-            toId: relation.child_post.id,
-            type: relation.relation_type === 'continuation' ? 'continuation' : 'linking',
-            strength: 0.8,
-          } as BrainstormConnection,
-        },
-        animated: true,
-      }));
-      
-      setNodes([mainNode, ...childNodes]);
-      setEdges(childEdges);
-      
-    } catch (error: any) {
-      console.error('Error loading brainstorm:', error);
-      toast.error('Failed to load brainstorm');
-    }
-  }, [id, fetchPostById, fetchPostRelations]);
+  const { getBrainstorm, deleteBrainstorm } = useBrainstorms();
+  const { comments, addComment, toggleLike, refetch } = useBrainstormInteractions(id || '');
 
   useEffect(() => {
-    loadBrainstormData();
-  }, [loadBrainstormData]);
+    const fetchBrainstorm = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      const data = await getBrainstorm(id);
+      if (!data) {
+        setError('Brainstorm not found or you do not have permission to view it');
+      } else {
+        setBrainstorm(data);
+      }
+      setLoading(false);
+    };
 
-  const handleCreateContinuation = (parentId: string) => {
-    if (!user) {
-      toast.error("Please login to continue this brainstorm");
-      return;
-    }
-    openComposer({ 
-      parentPostId: parentId, 
-      relationType: 'continuation' 
-    });
+    fetchBrainstorm();
+  }, [id, getBrainstorm]);
+
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
+    
+    await addComment(commentText.trim());
+    setCommentText('');
   };
 
-  const handleCreateNew = () => {
-    if (!user) {
-      toast.error("Please login to create brainstorms");
-      return;
+  const handleDelete = async () => {
+    if (!brainstorm) return;
+    
+    try {
+      await deleteBrainstorm(brainstorm.id);
+      navigate('/brainstorms');
+    } catch (error) {
+      console.error('Failed to delete brainstorm:', error);
     }
-    openComposer({});
   };
+
+  const isOwner = user && brainstorm && brainstorm.author_user_id === user.id;
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="text-center">
-          <Brain className="w-16 h-16 text-primary animate-pulse mx-auto mb-4" />
-          <p className="text-blue-200">Loading brainstorm...</p>
-        </div>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <Skeleton className="h-8 w-32 mb-8" />
+        <Card className="mb-6">
+          <CardHeader>
+            <Skeleton className="h-8 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-40 w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (!brainstorm) {
+  if (error || !brainstorm) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Brainstorm not found</h1>
-          <Button onClick={() => navigate("/")} variant="outline" className="text-blue-200 border-blue-400/30">
-            Back to Home
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <Link to="/brainstorms">
+          <Button variant="ghost" className="mb-6">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Brainstorms
           </Button>
+        </Link>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold mb-2">Brainstorm Not Found</h2>
+          <p className="text-muted-foreground">
+            {error || 'This brainstorm may be private or may not exist.'}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className="absolute top-6 left-6 right-6 z-20">
-        <div className="flex items-center justify-between">
-          <Button
-            onClick={() => navigate("/")}
-            variant="ghost"
-            className="glass-card text-blue-200 hover:text-white hover:bg-white/10"
-          >
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="flex items-center justify-between mb-6">
+        <Link to="/brainstorms">
+          <Button variant="ghost">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Feed
+            Back to Brainstorms
           </Button>
-          
-          <div className="flex items-center gap-3">
-            <div className="glass-card p-3">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={viewMode === 'detail' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('detail')}
-                  className="h-8"
-                >
-                  Detail
+        </Link>
+        
+        {isOwner && (
+          <div className="flex gap-2">
+            <Link to={`/brainstorms/${brainstorm.id}/edit`}>
+              <Button variant="outline" size="sm">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            </Link>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
                 </Button>
-                <Button
-                  variant={viewMode === 'network' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('network')}
-                  className="h-8"
-                >
-                  <Network className="w-4 h-4 mr-1" />
-                  Network
-                </Button>
-              </div>
-            </div>
-            
-            <Button
-              onClick={handleCreateNew}
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create New
-            </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Brainstorm</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this brainstorm? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
-        </div>
+        )}
       </div>
 
-      {viewMode === 'detail' ? (
-        /* Detail View */
-        <div className="relative z-10 max-w-4xl mx-auto pt-24 pb-12 px-6">
-          {/* Main Brainstorm */}
-          <GlassCard className="border-primary/20 mb-8">
-            <div className="p-8">
-              <div className="mb-6">
-                {brainstorm.title && (
-                  <h1 className="text-3xl text-white leading-tight font-bold mb-4">
-                    {brainstorm.title}
-                  </h1>
-                )}
-                <div className="flex items-center gap-4 text-sm text-blue-200">
-                  <div className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                    <span>Author</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{formatDistanceToNow(new Date(brainstorm.created_at))} ago</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Brain className="w-4 h-4" />
-                    <span>{brainstorm.t_score || 'New'} T-Score</span>
-                  </div>
-                </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold mb-3">{sanitizeText(brainstorm.title)}</h1>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <User className="w-4 h-4" />
+                <span>{brainstorm.author_display_name}</span>
+                <span>•</span>
+                <span>{formatDistanceToNow(new Date(brainstorm.created_at), { addSuffix: true })}</span>
               </div>
-              
-              <div className="text-white text-lg leading-relaxed mb-6">
-                <div className="whitespace-pre-wrap">
-                  {brainstorm.content}
-                </div>
-              </div>
+            </div>
+            <Badge variant={brainstorm.is_public ? 'default' : 'secondary'}>
+              {brainstorm.is_public ? 'Public' : 'Private'}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div 
+            className="prose prose-sm max-w-none mb-6"
+            dangerouslySetInnerHTML={{ __html: formatContent(brainstorm.content) }}
+          />
+          
+          <div className="flex items-center gap-4 pt-4 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleLike}
+              disabled={!user}
+              className="flex items-center gap-2"
+            >
+              <Heart className="w-4 h-4" />
+              <span>Like</span>
+            </Button>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MessageCircle className="w-4 h-4" />
+              <span>{comments.length} comments</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  <span className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full border border-primary/20">
-                    Brainstorm
-                  </span>
-                  <span className="px-3 py-1 bg-purple-500/10 text-purple-400 text-sm rounded-full border border-purple-500/20">
-                    {brainstorm.mode}
-                  </span>
-                </div>
-                
-                <Button
-                  onClick={() => handleCreateContinuation(brainstorm.id)}
-                  variant="outline"
-                  className="bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+      {/* Comments Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Comments</h3>
+        
+        {user && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="Add your thoughts..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <Button 
+                  onClick={handleAddComment}
+                  disabled={!commentText.trim()}
                 >
-                  Continue This Idea
+                  Add Comment
                 </Button>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Continuations */}
-          {relations.length > 0 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold text-white mb-2">Continuations & Links</h2>
-                <p className="text-blue-200">See how others built upon this idea</p>
-              </div>
-              
-              <div className="grid gap-6">
-                {relations.map((relation, index) => (
-                  <GlassCard key={relation.id} className="border-orange-500/20">
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            relation.relation_type === 'continuation' 
-                              ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' 
-                              : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                          }`}>
-                            {relation.relation_type === 'continuation' ? 'Continuation' : 'Link'}
-                          </span>
-                          <span className="text-sm text-blue-200">
-                            {formatDistanceToNow(new Date(relation.child_post.created_at))} ago
-                          </span>
-                        </div>
-                        
-                        <Button
-                          onClick={() => navigate(`/brainstorm/${relation.child_post.id}`)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-200 hover:text-white"
-                        >
-                          View Full
-                        </Button>
-                      </div>
-                      
-                      <div className="text-white leading-relaxed">
-                        {relation.child_post.content.length > 200 
-                          ? `${relation.child_post.content.slice(0, 200)}...`
-                          : relation.child_post.content
-                        }
-                      </div>
+        {!user && (
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <p className="text-muted-foreground mb-4">
+                Please log in to add comments
+              </p>
+              <Link to="/auth">
+                <Button>Sign In</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="space-y-4">
+          {comments.map((comment) => (
+            <Card key={comment.id}>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-medium text-sm">User</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                      </span>
                     </div>
-                  </GlassCard>
-                ))}
-              </div>
-            </div>
-          )}
+                    <p className="text-sm">
+                      {sanitizeText(comment.metadata.text || '')}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      ) : (
-        /* Network View */
-        <div className="w-full h-screen pt-20">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            fitView
-            fitViewOptions={{ padding: 0.3, maxZoom: 1.2 }}
-            minZoom={0.1}
-            maxZoom={2}
-            defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-            style={{ 
-              backgroundColor: 'transparent',
-              width: '100%',
-              height: '100%',
-            }}
-            nodesDraggable={true}
-            nodesConnectable={false}
-            elementsSelectable={true}
-            selectNodesOnDrag={false}
-            className="react-flow-turbo"
-            colorMode="dark"
-          >
-            <Background
-              color="rgba(72, 159, 227, 0.15)" 
-              gap={20} 
-              size={1}
-              variant={BackgroundVariant.Dots}
-            />
-            <Controls 
-              className="bg-slate-800/90 backdrop-blur-xl border border-blue-400/30 rounded-lg shadow-lg"
-              showZoom={true}
-              showFitView={true}
-              showInteractive={false}
-            />
-          </ReactFlow>
-        </div>
-      )}
+
+        {comments.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <p>No comments yet. Be the first to share your thoughts!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
