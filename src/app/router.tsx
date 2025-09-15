@@ -141,6 +141,10 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     ),
   },
 
+  { path: '/feed', element: <Navigate to="/" replace /> },
+{ path: '/public/feed', element: <Navigate to="/" replace /> },
+
+
   // Catch-all 404
   { path: '*', element: <NotFound /> },
 ];
