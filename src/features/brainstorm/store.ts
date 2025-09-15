@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { BrainstormNode, BrainstormEdge } from './types';
+import type { BrainstormNode, BrainstormEdge } from './types';
 
 type Store = {
   nodes: BrainstormNode[];
@@ -26,9 +26,13 @@ type Store = {
   toggleSoftEdges: () => void;
   fitToView: () => void;
   autoArrange: () => void;
+  reset: () => void;
 };
 
-export const useBrainstormStore = create<Store>((set, get) => ({
+const makeId = () =>
+  (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2));
+
+export const useBrainstormStore = create<Store>((set) => ({
   nodes: [],
   edges: [],
   selectedNode: null,
@@ -42,9 +46,9 @@ export const useBrainstormStore = create<Store>((set, get) => ({
   setEdges: (edges) => set({ edges }),
 
   addNode: (nodeData) => {
-    const id = crypto.randomUUID();
+    const id = makeId();
     const node: BrainstormNode = {
-      ...nodeData,
+      ...nodeData,            // must include: title, content, tags, position, author (per your type)
       id,
       created_at: new Date().toISOString(),
     };
@@ -53,22 +57,26 @@ export const useBrainstormStore = create<Store>((set, get) => ({
 
   updateNode: (id, updates) => {
     set((state) => ({
-      nodes: state.nodes.map((node) => (node.id === id ? { ...node, ...updates } : node)),
+      nodes: state.nodes.map((node) =>
+        node.id === id ? { ...node, ...updates } : node
+      ),
     }));
   },
 
   deleteNode: (id) => {
     set((state) => ({
       nodes: state.nodes.filter((node) => node.id !== id),
-      edges: state.edges.filter((edge) => edge.source !== id && edge.target !== id),
+      edges: state.edges.filter(
+        (edge) => edge.source !== id && edge.target !== id
+      ),
       selectedNode: state.selectedNode === id ? null : state.selectedNode,
     }));
   },
 
   addEdge: (edgeData) => {
-    const id = crypto.randomUUID();
+    const id = makeId();
     const edge: BrainstormEdge = {
-      ...edgeData,
+      ...edgeData,            // must include: source, target, type
       id,
       created_at: new Date().toISOString(),
     };
@@ -90,4 +98,16 @@ export const useBrainstormStore = create<Store>((set, get) => ({
   toggleSoftEdges: () => set((state) => ({ showSoftEdges: !state.showSoftEdges })),
   fitToView: () => {},
   autoArrange: () => {},
+
+  reset: () =>
+    set({
+      nodes: [],
+      edges: [],
+      selectedNode: null,
+      selectedEdge: null,
+      isCreatingLink: false,
+      searchTerm: '',
+      showHardEdges: true,
+      showSoftEdges: true,
+    }),
 }));
