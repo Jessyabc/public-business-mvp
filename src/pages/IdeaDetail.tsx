@@ -6,7 +6,7 @@ import { GlassCard } from "@/ui/components/GlassCard";
 import { Lightbulb, Plus, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-export function IdeaDetail() {
+export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   

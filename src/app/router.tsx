@@ -4,7 +4,10 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import Index from '@/pages/Index';
 
-// New idea and brainstorm components  
+// Canonical brainstorm page
+const BrainstormPage = lazy(() => import('@/features/brainstorm/BrainstormPage'));
+
+// Legacy pages (to be redirected)
 const IdeaDetail = lazy(() => import('@/pages/IdeaDetail'));
 const BrainstormNew = lazy(() => import('@/pages/BrainstormNew'));
 const BrainstormDetailPage = lazy(() => import('@/pages/BrainstormDetail'));
@@ -33,6 +36,7 @@ function LazyWrapper({ children }: { children: React.ReactNode }) {
 }
 
 const DemoCards = lazy(() => import('@/pages/DemoCards'));
+const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 
 export const router = createBrowserRouter([
   // Main feed route (shows BrainstormFeed/BusinessFeed based on mode)
@@ -41,10 +45,24 @@ export const router = createBrowserRouter([
     element: <Index />,
   },
   
-  // Brainstorm feed route
+  // Canonical brainstorm route
   {
     path: '/brainstorm',
-    element: <Index />,
+    element: (
+      <MainLayout>
+        <LazyWrapper><BrainstormPage /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+
+  // Legacy brainstorm redirects
+  {
+    path: '/brainstorm-v2',
+    element: <Navigate to="/brainstorm" replace />,
+  },
+  {
+    path: '/brainstorms/canvas',
+    element: <Navigate to="/brainstorm" replace />,
   },
 
   // Landing page and public routes (outside shell)  
@@ -64,37 +82,22 @@ export const router = createBrowserRouter([
       </MainLayout>
     ),
   },
+  // Legacy brainstorm routes - redirect to canonical
   {
     path: '/brainstorms',
-    element: (
-      <MainLayout>
-        <LazyWrapper><Brainstorms /></LazyWrapper>
-      </MainLayout>
-    ),
+    element: <Navigate to="/brainstorm" replace />,
   },
   {
     path: '/brainstorms/new',
-    element: (
-      <MainLayout>
-        <LazyWrapper><BrainstormNew /></LazyWrapper>
-      </MainLayout>
-    ),
+    element: <Navigate to="/brainstorm" replace />,
   },
   {
     path: '/brainstorms/:id',
-    element: (
-      <MainLayout>
-        <LazyWrapper><BrainstormDetailPage /></LazyWrapper>
-      </MainLayout>
-    ),
+    element: <Navigate to="/brainstorm" replace />,
   },
   {
-    path: '/brainstorms/:id/edit',
-    element: (
-      <MainLayout>
-        <LazyWrapper><BrainstormEdit /></LazyWrapper>
-      </MainLayout>
-    ),
+    path: '/brainstorms/:id/edit', 
+    element: <Navigate to="/brainstorm" replace />,
   },
   {
     path: '/open-ideas',
@@ -133,6 +136,16 @@ export const router = createBrowserRouter([
     element: (
       <MainLayout>
         <LazyWrapper><DemoCards /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+
+  // Dev sitemap (development only)
+  {
+    path: '/dev/sitemap',
+    element: (
+      <MainLayout>
+        <LazyWrapper><DevSitemap /></LazyWrapper>
       </MainLayout>
     ),
   },
