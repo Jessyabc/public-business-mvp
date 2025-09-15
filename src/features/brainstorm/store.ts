@@ -1,7 +1,16 @@
 import { create } from 'zustand';
-import { BrainstormState, BrainstormNode, BrainstormEdge } from './types';
+import { BrainstormNode, BrainstormEdge } from './types';
 
-interface BrainstormStore extends BrainstormState {
+type Store = {
+  nodes: BrainstormNode[];
+  edges: BrainstormEdge[];
+  selectedNode: string | null;
+  selectedEdge: string | null;
+  isCreatingLink: boolean;
+  searchTerm: string;
+  showHardEdges: boolean;
+  showSoftEdges: boolean;
+
   setNodes: (nodes: BrainstormNode[]) => void;
   setEdges: (edges: BrainstormEdge[]) => void;
   addNode: (node: Omit<BrainstormNode, 'id' | 'created_at'>) => void;
@@ -17,9 +26,9 @@ interface BrainstormStore extends BrainstormState {
   toggleSoftEdges: () => void;
   fitToView: () => void;
   autoArrange: () => void;
-}
+};
 
-export const useBrainstormStore = create<BrainstormStore>((set, get) => ({
+export const useBrainstormStore = create<Store>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNode: null,
@@ -39,21 +48,19 @@ export const useBrainstormStore = create<BrainstormStore>((set, get) => ({
       id,
       created_at: new Date().toISOString(),
     };
-    set(state => ({ nodes: [...state.nodes, node] }));
+    set((state) => ({ nodes: [...state.nodes, node] }));
   },
 
   updateNode: (id, updates) => {
-    set(state => ({
-      nodes: state.nodes.map(node =>
-        node.id === id ? { ...node, ...updates } : node
-      )
+    set((state) => ({
+      nodes: state.nodes.map((node) => (node.id === id ? { ...node, ...updates } : node)),
     }));
   },
 
   deleteNode: (id) => {
-    set(state => ({
-      nodes: state.nodes.filter(node => node.id !== id),
-      edges: state.edges.filter(edge => edge.source !== id && edge.target !== id),
+    set((state) => ({
+      nodes: state.nodes.filter((node) => node.id !== id),
+      edges: state.edges.filter((edge) => edge.source !== id && edge.target !== id),
       selectedNode: state.selectedNode === id ? null : state.selectedNode,
     }));
   },
@@ -65,12 +72,12 @@ export const useBrainstormStore = create<BrainstormStore>((set, get) => ({
       id,
       created_at: new Date().toISOString(),
     };
-    set(state => ({ edges: [...state.edges, edge] }));
+    set((state) => ({ edges: [...state.edges, edge] }));
   },
 
   deleteEdge: (id) => {
-    set(state => ({
-      edges: state.edges.filter(edge => edge.id !== id),
+    set((state) => ({
+      edges: state.edges.filter((edge) => edge.id !== id),
       selectedEdge: state.selectedEdge === id ? null : state.selectedEdge,
     }));
   },
@@ -79,16 +86,8 @@ export const useBrainstormStore = create<BrainstormStore>((set, get) => ({
   setSelectedEdge: (id) => set({ selectedEdge: id }),
   setCreatingLink: (creating) => set({ isCreatingLink: creating }),
   setSearchTerm: (term) => set({ searchTerm: term }),
-  toggleHardEdges: () => set(state => ({ showHardEdges: !state.showHardEdges })),
-  toggleSoftEdges: () => set(state => ({ showSoftEdges: !state.showSoftEdges })),
-  
-  fitToView: () => {
-    // UI state only - actual implementation would be in the canvas component
-    console.log('Fit to view requested');
-  },
-
-  autoArrange: () => {
-    // UI state only - actual implementation would arrange nodes
-    console.log('Auto arrange requested');
-  },
+  toggleHardEdges: () => set((state) => ({ showHardEdges: !state.showHardEdges })),
+  toggleSoftEdges: () => set((state) => ({ showSoftEdges: !state.showSoftEdges })),
+  fitToView: () => {},
+  autoArrange: () => {},
 }));
