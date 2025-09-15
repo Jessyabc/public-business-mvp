@@ -1,4 +1,4 @@
-// Read-only stubs; return empty arrays until backend is connected
+// src/adapters/feedsAdapter.ts
 
 export interface FeedItem {
   id: string;
@@ -15,9 +15,9 @@ export interface FeedItem {
 
 export interface HistoryItem {
   id: string;
-  action: string;
-  target: string;
-  created_at: string;
+  action: string;     // e.g., "liked", "opened", "linked"
+  target: string;     // e.g., "Idea #123"
+  created_at: string; // ISO timestamp
 }
 
 export class FeedsAdapter {
