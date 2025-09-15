@@ -7,18 +7,18 @@ import Index from '@/pages/Index';
 // Canonical brainstorm page
 const BrainstormPage = lazy(() => import('@/features/brainstorm/BrainstormPage'));
 
-// Legacy pages (to be redirected)
+// Pages we actually render
 const IdeaDetail = lazy(() => import('@/pages/IdeaDetail'));
-const BrainstormNew = lazy(() => import('@/pages/BrainstormNew'));
-const BrainstormDetailPage = lazy(() => import('@/pages/BrainstormDetail'));
-const BrainstormEdit = lazy(() => import('@/pages/BrainstormEdit'));
-const Brainstorms = lazy(() => import('@/pages/Brainstorms'));
 const OpenIdeas = lazy(() => import('@/pages/OpenIdeas'));
 const OpenIdeaNew = lazy(() => import('@/pages/OpenIdeaNew'));
 const Admin = lazy(() => import('@/pages/Admin'));
+const DemoCards = lazy(() => import('@/pages/DemoCards'));
+const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 
-// Keep existing pages for non-shell routes
+// Public/landing
 import { Landing } from '@/pages/Landing';
+
+// Nav items (kept for compatibility)
 import { navItems } from '@/nav-items';
 
 // Fallback component for loading
@@ -35,16 +35,35 @@ function LazyWrapper({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>;
 }
 
-const DemoCards = lazy(() => import('@/pages/DemoCards'));
-const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
+// Simple 404 (client-side)
+function NotFound() {
+  return (
+    <MainLayout>
+      <div className="min-h-[50vh] flex items-center justify-center text-center p-8">
+        <div>
+          <h1 className="text-2xl font-semibold mb-2">Page not found</h1>
+          <p className="text-muted-foreground">
+            The page you’re looking for doesn’t exist.{" "}
+            <a href="/" className="underline">Go home</a>.
+          </p>
+        </div>
+      </div>
+    </MainLayout>
+  );
+}
 
-export const router = createBrowserRouter([
-  // Main feed route (shows BrainstormFeed/BusinessFeed based on mode)
+// Build routes array so we can conditionally add dev-only routes
+const routes: Parameters<typeof createBrowserRouter>[0] = [
+  // Root (shell)
   {
     path: '/',
-    element: <Index />,
+    element: (
+      <MainLayout>
+        <Index />
+      </MainLayout>
+    ),
   },
-  
+
   // Canonical brainstorm route
   {
     path: '/brainstorm',
@@ -55,17 +74,14 @@ export const router = createBrowserRouter([
     ),
   },
 
-  // Legacy brainstorm redirects
-  {
-    path: '/brainstorm-v2',
-    element: <Navigate to="/brainstorm" replace />,
-  },
-  {
-    path: '/brainstorms/canvas',
-    element: <Navigate to="/brainstorm" replace />,
-  },
+  // Legacy brainstorm redirects (no need to lazy-import those old pages)
+  { path: '/brainstorm-v2', element: <Navigate to="/brainstorm" replace /> },
+  { path: '/brainstorms', element: <Navigate to="/brainstorm" replace /> },
+  { path: '/brainstorms/:id', element: <Navigate to="/brainstorm" replace /> },
+  { path: '/brainstorms/:id/edit', element: <Navigate to="/brainstorm" replace /> },
+  { path: '/brainstorms/canvas', element: <Navigate to="/brainstorm" replace /> },
 
-  // Landing page and public routes (outside shell)  
+  // Public landing
   {
     path: '/landing',
     element: (
@@ -74,6 +90,8 @@ export const router = createBrowserRouter([
       </MainLayout>
     ),
   },
+
+  // Other pages we actually render
   {
     path: '/idea/:id',
     element: (
@@ -81,23 +99,6 @@ export const router = createBrowserRouter([
         <LazyWrapper><IdeaDetail /></LazyWrapper>
       </MainLayout>
     ),
-  },
-  // Legacy brainstorm routes - redirect to canonical
-  {
-    path: '/brainstorms',
-    element: <Navigate to="/brainstorm" replace />,
-  },
-  {
-    path: '/brainstorms/new',
-    element: <Navigate to="/brainstorm" replace />,
-  },
-  {
-    path: '/brainstorms/:id',
-    element: <Navigate to="/brainstorm" replace />,
-  },
-  {
-    path: '/brainstorms/:id/edit', 
-    element: <Navigate to="/brainstorm" replace />,
   },
   {
     path: '/open-ideas',
@@ -123,13 +124,13 @@ export const router = createBrowserRouter([
       </MainLayout>
     ),
   },
-  
+
   // Keep existing routes from nav-items for compatibility - wrap all with MainLayout
   ...navItems.map(({ to, page }) => ({
     path: to,
     element: <MainLayout>{page}</MainLayout>,
   })),
-  
+
   // Demo route for PostCard showcase
   {
     path: '/demo/cards',
@@ -140,13 +141,20 @@ export const router = createBrowserRouter([
     ),
   },
 
-  // Dev sitemap (development only)
-  {
+  // Catch-all 404
+  { path: '*', element: <NotFound /> },
+];
+
+// Dev sitemap (development only)
+if (import.meta.env.DEV) {
+  routes.splice(routes.length - 1, 0, {
     path: '/dev/sitemap',
     element: (
       <MainLayout>
         <LazyWrapper><DevSitemap /></LazyWrapper>
       </MainLayout>
     ),
-  },
-]);
+  });
+}
+
+export const router = createBrowserRouter(routes);
