@@ -23,8 +23,8 @@ export function BottomNavigation() {
   { to: '/my-posts', icon: MessageSquare, label: 'My Posts', badge: null },
   { to: '/profile', icon: History, label: 'Profile', badge: null },
   { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
-  { to: '/research', icon: Search, label: 'Research', badge: null }
-  show navigation for logged-in users
+  { to: '/research', icon: Search, label: 'Research', badge: null },
+  ly show navigation for logged-in users
   if (!user) {
     return null;
   }
