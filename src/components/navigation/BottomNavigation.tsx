@@ -1,3 +1,4 @@
+// src/components/navigation/BottomNavigation.tsx
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, History, Bell, Search, MessageSquare, Building2, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,16 +16,18 @@ export function BottomNavigation() {
   const { mode, toggleMode } = useAppMode();
   const { isBusinessMember, isAdmin } = useUserRoles();
   const location = useLocation();
-  
+
   const isBusinessMemberRole = isBusinessMember() || isAdmin();
 
   const navItems = [
-  { to: '/brainstorm', icon: Home, label: 'Feed', badge: null },
-  { to: '/my-posts', icon: MessageSquare, label: 'My Posts', badge: null },
-  { to: '/profile', icon: History, label: 'Profile', badge: null },
-  { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
-  { to: '/research', icon: Search, label: 'Research', badge: null },
-  ly show navigation for logged-in users
+    { to: '/', icon: Home, label: 'Feed', badge: null },              // root shows dynamic feed by mode
+    { to: '/my-posts', icon: MessageSquare, label: 'My Posts', badge: null },
+    { to: '/profile', icon: History, label: 'Profile', badge: null },
+    { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
+    { to: '/research', icon: Search, label: 'Research', badge: null }
+  ];
+
+  // Only show navigation for logged-in users
   if (!user) {
     return null;
   }
@@ -51,10 +54,7 @@ export function BottomNavigation() {
           )}
 
           {/* Mode Toggle */}
-          <button 
-            onClick={toggleMode}
-            className="glass-button glass-nav-item"
-          >
+          <button onClick={toggleMode} className="glass-button glass-nav-item">
             {mode === 'public' ? (
               <Home className="w-4 h-4 text-pb-blue transition-all duration-med" />
             ) : (
@@ -69,15 +69,13 @@ export function BottomNavigation() {
           {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             const IconComponent = item.icon;
-            
+
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={`relative flex flex-col items-center space-y-1 px-2 py-2 rounded-xl transition-all duration-med ${
-                  isActive 
-                    ? 'glass-nav-item bg-pb-blue/20 text-pb-blue'
-                    : 'text-pb-text2 hover:text-pb-text0 hover:bg-white/10'
+                  isActive ? 'glass-nav-item bg-pb-blue/20 text-pb-blue' : 'text-pb-text2 hover:text-pb-text0 hover:bg-white/10'
                 }`}
               >
                 <IconComponent className="w-4 h-4 transition-all duration-med" />
@@ -90,7 +88,7 @@ export function BottomNavigation() {
               </NavLink>
             );
           })}
-          
+
           <Button
             onClick={() => openComposer()}
             className="w-10 h-10 rounded-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border-pb-blue/30 interactive-glass ml-2"
@@ -101,10 +99,7 @@ export function BottomNavigation() {
         </div>
       </div>
 
-      <ComposerModal 
-        isOpen={isOpen} 
-        onClose={closeComposer} 
-      />
+      <ComposerModal isOpen={isOpen} onClose={closeComposer} />
     </nav>
   );
 }
