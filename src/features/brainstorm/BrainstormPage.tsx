@@ -53,7 +53,7 @@ function Toolbar() {
 }
 // --- end placeholders ---
 
-export default function BrainstormPage() {
+function BrainstormPage() {
   const { setNodes, setEdges, nodes } = useBrainstormStore();
 
   const adapter = useMemo(() => new BrainstormSupabaseAdapter(), []);
@@ -103,3 +103,7 @@ export default function BrainstormPage() {
     </div>
   );
 }
+
+// Export both default and named for compatibility
+export { BrainstormPage };
+export default BrainstormPage;
