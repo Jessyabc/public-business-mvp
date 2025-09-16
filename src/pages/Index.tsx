@@ -36,7 +36,7 @@ const Index = () => {
   }
 
   // If user is connected, show the feeds
-  const feedContent = mode === 'business' ? <BusinessFeed /> : <BrainstormFeed />;
+  const feedContent = mode === 'business' ? <BusinessPage /> : <BrainstormPage />;
   
   return (
     <ProtectedRoute requireAuth={true}>
