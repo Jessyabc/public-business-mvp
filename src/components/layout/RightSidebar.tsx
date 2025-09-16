@@ -10,7 +10,6 @@ import { SHOW_RIGHT_SIDEBAR } from '@/config/flags';
 export function RightSidebar() {
   if (!SHOW_RIGHT_SIDEBAR) return null;
 
-  const [brainstormFeed, setBrainstormFeed] = useState<FeedItem[]>([]);
   const [businessFeed, setBusinessFeed] = useState<FeedItem[]>([]);
   const [openIdeasFeed, setOpenIdeasFeed] = useState<FeedItem[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -20,13 +19,11 @@ export function RightSidebar() {
     const adapter = new FeedsAdapter();
     (async () => {
       try {
-        const [brainstorms, business, openIdeas, historyItems] = await Promise.all([
-          adapter.getBrainstormFeed(),
+        const [business, openIdeas, historyItems] = await Promise.all([
           adapter.getBusinessFeed(),
           adapter.getOpenIdeasFeed(),
           adapter.getHistory(),
         ]);
-        setBrainstormFeed(brainstorms);
         setBusinessFeed(business);
         setOpenIdeasFeed(openIdeas);
         setHistory(historyItems);
@@ -79,13 +76,8 @@ export function RightSidebar() {
 
   return (
     <aside className="w-full lg:w-96 p-2">
-      <Tabs defaultValue="brain" className="w-full">
-        <TabsList className="grid grid-cols-4">
-          <TabsTrigger value="brain">
-            <span className="inline-flex items-center gap-1">
-              <Brain size={14} /> Brain
-            </span>
-          </TabsTrigger>
+      <Tabs defaultValue="biz" className="w-full">
+        <TabsList className="grid grid-cols-3">
           <TabsTrigger value="biz">
             <span className="inline-flex items-center gap-1">
               <Building size={14} /> Biz
@@ -102,17 +94,6 @@ export function RightSidebar() {
             </span>
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="brain" className="space-y-2 mt-2">
-          <div className="text-sm font-medium mb-1">Brainstorm Feed</div>
-          {loading ? (
-            <EmptyState title="Loading…" description="Fetching brainstorm feed" />
-          ) : brainstormFeed.length ? (
-            brainstormFeed.map((i) => <FeedItemCard key={i.id} item={i} />)
-          ) : (
-            <EmptyState title="No items" description="Connect backend to populate feed" />
-          )}
-        </TabsContent>
 
         <TabsContent value="biz" className="space-y-2 mt-2">
           <div className="text-sm font-medium mb-1">Business Feed</div>
