@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Landing } from './Landing';
-import { BrainstormFeed } from "@/components/feeds/BrainstormFeed";
+import { BrainstormPage } from '@/features/brainstorm/BrainstormPage';
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
