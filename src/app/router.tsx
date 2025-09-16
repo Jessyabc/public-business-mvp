@@ -76,9 +76,10 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
 
   // Legacy brainstorm redirects (no need to lazy-import those old pages)
   { path: '/brainstorm-v2', element: <Navigate to="/brainstorm" replace /> },
-  { path: '/brainstorms', element: <Navigate to="/brainstorm" replace /> },
-  { path: '/brainstorms/:id', element: <Navigate to="/brainstorm" replace /> },
-  { path: '/brainstorms/:id/edit', element: <Navigate to="/brainstorm" replace /> },
+  { path: '/brainstorms', element: <Navigate to="/" replace /> },
+  { path: '/brainstorms/:id', element: <Navigate to="/" replace /> },
+  { path: '/brainstorms/:id/edit', element: <Navigate to="/" replace /> },
+  { path: '/brainstorms/new', element: <Navigate to="/" replace /> },
   { path: '/brainstorms/canvas', element: <Navigate to="/brainstorm" replace /> },
 
   // Public landing
