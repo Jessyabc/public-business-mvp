@@ -1,12 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/glass.css';
 @import './styles/postcards.css';
 @import './styles/app-shell.css'; 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
 
 /* Legacy HSL Color Support - Maintaining backward compatibility */
 @layer base {

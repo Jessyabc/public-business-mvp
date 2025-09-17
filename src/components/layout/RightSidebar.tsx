@@ -1,147 +1,138 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEffect, useMemo, useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Brain, Building, Lightbulb, History as HistoryIcon } from 'lucide-react';
-import { FeedsAdapter, type FeedItem, type HistoryItem } from '@/adapters/feedsAdapter';
 import { formatDistanceToNow } from 'date-fns';
+import { FeedsAdapter, type FeedItem, type HistoryItem } from '@/adapters/feedsAdapter';
 import { SHOW_RIGHT_SIDEBAR } from '@/config/flags';
 
 export function RightSidebar() {
   if (!SHOW_RIGHT_SIDEBAR) return null;
 
-  const [businessFeed, setBusinessFeed] = useState<FeedItem[]>([]);
-  const [openIdeasFeed, setOpenIdeasFeed] = useState<FeedItem[]>([]);
+  const adapter = useMemo(() => new FeedsAdapter(), []);
+  const [ideas, setIdeas] = useState<FeedItem[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingIdeas, setLoadingIdeas] = useState(true);
+  const [loadingHist, setLoadingHist] = useState(true);
+  const [visible, setVisible] = useState({ ideas: 12 });
 
   useEffect(() => {
-    const adapter = new FeedsAdapter();
     (async () => {
       try {
-        const [business, openIdeas, historyItems] = await Promise.all([
-          adapter.getBusinessFeed(),
-          adapter.getOpenIdeasFeed(),
-          adapter.getHistory(),
-        ]);
-        setBusinessFeed(business);
-        setOpenIdeasFeed(openIdeas);
-        setHistory(historyItems);
-      } catch (err) {
-        console.error('Failed to load feeds:', err);
+        const list = await adapter.getOpenIdeasFeed();      // uses existing adapter
+        setIdeas(list ?? []);
+      } catch (e) {
+        console.warn('Open ideas load failed:', e);
       } finally {
-        setLoading(false);
+        setLoadingIdeas(false);
       }
     })();
-  }, []);
 
-  const EmptyState = ({ title, description }: { title: string; description: string }) => (
-    <Card className="border-dashed">
-      <CardHeader>
-        <CardTitle className="text-sm">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">{description}</CardContent>
-    </Card>
-  );
+    (async () => {
+      try {
+        const list = await adapter.getHistory();            // recent views/opens
+        setHistory(list ?? []);
+      } catch (e) {
+        console.warn('History load failed:', e);
+      } finally {
+        setLoadingHist(false);
+      }
+    })();
+  }, [adapter]);
 
-  const FeedItemCard = ({ item }: { item: FeedItem }) => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2">
-          {item.type === 'brainstorm' && <Brain size={16} />}
-          {item.type === 'business' && <Building size={16} />}
-          {item.type === 'open_idea' && <Lightbulb size={16} />}
-          <CardTitle className="text-sm">{item.title}</CardTitle>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Heart size={14} />
-            {item.stats?.likes ?? 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <MessageCircle size={14} />
-            {item.stats?.comments ?? 0}
-          </span>
-        </div>
-      </CardHeader>
-      <CardContent className="text-sm">
-        {item.content && <p className="mb-2">{item.content}</p>}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{item.author ?? 'Unknown'}</span>
-          <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const loadMoreIdeas = () =>
+    setVisible(v => ({ ...v, ideas: Math.min(v.ideas + 12, ideas.length) }));
 
   return (
-    <aside className="w-full lg:w-96 p-2">
-      <Tabs defaultValue="biz" className="w-full">
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="biz">
-            <span className="inline-flex items-center gap-1">
-              <Building size={14} /> Biz
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="ideas">
-            <span className="inline-flex items-center gap-1">
-              <Lightbulb size={14} /> Ideas
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="hist">
-            <span className="inline-flex items-center gap-1">
-              <HistoryIcon size={14} /> Hist
-            </span>
-          </TabsTrigger>
+    <aside
+      className="
+        fixed right-4 top-20 bottom-6 z-[60]
+        w-[22rem] xl:w-96
+        glass-surface p-3
+        hidden md:flex flex-col
+        pointer-events-auto
+      "
+      aria-label="Right sidebar overlay"
+    >
+      <Tabs defaultValue="ideas" className="w-full flex-1 overflow-hidden">
+        <TabsList className="grid grid-cols-2 mb-2">
+          <TabsTrigger value="ideas">Open Ideas</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="biz" className="space-y-2 mt-2">
-          <div className="text-sm font-medium mb-1">Business Feed</div>
-          {loading ? (
-            <EmptyState title="Loading…" description="Fetching business feed" />
-          ) : businessFeed.length ? (
-            businessFeed.map((i) => <FeedItemCard key={i.id} item={i} />)
-          ) : (
-            <EmptyState title="No items" description="Connect backend to populate feed" />
-          )}
+        <TabsContent value="ideas" className="flex flex-col h-[calc(100%-3rem)]">
+          <Card className="mb-2 bg-transparent border-transparent shadow-none">
+            <CardHeader className="py-2">
+              <CardTitle className="text-sm opacity-80">Open Ideas (public)</CardTitle>
+            </CardHeader>
+          </Card>
+
+          <ScrollArea className="flex-1 glass-scroll pr-2">
+            {loadingIdeas ? (
+              <div className="text-sm text-muted-foreground p-2">Loading open ideas…</div>
+            ) : ideas.length === 0 ? (
+              <div className="text-sm text-muted-foreground p-2">No ideas yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {ideas.slice(0, visible.ideas).map((it) => (
+                  <Card key={it.id} className="glass-surface interactive-glass cursor-pointer">
+                    <CardContent className="p-3">
+                      <div className="text-sm font-medium line-clamp-2">{it.title || it.content}</div>
+                      <div className="mt-1 text-xs text-muted-foreground flex items-center justify-between">
+                        <span>{it.author ?? 'Anonymous'}</span>
+                        <span>{formatDistanceToNow(new Date(it.created_at), { addSuffix: true })}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {visible.ideas < ideas.length && (
+                  <button
+                    onClick={loadMoreIdeas}
+                    className="w-full text-xs py-2 rounded-md glass-button interactive-glass"
+                  >
+                    Load more
+                  </button>
+                )}
+              </div>
+            )}
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="ideas" className="space-y-2 mt-2">
-          <div className="text-sm font-medium mb-1">Open Ideas Feed</div>
-          {loading ? (
-            <EmptyState title="Loading…" description="Fetching open ideas" />
-          ) : openIdeasFeed.length ? (
-            openIdeasFeed.map((i) => <FeedItemCard key={i.id} item={i} />)
-          ) : (
-            <EmptyState title="No items" description="Connect backend to populate feed" />
-          )}
-        </TabsContent>
+        <TabsContent value="history" className="flex flex-col h-[calc(100%-3rem)]">
+          <Card className="mb-2 bg-transparent border-transparent shadow-none">
+            <CardHeader className="py-2">
+              <CardTitle className="text-sm opacity-80">Recent activity</CardTitle>
+            </CardHeader>
+          </Card>
 
-        <TabsContent value="hist" className="space-y-2 mt-2">
-          <div className="text-sm font-medium mb-1">History</div>
-          {loading ? (
-            <EmptyState title="Loading…" description="Fetching history" />
-          ) : history.length ? (
-            history.map((h) => (
-              <Card key={h.id}>
-                <CardContent className="py-3 text-sm flex items-center justify-between">
-                  <span>
-                    {h.action}{' '}
-                    <Badge variant="outline" className="ml-1">
-                      {h.target}
-                    </Badge>
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(h.created_at), { addSuffix: true })}
-                  </span>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <EmptyState title="No history" description="Nothing to show yet" />
-          )}
+          <ScrollArea className="flex-1 glass-scroll pr-2">
+            {loadingHist ? (
+              <div className="text-sm text-muted-foreground p-2">Loading history…</div>
+            ) : history.length === 0 ? (
+              <div className="text-sm text-muted-foreground p-2">Nothing yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {history.map((h) => (
+                  <Card key={h.id} className="glass-surface interactive-glass cursor-pointer">
+                    <CardContent className="p-3 flex items-center justify-between">
+                      <span className="text-sm">
+                        {h.action || 'viewed'}{' '}
+                        {h.target && <Badge variant="outline" className="ml-1">{h.target}</Badge>}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(h.created_at), { addSuffix: true })}
+                      </span>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </aside>
   );
 }
+
+export default RightSidebar;

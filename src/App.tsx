@@ -7,6 +7,7 @@ import { AppModeProvider } from "@/contexts/AppModeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackgroundModeManager } from "@/components/layout/BackgroundModeManager";
 import { router } from "./app/router";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 const queryClient = new QueryClient();
 
