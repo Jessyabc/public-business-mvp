@@ -1,42 +1,21 @@
 import { supabase } from '@/integrations/supabase/client';
+import { rpcListBrainstormNodes, rpcListBrainstormEdgesForNodes } from '@/integrations/supabase/rpc';
 import { BrainstormNode, BrainstormEdge } from '../types';
 import { TABLES, BRAINSTORM_FILTERS } from '@/adapters/constants';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 import { toast } from 'sonner';
 
 export class BrainstormSupabaseAdapter {
-  async loadNodes(): Promise<BrainstormNode[]> {
+  async loadNodes(options: { cursor?: string; limit?: number } = {}): Promise<BrainstormNode[]> {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.BRAINSTORM_NODES)
-        .select('id, title, content, metadata, created_at, user_id')
-        .eq('type', BRAINSTORM_FILTERS.TYPE)
-        .eq('mode', BRAINSTORM_FILTERS.MODE)
-        .eq('status', BRAINSTORM_FILTERS.STATUS)
-        .order('created_at', { ascending: false });
+      const { data, error } = await rpcListBrainstormNodes(options.cursor, options.limit);
 
       if (error) {
-        console.warn(`Failed to load nodes from ${TABLES.BRAINSTORM_NODES}:`, error.message);
+        console.warn(`Failed to load nodes via RPC:`, error.message);
         return [];
       }
 
-      // Get profile data separately to avoid join issues
-      const nodeData = data || [];
-      const userIds = [...new Set(nodeData.map(post => post.user_id).filter(Boolean))];
-      
-      let profilesMap = new Map();
-      if (userIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, display_name')
-          .in('id', userIds);
-          
-        if (profiles) {
-          profilesMap = new Map(profiles.map(p => [p.id, p.display_name]));
-        }
-      }
-
-      return nodeData.map((post: any) => ({
+      return (data || []).map((post: any) => ({
         id: post.id,
         title: post.title || 'Untitled',
         content: post.content || '',
@@ -44,17 +23,42 @@ export class BrainstormSupabaseAdapter {
         tags: (post.metadata as any)?.tags || [],
         position: (post.metadata as any)?.position || { x: Math.random() * 400, y: Math.random() * 300 },
         created_at: post.created_at,
-        author: profilesMap.get(post.user_id) || 'Anonymous'
+        author: post.display_name || 'Anonymous'
       }));
     } catch (err) {
-      console.warn(`Table ${TABLES.BRAINSTORM_NODES} may not exist or is not accessible:`, err);
+      console.warn(`Failed to load brainstorm nodes:`, err);
+      return [];
+    }
+  }
+
+  async loadEdgesForNodes(nodeIds: string[]): Promise<BrainstormEdge[]> {
+    if (nodeIds.length === 0) return [];
+    
+    try {
+      const { data, error } = await rpcListBrainstormEdgesForNodes(nodeIds);
+
+      if (error) {
+        console.warn(`Failed to load edges via RPC:`, error.message);
+        return [];
+      }
+
+      return (data || []).map((relation: any) => ({
+        id: relation.id,
+        source: relation.parent_post_id,
+        target: relation.child_post_id,
+        type: relation.relation_type === 'hard' ? 'hard' : 'soft',
+        note: relation.note || '',
+        created_at: relation.created_at
+      }));
+    } catch (err) {
+      console.warn(`Failed to load brainstorm edges:`, err);
       return [];
     }
   }
 
   async loadEdges(): Promise<BrainstormEdge[]> {
-    // Edges table doesn't exist yet - return empty array
-    console.warn(`Table ${TABLES.BRAINSTORM_EDGES} does not exist yet`);
+    // Legacy method - use loadEdgesForNodes instead
+    console.warn('loadEdges() is deprecated, use loadEdgesForNodes() instead');
     return [];
   }
 
@@ -209,13 +213,72 @@ export class BrainstormSupabaseAdapter {
   }
 
   async saveEdge(edgeData: Omit<BrainstormEdge, 'id' | 'created_at'>): Promise<BrainstormEdge> {
-    console.warn(`Table ${TABLES.BRAINSTORM_EDGES} does not exist yet - edges not supported`);
-    toast.error('Edge connections not yet available');
-    throw new Error('Edges table not implemented');
+    if (!BRAINSTORM_WRITES_ENABLED) {
+      const error = 'Brainstorm writes are disabled in config';
+      toast.error(error);
+      throw new Error(error);
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.BRAINSTORM_EDGES)
+        .insert({
+          parent_post_id: edgeData.source,
+          child_post_id: edgeData.target,
+          relation_type: edgeData.type || 'soft'
+        })
+        .select('id, parent_post_id, child_post_id, relation_type, created_at')
+        .single();
+
+      if (error) {
+        console.warn('Failed to save edge:', error.message);
+        toast.error(`Failed to save connection: ${error.message}`);
+        throw error;
+      }
+
+      toast.success('Connection saved successfully');
+      
+      return {
+        id: data.id,
+        source: data.parent_post_id,
+        target: data.child_post_id,
+        type: data.relation_type === 'hard' ? 'hard' : 'soft',
+        note: edgeData.note || '',
+        created_at: data.created_at
+      };
+    } catch (err: any) {
+      const errorMsg = err.message || 'Failed to save edge';
+      console.warn('Save edge error:', errorMsg);
+      toast.error(errorMsg);
+      throw err;
+    }
   }
 
   async deleteEdge(id: string): Promise<void> {
-    console.warn(`Table ${TABLES.BRAINSTORM_EDGES} does not exist yet - edges not supported`);
-    throw new Error('Edges table not implemented');
+    if (!BRAINSTORM_WRITES_ENABLED) {
+      const error = 'Brainstorm writes are disabled in config';
+      toast.error(error);
+      throw new Error(error);
+    }
+
+    try {
+      const { error } = await supabase
+        .from(TABLES.BRAINSTORM_EDGES)
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.warn('Failed to delete edge:', error.message);
+        toast.error(`Failed to delete connection: ${error.message}`);
+        throw error;
+      }
+
+      toast.success('Connection deleted');
+    } catch (err: any) {
+      const errorMsg = err.message || 'Failed to delete edge';
+      console.warn('Delete edge error:', errorMsg);
+      toast.error(errorMsg);
+      throw err;
+    }
   }
 }

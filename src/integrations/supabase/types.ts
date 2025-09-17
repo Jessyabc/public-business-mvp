@@ -835,6 +835,28 @@ export type Database = {
         Args: { invitation_id: string }
         Returns: boolean
       }
+      api_list_brainstorm_edges_for_nodes: {
+        Args: { p_node_ids: string[] }
+        Returns: {
+          child_post_id: string
+          created_at: string
+          id: string
+          parent_post_id: string
+          relation_type: string
+        }[]
+      }
+      api_list_brainstorm_nodes: {
+        Args: { p_cursor?: string; p_limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          display_name: string
+          id: string
+          metadata: Json
+          title: string
+          user_id: string
+        }[]
+      }
       can_create_business_posts: {
         Args: { user_uuid: string }
         Returns: boolean

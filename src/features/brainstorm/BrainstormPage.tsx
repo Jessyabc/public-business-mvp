@@ -61,9 +61,18 @@ function BrainstormPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [n, e] = await Promise.all([adapter.loadNodes(), adapter.loadEdges()]);
-        setNodes(n);
-        setEdges(e);
+        // Load nodes first
+        const nodes = await adapter.loadNodes();
+        setNodes(nodes);
+        
+        // Then load edges for these nodes
+        if (nodes.length > 0) {
+          const nodeIds = nodes.map(node => node.id);
+          const edges = await adapter.loadEdgesForNodes(nodeIds);
+          setEdges(edges);
+        } else {
+          setEdges([]);
+        }
       } catch (err) {
         console.error('Failed to load brainstorm data:', err);
         setNodes([]);
