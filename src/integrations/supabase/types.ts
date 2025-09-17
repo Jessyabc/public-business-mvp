@@ -857,6 +857,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      api_track_event: {
+        Args: {
+          p_event: string
+          p_kind: string
+          p_props?: Json
+          p_target: string
+        }
+        Returns: undefined
+      }
       can_create_business_posts: {
         Args: { user_uuid: string }
         Returns: boolean

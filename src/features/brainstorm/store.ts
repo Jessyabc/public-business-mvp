@@ -10,6 +10,8 @@ type Store = {
   searchTerm: string;
   showHardEdges: boolean;
   showSoftEdges: boolean;
+  depth: 0 | 1 | 2;
+  selectedNodeId: string | null;
 
   setNodes: (nodes: BrainstormNode[]) => void;
   setEdges: (edges: BrainstormEdge[]) => void;
@@ -24,6 +26,8 @@ type Store = {
   setSearchTerm: (term: string) => void;
   toggleHardEdges: () => void;
   toggleSoftEdges: () => void;
+  setDepth: (depth: 0 | 1 | 2) => void;
+  setSelectedNodeId: (id: string | null) => void;
   fitToView: () => void;
   autoArrange: () => void;
   reset: () => void;
@@ -41,6 +45,8 @@ export const useBrainstormStore = create<Store>((set) => ({
   searchTerm: '',
   showHardEdges: true,
   showSoftEdges: true,
+  depth: 0,
+  selectedNodeId: null,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -96,6 +102,8 @@ export const useBrainstormStore = create<Store>((set) => ({
   setSearchTerm: (term) => set({ searchTerm: term }),
   toggleHardEdges: () => set((state) => ({ showHardEdges: !state.showHardEdges })),
   toggleSoftEdges: () => set((state) => ({ showSoftEdges: !state.showSoftEdges })),
+  setDepth: (depth) => set({ depth }),
+  setSelectedNodeId: (id) => set({ selectedNodeId: id }),
   fitToView: () => {},
   autoArrange: () => {},
 
@@ -109,5 +117,7 @@ export const useBrainstormStore = create<Store>((set) => ({
       searchTerm: '',
       showHardEdges: true,
       showSoftEdges: true,
+      depth: 0,
+      selectedNodeId: null,
     }),
 }));
