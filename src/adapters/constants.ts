@@ -2,7 +2,7 @@
 export const TABLES = {
   // Brainstorm data stored in posts table with type='brainstorm'
   BRAINSTORM_NODES: 'posts',
-  BRAINSTORM_EDGES: 'brainstorm_edges',  // May not exist yet
+  BRAINSTORM_EDGES: 'post_relations',  // Using existing relations table
   
   // Open ideas and related data  
   OPEN_IDEAS: 'open_ideas',
