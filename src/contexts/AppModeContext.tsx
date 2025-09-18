@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import * as React from 'react';
+const { createContext, useContext, useState } = React;
+type ReactNode = React.ReactNode;
 
 export type AppMode = 'public' | 'business';
 
