@@ -1,59 +1,72 @@
-/* ---- App Shell: full-viewport dark gradient + glass components ---- */
-:root{
-  --pb-bg-1: #051a33;          /* deep PB blue */
-  --pb-bg-2: #071f3f;
-  --pb-bg-3: #0a2954;
-  --pb-glass-bg: rgba(255,255,255,.08);
-  --pb-glass-brd: rgba(255,255,255,.18);
-  --pb-glass-tint: rgba(120,200,255,.08);
-  --pb-glow: rgba(120,200,255,.35);
-}
-
-html, body, #root {
-  height: 100%;
-}
-
+/* Global layout scaffold */
+html, body, #root { height: 100%; }
+* { min-width: 0; }
 body {
-  margin: 0;
+  color: #e6eef8;
   background:
-    radial-gradient(1200px 800px at 20% 0%, var(--pb-bg-3) 0%, transparent 60%),
-    radial-gradient(1200px 900px at 80% 100%, var(--pb-bg-2) 0%, transparent 60%),
-    linear-gradient(180deg, var(--pb-bg-1), #061b36 60%, #051a33 100%);
-  color: rgba(255,255,255,.92);
+    radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,0.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(0,153,255,0.10), transparent 55%),
+    linear-gradient(180deg, #0a1f3a 0%, #061529 60%, #051225 100%);
 }
 
-/* Optional: clamp the main app to viewport, let inner areas scroll */
-.app-shell {
-  min-height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+/* Page shell prevents double scrollbars */
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.page-content {
+  overflow: auto; /* interior scroll only */
 }
 
-/* Glass primitives */
+/* Glassmorphism tokens (used across app) */
 .glass-surface {
-  background: linear-gradient(180deg, var(--pb-glass-bg), transparent),
-              var(--pb-glass-tint);
-  border: 1px solid var(--pb-glass-brd);
-  border-radius: 16px;
-  box-shadow:
-    0 2px 20px -6px rgba(0,0,0,.45),
-    0 0 0 1px rgba(255,255,255,.03) inset,
-    0 0 32px -10px var(--pb-glow);
-  backdrop-filter: blur(14px) saturate(135%);
-  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
 }
 
-.glass-card { ime-mode: glass-surface; } /* if your build doesn’t support composes, keep using the class directly */
-.glass-button {
-  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-  border: 1px solid var(--pb-glass-brd);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.03) inset,
-    0 8px 24px -12px var(--pb-glow);
-  backdrop-filter: blur(12px) saturate(135%);
-  -webkit-backdrop-filter: blur(12px) saturate(135%);
+.glass-card {
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  backdrop-filter: saturate(140%) blur(16px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 16px;
 }
+
+.glass-button {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Right sidebar overlay behavior */
+.right-sidebar-overlay {
+  position: fixed;
+  top: 72px;          /* height under fixed header */
+  right: 16px;
+  bottom: 16px;
+  width: 320px;       /* ~w-80 */
+  z-index: 50;
+  overflow: auto;
+}
+@media (min-width: 1440px) {
+  .right-sidebar-overlay { width: 380px; }
+}
+
+/* Brainstorm canvas container to avoid body scroll */
+.brainstorm-canvas {
+  height: calc(100vh - 96px);
+  overflow: hidden;
+}
+
+/* Prevent layout jitter */
+img, svg, canvas, video { display:block; }
 
 /* Subtle zoom-hover for cards */
 .hover-scale { transition: transform .25s ease, box-shadow .25s ease; }

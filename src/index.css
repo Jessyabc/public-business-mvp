@@ -1,13 +1,15 @@
+/* Tailwind must come first */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Project styles (tokens first, then base, then glass, then specialized) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/glass.css';
 @import './styles/postcards.css';
-@import './styles/app-shell.css'; 
+@import './styles/app-shell.css';
 
 
 /* Legacy HSL Color Support - Maintaining backward compatibility */
