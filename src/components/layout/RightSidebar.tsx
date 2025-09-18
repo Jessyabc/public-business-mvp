@@ -45,14 +45,7 @@ export function RightSidebar() {
     setVisible(v => ({ ...v, ideas: Math.min(v.ideas + 12, ideas.length) }));
 
   return (
-    <aside
-      className="
-        fixed right-4 top-20 bottom-6 z-[60]
-        w-[22rem] xl:w-96
-        glass-surface p-3
-        hidden md:flex flex-col
-        pointer-events-auto
-      "
+    <aside className="right-sidebar-overlay glass-card p-3"
       aria-label="Right sidebar overlay"
     >
       <Tabs defaultValue="ideas" className="w-full flex-1 overflow-hidden">
