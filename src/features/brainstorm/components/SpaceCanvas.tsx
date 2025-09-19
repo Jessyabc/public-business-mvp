@@ -208,7 +208,7 @@ export default function SpaceCanvas({ startId, className }: Props) {
 
       {/* Hard link “nexts” as luminous beacons */}
       {forwardNext && (
-        <div className="absolute right-10 top-10 mr-[360px]">
+        <div className="absolute right-10 top-10">
           <div className="mb-2 text-xs uppercase tracking-wide text-[#6fb3ff]">Hard link →</div>
           <div className="w-64 rounded-xl p-[1px] bg-gradient-to-r from-[#3aa0ff] to-white/60">
             <div className="rounded-[10px] bg-[#0b285a]/70 p-3">
@@ -252,9 +252,9 @@ export default function SpaceCanvas({ startId, className }: Props) {
         </div>
       )}
 
-      {/* Soft neighbors rail - moved left to avoid sidebar conflict */}
+      {/* Soft neighbors rail */}
       {softNeighbors.length > 0 && (
-        <div className="absolute left-6 bottom-20 w-[320px] space-y-3 max-h-[40vh] overflow-y-auto">
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-[320px] space-y-3">
           <div className="text-xs uppercase tracking-wide text-white/70 mb-2">Soft links</div>
           {softNeighbors.slice(0, 5).map(n => (
             <SoftCard key={n.id} post={n} onOpen={(id) => {

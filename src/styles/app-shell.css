@@ -55,28 +55,20 @@ body {
   z-index: 100;       /* Higher z-index to appear above canvas */
   overflow: auto;
 }
-
-@media (max-width: 1280px) {
-  .right-sidebar-overlay {
-    display: none;    /* Hide sidebar on smaller screens to avoid overlap */
-  }
-}
-
 @media (min-width: 1440px) {
-  .right-sidebar-overlay { 
-    width: 380px; 
-  }
+  .right-sidebar-overlay { width: 380px; }
 }
 
 /* Brainstorm canvas container to avoid body scroll */
 .brainstorm-canvas {
   height: calc(100vh - 96px);
   overflow: hidden;
+  margin-right: 340px;  /* Make room for right sidebar */
 }
 
-@media (min-width: 1280px) {
+@media (max-width: 1280px) {
   .brainstorm-canvas {
-    margin-right: 340px;  /* Make room for right sidebar only on large screens */
+    margin-right: 0;  /* Remove margin on smaller screens */
   }
 }
 
