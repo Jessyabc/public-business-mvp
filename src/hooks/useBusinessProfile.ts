@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BusinessProfile, Industry, Department } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,17 +12,9 @@ export function useBusinessProfile() {
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-      fetchIndustries();
-      fetchDepartments();
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -53,9 +45,9 @@ export function useBusinessProfile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const fetchIndustries = async () => {
+  const fetchIndustries = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('industries')
@@ -67,9 +59,9 @@ export function useBusinessProfile() {
     } catch (error: unknown) {
       console.error('Error fetching industries:', error);
     }
-  };
+  }, []);
 
-  const fetchDepartments = async () => {
+  const fetchDepartments = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('departments')
@@ -81,7 +73,15 @@ export function useBusinessProfile() {
     } catch (error: unknown) {
       console.error('Error fetching departments:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+      fetchIndustries();
+      fetchDepartments();
+    }
+  }, [user, fetchProfile, fetchIndustries, fetchDepartments]);
 
   const createProfile = async (profileData: any) => {
     if (!user) return;

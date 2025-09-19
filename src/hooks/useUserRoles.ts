@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -7,7 +7,7 @@ export function useUserRoles() {
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     if (!user) {
       setRoles([]);
       setLoading(false);
@@ -30,11 +30,11 @@ export function useUserRoles() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchRoles();
-  }, [user]);
+  }, [fetchRoles]);
 
   const hasRole = (role: string) => roles.includes(role);
   const hasAnyRole = (roleList: string[]) => roleList.some(role => roles.includes(role));
@@ -51,10 +51,7 @@ export function useUserRoles() {
     // Backward compatibility
     userRoles: roles,
     refetch: () => {
-      // Re-trigger the effect by updating user dependency
-      if (user) {
-        fetchRoles();
-      }
+      fetchRoles();
     },
   };
 }
