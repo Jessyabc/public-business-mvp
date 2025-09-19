@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +34,7 @@ export function useBusinessInvitations() {
   const [invitations, setInvitations] = useState<BusinessInvitation[]>([]);
   const [receivedInvitations, setReceivedInvitations] = useState<BusinessInvitation[]>([]);
 
-  const fetchSentInvitations = async () => {
+  const fetchSentInvitations = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -57,9 +57,9 @@ export function useBusinessInvitations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const fetchReceivedInvitations = async () => {
+  const fetchReceivedInvitations = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -88,10 +88,10 @@ export function useBusinessInvitations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   // CREATE via RPC (server-side token + RLS)
-  const createInvitation = async (input: CreateInvitationData) => {
+  const createInvitation = useCallback(async (input: CreateInvitationData) => {
     if (!user) {
       toast({
         title: 'Authentication Required',
@@ -129,10 +129,10 @@ export function useBusinessInvitations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast, fetchSentInvitations]);
 
   // ACCEPT via RPC (needs the token)
-  const acceptInvitation = async (token: string) => {
+  const acceptInvitation = useCallback(async (token: string) => {
     if (!user) return false;
     setLoading(true);
     try {
@@ -160,10 +160,10 @@ export function useBusinessInvitations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast, fetchSentInvitations]);
 
   // REJECT by marking consumed (allowed by RLS policy "Invitee can mark consumed")
-  const rejectInvitation = async (id: string) => {
+  const rejectInvitation = useCallback(async (id: string) => {
     if (!user) return false;
     setLoading(true);
     try {
@@ -198,19 +198,22 @@ export function useBusinessInvitations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   // Token processing now only occurs on /accept-invite page
 
   // Expose a convenience status helper if you want it in the UI
-  const getInvitationStatus = (inv: BusinessInvitation) => computeStatus(inv);
+  const getInvitationStatus = useCallback(
+    (inv: BusinessInvitation) => computeStatus(inv),
+    [],
+  );
 
   useEffect(() => {
     if (user) {
       fetchSentInvitations();
       fetchReceivedInvitations();
     }
-  }, [user]);
+  }, [user, fetchSentInvitations, fetchReceivedInvitations]);
 
   return {
     invitations,
