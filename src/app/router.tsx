@@ -1,8 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import Index from '@/pages/Index';
+import { LazyWrapper, LoadingFallback, NotFound } from './router-helpers';
 
 // Canonical brainstorm page
 const BrainstormPage = lazy(() => import('@/features/brainstorm/BrainstormPage'));
@@ -20,37 +20,6 @@ import { Landing } from '@/pages/Landing';
 
 // Nav items (kept for compatibility)
 import { navItems } from '@/nav-items';
-
-// Fallback component for loading
-function LoadingFallback() {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <LoadingSpinner />
-    </div>
-  );
-}
-
-// Wrapper for lazy components
-function LazyWrapper({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>;
-}
-
-// Simple 404 (client-side)
-function NotFound() {
-  return (
-    <MainLayout>
-      <div className="min-h-[50vh] flex items-center justify-center text-center p-8">
-        <div>
-          <h1 className="text-2xl font-semibold mb-2">Page not found</h1>
-          <p className="text-muted-foreground">
-            The page you’re looking for doesn’t exist.{" "}
-            <a href="/" className="underline">Go home</a>.
-          </p>
-        </div>
-      </div>
-    </MainLayout>
-  );
-}
 
 // Build routes array so we can conditionally add dev-only routes
 const routes: Parameters<typeof createBrowserRouter>[0] = [
