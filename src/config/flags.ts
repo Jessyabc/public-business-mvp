@@ -1,4 +1,4 @@
-// Centralized feature flags (Vite env)
+
 export const SHOW_RIGHT_SIDEBAR =
   (import.meta.env.VITE_SHOW_RIGHT_SIDEBAR ?? 'true') !== 'false';
 
