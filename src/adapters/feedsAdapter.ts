@@ -1,6 +1,37 @@
 import { supabase } from '@/integrations/supabase/client';
 import { TABLES, BUSINESS_FILTERS } from './constants';
 
+interface BusinessFeedRow {
+  id: string;
+  title: string | null;
+  content: string | null;
+  created_at: string;
+  likes_count: number | null;
+  comments_count: number | null;
+  profiles: {
+    display_name: string | null;
+  } | null;
+}
+
+interface OpenIdeaRow {
+  id: string;
+  content: string;
+  created_at: string;
+  linked_brainstorms_count: number | null;
+}
+
+interface FeedEventProperties {
+  postId?: string | null;
+  ideaId?: string | null;
+}
+
+interface HistoryEventRow {
+  id: string;
+  event_name: string;
+  properties: FeedEventProperties | null;
+  created_at: string;
+}
+
 export interface FeedItem {
   id: string;
   type: 'brainstorm' | 'business' | 'open_idea';
@@ -50,7 +81,9 @@ export class FeedsAdapter {
         return [];
       }
 
-      return (data || []).map((post: any) => ({
+      const posts = (data ?? []) as BusinessFeedRow[];
+
+      return posts.map((post) => ({
         id: post.id,
         type: 'business' as const,
         title: post.title || 'Untitled Post',
@@ -82,7 +115,9 @@ export class FeedsAdapter {
         return [];
       }
 
-      return (data || []).map((idea: any) => ({
+      const ideas = (data ?? []) as OpenIdeaRow[];
+
+      return ideas.map((idea) => ({
         id: idea.id,
         type: 'open_idea' as const,
         title: idea.content.substring(0, 60) + (idea.content.length > 60 ? '...' : ''),
@@ -119,7 +154,9 @@ export class FeedsAdapter {
         return [];
       }
 
-      return (data || []).map((event: any) => ({
+      const events = (data ?? []) as HistoryEventRow[];
+
+      return events.map((event) => ({
         id: event.id,
         action: this.formatEventAction(event.event_name),
         target: this.formatEventTarget(event.event_name, event.properties),
@@ -143,7 +180,7 @@ export class FeedsAdapter {
     return actionMap[eventName] || eventName.replace(/_/g, ' ');
   }
 
-  private formatEventTarget(eventName: string, properties: any): string {
+  private formatEventTarget(eventName: string, properties?: FeedEventProperties | null): string {
     if (properties?.postId) return `Post #${properties.postId.substring(0, 8)}`;
     if (properties?.ideaId) return `Idea #${properties.ideaId.substring(0, 8)}`;
     if (eventName.includes('hero')) return 'Landing Page';
