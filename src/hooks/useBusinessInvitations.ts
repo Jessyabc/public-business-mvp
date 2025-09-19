@@ -47,11 +47,17 @@ export function useBusinessInvitations() {
 
       if (error) throw error;
       setInvitations(data as BusinessInvitation[] || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching sent invitations:', error);
+      let description = 'Failed to fetch sent invitations';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: 'Error',
-        description: 'Failed to fetch sent invitations',
+        description,
         variant: 'destructive',
       });
     } finally {
@@ -78,11 +84,17 @@ export function useBusinessInvitations() {
 
       if (error) throw error;
       setReceivedInvitations(data as BusinessInvitation[] || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching received invitations:', error);
+      let description = 'Failed to fetch received invitations';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: 'Error',
-        description: 'Failed to fetch received invitations',
+        description,
         variant: 'destructive',
       });
     } finally {
@@ -118,11 +130,17 @@ export function useBusinessInvitations() {
       }
 
       return row; // { token, expires_at }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating invitation:', error);
+      let description = 'Failed to send invitation';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: 'Error',
-        description: error.message || 'Failed to send invitation',
+        description,
         variant: 'destructive',
       });
       throw error;
@@ -149,11 +167,17 @@ export function useBusinessInvitations() {
       setReceivedInvitations(prev => prev.filter(inv => inv.token !== token));
       await fetchSentInvitations();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error accepting invitation:', error);
+      let description = 'Failed to accept invitation';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: 'Error',
-        description: error.message || 'Failed to accept invitation',
+        description,
         variant: 'destructive',
       });
       return false;
@@ -187,11 +211,17 @@ export function useBusinessInvitations() {
         description: 'The invitation was closed.',
       });
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error rejecting invitation:', error);
+      let description = 'Failed to reject invitation';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: 'Error',
-        description: 'Failed to reject invitation',
+        description,
         variant: 'destructive',
       });
       return false;

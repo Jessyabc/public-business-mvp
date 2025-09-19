@@ -31,10 +31,17 @@ export function Header() {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Failed to sign out', error);
+      let description = 'Failed to sign out';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to sign out",
+        description,
         variant: "destructive",
       });
     }

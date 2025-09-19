@@ -105,11 +105,17 @@ export function BusinessInsightComposer({ open, onOpenChange, onSuccess }: Busin
 
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error posting business insight:', error);
+      let description = 'Failed to post business insight';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to post business insight",
+        description,
         variant: "destructive",
       });
     } finally {

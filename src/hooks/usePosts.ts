@@ -60,12 +60,18 @@ export function usePosts() {
 
       if (error) throw error;
       setPosts((data as Post[]) || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching posts:', err);
-      setError(err.message || 'Failed to fetch posts');
+      const message =
+        err instanceof Error
+          ? err.message
+          : err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string'
+            ? (err as { message: string }).message
+            : 'Failed to fetch posts';
+      setError(message);
       toast({
         title: "Error",
-        description: "Failed to fetch posts",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -129,11 +135,17 @@ export function usePosts() {
       });
       
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating post:', error);
+      let description = 'Failed to create post';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to create post",
+        description,
         variant: "destructive",
       });
       throw error;
@@ -159,7 +171,7 @@ export function usePosts() {
           relation_type: relation.relation_type,
         });
       if (error) throw error;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error creating post relation:', error);
       toast({
         title: 'Relation not linked',
@@ -197,11 +209,17 @@ export function usePosts() {
       });
       
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating post:', error);
+      let description = 'Failed to update post';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to update post",
+        description,
         variant: "destructive",
       });
       throw error;
@@ -232,11 +250,17 @@ export function usePosts() {
       });
       
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting post:', error);
+      let description = 'Failed to delete post';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to delete post",
+        description,
         variant: "destructive",
       });
       return false;
@@ -258,9 +282,15 @@ export function usePosts() {
 
       if (error) throw error;
       return data as Post;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching post:', err);
-      setError(err.message || 'Failed to fetch post');
+      const message =
+        err instanceof Error
+          ? err.message
+          : err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string'
+            ? (err as { message: string }).message
+            : 'Failed to fetch post';
+      setError(message);
       throw err;
     } finally {
       setLoading(false);
@@ -280,7 +310,7 @@ export function usePosts() {
 
       if (error) throw error;
       return relations || [];
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching post relations:', err);
       return [];
     }
@@ -301,12 +331,18 @@ export function usePosts() {
 
       if (error) throw error;
       setPosts((data as Post[]) || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching user posts:', err);
-      setError(err.message || 'Failed to fetch your posts');
+      const message =
+        err instanceof Error
+          ? err.message
+          : err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string'
+            ? (err as { message: string }).message
+            : 'Failed to fetch your posts';
+      setError(message);
       toast({
         title: "Error",
-        description: "Failed to fetch your posts",
+        description: message,
         variant: "destructive",
       });
     } finally {

@@ -36,10 +36,17 @@ export function Admin() {
 
       if (error) throw error;
       setIdeas(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Failed to fetch ideas', error);
+      let description = 'Failed to fetch ideas.';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to fetch ideas.",
+        description,
         variant: "destructive",
       });
     } finally {
@@ -66,10 +73,17 @@ export function Admin() {
         title: "Success",
         description: `Idea ${!currentStatus ? "added to" : "removed from"} curated feed.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Failed to update idea', error);
+      let description = 'Failed to update idea.';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to update idea.",
+        description,
         variant: "destructive",
       });
     }

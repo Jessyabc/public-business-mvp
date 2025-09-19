@@ -52,10 +52,17 @@ export default function Settings() {
         title: "Account Deletion Request",
         description: "Your account deletion request has been submitted. We'll process it within 24 hours.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Failed to process account deletion', error);
+      let description = 'Failed to process account deletion';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to process account deletion",
+        description,
         variant: "destructive",
       });
     } finally {
