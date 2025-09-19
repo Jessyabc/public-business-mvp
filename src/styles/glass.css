@@ -6,7 +6,11 @@
   pointer-events: none;
 }
 
-.glass-card {
+.glass-card,
+.glass-ios-card,
+.glass-ios-triple,
+.glass-ios-widget,
+.glass-corner-distort {
   position: relative;
   border-radius: var(--radius);
   background: var(--glass-fill);
@@ -19,14 +23,22 @@
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  .glass-card {
+  .glass-card,
+  .glass-ios-card,
+  .glass-ios-triple,
+  .glass-ios-widget,
+  .glass-corner-distort {
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
   }
 }
 
 /* Refraction/bend layer */
-.glass-card::before {
+.glass-card::before,
+.glass-ios-card::before,
+.glass-ios-triple::before,
+.glass-ios-widget::before,
+.glass-corner-distort::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -37,10 +49,11 @@
   pointer-events: none;
   -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
   mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
+  z-index: 0;
 }
 
 /* Content scrim (keeps type AAA without killing glass) */
-.glass-card .scrim {
+:is(.glass-card, .glass-ios-card, .glass-ios-triple, .glass-ios-widget, .glass-corner-distort) .scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .18));
@@ -48,21 +61,128 @@
   z-index: 1;
 }
 
-.glass-card > * {
+:is(.glass-card, .glass-ios-card, .glass-ios-triple, .glass-ios-widget, .glass-corner-distort) > * {
   position: relative;
   z-index: 2;
 }
 
-.glass-card:hover {
+:is(.glass-card, .glass-ios-card, .glass-ios-triple, .glass-ios-widget, .glass-corner-distort):hover,
+:is(.glass-card, .glass-ios-card, .glass-ios-triple, .glass-ios-widget, .glass-corner-distort).glass-follow-cursor:hover,
+:is(.glass-card, .glass-ios-card, .glass-ios-triple, .glass-ios-widget, .glass-corner-distort).glass-follow-cursor:active {
   box-shadow: var(--shadow-lg);
   transform: translateY(-1px);
   transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
 }
 
 /* Dark canvas override */
-body[data-bg="dark"] .glass-card {
+body[data-bg="dark"] :is(.glass-card, .glass-ios-card, .glass-ios-triple, .glass-ios-widget, .glass-corner-distort) {
   color: var(--text-ink-d);
   box-shadow: var(--shadow-lg);
+}
+
+.glass-ios-card {
+  --glass-ios-card-radius: 28px;
+  border-radius: var(--glass-ios-card-radius);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .65) 0%, rgba(255, 255, 255, .25) 35%, rgba(255, 255, 255, .05) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, .08) 100%),
+    var(--glass-fill);
+  border: 1px solid rgba(255, 255, 255, .4);
+  box-shadow: var(--shadow-md), inset 0 0 0 0.5px rgba(255, 255, 255, .25), inset 0 18px 45px rgba(255, 255, 255, .22);
+}
+
+.glass-ios-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--glass-ios-card-radius) - 1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .75) 0%, rgba(255, 255, 255, .18) 45%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .85;
+  z-index: 0;
+}
+
+.glass-ios-triple {
+  --glass-ios-triple-radius: 24px;
+  border-radius: var(--glass-ios-triple-radius);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .58) 0%, rgba(255, 255, 255, .22) 42%, rgba(255, 255, 255, .08) 100%),
+    radial-gradient(120% 120% at 12% 0%, rgba(255, 255, 255, .62) 0%, rgba(255, 255, 255, .18) 45%, transparent 70%),
+    linear-gradient(0deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .06)),
+    var(--glass-fill);
+  border: 1px solid rgba(255, 255, 255, .42);
+  box-shadow: var(--shadow-md), inset 0 0 0 1px rgba(255, 255, 255, .18), inset 0 22px 55px rgba(255, 255, 255, .26);
+}
+
+.glass-ios-triple::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--glass-ios-triple-radius) - 1px);
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, .45) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, .38) 0%, rgba(255, 255, 255, .08) 65%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .8;
+  z-index: 0;
+}
+
+.glass-ios-widget {
+  --glass-ios-widget-radius: 20px;
+  border-radius: var(--glass-ios-widget-radius);
+  background:
+    radial-gradient(120% 100% at 50% -20%, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, .28) 42%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .26) 0%, rgba(255, 255, 255, .05) 100%),
+    var(--glass-fill);
+  border: 1px solid rgba(255, 255, 255, .36);
+  box-shadow: var(--shadow-md), inset 0 0 0 0.5px rgba(255, 255, 255, .2), inset 0 12px 30px rgba(255, 255, 255, .2);
+}
+
+.glass-ios-widget::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--glass-ios-widget-radius) - 1px);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, .65) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .75;
+  z-index: 0;
+}
+
+.glass-corner-distort {
+  --glass-corner-distort-radius: 30px;
+  border-radius: var(--glass-corner-distort-radius);
+  background:
+    radial-gradient(80% 90% at 0% 0%, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, .38) 35%, rgba(255, 255, 255, 0) 70%),
+    radial-gradient(85% 90% at 100% 100%, rgba(255, 255, 255, .38) 0%, rgba(255, 255, 255, 0) 65%),
+    linear-gradient(135deg, rgba(255, 255, 255, .52) 0%, rgba(255, 255, 255, .12) 100%),
+    var(--glass-fill);
+  border: 1px solid rgba(255, 255, 255, .45);
+  box-shadow: var(--shadow-lg), inset 0 0 0 1px rgba(255, 255, 255, .22), inset 0 -18px 38px rgba(255, 255, 255, .16);
+}
+
+.glass-corner-distort::before {
+  transform: scale(1.05) translate(-1%, -1%);
+  filter: blur(calc(var(--glass-refraction-blur) * 1.05)) url(#glass-displace);
+  -webkit-mask-image: radial-gradient(120% 100% at 35% 35%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .3) 65%, transparent 100%);
+  mask-image: radial-gradient(120% 100% at 35% 35%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .3) 65%, transparent 100%);
+}
+
+.glass-corner-distort::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--glass-corner-distort-radius) - 1px);
+  background:
+    radial-gradient(60% 60% at 100% 0%, rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .12) 55%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(200deg, rgba(255, 255, 255, .32) 0%, rgba(255, 255, 255, 0) 65%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .7;
+  z-index: 0;
 }
 
 /* Bottom dock with safe area */
