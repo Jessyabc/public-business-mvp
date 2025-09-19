@@ -6,6 +6,51 @@
   pointer-events: none;
 }
 
+.glass-surface {
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: calc(var(--radius) - 6px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
+  color: var(--text-ink);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+}
+
+@supports (background: color-mix(in srgb, white 50%, transparent)) {
+  .glass-surface {
+    --glass-surface-fill: color-mix(in srgb, var(--glass-fill) 18%, transparent);
+    --glass-surface-border: color-mix(in srgb, var(--glass-border) 32%, transparent);
+    --glass-surface-blur: calc(var(--glass-blur) * .78);
+    --glass-surface-vibrancy: calc(var(--glass-vibrancy) * 1.22);
+
+    background: var(--glass-surface-fill);
+    border: 1px solid var(--glass-surface-border);
+    -webkit-backdrop-filter: saturate(var(--glass-surface-vibrancy)) blur(var(--glass-surface-blur));
+    backdrop-filter: saturate(var(--glass-surface-vibrancy)) blur(var(--glass-surface-blur));
+  }
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .18);
+  color: var(--text-ink);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+@supports (background: color-mix(in srgb, white 50%, transparent)) {
+  .glass-button {
+    --glass-button-fill: color-mix(in srgb, var(--glass-fill) 24%, transparent);
+    --glass-button-border: color-mix(in srgb, var(--glass-border) 32%, transparent);
+    --glass-button-blur: calc(var(--glass-blur) * .56);
+
+    background: var(--glass-button-fill);
+    border: 1px solid var(--glass-button-border);
+    -webkit-backdrop-filter: blur(var(--glass-button-blur));
+    backdrop-filter: blur(var(--glass-button-blur));
+  }
+}
+
 .glass-card,
 .glass-ios-card,
 .glass-ios-triple,
