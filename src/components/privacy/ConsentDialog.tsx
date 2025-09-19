@@ -1,5 +1,4 @@
-import * as React from 'react';
-const { useState, useEffect } = React;
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,20 +11,16 @@ import {
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Shield, Eye, BarChart3, Cookie } from 'lucide-react';
-
-interface ConsentPreferences {
-  analytics: boolean;
-  functional: boolean;
-  marketing: boolean;
-}
+import {
+  CONSENT_STORAGE_KEY,
+  CONSENT_TIMESTAMP_KEY,
+  type ConsentPreferences,
+} from '@/hooks/useConsent';
 
 interface ConsentDialogProps {
   open: boolean;
   onConsentChange: (preferences: ConsentPreferences) => void;
 }
-
-const CONSENT_STORAGE_KEY = 'user-consent-preferences';
-const CONSENT_TIMESTAMP_KEY = 'user-consent-timestamp';
 
 export function ConsentDialog({ open, onConsentChange }: ConsentDialogProps) {
   const [preferences, setPreferences] = useState<ConsentPreferences>({
@@ -162,58 +157,4 @@ export function ConsentDialog({ open, onConsentChange }: ConsentDialogProps) {
   );
 }
 
-// Hook for managing consent preferences
-export function useConsent() {
-  const [preferences, setPreferences] = useState<ConsentPreferences | null>(null);
-  const [showDialog, setShowDialog] = useState(false);
-
-  useEffect(() => {
-    // Check for existing consent
-    const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
-    const timestamp = localStorage.getItem(CONSENT_TIMESTAMP_KEY);
-    
-    if (stored && timestamp) {
-      const consentAge = Date.now() - parseInt(timestamp);
-      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-      
-      if (consentAge < thirtyDaysMs) {
-        // Use existing consent if less than 30 days old
-        setPreferences(JSON.parse(stored));
-      } else {
-        // Show dialog if consent is stale
-        setShowDialog(true);
-      }
-    } else {
-      // No consent found, show dialog
-      setShowDialog(true);
-    }
-  }, []);
-
-  const handleConsentChange = (prefs: ConsentPreferences) => {
-    setPreferences(prefs);
-    setShowDialog(false);
-  };
-
-  const hasConsent = (type: keyof ConsentPreferences): boolean => {
-    return preferences?.[type] ?? false;
-  };
-
-  const updateConsent = (prefs: ConsentPreferences) => {
-    localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(prefs));
-    localStorage.setItem(CONSENT_TIMESTAMP_KEY, Date.now().toString());
-    setPreferences(prefs);
-  };
-
-  return {
-    preferences,
-    showDialog,
-    hasConsent,
-    updateConsent,
-    ConsentDialog: () => (
-      <ConsentDialog 
-        open={showDialog} 
-        onConsentChange={handleConsentChange} 
-      />
-    )
-  };
-}
+// The consent hook has moved to src/hooks/useConsent.ts
