@@ -51,10 +51,10 @@ double_confirm_changes = true
 enable_confirmations = false
 
 [functions.create-post]
-verify_jwt = false
+verify_jwt = true
 
 [functions.interact-post]
-verify_jwt = false
+verify_jwt = true
 
 [functions.submit-open-idea]
 verify_jwt = false
