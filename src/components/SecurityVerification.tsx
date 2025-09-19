@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -22,7 +22,7 @@ export function SecurityVerification() {
   const [checks, setChecks] = useState<SecurityCheck[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const runSecurityChecks = async () => {
+  const runSecurityChecks = useCallback(async () => {
     const newChecks: SecurityCheck[] = [];
 
     // Authentication checks
@@ -129,13 +129,23 @@ export function SecurityVerification() {
 
     setChecks(newChecks);
     setLoading(false);
-  };
+  }, [
+    user,
+    session,
+    userRoles,
+    roleLoading,
+    canCreateBusinessPosts,
+    receivedInvitations,
+    invitationLoading
+  ]);
 
   useEffect(() => {
-    if (!roleLoading && !invitationLoading) {
-      runSecurityChecks();
+    if (roleLoading || invitationLoading) {
+      return;
     }
-  }, [user, session, userRoles, roleLoading, invitationLoading]);
+
+    runSecurityChecks();
+  }, [runSecurityChecks, roleLoading, invitationLoading]);
 
   const getStatusIcon = (status: SecurityCheck['status']) => {
     switch (status) {
