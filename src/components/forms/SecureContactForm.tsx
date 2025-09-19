@@ -72,14 +72,24 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
       reset();
       onSuccess?.();
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Contact form error:', error);
-      
-      let errorMessage = 'Failed to send message. Please try again.';
-      
-      if (error.message?.includes('RATE_LIMIT_EXCEEDED')) {
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : error &&
+              typeof error === 'object' &&
+              'message' in error &&
+              typeof (error as { message?: unknown }).message === 'string'
+            ? (error as { message: string }).message
+            : null;
+
+      let errorMessage = message ?? 'Failed to send message. Please try again.';
+
+      if (message?.includes('RATE_LIMIT_EXCEEDED')) {
         errorMessage = 'Too many requests. Please wait before sending another message.';
-      } else if (error.message?.includes('VALIDATION_ERROR')) {
+      } else if (message?.includes('VALIDATION_ERROR')) {
         errorMessage = 'Please check your input and try again.';
       }
 

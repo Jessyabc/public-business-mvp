@@ -87,11 +87,17 @@ export function CreateBusiness() {
       });
 
       navigate('/business-profile');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating business:', error);
+      let description = 'Failed to create business';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to create business",
+        description,
         variant: "destructive",
       });
     } finally {

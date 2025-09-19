@@ -127,11 +127,17 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
         throw new Error(data?.error || 'Unknown error');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting idea:', error);
+      let description = 'Failed to submit idea. Please try again.';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: 'Error',
-        description: error.message || 'Failed to submit idea. Please try again.',
+        description,
         variant: 'destructive',
       });
     } finally {

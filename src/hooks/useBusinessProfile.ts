@@ -37,11 +37,17 @@ export function useBusinessProfile() {
 
       if (error) throw error;
       setProfile(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching business profile:', error);
+      let description = 'Failed to fetch business profile';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to fetch business profile",
+        description,
         variant: "destructive",
       });
     } finally {
@@ -58,7 +64,7 @@ export function useBusinessProfile() {
 
       if (error) throw error;
       setIndustries(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching industries:', error);
     }
   };
@@ -72,7 +78,7 @@ export function useBusinessProfile() {
 
       if (error) throw error;
       setDepartments(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching departments:', error);
     }
   };
@@ -99,11 +105,17 @@ export function useBusinessProfile() {
         description: "Business profile created successfully",
       });
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating business profile:', error);
+      let description = 'Failed to create business profile';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to create business profile",
+        description,
         variant: "destructive",
       });
       throw error;
@@ -132,11 +144,17 @@ export function useBusinessProfile() {
         description: "Business profile updated successfully",
       });
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating business profile:', error);
+      let description = 'Failed to update business profile';
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        description = (error as { message: string }).message;
+      }
       toast({
         title: "Error",
-        description: "Failed to update business profile",
+        description,
         variant: "destructive",
       });
       throw error;

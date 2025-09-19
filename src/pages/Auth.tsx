@@ -70,8 +70,15 @@ export default function Auth() {
       }
       
       toast.success('Account created! Check your email to verify.');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create account');
+    } catch (error: unknown) {
+      console.error('Failed to create account', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string'
+            ? (error as { message: string }).message
+            : 'Failed to create account';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
