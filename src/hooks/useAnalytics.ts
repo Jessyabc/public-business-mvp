@@ -15,6 +15,10 @@ class AnalyticsService {
     sessionStorage.setItem('analytics_session_id', this.sessionId);
   }
 
+  getSessionId(): string {
+    return this.sessionId;
+  }
+
   private generateSessionId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }

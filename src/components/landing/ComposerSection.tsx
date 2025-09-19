@@ -111,7 +111,7 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
           email: email || null,
           notify_on_interaction: notifyInteraction,
           subscribe_newsletter: subscribeNews,
-          session_id: (analytics as any).sessionId
+          session_id: analytics.getSessionId()
         }
       });
 
@@ -127,11 +127,14 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
         throw new Error(data?.error || 'Unknown error');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting idea:', error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to submit idea. Please try again.';
       toast({
         title: 'Error',
-        description: error.message || 'Failed to submit idea. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
