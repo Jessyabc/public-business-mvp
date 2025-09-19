@@ -19,32 +19,6 @@ body {
   overflow: auto; /* interior scroll only */
 }
 
-/* Glassmorphism tokens (used across app) */
-.glass-surface {
-  background: rgba(255,255,255,0.06);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-  backdrop-filter: saturate(140%) blur(14px);
-  -webkit-backdrop-filter: saturate(140%) blur(14px);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 14px;
-}
-
-.glass-card {
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-  backdrop-filter: saturate(140%) blur(16px);
-  -webkit-backdrop-filter: saturate(140%) blur(16px);
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 16px;
-}
-
-.glass-button {
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
 /* Right sidebar overlay behavior */
 .right-sidebar-overlay {
   position: fixed;
