@@ -27,40 +27,52 @@ export function BusinessFeed() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const observerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    if (!fetchPosts) {
+      return;
+    }
     fetchPosts('business');
-  }, []);
+  }, [fetchPosts]);
 
   // Infinite scroll observer
-  const lastPostRef = useCallback((node: HTMLDivElement) => {
-    if (loading || isLoadingMore || !hasMore) return;
-    if (observerRef.current) observerRef.current = null;
-    
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        handleLoadMore();
-      }
-    });
-    
-    if (node) {
-      observer.observe(node);
-      observerRef.current = node;
-    }
-  }, [loading, isLoadingMore, hasMore]);
-
-  const handleLoadMore = async () => {
+  const handleLoadMore = useCallback(() => {
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     // In a real implementation, you'd fetch more posts here
     setTimeout(() => {
-      setPage(prev => prev + 1);
+      setPage(prev => {
+        const nextPage = prev + 1;
+        if (nextPage >= 3) {
+          setHasMore(false);
+        }
+        return nextPage;
+      });
       setIsLoadingMore(false);
-      // Set hasMore to false when no more posts
-      if (page >= 3) setHasMore(false);
     }, 1000);
-  };
+  }, [hasMore, isLoadingMore]);
+
+  const lastPostRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || isLoadingMore) return;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+
+    if (!node || !hasMore) {
+      return;
+    }
+
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        handleLoadMore();
+      }
+    });
+
+    observerRef.current.observe(node);
+  }, [handleLoadMore, hasMore, isLoadingMore, loading]);
 
   const handleCreatePost = () => {
     if (!user) {
@@ -71,7 +83,12 @@ export function BusinessFeed() {
   };
 
   useEffect(() => {
-    fetchPosts('business');
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
   }, []);
 
   // Filter posts based on current filters

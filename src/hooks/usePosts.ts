@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -42,7 +42,10 @@ export function usePosts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPosts = async (mode?: 'public' | 'business') => {
+  const getErrorMessage = (error: unknown, fallback: string) =>
+    error instanceof Error ? error.message : fallback;
+
+  const fetchPosts = useCallback(async (mode?: 'public' | 'business') => {
     setLoading(true);
     setError(null);
     try {
@@ -60,20 +63,21 @@ export function usePosts() {
 
       if (error) throw error;
       setPosts((data as Post[]) || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching posts:', err);
-      setError(err.message || 'Failed to fetch posts');
+      const message = getErrorMessage(err, 'Failed to fetch posts');
+      setError(message);
       toast({
         title: "Error",
-        description: "Failed to fetch posts",
+        description: message,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const createPost = async (postData: CreatePostData) => {
+  const createPost = useCallback(async (postData: CreatePostData) => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -122,28 +126,28 @@ export function usePosts() {
       
       // Add the new post to the local state
       setPosts(prev => [data as Post, ...prev]);
-      
+
       toast({
         title: "Success",
         description: `${postData.type === 'brainstorm' ? 'Brainstorm' : 'Post'} created successfully`,
       });
-      
+
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating post:', error);
       toast({
         title: "Error",
-        description: "Failed to create post",
+        description: getErrorMessage(error, 'Failed to create post'),
         variant: "destructive",
       });
       throw error;
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
 
   // Create a post and optionally link it to a parent via post_relations
-  const createPostWithRelation = async (
+  const createPostWithRelation = useCallback(async (
     postData: CreatePostData,
     relation?: { parent_post_id: string; relation_type: 'continuation' | 'linking' }
   ) => {
@@ -159,7 +163,7 @@ export function usePosts() {
           relation_type: relation.relation_type,
         });
       if (error) throw error;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error creating post relation:', error);
       toast({
         title: 'Relation not linked',
@@ -169,9 +173,9 @@ export function usePosts() {
     }
 
     return newPost;
-  };
+  }, [createPost, toast]);
 
-  const updatePost = async (id: string, postData: Partial<CreatePostData>) => {
+  const updatePost = useCallback(async (id: string, postData: Partial<CreatePostData>) => {
     if (!user) return null;
 
     setLoading(true);
@@ -195,22 +199,22 @@ export function usePosts() {
         title: "Success",
         description: "Post updated successfully",
       });
-      
+
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating post:', error);
       toast({
         title: "Error",
-        description: "Failed to update post",
+        description: getErrorMessage(error, 'Failed to update post'),
         variant: "destructive",
       });
       throw error;
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
 
-  const deletePost = async (id: string) => {
+  const deletePost = useCallback(async (id: string) => {
     if (!user) return false;
 
     setLoading(true);
@@ -230,22 +234,22 @@ export function usePosts() {
         title: "Success",
         description: "Post deleted successfully",
       });
-      
+
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting post:', error);
       toast({
         title: "Error",
-        description: "Failed to delete post",
+        description: getErrorMessage(error, 'Failed to delete post'),
         variant: "destructive",
       });
       return false;
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
 
-  const fetchPostById = async (id: string) => {
+  const fetchPostById = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -258,16 +262,17 @@ export function usePosts() {
 
       if (error) throw error;
       return data as Post;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching post:', err);
-      setError(err.message || 'Failed to fetch post');
+      const message = getErrorMessage(err, 'Failed to fetch post');
+      setError(message);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchPostRelations = async (postId: string) => {
+  const fetchPostRelations = useCallback(async (postId: string) => {
     try {
       // Fetch child posts (continuations/links)
       const { data: relations, error } = await supabase
@@ -280,15 +285,15 @@ export function usePosts() {
 
       if (error) throw error;
       return relations || [];
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching post relations:', err);
       return [];
     }
-  };
+  }, []);
 
-  const fetchUserPosts = async () => {
+  const fetchUserPosts = useCallback(async () => {
     if (!user) return;
-    
+
     setLoading(true);
     setError(null);
     try {
@@ -301,24 +306,25 @@ export function usePosts() {
 
       if (error) throw error;
       setPosts((data as Post[]) || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching user posts:', err);
-      setError(err.message || 'Failed to fetch your posts');
+      const message = getErrorMessage(err, 'Failed to fetch your posts');
+      setError(message);
       toast({
         title: "Error",
-        description: "Failed to fetch your posts",
+        description: message,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
 
   useEffect(() => {
     if (user) {
       fetchPosts();
     }
-  }, [user]);
+  }, [fetchPosts, user]);
 
   return {
     posts,
