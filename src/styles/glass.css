@@ -6,6 +6,86 @@
   pointer-events: none;
 }
 
+.glass-surface,
+.glass-button {
+  --glass-layer-bg: var(--glass-fill);
+  --glass-layer-border: var(--glass-border);
+  --glass-layer-shadow: var(--shadow-md);
+  --glass-layer-blur: calc(var(--glass-blur) * 0.55);
+  position: relative;
+  isolation: isolate;
+  color: var(--text-ink);
+  background: var(--glass-layer-bg);
+  border: 1px solid var(--glass-layer-border);
+  box-shadow: var(--glass-layer-shadow);
+  background-clip: padding-box;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+
+.glass-surface {
+  --glass-layer-shadow: var(--shadow-md);
+  border-radius: calc(var(--radius) - 6px);
+}
+
+.glass-button {
+  --glass-layer-shadow: var(--shadow-md);
+  --glass-layer-blur: calc(var(--glass-blur) * 0.45);
+}
+
+@supports (background: color-mix(in srgb, transparent, transparent)) {
+  .glass-surface {
+    --glass-layer-bg: color-mix(in srgb, var(--glass-fill) 84%, transparent);
+    --glass-layer-border: color-mix(in srgb, var(--glass-border) 72%, transparent);
+  }
+
+  .glass-button {
+    --glass-layer-bg: color-mix(in srgb, var(--glass-fill) 70%, transparent);
+    --glass-layer-border: color-mix(in srgb, var(--glass-border) 66%, transparent);
+  }
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-surface,
+  .glass-button {
+    -webkit-backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+    backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+  }
+}
+
+.glass-button:hover,
+.glass-button:focus-visible {
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-button:focus-visible {
+  outline: none;
+  position: relative;
+}
+
+.glass-button:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--glass-border);
+  pointer-events: none;
+}
+
+body[data-bg="dark"] .glass-surface,
+body[data-bg="dark"] .glass-button {
+  color: var(--text-ink-d);
+  box-shadow: var(--shadow-lg);
+}
+
+@supports (background: color-mix(in srgb, transparent, transparent)) {
+  .glass-button:focus-visible::after {
+    border: 2px solid color-mix(in srgb, var(--glass-border) 55%, transparent);
+  }
+}
+
 .glass-card {
   position: relative;
   border-radius: var(--radius);
