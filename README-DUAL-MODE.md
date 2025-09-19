@@ -1,6 +1,13 @@
 # Dual-Mode App Shell Documentation
 
-This document explains the dual-mode architecture implemented in Public Business.
+This document explains the dual-mode architecture implemented in Public Business and how the current app shell (`src/app/`) is organized.
+
+## App Shell Overview
+
+- `src/app/NewApp.tsx` – wraps the router with providers (query client, tooltips, auth, etc.) and ensures the UI mode is applied to the document body.
+- `src/app/router.tsx` – defines all routes with `react-router-dom`, handling lazy loading, redirects, and the shared `MainLayout` wrapper.
+
+When updating the app shell, make sure `NewApp.tsx` exports the component that Vite mounts and that any new routes are registered in `router.tsx`.
 
 ## Design Tokens
 
@@ -24,36 +31,28 @@ className={`p-${tokens.spacing.md} rounded-${tokens.radii.lg}`}
 
 The app is organized into distinct route groups:
 
-### Public Mode (`/public/*`)
-- `/public/profile` - User profile and activity history
-- `/public/brainstorms` - List of all brainstorms
-- `/public/brainstorms/:id` - Detailed brainstorm with branches
-- `/public/notifications` - User notifications
+### Primary Routes
+- `/` – Main feed rendered inside `MainLayout`.
+- `/brainstorm` – Canonical brainstorm experience (lazy loaded).
+- `/landing` – Public-facing marketing page.
+- `/open-ideas`, `/open-ideas/new`, `/idea/:id` – Open idea flow (all lazy loaded).
+- `/admin`, `/demo/cards`, `/dev/sitemap` (dev only) – Additional internal pages registered in the router.
 
-### Business Mode (`/business/*`)
-- `/business/dashboard` - Business metrics and overview
-- `/business/reports` - Published reports and insights
-- `/business/notifications` - Business-related notifications
+### Redirects & Legacy Support
+- Several `/brainstorms*` paths redirect to `/` or `/brainstorm` to keep legacy URLs functional.
+- Navigation items from `src/nav-items.tsx` are automatically wrapped with `MainLayout` for compatibility.
 
-### Shared Routes
-- Notifications component is shared between modes
-- Landing page for unauthenticated users
-- Legacy routes maintained for compatibility
-
-## How to Add a New Tab Per Mode
+## How to Add a New Page (and Optional Tab)
 
 ### 1. Create the Page Component
 
-Create your component in the appropriate folder:
-- Public mode: `src/app/public/YourPage.tsx`
-- Business mode: `src/app/business/YourPage.tsx`
-- Shared: `src/app/shared/YourPage.tsx`
+Place the new page in `src/pages/YourPage.tsx` so it can be lazy loaded by the router:
 
 ```typescript
-// Example: src/app/public/Analytics.tsx
+// Example: src/pages/Analytics.tsx
 import { GlassCard } from '@/ui/components/GlassCard';
 
-export function PublicAnalytics() {
+export default function Analytics() {
   return (
     <div className="space-y-6 pt-8">
       <GlassCard>
@@ -65,48 +64,50 @@ export function PublicAnalytics() {
 }
 ```
 
-### 2. Add Lazy Loading to Router
+### 2. Register the Route
 
-Update `src/app/router.tsx`:
+Update `src/app/router.tsx` to lazy load and mount the new page inside `MainLayout`:
 
 ```typescript
-// Add lazy import
-const PublicAnalytics = lazy(() => import('./public/Analytics').then(m => ({ default: m.PublicAnalytics })));
+// Add lazy import near the other page imports
+const Analytics = lazy(() => import('@/pages/Analytics'));
 
-// Add route
+// Register the route inside the routes array
 {
-  path: 'analytics',
+  path: '/analytics',
   element: (
-    <LazyWrapper>
-      <PublicAnalytics />
-    </LazyWrapper>
+    <MainLayout>
+      <LazyWrapper>
+        <Analytics />
+      </LazyWrapper>
+    </MainLayout>
   ),
-}
+},
 ```
 
-### 3. Update Bottom Navigation
+### 3. Update Navigation (Optional)
 
-Modify `src/app/shell/AdaptiveBottomBar.tsx`:
+If the page should appear in the authenticated bottom navigation, edit `src/components/navigation/BottomNavigation.tsx`:
 
 ```typescript
-import { Analytics } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
-const publicTabs = [
-  { icon: User, label: 'Profile', to: '/public/profile' },
-  { icon: Brain, label: 'Brainstorms', to: '/public/brainstorms' },
-  { icon: Analytics, label: 'Analytics', to: '/public/analytics' }, // New tab
-  { icon: Bell, label: 'Notifications', to: '/public/notifications' },
+const navItems = [
+  // ...existing items
+  { to: '/analytics', icon: BarChart3, label: 'Analytics', badge: null },
 ];
 ```
 
+For marketing or legacy navigation links, also update `src/nav-items.tsx` as needed.
+
 ### 4. Update Default Route (Optional)
 
-If you want the new page as default, update `src/stores/uiModeStore.ts`:
+To change the remembered tab per mode, adjust `lastVisitedTab` in `src/stores/uiModeStore.ts`:
 
 ```typescript
 lastVisitedTab: {
-  public: '/public/analytics', // Changed from /public/profile
-  business: '/business/dashboard',
+  public: '/',
+  business: '/business-dashboard',
 },
 ```
 
@@ -222,7 +223,7 @@ const brainstorm = brainstormService.getBrainstorm(id);
 
 ### Error Boundaries
 - `ErrorBoundary`: React error boundary with retry functionality
-- Wraps all routed content in `MainShell`
+- Wrap page content or provider trees manually (e.g., around `MainLayout` children)
 - Customizable fallback components
 
 ### Usage Pattern:
@@ -271,9 +272,9 @@ Mode switching automatically updates the body `data-mode` attribute, triggering 
 ## Performance Considerations
 
 ### Code Splitting:
-- All page components are lazy loaded
-- Routes are split by mode (public/business)
-- Shared components loaded only when needed
+- All page components are lazy loaded through `router.tsx`
+- Feature-focused routes keep bundles small without mode-specific directories
+- Shared components load only when referenced
 
 ### Loading Strategy:
 - Minimum 300ms loading time for better UX
