@@ -13,6 +13,8 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { toast } from 'sonner';
 
+type RelationType = 'continuation' | 'linking';
+
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,7 +30,13 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const [postType, setPostType] = useState<string>("");
   const [visibility, setVisibility] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [relationType, setRelationType] = useState<'continuation' | 'linking'>('continuation');
+  const [relationType, setRelationType] = useState<RelationType>('continuation');
+
+  const handleRelationTypeChange = (value: RelationType | '') => {
+    if (value) {
+      setRelationType(value);
+    }
+  };
 
   useEffect(() => {
     if (context?.relationType) {
@@ -181,7 +189,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       </div>
       <div>
         <Label>Choose link type</Label>
-        <ToggleGroup type="single" value={relationType} onValueChange={(v) => v && setRelationType(v as any)} className="mt-2">
+        <ToggleGroup type="single" value={relationType} onValueChange={handleRelationTypeChange} className="mt-2">
           <ToggleGroupItem value="continuation" className="px-3 py-2">Continuing Brainstorm</ToggleGroupItem>
           <ToggleGroupItem value="linking" className="px-3 py-2">Linking Brainstorm</ToggleGroupItem>
         </ToggleGroup>
