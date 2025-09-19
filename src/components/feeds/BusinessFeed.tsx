@@ -70,10 +70,6 @@ export function BusinessFeed() {
     openComposer({});
   };
 
-  useEffect(() => {
-    fetchPosts('business');
-  }, []);
-
   // Filter posts based on current filters
   const filteredPosts = posts.filter(post => {
     const matchesSearch = !filters.search || 
