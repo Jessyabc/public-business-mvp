@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -835,6 +871,16 @@ export type Database = {
         Args: { invitation_id: string }
         Returns: boolean
       }
+      api_brainstorm_recent: {
+        Args: { p_limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          title: string
+          user_id: string
+        }[]
+      }
       api_list_brainstorm_edges_for_nodes: {
         Args: { p_node_ids: string[] }
         Returns: {
@@ -853,6 +899,21 @@ export type Database = {
           display_name: string
           id: string
           metadata: Json
+          title: string
+          user_id: string
+        }[]
+      }
+      api_space_chain_hard: {
+        Args: {
+          p_direction?: string
+          p_limit?: number
+          p_max_depth?: number
+          p_start: string
+        }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
           title: string
           user_id: string
         }[]
