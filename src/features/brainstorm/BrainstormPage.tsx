@@ -1,58 +1,19 @@
-import { useEffect } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { GraphCanvas } from './components/GraphCanvas';
-import { Toolbar } from './components/Toolbar';
-import { NodeForm } from './components/NodeForm';
-import { RightSidebar } from '@/components/layout/RightSidebar';
-import { useBrainstormStore } from './store';
-import { BrainstormSupabaseAdapter } from './adapters/supabaseAdapter';
+// src/features/brainstorm/BrainstormPage.tsx
+import { useSearchParams } from 'react-router-dom';
+import SpaceCanvas from './components/SpaceCanvas';
+import { RightSidebar } from '@/components/layout/RightSidebar'; // adjust if your path differs
 
 export default function BrainstormPage() {
-  const { setNodes, setEdges } = useBrainstormStore();
-  const adapter = new BrainstormSupabaseAdapter();
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [nodes, edges] = await Promise.all([
-          adapter.loadNodes(),
-          adapter.loadEdges(),
-        ]);
-        setNodes(nodes);
-        setEdges(edges);
-      } catch (error) {
-        console.error('Failed to load brainstorm data:', error);
-      }
-    };
-
-    loadData();
-  }, [setNodes, setEdges]);
+  const [params] = useSearchParams();
+  const startId = params.get('id') || undefined;
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-background via-background/95 to-muted/20">
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Toolbar />
-        <div className="flex-1 p-4">
-          <GraphCanvas />
-        </div>
-      </div>
-
-      {/* Right Sidebar */}
+    <div className="brainstorm-canvas relative">
+      {/* Deep PB-blue canvas: wheel = hard chain, soft links rail */}
+      <SpaceCanvas startId={startId} />
+      
+      {/* Right sidebar overlay is handled by the RightSidebar component itself */}
       <RightSidebar />
-
-      {/* Floating Add Button for Mobile */}
-      <NodeForm
-        trigger={
-          <Button 
-            size="lg"
-            className="md:hidden fixed bottom-20 right-4 z-50 rounded-full w-14 h-14 shadow-lg glass-button"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        }
-      />
     </div>
   );
 }

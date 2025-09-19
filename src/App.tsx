@@ -7,6 +7,7 @@ import { AppModeProvider } from "@/contexts/AppModeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackgroundModeManager } from "@/components/layout/BackgroundModeManager";
 import { router } from "./app/router";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,11 @@ const App = () => (
       <AuthProvider>
         <AppModeProvider>
           <BackgroundModeManager />
-          <RouterProvider router={router} />
+          <div className="page-shell">
+            <main className="page-content">
+              <RouterProvider router={router} />
+            </main>
+          </div>
         </AppModeProvider>
       </AuthProvider>
     </TooltipProvider>

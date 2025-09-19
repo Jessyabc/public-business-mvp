@@ -67,7 +67,7 @@ src/features/brainstorm/
 ├── store.ts
 ├── adapters/supabaseAdapter.ts
 └── components/
-    ├── GraphCanvas.tsx
+    ├── SpaceCanvas.tsx
     ├── Toolbar.tsx
     └── NodeForm.tsx
 

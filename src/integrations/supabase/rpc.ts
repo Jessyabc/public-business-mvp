@@ -15,3 +15,28 @@ export async function rpcCanCreateBusinessPosts(user_uuid: string) {
 export async function rpcGetMyRoles() {
   return supabase.rpc("get_my_roles");
 }
+
+export async function rpcListBrainstormNodes(p_cursor?: string, p_limit?: number) {
+  return supabase.rpc("api_list_brainstorm_nodes", { 
+    p_cursor: p_cursor || null, 
+    p_limit: p_limit || 500 
+  });
+}
+
+export async function rpcListBrainstormEdgesForNodes(p_node_ids: string[]) {
+  return supabase.rpc("api_list_brainstorm_edges_for_nodes", { p_node_ids });
+}
+
+export async function rpcTrackEvent(
+  p_event: string, 
+  p_target: string, 
+  p_kind: string, 
+  p_props?: Record<string, any>
+) {
+  return supabase.rpc("api_track_event", { 
+    p_event, 
+    p_target, 
+    p_kind, 
+    p_props: p_props || {} 
+  });
+}

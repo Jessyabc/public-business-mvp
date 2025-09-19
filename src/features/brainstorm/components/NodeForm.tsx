@@ -11,6 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Plus, X } from 'lucide-react';
 import { useBrainstormStore } from '../store';
 import { toast } from '@/hooks/use-toast';
+import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
+
 
 const nodeSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
@@ -37,7 +39,7 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
   });
 
   const onSubmit = (data: NodeFormData) => {
-    const BRAINSTORM_WRITES_ENABLED = process.env.REACT_APP_BRAINSTORM_WRITES_ENABLED === 'true';
+    
 
     if (!BRAINSTORM_WRITES_ENABLED) {
       toast({

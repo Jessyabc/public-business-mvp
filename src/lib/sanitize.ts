@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import * as DOMPurify from 'dompurify';
 
 export const sanitizeHtml = (html: string): string => {
   return DOMPurify.sanitize(html, {
