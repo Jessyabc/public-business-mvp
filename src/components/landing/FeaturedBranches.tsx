@@ -1,21 +1,27 @@
 import { useState } from 'react';
-import { useFreeBrainstorms } from '@/hooks/useOpenIdeas';
+import { useFreeBrainstorms, IdeaBrainstorm } from '@/hooks/useOpenIdeas';
 import { BrainstormCard } from '@/components/BrainstormCard';
 import { BrainstormModal } from '@/components/BrainstormModal';
 import { MessageSquare, TrendingUp, Lightbulb } from 'lucide-react';
 
+function hasGtag(
+  win: Window & typeof globalThis,
+): win is Window & typeof globalThis & { gtag: (...args: unknown[]) => void } {
+  return 'gtag' in win && typeof win.gtag === 'function';
+}
+
 export function FeaturedBranches() {
   const { data: freeBrainstorms = [], isLoading } = useFreeBrainstorms();
-  const [selectedBrainstorm, setSelectedBrainstorm] = useState(null);
+  const [selectedBrainstorm, setSelectedBrainstorm] = useState<IdeaBrainstorm | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCardClick = (brainstorm: any) => {
+  const handleCardClick = (brainstorm: IdeaBrainstorm) => {
     setSelectedBrainstorm(brainstorm);
     setIsModalOpen(true);
 
     // Analytics event
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'teaser_click', {
+    if (typeof window !== 'undefined' && hasGtag(window)) {
+      window.gtag('event', 'teaser_click', {
         event_category: 'engagement',
         event_label: brainstorm.id,
       });
