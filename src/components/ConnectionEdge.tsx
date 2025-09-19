@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, Edge } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, Edge, type Position } from '@xyflow/react';
 import { BrainstormConnection } from '@/types/brainstorm';
 import { useComposerStore } from '@/hooks/useComposerStore';
 
@@ -15,8 +15,8 @@ interface ConnectionEdgeProps {
   sourceY: number;
   targetX: number;
   targetY: number;
-  sourcePosition: any;
-  targetPosition: any;
+  sourcePosition: Position;
+  targetPosition: Position;
   data: ConnectionEdgeData;
 }
 
