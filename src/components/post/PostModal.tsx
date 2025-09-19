@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -40,14 +40,7 @@ export function PostModal({
 }: PostModalProps) {
   const [isTracked, setIsTracked] = useState(false);
 
-  // Track open event when modal opens
-  useEffect(() => {
-    if (isOpen && !isTracked) {
-      trackEvent();
-    }
-  }, [isOpen, isTracked]);
-
-  const trackEvent = async () => {
+  const trackEvent = useCallback(async () => {
     try {
       await supabase.rpc('api_track_event', {
         p_event: 'open_post',
@@ -63,7 +56,16 @@ export function PostModal({
     } catch (error) {
       console.warn('Failed to track modal open:', error);
     }
-  };
+  }, [author, content, id, setIsTracked, title, type]);
+
+  // Track open event when modal opens
+  useEffect(() => {
+    if (isOpen && !isTracked) {
+      trackEvent();
+    } else if (!isOpen && isTracked) {
+      setIsTracked(false);
+    }
+  }, [isOpen, isTracked, trackEvent]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
