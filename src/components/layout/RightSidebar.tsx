@@ -8,7 +8,7 @@ import { FeedsAdapter, type FeedItem, type HistoryItem } from '@/adapters/feedsA
 import { SHOW_RIGHT_SIDEBAR } from '@/config/flags';
 
 export function RightSidebar() {
-  if (!SHOW_RIGHT_SIDEBAR) return null;
+  const showSidebar = SHOW_RIGHT_SIDEBAR;
 
   const adapter = useMemo(() => new FeedsAdapter(), []);
   const [ideas, setIdeas] = useState<FeedItem[]>([]);
@@ -18,6 +18,10 @@ export function RightSidebar() {
   const [visible, setVisible] = useState({ ideas: 12 });
 
   useEffect(() => {
+    if (!showSidebar) {
+      return;
+    }
+
     (async () => {
       try {
         const list = await adapter.getOpenIdeasFeed();      // uses existing adapter
@@ -39,10 +43,12 @@ export function RightSidebar() {
         setLoadingHist(false);
       }
     })();
-  }, [adapter]);
+  }, [adapter, showSidebar]);
 
   const loadMoreIdeas = () =>
     setVisible(v => ({ ...v, ideas: Math.min(v.ideas + 12, ideas.length) }));
+
+  if (!showSidebar) return null;
 
   return (
     <aside className="right-sidebar-overlay glass-card p-3"
