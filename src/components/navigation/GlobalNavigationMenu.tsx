@@ -65,7 +65,7 @@ export function GlobalNavigationMenu() {
     <nav className={`fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-xl border-b ${
       mode === 'public' 
         ? 'bg-black/20 border-white/10' 
-        : 'bg-white/20 border-slate-200/20'
+        : 'bg-white/70 border-slate-300/40'
     }`}>
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo and Navigation */}
