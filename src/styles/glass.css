@@ -145,6 +145,66 @@ body[data-bg="dark"] .glass-card {
   box-shadow: var(--shadow-lg);
 }
 
+/* Business mode glass card - identical to public mode */
+.glass-business-card {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+  overflow: clip;
+  isolation: isolate;
+  transform: translateZ(0);
+  color: var(--text-ink);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-business-card {
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+  }
+}
+
+/* Refraction/bend layer for business cards */
+.glass-business-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  background-attachment: fixed;
+  filter: blur(var(--glass-refraction-blur)) url(#glass-displace);
+  transform: scale(1.02);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
+  mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
+}
+
+/* Content scrim for business cards */
+.glass-business-card .scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .18));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-business-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.glass-business-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+/* Dark canvas override for business cards */
+body[data-bg="dark"] .glass-business-card {
+  color: var(--text-ink-d);
+  box-shadow: var(--shadow-lg);
+}
+
 /* Bottom dock with safe area */
 .pb-dock {
   position: fixed;

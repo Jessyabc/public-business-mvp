@@ -114,23 +114,28 @@
 
   body[data-mode="business"],
   body[data-bg="dark"] {
-    --background: 222 72% 11%;
-    --foreground: var(--text-ink-d);
-    --card: 223 64% 15%;
-    --card-foreground: var(--text-ink-d);
-    --popover: 223 64% 15%;
-    --popover-foreground: var(--text-ink-d);
-    --secondary: 222 54% 22%;
-    --secondary-foreground: var(--text-ink-d);
-    --muted: 221 48% 20%;
-    --muted-foreground: 210 38% 82%;
+    /* Background tokens */
+    --background: 222 84% 5%;
+    --card: 222 84% 5%;
+    --popover: 222 84% 5%;
+    --secondary: 217 33% 18%;
+    --muted: 217 33% 18%;
     --accent: 222 58% 24%;
-    --accent-foreground: var(--text-ink-d);
-    --destructive: 0 70% 52%;
-    --destructive-foreground: var(--text-ink-d);
-    --border: 220 46% 40%;
+    --border: 217 33% 18%;
     --input: 220 48% 32%;
-    --ring: 212 72% 60%;
+    --ring: 213 27% 84%;
+    
+    /* Text tokens - light values for dark backgrounds */
+    --foreground: 210 40% 98%;
+    --card-foreground: 210 40% 98%;
+    --popover-foreground: 210 40% 98%;
+    --secondary-foreground: 210 40% 98%;
+    --muted-foreground: 215 20% 65%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 70% 52%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Custom text tokens */
     --text-ink: var(--text-ink-d);
     --glass-bg: hsl(222 84% 5% / 0.78);
     --glass-border: hsl(210 40% 98% / 0.12);

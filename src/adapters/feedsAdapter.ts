@@ -81,9 +81,9 @@ export class FeedsAdapter {
         return [];
       }
 
-      const posts = (data ?? []) as BusinessFeedRow[];
+      const posts = (data ?? []) as any[];
 
-      return posts.map((post) => ({
+      return posts.map((post: any) => ({
         id: post.id,
         type: 'business' as const,
         title: post.title || 'Untitled Post',
