@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BackgroundModeManager } from "@/components/layout/BackgroundModeManager";
 import { router } from "./app/router";
 import { RightSidebar } from "@/components/layout/RightSidebar";
+import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
               <RouterProvider router={router} />
             </main>
           </div>
+          {process.env.NODE_ENV !== 'production' && <DeveloperPanel />}
         </AppModeProvider>
       </AuthProvider>
     </TooltipProvider>

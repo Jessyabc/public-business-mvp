@@ -13,14 +13,23 @@ interface AppModeContextType {
 const AppModeContext = createContext<AppModeContextType | undefined>(undefined);
 
 export function AppModeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<AppMode>('public');
+  const [mode, setMode] = useState<AppMode>(() => {
+    const stored = localStorage.getItem('pb-ui-mode');
+    return (stored === 'public' || stored === 'business') ? stored : 'public';
+  });
+
+  const handleSetMode = (newMode: AppMode) => {
+    setMode(newMode);
+    localStorage.setItem('pb-ui-mode', newMode);
+  };
 
   const toggleMode = () => {
-    setMode(prev => prev === 'public' ? 'business' : 'public');
+    const newMode = mode === 'public' ? 'business' : 'public';
+    handleSetMode(newMode);
   };
 
   return (
-    <AppModeContext.Provider value={{ mode, setMode, toggleMode }}>
+    <AppModeContext.Provider value={{ mode, setMode: handleSetMode, toggleMode }}>
       {children}
     </AppModeContext.Provider>
   );
