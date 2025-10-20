@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppMode } from '@/contexts/AppModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveTheme } from '@/styles/theme';
 import { toast } from 'sonner';
-import { Save, RotateCcw, Eye } from 'lucide-react';
+import { Save, RotateCcw, Eye, BookOpen } from 'lucide-react';
 
 interface ThemeSettings {
   [key: string]: any;
@@ -20,12 +21,22 @@ interface ThemeSettings {
   effects?: Record<string, string>;
 }
 
+interface ModeThemeSettings {
+  public: ThemeSettings;
+  business: ThemeSettings;
+}
+
 const STORAGE_KEY = 'theme-customization';
 
 export default function Customize() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [settings, setSettings] = useState<ThemeSettings>({});
+  const { mode: appMode, setMode: setAppMode } = useAppMode();
+  const [editingMode, setEditingMode] = useState<'public' | 'business'>(appMode);
+  const [settings, setSettings] = useState<ModeThemeSettings>({
+    public: {},
+    business: {},
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -41,6 +52,11 @@ export default function Customize() {
     loadSettings();
   }, []);
 
+  // Switch app mode when editing mode changes
+  useEffect(() => {
+    setAppMode(editingMode);
+  }, [editingMode, setAppMode]);
+
   const loadSettings = async () => {
     try {
       // Try Supabase first
@@ -52,10 +68,13 @@ export default function Customize() {
           .single();
 
         if (!error && data?.theme_settings && typeof data.theme_settings === 'object') {
-          const parsed = data.theme_settings as ThemeSettings;
-          if (Object.keys(parsed).length > 0) {
-            setSettings(parsed);
-            applyTheme(parsed);
+          const parsed = data.theme_settings as any;
+          if (parsed.public || parsed.business) {
+            setSettings({
+              public: parsed.public || {},
+              business: parsed.business || {},
+            });
+            applyTheme(parsed[editingMode] || {});
             setLoading(false);
             return;
           }
@@ -66,8 +85,10 @@ export default function Customize() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setSettings(parsed);
-        applyTheme(parsed);
+        if (parsed.public || parsed.business) {
+          setSettings(parsed);
+          applyTheme(parsed[editingMode] || {});
+        }
       }
     } catch (error) {
       console.error('Failed to load theme settings:', error);
@@ -110,10 +131,15 @@ export default function Customize() {
     }
   };
 
+  const handleModeSwitch = (mode: 'public' | 'business') => {
+    setEditingMode(mode);
+    applyTheme(settings[mode]);
+  };
+
   const handlePreview = () => {
-    applyTheme(settings);
+    applyTheme(settings[editingMode]);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    toast.success('Theme previewed locally');
+    toast.success(`${editingMode.charAt(0).toUpperCase() + editingMode.slice(1)} theme previewed locally`);
   };
 
   const handleSaveToAccount = async () => {
@@ -132,8 +158,8 @@ export default function Customize() {
       if (error) throw error;
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-      applyTheme(settings);
-      toast.success('Theme saved to your account');
+      applyTheme(settings[editingMode]);
+      toast.success('Both themes saved to your account');
     } catch (error) {
       console.error('Failed to save theme:', error);
       toast.error('Failed to save theme');
@@ -143,18 +169,30 @@ export default function Customize() {
   };
 
   const handleRevert = async () => {
-    const defaultTheme = resolveTheme('public');
-    const defaultSettings: ThemeSettings = {
-      colors: { ...defaultTheme.colors } as Record<string, string>,
-      radii: { ...defaultTheme.radii } as Record<string, string>,
-      elevation: { ...defaultTheme.elevation } as Record<number, string>,
-      effects: Object.fromEntries(
-        Object.entries(defaultTheme.effects).map(([k, v]) => [k, String(v)])
-      ) as Record<string, string>,
+    const defaultPublicTheme = resolveTheme('public');
+    const defaultBusinessTheme = resolveTheme('business');
+    
+    const defaultSettings: ModeThemeSettings = {
+      public: {
+        colors: { ...defaultPublicTheme.colors } as Record<string, string>,
+        radii: { ...defaultPublicTheme.radii } as Record<string, string>,
+        elevation: { ...defaultPublicTheme.elevation } as Record<number, string>,
+        effects: Object.fromEntries(
+          Object.entries(defaultPublicTheme.effects).map(([k, v]) => [k, String(v)])
+        ) as Record<string, string>,
+      },
+      business: {
+        colors: { ...defaultBusinessTheme.colors } as Record<string, string>,
+        radii: { ...defaultBusinessTheme.radii } as Record<string, string>,
+        elevation: { ...defaultBusinessTheme.elevation } as Record<number, string>,
+        effects: Object.fromEntries(
+          Object.entries(defaultBusinessTheme.effects).map(([k, v]) => [k, String(v)])
+        ) as Record<string, string>,
+      },
     };
 
     setSettings(defaultSettings);
-    applyTheme(defaultSettings);
+    applyTheme(defaultSettings[editingMode]);
     localStorage.removeItem(STORAGE_KEY);
 
     if (user) {
@@ -168,34 +206,46 @@ export default function Customize() {
       }
     }
 
-    toast.success('Theme reverted to defaults');
+    toast.success('Both themes reverted to defaults');
   };
 
   const updateColor = (key: string, value: string) => {
     setSettings(prev => ({
       ...prev,
-      colors: { ...(prev.colors || {}), [key]: value }
+      [editingMode]: {
+        ...prev[editingMode],
+        colors: { ...(prev[editingMode].colors || {}), [key]: value }
+      }
     }));
   };
 
   const updateRadius = (key: string, value: string) => {
     setSettings(prev => ({
       ...prev,
-      radii: { ...(prev.radii || {}), [key]: value }
+      [editingMode]: {
+        ...prev[editingMode],
+        radii: { ...(prev[editingMode].radii || {}), [key]: value }
+      }
     }));
   };
 
   const updateElevation = (level: number, value: string) => {
     setSettings(prev => ({
       ...prev,
-      elevation: { ...(prev.elevation || {}), [level]: value }
+      [editingMode]: {
+        ...prev[editingMode],
+        elevation: { ...(prev[editingMode].elevation || {}), [level]: value }
+      }
     }));
   };
 
   const updateEffect = (key: string, value: string) => {
     setSettings(prev => ({
       ...prev,
-      effects: { ...(prev.effects || {}), [key]: value }
+      [editingMode]: {
+        ...prev[editingMode],
+        effects: { ...(prev[editingMode].effects || {}), [key]: value }
+      }
     }));
   };
 
@@ -210,7 +260,8 @@ export default function Customize() {
     );
   }
 
-  const defaultTheme = resolveTheme('public');
+  const defaultTheme = resolveTheme(editingMode);
+  const currentSettings = settings[editingMode];
 
   return (
     <div className="min-h-screen p-6 bg-background">
@@ -222,6 +273,33 @@ export default function Customize() {
           </p>
         </div>
 
+        {/* Mode Selector */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Editing: {editingMode.charAt(0).toUpperCase() + editingMode.slice(1)} Mode</CardTitle>
+            <CardDescription>Switch between Public and Business themes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => handleModeSwitch('public')}
+                variant={editingMode === 'public' ? 'default' : 'outline'}
+                className="flex-1"
+              >
+                Public Mode
+              </Button>
+              <Button
+                onClick={() => handleModeSwitch('business')}
+                variant={editingMode === 'business' ? 'default' : 'outline'}
+                className="flex-1"
+              >
+                Business Mode
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
         <div className="flex gap-4 mb-6">
           <Button onClick={handlePreview} variant="outline" className="gap-2">
             <Eye className="w-4 h-4" />
@@ -238,11 +316,15 @@ export default function Customize() {
         </div>
 
         <Tabs defaultValue="colors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="colors">Colors</TabsTrigger>
             <TabsTrigger value="radii">Radii</TabsTrigger>
             <TabsTrigger value="elevation">Elevation</TabsTrigger>
             <TabsTrigger value="effects">Glass Effects</TabsTrigger>
+            <TabsTrigger value="guide">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Guide
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="colors" className="space-y-4">
@@ -261,13 +343,13 @@ export default function Customize() {
                       <Input
                         id={`color-${key}`}
                         type="color"
-                        value={settings.colors?.[key] || defaultValue}
+                        value={currentSettings.colors?.[key] || defaultValue}
                         onChange={(e) => updateColor(key, e.target.value)}
                         className="w-20 h-10"
                       />
                       <Input
                         type="text"
-                        value={settings.colors?.[key] || defaultValue}
+                        value={currentSettings.colors?.[key] || defaultValue}
                         onChange={(e) => updateColor(key, e.target.value)}
                         className="flex-1"
                         placeholder={defaultValue}
@@ -294,7 +376,7 @@ export default function Customize() {
                     <Input
                       id={`radius-${key}`}
                       type="text"
-                      value={settings.radii?.[key] || defaultValue}
+                      value={currentSettings.radii?.[key] || defaultValue}
                       onChange={(e) => updateRadius(key, e.target.value)}
                       placeholder={defaultValue}
                     />
@@ -319,7 +401,7 @@ export default function Customize() {
                     <Input
                       id={`elevation-${level}`}
                       type="text"
-                      value={settings.elevation?.[Number(level)] || defaultValue}
+                      value={currentSettings.elevation?.[Number(level)] || defaultValue}
                       onChange={(e) => updateElevation(Number(level), e.target.value)}
                       placeholder={defaultValue}
                       className="font-mono text-sm"
@@ -351,21 +433,21 @@ export default function Customize() {
                           <Slider
                             id={`effect-${key}`}
                             min={0}
-                            max={key.includes('Blur') ? 50 : 2}
+                            max={key.includes('Blur') ? 50 : 20}
                             step={key.includes('Blur') ? 1 : 0.1}
-                            value={[parseFloat(settings.effects?.[key as keyof typeof settings.effects] || defaultValue)]}
+                            value={[parseFloat(currentSettings.effects?.[key as keyof typeof currentSettings.effects] || defaultValue)]}
                             onValueChange={([value]) => updateEffect(key, value.toString())}
                             className="flex-1"
                           />
                           <span className="text-sm text-muted-foreground w-12">
-                            {settings.effects?.[key as keyof typeof settings.effects] || defaultValue}
+                            {currentSettings.effects?.[key as keyof typeof currentSettings.effects] || defaultValue}
                           </span>
                         </div>
                       ) : (
                         <Input
                           id={`effect-${key}`}
                           type="text"
-                          value={settings.effects?.[key as keyof typeof settings.effects] || defaultValue}
+                          value={currentSettings.effects?.[key as keyof typeof currentSettings.effects] || defaultValue}
                           onChange={(e) => updateEffect(key, e.target.value)}
                           placeholder={defaultValue}
                         />
@@ -373,6 +455,166 @@ export default function Customize() {
                     </div>
                   );
                 })}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="guide" className="space-y-4">
+            <Card className="backdrop-blur-sm hover:shadow-lg transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Private Reference Guide
+                </CardTitle>
+                <CardDescription>
+                  Your personal cheat sheet for theme tokens and design vocabulary
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Colors Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">Colors</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div 
+                          className="w-8 h-8 rounded-md border"
+                          style={{ backgroundColor: currentSettings.colors?.background || defaultTheme.colors.background }}
+                        />
+                        <code className="text-sm font-mono">background</code>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        The main canvas — sets the overall page mood. Soft blue = dreamy public vibe.
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div 
+                          className="w-8 h-8 rounded-md border"
+                          style={{ backgroundColor: currentSettings.colors?.surface || defaultTheme.colors.surface }}
+                        />
+                        <code className="text-sm font-mono">surface</code>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Cards & menus — elevated above background for depth.
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div 
+                          className="w-8 h-8 rounded-md border"
+                          style={{ backgroundColor: currentSettings.colors?.accent || defaultTheme.colors.accent }}
+                        />
+                        <code className="text-sm font-mono">accent</code>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Call-to-action color — buttons, links. Try #489FE3 for PB-blue.
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div 
+                          className="w-8 h-8 rounded-md border"
+                          style={{ backgroundColor: currentSettings.colors?.accentOn || defaultTheme.colors.accentOn }}
+                        />
+                        <code className="text-sm font-mono">accentOn</code>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Text on accent backgrounds — ensures readability.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Radii Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">Border Radii</h3>
+                  <div className="grid gap-3">
+                    <div className="p-3 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">sm (8px)</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Tight curves for badges</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">md (12px)</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Standard for buttons and inputs</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">lg (16px)</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Card curves for panels</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">xl (24px)</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Pronounced curves for hero sections</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Elevation Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">Elevation Levels</h3>
+                  <div className="grid gap-3">
+                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[1] }}>
+                      <code className="text-sm font-mono font-semibold">1</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Hover states & slight separation</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[2] }}>
+                      <code className="text-sm font-mono font-semibold">2</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Standard cards</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[8] }}>
+                      <code className="text-sm font-mono font-semibold">8</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Overlays & popovers</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[16] }}>
+                      <code className="text-sm font-mono font-semibold">16</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Modals & dialogs</span>
+                    </div>
+                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[24] }}>
+                      <code className="text-sm font-mono font-semibold">24</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Spotlight cards & tooltips</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Glass Effects Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">Glass Effects</h3>
+                  <div className="grid gap-3">
+                    <div className="p-4 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">glassBlur</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Frost level for backdrop blur</span>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Current: {currentSettings.effects?.glassBlur || defaultTheme.effects.glassBlur}
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">warpDistortion</code>
+                      <span className="text-sm text-muted-foreground ml-2">— iOS-style refraction intensity</span>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Current: {currentSettings.effects?.warpDistortion || defaultTheme.effects.warpDistortion}
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg border backdrop-blur-sm">
+                      <code className="text-sm font-mono font-semibold">glassBg / glassBorder</code>
+                      <span className="text-sm text-muted-foreground ml-2">— Translucent fill & edge definition</span>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Bg: {currentSettings.effects?.glassBg || defaultTheme.effects.glassBg}<br />
+                        Border: {currentSettings.effects?.glassBorder || defaultTheme.effects.glassBorder}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pro Tips */}
+                <div className="p-4 rounded-lg bg-muted/50 border backdrop-blur-sm">
+                  <h4 className="font-semibold mb-2 text-foreground">Pro Tips</h4>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    <li>• Use HSL colors for easier theming (hsl(hue, saturation%, lightness%))</li>
+                    <li>• Match glassBg opacity to background color for natural frosting</li>
+                    <li>• Higher blur = dreamier public mode; lower = crisp business mode</li>
+                    <li>• Test both light and dark modes after customization</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

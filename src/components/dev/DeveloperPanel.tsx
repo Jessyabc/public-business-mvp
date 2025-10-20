@@ -150,7 +150,7 @@ export function DeveloperPanel() {
       environment: {
         userAgent: navigator.userAgent,
         href: window.location.href,
-        NODE_ENV: process.env.NODE_ENV,
+        NODE_ENV: import.meta.env.MODE,
         VITE_ENV: import.meta.env,
       },
       stylesheets,

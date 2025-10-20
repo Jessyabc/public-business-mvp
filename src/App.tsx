@@ -27,7 +27,7 @@ const App = () => (
               <RouterProvider router={router} />
             </main>
           </div>
-          {process.env.NODE_ENV !== 'production' && <DeveloperPanel />}
+          {import.meta.env.DEV && <DeveloperPanel />}
         </AppModeProvider>
       </AuthProvider>
     </TooltipProvider>

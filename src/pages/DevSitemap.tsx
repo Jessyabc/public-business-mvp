@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { ExternalLink, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styles from '@/components/effects/glassSurface.module.css';
+import { SHOW_RIGHT_SIDEBAR, BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 
 const sitemapData = {
   canonical_routes: [
@@ -20,7 +21,7 @@ const sitemapData = {
 
 export default function DevSitemap() {
   // Only show in development
-  if (process.env.NODE_ENV === 'production') {
+  if (import.meta.env.PROD) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="glass-card">
@@ -35,7 +36,7 @@ export default function DevSitemap() {
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-background via-background/95 to-muted/20">
+    <div className="min-h-screen p-6 bg-background">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">App Sitemap</h1>
@@ -171,14 +172,14 @@ export default function DevSitemap() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className={`flex items-center justify-between p-3 ${styles.glassSurface} rounded`}>
                 <span className="font-mono text-sm">SHOW_RIGHT_SIDEBAR</span>
-                <Badge variant={process.env.REACT_APP_SHOW_RIGHT_SIDEBAR !== 'false' ? 'default' : 'secondary'}>
-                  {process.env.REACT_APP_SHOW_RIGHT_SIDEBAR !== 'false' ? 'Enabled' : 'Disabled'}
+                <Badge variant={SHOW_RIGHT_SIDEBAR ? 'default' : 'secondary'}>
+                  {SHOW_RIGHT_SIDEBAR ? 'Enabled' : 'Disabled'}
                 </Badge>
               </div>
               <div className={`flex items-center justify-between p-3 ${styles.glassSurface} rounded`}>
                 <span className="font-mono text-sm">BRAINSTORM_WRITES_ENABLED</span>
-                <Badge variant={process.env.REACT_APP_BRAINSTORM_WRITES_ENABLED === 'true' ? 'default' : 'secondary'}>
-                  {process.env.REACT_APP_BRAINSTORM_WRITES_ENABLED === 'true' ? 'Enabled' : 'Disabled'}
+                <Badge variant={BRAINSTORM_WRITES_ENABLED ? 'default' : 'secondary'}>
+                  {BRAINSTORM_WRITES_ENABLED ? 'Enabled' : 'Disabled'}
                 </Badge>
               </div>
             </div>
