@@ -12,7 +12,7 @@ function BackgroundGlow() {
       <div
         className="
           absolute left-1/2 top-[0%] -translate-x-1/2 -translate-y-1/2
-          w=[130vw] h=[130vw]
+          w=[130vw] h=[100vw]
           bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),rgba(56,189,248,0.40)_18%,rgba(99,102,241,0.32)_36%,transparent_64%)]
           blur-[140px] opacity-90 mix-blend-screen
           animate-glow-center motion-reduce:animate-none
