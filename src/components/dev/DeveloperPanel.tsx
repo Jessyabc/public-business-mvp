@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppMode } from '@/contexts/AppModeContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 interface StylesheetInfo {
   href: string;
@@ -21,6 +23,11 @@ export function DeveloperPanel() {
   const [selectorInput, setSelectorInput] = useState('');
   const [probeResult, setProbeResult] = useState<SelectorProbeResult | null>(null);
   const { mode, setMode } = useAppMode();
+  const navigate = useNavigate();
+  const { isAdmin } = useUserRoles();
+  
+  const isDev = import.meta.env.DEV;
+  const showCustomizeButton = isDev || isAdmin();
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -406,7 +413,28 @@ export function DeveloperPanel() {
       </div>
 
       {/* Export */}
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {showCustomizeButton && (
+          <button
+            onClick={() => navigate('/customize')}
+            style={{
+              width: '100%',
+              padding: '8px',
+              background: '#6366f1',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            🎨 Customize Theme
+          </button>
+        )}
         <button
           onClick={exportDiagnostics}
           style={{
