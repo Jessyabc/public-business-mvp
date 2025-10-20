@@ -132,7 +132,7 @@ function BrainstormNodeComponent({ data }: { data: BrainstormNodeData }) {
       </div>
       
       {/* Depth shadow */}
-      <div className="absolute inset-0 rounded-inherit bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 rounded-inherit bg-surface/5 pointer-events-none" />
     </div>
   );
 }

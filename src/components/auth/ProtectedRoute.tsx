@@ -22,7 +22,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
           <div className="text-blue-200">Loading...</div>
@@ -33,7 +33,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
 
   if (requireAuth && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6">
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <div className="text-center glass-card p-8 max-w-md">
           <Lock className="w-12 h-12 mx-auto mb-4 text-blue-400" />
           <h2 className="text-2xl font-bold text-white mb-4">Authentication Required</h2>

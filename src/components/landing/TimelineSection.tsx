@@ -114,7 +114,7 @@ export function TimelineSection({ onComplete }: TimelineSectionProps) {
         {/* Timeline */}
         <div className="relative">
           {/* Connecting line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-pb-blue/30 to-pb-blue/10"></div>
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-accent/20"></div>
           
           {timelineNodes.map((node, index) => (
             <div

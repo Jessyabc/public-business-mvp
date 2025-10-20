@@ -50,7 +50,7 @@ export function BrainstormPreview({ onExplore }: BrainstormPreviewProps) {
       </CardHeader>
       <CardContent>
         {/* Mock Network Visualization */}
-        <div className="relative h-80 mb-6 bg-gradient-to-br from-background to-muted/20 rounded-xl overflow-hidden border border-border/50">
+        <div className="relative h-80 mb-6 bg-muted/20 rounded-xl overflow-hidden border border-border/50">
           {/* Connection Lines */}
           <svg className="absolute inset-0 w-full h-full">
             <defs>
@@ -88,7 +88,7 @@ export function BrainstormPreview({ onExplore }: BrainstormPreviewProps) {
           </svg>
           
           {/* Sample Network Nodes */}
-          <div className="absolute w-48 p-3 rounded-lg border backdrop-blur-sm bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20" 
+          <div className="absolute w-48 p-3 rounded-lg border backdrop-blur-sm bg-accent/10 border-accent/20" 
                style={{ left: '20%', top: '25%', transform: 'translate(-50%, -50%)' }}>
             <Badge variant="secondary" className="text-xs text-primary">Spark</Badge>
             <h4 className="font-semibold text-sm text-foreground mb-2 mt-2 leading-tight">
@@ -99,7 +99,7 @@ export function BrainstormPreview({ onExplore }: BrainstormPreviewProps) {
             </p>
           </div>
 
-          <div className="absolute w-48 p-3 rounded-lg border backdrop-blur-sm bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20"
+          <div className="absolute w-48 p-3 rounded-lg border backdrop-blur-sm bg-accent/10 border-accent/20"
                style={{ left: '65%', top: '15%', transform: 'translate(-50%, -50%)' }}>
             <Badge variant="secondary" className="text-xs text-blue-600">Thread</Badge>
             <h4 className="font-semibold text-sm text-foreground mb-2 mt-2 leading-tight">
@@ -110,7 +110,7 @@ export function BrainstormPreview({ onExplore }: BrainstormPreviewProps) {
             </p>
           </div>
 
-          <div className="absolute w-48 p-3 rounded-lg border backdrop-blur-sm bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20"
+          <div className="absolute w-48 p-3 rounded-lg border backdrop-blur-sm bg-accent/10 border-accent/20"
                style={{ left: '10%', top: '65%', transform: 'translate(-50%, -50%)' }}>
             <Badge variant="secondary" className="text-xs text-purple-600">Echo</Badge>
             <h4 className="font-semibold text-sm text-foreground mb-2 mt-2 leading-tight">

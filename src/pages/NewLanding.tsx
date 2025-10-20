@@ -124,7 +124,7 @@ export function NewLanding() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-gradient-to-b from-slate-600 to-slate-900 py-20 px-6">
+      <section className="bg-accent/10 py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-8">
             Ready to Start Collaborating?

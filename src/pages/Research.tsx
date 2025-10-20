@@ -51,9 +51,7 @@ const Research = () => {
 
   return (
     <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
-      mode === 'public' 
-        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+      'bg-background'
     }`}>
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">

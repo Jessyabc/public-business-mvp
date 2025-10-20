@@ -51,7 +51,7 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
     )}>
       {/* Highlight glow for linked posts */}
       {post.isHighlighted && (
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-lg pointer-events-none" />
+        <div className="absolute inset-0 bg-accent/5 rounded-lg pointer-events-none" />
       )}
 
       {/* Header */}

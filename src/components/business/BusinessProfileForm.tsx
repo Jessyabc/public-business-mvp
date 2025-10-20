@@ -99,11 +99,11 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6 animate-fade-in">
+    <div className="min-h-screen bg-background p-6 animate-fade-in">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center space-y-4">
-          <div className="glass-business w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto border border-blue-200/30">
-            <Building2 className="w-8 h-8 text-blue-600" />
+          <div className="glass-business w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto border border-accent/20">
+            <Building2 className="w-8 h-8 text-accent" />
           </div>
           <div>
             <h1 className={`text-3xl font-bold ${
@@ -319,7 +319,7 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
 
                 <Button 
                   type="submit" 
-                  className="w-full glass-card bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 text-white"
+                  className="w-full"
                   disabled={loading || isSubmitting}
                 >
                   {isSubmitting ? 'Submitting...' : profile ? 'Update Profile' : 'Submit for Review'}

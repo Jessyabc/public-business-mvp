@@ -209,9 +209,9 @@ export default function SpaceCanvas({ startId, className }: Props) {
       {/* Hard link “nexts” as luminous beacons */}
       {forwardNext && (
         <div className="absolute right-10 top-10">
-          <div className="mb-2 text-xs uppercase tracking-wide text-[#6fb3ff]">Hard link →</div>
-          <div className="w-64 rounded-xl p-[1px] bg-gradient-to-r from-[#3aa0ff] to-white/60">
-            <div className="rounded-[10px] bg-[#0b285a]/70 p-3">
+          <div className="mb-2 text-xs uppercase tracking-wide text-accent">Hard link →</div>
+          <div className="w-64 rounded-xl p-[1px] bg-accent/60">
+            <div className="rounded-[10px] bg-surface/70 p-3">
               <div className="text-sm font-semibold text-white/90 line-clamp-2">{forwardNext.title || 'Next in thread'}</div>
               {forwardNext.content && <div className="text-xs text-white/70 line-clamp-3 mt-1">{forwardNext.content}</div>}
               <div className="mt-2 flex items-center justify-between">
@@ -231,9 +231,9 @@ export default function SpaceCanvas({ startId, className }: Props) {
       )}
       {backwardNext && (
         <div className="absolute left-10 top-10">
-          <div className="mb-2 text-xs uppercase tracking-wide text-white/80">← Previous</div>
-          <div className="w-64 rounded-xl p-[1px] bg-gradient-to-r from-white/70 to-white/20">
-            <div className="rounded-[10px] bg-[#0b285a]/60 p-3">
+          <div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">← Previous</div>
+          <div className="w-64 rounded-xl p-[1px] bg-border">
+            <div className="rounded-[10px] bg-surface/60 p-3">
               <div className="text-sm font-semibold text-white/90 line-clamp-2">{backwardNext.title || 'Earlier idea'}</div>
               {backwardNext.content && <div className="text-xs text-white/70 line-clamp-3 mt-1">{backwardNext.content}</div>}
               <div className="mt-2 flex items-center justify-between">

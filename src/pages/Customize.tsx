@@ -150,15 +150,20 @@ export default function Customize() {
 
     setSaving(true);
     try {
+      // Use upsert to create row if it doesn't exist
       const { error } = await supabase
         .from('profiles')
-        .update({ theme_settings: settings as any })
-        .eq('id', user.id);
+        .upsert({ id: user.id, theme_settings: settings as any });
 
       if (error) throw error;
 
+      // Persist to localStorage as well
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      
+      // Apply current theme and reload settings to pick up stored values
       applyTheme(settings[editingMode]);
+      await loadSettings();
+      
       toast.success('Both themes saved to your account');
     } catch (error) {
       console.error('Failed to save theme:', error);
