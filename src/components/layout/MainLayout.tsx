@@ -18,11 +18,10 @@ export function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
 
   return (
-    <div className={`min-h-screen w-full transition-all duration-700 ease-in-out ${
-      mode === 'public' 
-        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
-    }`}>
+    <div 
+      className="min-h-screen w-full transition-all duration-700 ease-in-out"
+      style={{ background: 'var(--background)', color: 'var(--text-primary)' }}
+    >
       {/* Global Navigation Menu - always visible */}
       <GlobalNavigationMenu />
       
