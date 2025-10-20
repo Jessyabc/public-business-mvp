@@ -40,6 +40,32 @@ function elevationPlugin({ addUtilities }) {
   addUtilities(elevations);
 }
 
+/**
+ * Responsive Spacing Plugin
+ * Generates space-tight and space-normal utilities.
+ * space-tight: Optimized for mobile with tighter spacing
+ * space-normal: Standard spacing for larger screens
+ */
+function responsiveSpacingPlugin({ addUtilities, theme }) {
+  const tightScale = {
+    '.space-tight-xs': { gap: '0.25rem' },   // 4px
+    '.space-tight-sm': { gap: '0.5rem' },    // 8px
+    '.space-tight-md': { gap: '0.75rem' },   // 12px
+    '.space-tight-lg': { gap: '1rem' },      // 16px
+    '.space-tight-xl': { gap: '1.25rem' },   // 20px
+  };
+  
+  const normalScale = {
+    '.space-normal-xs': { gap: '0.5rem' },   // 8px
+    '.space-normal-sm': { gap: '1rem' },     // 16px
+    '.space-normal-md': { gap: '1.5rem' },   // 24px
+    '.space-normal-lg': { gap: '2rem' },     // 32px
+    '.space-normal-xl': { gap: '3rem' },     // 48px
+  };
+  
+  addUtilities({ ...tightScale, ...normalScale });
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -77,6 +103,9 @@ export default {
   plugins: [
     // Elevation utilities (elevation-1 through elevation-24)
     elevationPlugin,
+    
+    // Responsive spacing utilities (space-tight, space-normal)
+    responsiveSpacingPlugin,
     
     // Enable data-theme attribute variants
     function({ addVariant }) {
