@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useProfile } from '@/hooks/useProfile';
 import { Menu, X, LogOut, User, Settings } from 'lucide-react';
+import styles from '@/components/effects/glassSurface.module.css';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,7 +106,7 @@ export function Header() {
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full glass-button">
+                    <Button variant="ghost" className={`relative h-8 w-8 rounded-full ${styles.glassButton}`}>
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={profile?.avatar_url || ''} />
                         <AvatarFallback>
@@ -136,7 +137,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
-              className="lg:hidden glass-button"
+              className={`lg:hidden ${styles.glassButton}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -164,24 +165,24 @@ export function Header() {
                 <div className="flex flex-col space-y-2 pt-4 border-t border-pb-blue/20">
                   {!user ? (
                     <>
-                      <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="glass-button">
+                      <Button variant="ghost" onClick={() => setShowAuthModal(true)} className={styles.glassButton}>
                         Login
                       </Button>
-                      <Button onClick={() => setShowAuthModal(true)} className="glass-button bg-pb-blue/20 text-pb-blue">
+                      <Button onClick={() => setShowAuthModal(true)} className={`${styles.glassButton} bg-pb-blue/20 text-pb-blue`}>
                         Sign Up
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button variant="ghost" onClick={() => navigate('/profile')} className="glass-button">
+                      <Button variant="ghost" onClick={() => navigate('/profile')} className={styles.glassButton}>
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Button>
-                      <Button variant="ghost" onClick={() => navigate('/settings')} className="glass-button">
+                      <Button variant="ghost" onClick={() => navigate('/settings')} className={styles.glassButton}>
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Button>
-                      <Button variant="destructive" onClick={handleSignOut} className="glass-button">
+                      <Button variant="destructive" onClick={handleSignOut} className={styles.glassButton}>
                         <LogOut className="mr-2 h-4 w-4" />
                         Sign Out
                       </Button>

@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { Lightbulb, Settings } from "lucide-react";
+import styles from "@/components/effects/glassSurface.module.css";
 
 interface OpenIdea {
   id: string;
@@ -131,7 +132,7 @@ export function Admin() {
             />
             <Button
               onClick={handleLogin}
-              className="w-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass"
+              className={`w-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass`}
             >
               Access Admin Panel
             </Button>

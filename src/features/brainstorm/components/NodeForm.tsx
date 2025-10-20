@@ -12,6 +12,7 @@ import { Plus, X } from 'lucide-react';
 import { useBrainstormStore } from '../store';
 import { toast } from '@/hooks/use-toast';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
+import styles from '@/components/effects/glassSurface.module.css';
 
 
 const nodeSchema = z.object({
@@ -98,7 +99,7 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
       <SheetTrigger asChild>
         {trigger}
       </SheetTrigger>
-      <SheetContent className="glass-surface">
+      <SheetContent className={styles.glassSurface}>
         <SheetHeader>
           <SheetTitle className="text-foreground">Add New Idea</SheetTitle>
         </SheetHeader>
@@ -112,7 +113,7 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
                 <FormItem>
                   <FormLabel>Emoji</FormLabel>
                   <FormControl>
-                    <Input {...field} className="text-2xl h-12 text-center glass-surface" />
+                    <Input {...field} className={`text-2xl h-12 text-center ${styles.glassSurface}`} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +127,7 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Brief title for your idea..." className="glass-surface" />
+                    <Input {...field} placeholder="Brief title for your idea..." className={styles.glassSurface} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,7 +144,7 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
                     <Textarea
                       {...field}
                       placeholder="Describe your idea in detail..."
-                      className="min-h-[100px] glass-surface"
+                      className={`min-h-[100px] ${styles.glassSurface}`}
                     />
                   </FormControl>
                   <FormMessage />
@@ -164,15 +165,15 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                        className="glass-surface"
+                        className={styles.glassSurface}
                       />
-                      <Button type="button" onClick={addTag} size="sm" className="glass-button">
+                      <Button type="button" onClick={addTag} size="sm" className={styles.glassButton}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {form.watch('tags').map((tag) => (
-                        <Badge key={tag} variant="secondary" className="glass-surface">
+                        <Badge key={tag} variant="secondary" className={styles.glassSurface}>
                           {tag}
                           <button
                             type="button"
@@ -191,14 +192,14 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
             />
 
             <div className="flex gap-3 pt-4">
-              <Button type="submit" className="flex-1 glass-button">
+              <Button type="submit" className={`flex-1 ${styles.glassButton}`}>
                 Add Idea
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                className="glass-button"
+                className={styles.glassButton}
               >
                 Cancel
               </Button>

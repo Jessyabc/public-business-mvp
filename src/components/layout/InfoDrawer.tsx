@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Info, ExternalLink } from 'lucide-react';
+import styles from '@/components/effects/glassSurface.module.css';
 import {
   Drawer,
   DrawerContent,
@@ -65,19 +66,19 @@ export function InfoDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="ghost" size="sm" className="glass-button">
+        <Button variant="ghost" size="sm" className={styles.glassButton}>
           <Info className="w-4 h-4 mr-2" />
           Info
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="glass-surface">
+      <DrawerContent className={styles.glassSurface}>
         <DrawerHeader>
           <DrawerTitle className="text-foreground">Platform Information</DrawerTitle>
         </DrawerHeader>
         <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
           {Object.entries(categorizedPages).map(([category, pages]) => (
             <div key={category}>
-              <Badge variant="secondary" className="mb-3 glass-surface">
+              <Badge variant="secondary" className={`mb-3 ${styles.glassSurface}`}>
                 {category}
               </Badge>
               <div className="space-y-3">

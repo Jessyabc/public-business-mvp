@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { Lightbulb } from "lucide-react";
+import styles from "@/components/effects/glassSurface.module.css";
 
 interface OpenIdeaFormProps {
   onSuccess?: (ideaId: string) => void;
@@ -115,7 +116,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
             setEmail("");
           }}
           variant="outline"
-          className="glass-button bg-white/10 hover:bg-white/20 border border-white/30"
+          className={`${styles.glassButton} bg-white/10 hover:bg-white/20 border border-white/30`}
         >
           Share Another Idea
         </Button>
@@ -166,7 +167,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
         <Button
           type="submit"
           disabled={isSubmitting || content.length < 10 || content.length > 280}
-          className="w-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass"
+          className={`w-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass`}
         >
           {isSubmitting ? "Planting..." : "Drop Your Idea"}
         </Button>

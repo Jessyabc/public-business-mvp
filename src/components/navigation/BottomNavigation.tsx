@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
+import styles from '@/components/effects/glassSurface.module.css';
 
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
@@ -54,7 +55,7 @@ export function BottomNavigation() {
           )}
 
           {/* Mode Toggle */}
-          <button onClick={toggleMode} className="glass-button glass-nav-item">
+          <button onClick={toggleMode} className={`${styles.glassButton} glass-nav-item`}>
             {mode === 'public' ? (
               <Home className="w-4 h-4 text-pb-blue transition-all duration-med" />
             ) : (
@@ -91,7 +92,7 @@ export function BottomNavigation() {
 
           <Button
             onClick={() => openComposer()}
-            className="w-10 h-10 rounded-full glass-button bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border-pb-blue/30 interactive-glass ml-2"
+            className={`w-10 h-10 rounded-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border-pb-blue/30 interactive-glass ml-2`}
             size="icon"
           >
             <Plus className="w-4 h-4" />

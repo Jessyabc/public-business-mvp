@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useBrainstormStore } from '../store';
+import styles from '@/components/effects/glassSurface.module.css';
 
 export function Toolbar() {
   const {
@@ -21,7 +22,7 @@ export function Toolbar() {
   } = useBrainstormStore();
 
   return (
-    <div className="flex items-center justify-between p-4 glass-surface border-b border-border/50">
+    <div className={`flex items-center justify-between p-4 ${styles.glassSurface} border-b border-border/50`}>
       <div className="flex items-center gap-3">
         <Button
           size="sm"
@@ -29,7 +30,7 @@ export function Toolbar() {
             // This would open NodeForm in the actual implementation
             console.log('Add idea clicked');
           }}
-          className="glass-button"
+          className={styles.glassButton}
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Idea
@@ -39,7 +40,7 @@ export function Toolbar() {
           size="sm"
           variant={isCreatingLink ? 'default' : 'secondary'}
           onClick={() => setCreatingLink(!isCreatingLink)}
-          className="glass-button"
+          className={styles.glassButton}
           disabled={nodes.length < 2}
         >
           <Link className="w-4 h-4 mr-2" />
@@ -51,7 +52,7 @@ export function Toolbar() {
             size="sm"
             variant={showHardEdges ? 'default' : 'secondary'}
             onClick={toggleHardEdges}
-            className="glass-button"
+            className={styles.glassButton}
           >
             <Eye className="w-4 h-4 mr-1" />
             Hard
@@ -60,7 +61,7 @@ export function Toolbar() {
             size="sm"
             variant={showSoftEdges ? 'default' : 'secondary'}
             onClick={toggleSoftEdges}
-            className="glass-button"
+            className={styles.glassButton}
           >
             <EyeOff className="w-4 h-4 mr-1" />
             Soft
@@ -75,11 +76,11 @@ export function Toolbar() {
             placeholder="Search ideas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-40 pl-9 glass-surface"
+            className={`w-40 pl-9 ${styles.glassSurface}`}
           />
         </div>
 
-        <Badge variant="secondary" className="glass-surface">
+        <Badge variant="secondary" className={styles.glassSurface}>
           {nodes.length} ideas, {edges.length} links
         </Badge>
 
@@ -88,7 +89,7 @@ export function Toolbar() {
             size="sm"
             variant="ghost"
             onClick={fitToView}
-            className="glass-button"
+            className={styles.glassButton}
           >
             <Maximize className="w-4 h-4" />
           </Button>
@@ -96,7 +97,7 @@ export function Toolbar() {
             size="sm"
             variant="ghost"
             onClick={autoArrange}
-            className="glass-button"
+            className={styles.glassButton}
           >
             <Shuffle className="w-4 h-4" />
           </Button>

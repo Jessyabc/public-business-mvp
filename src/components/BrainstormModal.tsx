@@ -4,6 +4,7 @@ import { GlassCard } from "@/ui/components/GlassCard";
 import { formatDistanceToNow } from "date-fns";
 import { User, Clock, ArrowRight } from "lucide-react";
 import { IdeaBrainstorm } from "@/hooks/useOpenIdeas";
+import styles from "@/components/effects/glassSurface.module.css";
 
 interface BrainstormModalProps {
   brainstorm: IdeaBrainstorm | null;
@@ -44,7 +45,7 @@ export function BrainstormModal({ brainstorm, isOpen, onClose }: BrainstormModal
           <div className="flex gap-3">
             <Button 
               disabled 
-              className="flex-1 glass-button bg-pb-blue/10 text-pb-blue border-pb-blue/30 opacity-50"
+              className={`flex-1 ${styles.glassButton} bg-pb-blue/10 text-pb-blue border-pb-blue/30 opacity-50`}
             >
               Continue this Brainstorm
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -52,7 +53,7 @@ export function BrainstormModal({ brainstorm, isOpen, onClose }: BrainstormModal
             <Button 
               variant="outline" 
               onClick={onClose}
-              className="glass-button border-pb-blue/30 text-pb-text0 hover:bg-pb-blue/10"
+              className={`${styles.glassButton} border-pb-blue/30 text-pb-text0 hover:bg-pb-blue/10`}
             >
               Close
             </Button>

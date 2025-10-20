@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { FeedsAdapter, type FeedItem, type HistoryItem } from '@/adapters/feedsAdapter';
 import { SHOW_RIGHT_SIDEBAR } from '@/config/flags';
+import styles from '@/components/effects/glassSurface.module.css';
 
 export function RightSidebar() {
   const showSidebar = SHOW_RIGHT_SIDEBAR;
@@ -75,7 +76,7 @@ export function RightSidebar() {
             ) : (
               <div className="space-y-2">
                 {ideas.slice(0, visible.ideas).map((it) => (
-                  <Card key={it.id} className="glass-surface interactive-glass cursor-pointer">
+                  <Card key={it.id} className={`${styles.glassSurface} interactive-glass cursor-pointer`}>
                     <CardContent className="p-3">
                       <div className="text-sm font-medium line-clamp-2">{it.title || it.content}</div>
                       <div className="mt-1 text-xs text-muted-foreground flex items-center justify-between">
@@ -88,7 +89,7 @@ export function RightSidebar() {
                 {visible.ideas < ideas.length && (
                   <button
                     onClick={loadMoreIdeas}
-                    className="w-full text-xs py-2 rounded-md glass-button interactive-glass"
+                    className={`w-full text-xs py-2 rounded-md ${styles.glassButton} interactive-glass`}
                   >
                     Load more
                   </button>
@@ -113,7 +114,7 @@ export function RightSidebar() {
             ) : (
               <div className="space-y-2">
                 {history.map((h) => (
-                  <Card key={h.id} className="glass-surface interactive-glass cursor-pointer">
+                  <Card key={h.id} className={`${styles.glassSurface} interactive-glass cursor-pointer`}>
                     <CardContent className="p-3 flex items-center justify-between">
                       <span className="text-sm">
                         {h.action || 'viewed'}{' '}

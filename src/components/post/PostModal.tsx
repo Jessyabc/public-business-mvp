@@ -6,6 +6,7 @@ import { Calendar, Eye, Heart, MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import styles from '@/components/effects/glassSurface.module.css';
 
 interface PostModalProps {
   isOpen: boolean;
@@ -87,7 +88,7 @@ export function PostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto glass-surface border-white/20 backdrop-blur-xl">
+      <DialogContent className={`max-w-2xl max-h-[80vh] overflow-y-auto ${styles.glassSurface} border-white/20 backdrop-blur-xl`}>
         {/* Header */}
         <DialogHeader className="space-y-4">
           <div className="flex items-start justify-between">

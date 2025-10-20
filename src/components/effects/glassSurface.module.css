@@ -1,0 +1,99 @@
+/**
+ * Glass Surface Effect Module
+ * 
+ * Modern glass morphism styles using CSS custom properties
+ * injected by ThemeInjector at runtime.
+ */
+
+.glassSurface {
+  --glass-layer-bg: var(--glass-fill);
+  --glass-layer-border: var(--glass-border);
+  --glass-layer-shadow: var(--elevation-4);
+  --glass-layer-blur: calc(var(--glass-blur) * 0.55);
+  
+  position: relative;
+  isolation: isolate;
+  color: var(--text-primary);
+  background: var(--glass-layer-bg);
+  border: 1px solid var(--glass-layer-border);
+  box-shadow: var(--glass-layer-shadow);
+  background-clip: padding-box;
+  border-radius: var(--radius-md);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@supports (background: color-mix(in srgb, transparent, transparent)) {
+  .glassSurface {
+    --glass-layer-bg: color-mix(in srgb, var(--glass-fill) 84%, transparent);
+    --glass-layer-border: color-mix(in srgb, var(--glass-border) 72%, transparent);
+  }
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glassSurface {
+    -webkit-backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+    backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+  }
+}
+
+.glassSurface:hover {
+  box-shadow: var(--elevation-8);
+}
+
+.glassSurface:focus-visible {
+  outline: none;
+  position: relative;
+}
+
+.glassSurface:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--glass-border);
+  pointer-events: none;
+}
+
+@supports (background: color-mix(in srgb, transparent, transparent)) {
+  .glassSurface:focus-visible::after {
+    border: 2px solid color-mix(in srgb, var(--glass-border) 55%, transparent);
+  }
+}
+
+/* Button variant with lighter opacity */
+.glassButton {
+  composes: glassSurface;
+  --glass-layer-blur: calc(var(--glass-blur) * 0.45);
+  cursor: pointer;
+}
+
+@supports (background: color-mix(in srgb, transparent, transparent)) {
+  .glassButton {
+    --glass-layer-bg: color-mix(in srgb, var(--glass-fill) 70%, transparent);
+    --glass-layer-border: color-mix(in srgb, var(--glass-border) 66%, transparent);
+  }
+}
+
+/* Warp/displacement effect */
+.warp {
+  position: relative;
+  overflow: hidden;
+}
+
+.warp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  background-attachment: fixed;
+  filter: blur(var(--glass-refraction-blur)) url(#glass-displace);
+  transform: scale(1.02);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
+  mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
+}
+
+/* Combined glass surface with warp */
+.glassWarp {
+  composes: glassSurface warp;
+}

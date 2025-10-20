@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import styles from '@/components/effects/glassSurface.module.css';
 
 const sitemapData = {
   canonical_routes: [
@@ -53,7 +54,7 @@ export default function DevSitemap() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {sitemapData.canonical_routes.map((route) => (
-                <Card key={route.path} className="glass-surface hover:glass-hover transition-all duration-200">
+                <Card key={route.path} className={`${styles.glassSurface} hover:glass-hover transition-all duration-200`}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <Link
@@ -88,7 +89,7 @@ export default function DevSitemap() {
           <CardContent>
             <div className="space-y-3">
               {sitemapData.redirects.map((redirect) => (
-                <div key={redirect.from} className="flex items-center justify-between p-3 glass-surface rounded">
+                <div key={redirect.from} className={`flex items-center justify-between p-3 ${styles.glassSurface} rounded`}>
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-sm text-muted-foreground">{redirect.from}</span>
                     <RotateCcw className="w-4 h-4 text-primary" />
@@ -115,7 +116,7 @@ export default function DevSitemap() {
           <CardContent>
             <div className="space-y-3">
               {sitemapData.legacy_routes.map((legacy) => (
-                <div key={legacy.path} className="flex items-center justify-between p-3 glass-surface rounded">
+                <div key={legacy.path} className={`flex items-center justify-between p-3 ${styles.glassSurface} rounded`}>
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-sm text-muted-foreground line-through">
                       {legacy.path}
@@ -139,19 +140,19 @@ export default function DevSitemap() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="p-4 glass-surface rounded text-center">
+              <div className={`p-4 ${styles.glassSurface} rounded text-center`}>
                 <div className="text-2xl font-bold text-green-500">
                   {sitemapData.navigation_health.orphaned_pages.length}
                 </div>
                 <div className="text-sm text-muted-foreground">Orphaned Pages</div>
               </div>
-              <div className="p-4 glass-surface rounded text-center">
+              <div className={`p-4 ${styles.glassSurface} rounded text-center`}>
                 <div className="text-2xl font-bold text-green-500">
                   {sitemapData.navigation_health.destinationless_links}
                 </div>
                 <div className="text-sm text-muted-foreground">Broken Links</div>
               </div>
-              <div className="p-4 glass-surface rounded text-center">
+              <div className={`p-4 ${styles.glassSurface} rounded text-center`}>
                 <div className="text-2xl font-bold text-green-500">
                   {sitemapData.navigation_health.missing_404 ? '❌' : '✅'}
                 </div>
@@ -168,13 +169,13 @@ export default function DevSitemap() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="flex items-center justify-between p-3 glass-surface rounded">
+              <div className={`flex items-center justify-between p-3 ${styles.glassSurface} rounded`}>
                 <span className="font-mono text-sm">SHOW_RIGHT_SIDEBAR</span>
                 <Badge variant={process.env.REACT_APP_SHOW_RIGHT_SIDEBAR !== 'false' ? 'default' : 'secondary'}>
                   {process.env.REACT_APP_SHOW_RIGHT_SIDEBAR !== 'false' ? 'Enabled' : 'Disabled'}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between p-3 glass-surface rounded">
+              <div className={`flex items-center justify-between p-3 ${styles.glassSurface} rounded`}>
                 <span className="font-mono text-sm">BRAINSTORM_WRITES_ENABLED</span>
                 <Badge variant={process.env.REACT_APP_BRAINSTORM_WRITES_ENABLED === 'true' ? 'default' : 'secondary'}>
                   {process.env.REACT_APP_BRAINSTORM_WRITES_ENABLED === 'true' ? 'Enabled' : 'Disabled'}
