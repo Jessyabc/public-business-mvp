@@ -1,3 +1,5 @@
+/* @deprecated: legacy styles slated for removal */
+
 html {
   color-scheme: light;
   scroll-padding-bottom: calc(var(--dock-h) + var(--dock-gap));

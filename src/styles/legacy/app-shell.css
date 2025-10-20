@@ -1,3 +1,5 @@
+/* @deprecated: legacy styles slated for removal */
+
 /* Global layout scaffold */
 html, body, #root { height: 100%; }
 * { min-width: 0; }
