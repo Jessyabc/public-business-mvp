@@ -84,6 +84,7 @@ export function ThemeInjector() {
     // Log theme changes in development
     if (import.meta.env.DEV) {
       console.log(`[ThemeInjector] Applied ${mode} theme:`, theme);
+      console.log(`[ThemeInjector] --background value:`, theme.colors.background);
     }
   }, [mode]);
 
