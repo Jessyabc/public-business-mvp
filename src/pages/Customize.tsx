@@ -338,7 +338,8 @@ export default function Customize() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {Object.entries(defaultTheme.effects).map(([key, defaultValue]) => {
-                  const isNumeric = !defaultValue.includes('hsl') && !defaultValue.includes('rgba');
+                  const valueStr = String(defaultValue);
+                  const isNumeric = typeof defaultValue === 'number' || (!valueStr.includes('hsl') && !valueStr.includes('rgba'));
                   
                   return (
                     <div key={key} className="space-y-2">

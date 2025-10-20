@@ -75,7 +75,7 @@ export interface ThemeEffects {
   /** Glass blur intensity – backdrop effect strength */
   glassBlur: string;
   /** Warp distortion amount – refraction simulation */
-  warpDistortion: number;
+  warpDistortion: string;
 }
 
 export interface Theme {
@@ -127,7 +127,7 @@ const base: Theme = {
     glassBg: 'rgba(255, 255, 255, 0.48)',
     glassBorder: 'rgba(255, 255, 255, 0.55)',
     glassBlur: '18px',
-    warpDistortion: 8,
+    warpDistortion: '8',
   },
 };
 
@@ -155,7 +155,7 @@ export const modes = {
       glassBg: 'rgba(255, 255, 255, 0.55)',   // Lighter glass fill
       glassBorder: 'rgba(255, 255, 255, 0.70)', // Softer glass border
       glassBlur: '24px',                       // Higher blur for dreamy effect
-      warpDistortion: 8,                       // Same warp as business
+      warpDistortion: '8',                     // Same warp as business
     },
   },
 
@@ -179,7 +179,7 @@ export const modes = {
       glassBg: 'rgba(255, 255, 255, 0.48)',   // Same glass overlay as public
       glassBorder: 'rgba(255, 255, 255, 0.55)', // Same glass border
       glassBlur: '18px',                       // Standard blur
-      warpDistortion: 8,                       // Same warp as public
+      warpDistortion: '8',                     // Same warp as public
     },
   },
 } as const;
