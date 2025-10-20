@@ -136,44 +136,50 @@ const base: Theme = {
  */
 export const modes = {
   /**
-   * Public mode – dreamy blue vibe, darker canvas for contrast
+   * Public mode – dreamy blue backdrop with soft gradient
+   * Features lighter surfaces and enhanced glass blur for a welcoming feel
    */
   public: {
     colors: {
-      background: 'hsl(222, 84%, 5%)',      // Deep navy canvas
-      surface: 'hsl(222, 58%, 12%)',        // Slightly lifted navy
-      textPrimary: 'hsl(210, 40%, 98%)',    // Near-white text
-      textSecondary: 'hsl(215, 20%, 75%)',  // Soft grey text
-      textTertiary: 'hsl(215, 20%, 65%)',   // Muted grey text
-      accent: 'hsl(202, 72%, 63%)',         // Sky blue accent
-      accentOn: 'hsl(212, 84%, 7%)',        // Dark text on accent
-      border: 'hsl(217, 33%, 18%)',         // Subtle borders
-      focus: 'hsl(202, 72%, 63%)',          // Match accent for focus
+      background: 'hsl(220, 55%, 92%)',       // Soft blue-grey canvas (dreamy)
+      surface: 'hsl(210, 50%, 96%)',          // Very light blue-tinted surface
+      textPrimary: 'hsl(212, 84%, 7%)',       // Deep navy text
+      textSecondary: 'hsl(215, 16%, 47%)',    // Medium grey text
+      textTertiary: 'hsl(215, 20%, 65%)',     // Light grey text
+      accent: 'hsl(202, 72%, 63%)',           // Sky blue accent
+      accentOn: 'hsl(0, 0%, 100%)',           // White text on accent
+      border: 'hsl(210, 30%, 85%)',           // Soft blue-grey borders
+      focus: 'hsl(202, 72%, 63%)',            // Match accent for focus
     },
     effects: {
-      glassBg: 'rgba(255, 255, 255, 0.40)',
-      glassBorder: 'rgba(255, 255, 255, 0.62)',
+      glassBg: 'rgba(255, 255, 255, 0.55)',   // Lighter glass fill
+      glassBorder: 'rgba(255, 255, 255, 0.70)', // Softer glass border
+      glassBlur: '24px',                       // Higher blur for dreamy effect
+      warpDistortion: 8,                       // Same warp as business
     },
   },
 
   /**
-   * Business mode – structured white palette, clean and professional
+   * Business mode – crisp white and neutral surfaces
+   * Professional palette with clean, focused aesthetic
    */
   business: {
     colors: {
-      background: 'hsl(210, 40%, 98%)',     // Light canvas
-      surface: 'hsl(0, 0%, 100%)',          // Pure white surfaces
-      textPrimary: 'hsl(212, 84%, 7%)',     // Near-black text
-      textSecondary: 'hsl(215, 16%, 47%)',  // Medium grey text
-      textTertiary: 'hsl(215, 20%, 65%)',   // Light grey text
-      accent: 'hsl(221, 83%, 53%)',         // Professional blue
-      accentOn: 'hsl(0, 0%, 100%)',         // White on accent
-      border: 'hsl(206, 30%, 85%)',         // Soft borders
-      focus: 'hsl(221, 83%, 53%)',          // Match accent for focus
+      background: 'hsl(0, 0%, 98%)',          // Clean off-white canvas
+      surface: 'hsl(0, 0%, 100%)',            // Pure white surfaces
+      textPrimary: 'hsl(212, 84%, 7%)',       // Near-black text
+      textSecondary: 'hsl(215, 16%, 47%)',    // Medium grey text
+      textTertiary: 'hsl(215, 20%, 65%)',     // Light grey text
+      accent: 'hsl(221, 83%, 53%)',           // Professional blue
+      accentOn: 'hsl(0, 0%, 100%)',           // White on accent
+      border: 'hsl(210, 20%, 88%)',           // Neutral grey borders
+      focus: 'hsl(221, 83%, 53%)',            // Match accent for focus
     },
     effects: {
-      glassBg: 'rgba(255, 255, 255, 0.65)',
-      glassBorder: 'rgba(255, 255, 255, 0.75)',
+      glassBg: 'rgba(255, 255, 255, 0.48)',   // Same glass overlay as public
+      glassBorder: 'rgba(255, 255, 255, 0.55)', // Same glass border
+      glassBlur: '18px',                       // Standard blur
+      warpDistortion: 8,                       // Same warp as public
     },
   },
 } as const;
