@@ -124,6 +124,10 @@ export function Header() {
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/customize')}>
+                      <span className="mr-2 h-4 w-4 flex items-center">🎨</span>
+                      Customize Theme
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
@@ -181,6 +185,10 @@ export function Header() {
                       <Button variant="ghost" onClick={() => navigate('/settings')} className={styles.glassButton}>
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
+                      </Button>
+                      <Button variant="ghost" onClick={() => navigate('/customize')} className={styles.glassButton}>
+                        <span className="mr-2">🎨</span>
+                        Customize Theme
                       </Button>
                       <Button variant="destructive" onClick={handleSignOut} className={styles.glassButton}>
                         <LogOut className="mr-2 h-4 w-4" />

@@ -14,6 +14,7 @@ const OpenIdeaNew = lazy(() => import('@/pages/OpenIdeaNew'));
 const Admin = lazy(() => import('@/pages/Admin'));
 const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
+const Customize = lazy(() => import('@/pages/Customize'));
 
 // Public/landing
 import { Landing } from '@/pages/Landing';
@@ -91,6 +92,14 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     element: (
       <MainLayout>
         <LazyWrapper><Admin /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+  {
+    path: '/customize',
+    element: (
+      <MainLayout>
+        <LazyWrapper><Customize /></LazyWrapper>
       </MainLayout>
     ),
   },
