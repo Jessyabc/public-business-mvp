@@ -57,12 +57,12 @@ export function Explore() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
+        <div className="absolute inset-0 bg-muted/20" />
         <div className="relative px-6 py-16 text-center">
-          <div className="glass-card w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto mb-6 border border-blue-200/30">
+          <div className="glass-card w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 border border-accent/30">
             <Compass className="w-10 h-10 text-blue-600" />
           </div>
           <h1 className="text-4xl font-bold text-slate-900 mb-4">
@@ -167,7 +167,7 @@ export function Explore() {
                     </div>
                     <span>{session.duration}</span>
                   </div>
-                  <Button className="w-full mt-4 glass-card bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 text-white">
+                  <Button className="w-full mt-4">
                     Join Session
                   </Button>
                 </CardContent>

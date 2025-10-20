@@ -120,11 +120,11 @@ export default function Features() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+          <h1 className="text-5xl font-bold text-foreground mb-6">
             Powerful Features for Every User
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
@@ -133,7 +133,7 @@ export default function Features() {
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link to="/auth">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button size="lg">
                 Get Started Free
               </Button>
             </Link>
@@ -166,7 +166,7 @@ export default function Features() {
             {publicFeatures.map((feature, index) => (
               <Card key={index} className="glass-card border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white mb-4">
+                  <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mb-4">
                     {feature.icon}
                   </div>
                   <CardTitle className="text-xl">{feature.title}</CardTitle>
@@ -208,7 +208,7 @@ export default function Features() {
             {businessFeatures.map((feature, index) => (
               <Card key={index} className="glass-card border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white mb-4">
+                  <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mb-4">
                     {feature.icon}
                   </div>
                   <CardTitle className="text-xl">{feature.title}</CardTitle>
@@ -231,7 +231,7 @@ export default function Features() {
       </section>
 
       {/* System Features */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-purple-50">
+      <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
@@ -259,7 +259,7 @@ export default function Features() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-16 px-4 bg-accent">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-3xl font-bold mb-4">
             Ready to Get Started?

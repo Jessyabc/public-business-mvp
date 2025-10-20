@@ -10,8 +10,8 @@ export function BusinessMembership() {
     <div className="min-h-screen p-6 space-y-6">
       <div className="max-w-4xl mx-auto">
         <div className="text-center space-y-4 mb-8">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto border border-blue-200/30">
-            <Users className="w-8 h-8 text-blue-600" />
+          <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto border border-accent/30">
+            <Users className="w-8 h-8 text-accent" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Business Membership</h1>

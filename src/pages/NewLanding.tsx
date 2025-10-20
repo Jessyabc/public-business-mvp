@@ -54,7 +54,7 @@ export function NewLanding() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-3 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-3 bg-background text-foreground overflow-hidden">
         <BackgroundGlow />
 
         {/* Logo */}
@@ -103,7 +103,7 @@ export function NewLanding() {
       <TimelineSection onComplete={() => setShowComposer(true)} />
 
       {/* Composer Section */}
-      <section className="bg-gradient-to-b from-slate-700 to-slate-600">
+      <section className="bg-muted/50">
         <ComposerSection isVisible={showComposer} />
       </section>
 

@@ -81,9 +81,9 @@ export default function ComponentsShowcase() {
     <div className="container mx-auto p-6 max-w-7xl space-y-8">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Components Showcase
-        </h1>
+          <h1 className="text-4xl font-bold text-foreground">
+            Components Showcase
+          </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Comprehensive showcase of all UI components, glass effects, and interactive elements. 
           No authentication required for viewing.

@@ -193,7 +193,7 @@ export default function Industries() {
               className="p-6 hover:scale-105 transition-all duration-300 cursor-pointer group"
               onClick={() => setSelectedIndustry(industry)}
             >
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${industry.gradient} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}>
+              <div className="w-16 h-16 rounded-xl bg-accent flex items-center justify-center text-accent-foreground mb-4 group-hover:scale-110 transition-transform duration-300">
                 {industry.icon}
               </div>
               <h3 className="text-xl font-bold text-ink-base mb-3">
@@ -239,7 +239,7 @@ export default function Industries() {
             <>
               <DialogHeader>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${selectedIndustry.gradient} flex items-center justify-center text-white`}>
+                  <div className="w-16 h-16 rounded-xl bg-accent flex items-center justify-center text-accent-foreground">
                     {selectedIndustry.icon}
                   </div>
                   <div>

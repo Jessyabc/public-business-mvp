@@ -91,9 +91,9 @@ export default function About() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-white to-primary/5">
+      <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-primary via-primary to-primary/80">
+      <section className="py-20 px-4 bg-accent">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             Welcome to Public Business
@@ -164,7 +164,7 @@ export default function About() {
               <h3 className="text-2xl font-bold text-slate-900 mb-6">Our Core Values</h3>
               {values.map((value, index) => (
                 <div key={index} className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
+                  <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground">
                     {value.icon}
                   </div>
                   <div>
@@ -193,7 +193,7 @@ export default function About() {
             {features.map((feature, index) => (
               <Card key={index} className="glass-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
                 <CardHeader>
-                  <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white mb-4">
+                  <div className="w-14 h-14 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mb-4">
                     {feature.icon}
                   </div>
                   <CardTitle className="text-2xl">{feature.title}</CardTitle>
@@ -216,7 +216,7 @@ export default function About() {
       </section>
 
       {/* Meet the Team */}
-      <section className="py-16 px-4 bg-gradient-to-r from-slate-50 to-blue-50">
+      <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="mb-12">
             <Badge variant="default" className="mb-4">
@@ -228,7 +228,7 @@ export default function About() {
           
           <Card className="glass-card border-0 shadow-xl max-w-2xl mx-auto">
             <CardContent className="p-8">
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
+              <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-accent-foreground text-2xl font-bold mx-auto mb-6">
                 JB
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-2">Jessy Alexander Beaudoin</h3>
@@ -305,7 +305,7 @@ export default function About() {
             {whyChooseUs.map((item, index) => (
               <Card key={index} className="glass-card border-0 shadow-lg hover:shadow-xl transition-all duration-300 text-center">
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white mx-auto mb-4">
+                  <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mx-auto mb-4">
                     {item.icon}
                   </div>
                   <h3 className="font-semibold text-slate-900 mb-3">{item.title}</h3>
@@ -318,7 +318,7 @@ export default function About() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-16 px-4 bg-accent">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-4xl font-bold mb-6">
             Ready to Join the Future of Business Innovation?

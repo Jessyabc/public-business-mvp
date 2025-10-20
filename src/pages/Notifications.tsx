@@ -11,11 +11,7 @@ const Notifications = () => {
 
   return (
     <ProtectedRoute requireAuth={true}>
-      <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
-        mode === 'public' 
-          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
-      }`}>
+      <div className="min-h-screen p-6 pb-32 bg-background">
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
           <div className={`glass-card rounded-3xl p-8 backdrop-blur-xl transition-all duration-700 ${

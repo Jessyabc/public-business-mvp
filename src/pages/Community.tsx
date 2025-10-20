@@ -90,12 +90,12 @@ export function Community() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10" />
+        <div className="absolute inset-0 bg-muted/20" />
         <div className="relative px-6 py-16 text-center">
-          <div className="glass-card w-20 h-20 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center mx-auto mb-6 border border-purple-200/30">
+          <div className="glass-card w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 border border-accent/30">
             <Users className="w-10 h-10 text-purple-600" />
           </div>
           <h1 className="text-4xl font-bold text-slate-900 mb-4">
@@ -260,7 +260,7 @@ export function Community() {
                     </div>
                   </div>
                 ))}
-                <Button className="w-full glass-card bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0 text-white">
+                <Button className="w-full">
                   View All Events
                 </Button>
               </CardContent>
