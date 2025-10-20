@@ -14,13 +14,13 @@ export function BrainstormPreview({ onExplore }: BrainstormPreviewProps) {
   const getCardStyle = (type: string) => {
     switch (type) {
       case 'Spark':
-        return 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20';
+        return 'bg-accent/10 border-accent/20';
       case 'Threadline':
-        return 'bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20';
+        return 'bg-primary/10 border-primary/20';
       case 'Echo Note':
-        return 'bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20';
+        return 'bg-muted/50 border-border';
       default:
-        return 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20';
+        return 'bg-surface border-border';
     }
   };
 
