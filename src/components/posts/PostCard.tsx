@@ -123,7 +123,7 @@ export function PostCard({ post, className, onClick }: PostCardProps) {
         "backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)]",
         "border border-[var(--glass-border)]",
         "transition-all duration-300 ease-out",
-        "hover:transform hover:-translate-y-1 hover:shadow-xl",
+        "hover:transform hover:-translate-y-1 elevation-4 hover:elevation-16",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pb-blue focus-visible:ring-offset-2",
         "cursor-pointer",
         className

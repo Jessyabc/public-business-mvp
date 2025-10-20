@@ -62,7 +62,7 @@ export function RightSidebar() {
         </TabsList>
 
         <TabsContent value="ideas" className="flex flex-col h-[calc(100%-3rem)]">
-          <Card className="mb-2 bg-transparent border-transparent shadow-none">
+          <Card className="mb-2 bg-transparent border-transparent shadow-none elevation-0">
             <CardHeader className="py-2">
               <CardTitle className="text-sm opacity-80">Open Ideas (public)</CardTitle>
             </CardHeader>
@@ -100,7 +100,7 @@ export function RightSidebar() {
         </TabsContent>
 
         <TabsContent value="history" className="flex flex-col h-[calc(100%-3rem)]">
-          <Card className="mb-2 bg-transparent border-transparent shadow-none">
+          <Card className="mb-2 bg-transparent border-transparent shadow-none elevation-0">
             <CardHeader className="py-2">
               <CardTitle className="text-sm opacity-80">Recent activity</CardTitle>
             </CardHeader>

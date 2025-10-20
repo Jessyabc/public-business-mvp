@@ -18,7 +18,7 @@ export function BrainstormCard({ brainstorm, stats, onClick, className }: Brains
 
   return (
     <Card 
-      className={`cursor-pointer hover:shadow-md transition-shadow ${className}`}
+      className={`cursor-pointer elevation-4 hover:elevation-8 transition-shadow ${className}`}
       onClick={onClick}
     >
       <CardHeader className="pb-3">

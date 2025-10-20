@@ -46,8 +46,8 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
 
   return (
     <div className={cn(
-      "glass-business-card p-6 transition-all duration-300 hover:shadow-lg relative group",
-      post.isHighlighted && "ring-2 ring-primary/30 shadow-primary/20"
+      "glass-business-card p-6 transition-all duration-300 elevation-4 hover:elevation-16 relative group",
+      post.isHighlighted && "ring-2 ring-primary/30"
     )}>
       {/* Highlight glow for linked posts */}
       {post.isHighlighted && (

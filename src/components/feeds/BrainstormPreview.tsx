@@ -38,7 +38,7 @@ export function BrainstormPreview({ onExplore }: BrainstormPreviewProps) {
   };
 
   return (
-    <Card className="glass-card border-0 shadow-xl">
+    <Card className="glass-card border-0 elevation-16">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3 mb-2">
           <Network className="w-6 h-6 text-primary" />

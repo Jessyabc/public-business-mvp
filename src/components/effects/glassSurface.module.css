@@ -8,7 +8,6 @@
 .glassSurface {
   --glass-layer-bg: var(--glass-fill);
   --glass-layer-border: var(--glass-border);
-  --glass-layer-shadow: var(--elevation-4);
   --glass-layer-blur: calc(var(--glass-blur) * 0.55);
   
   position: relative;
@@ -16,7 +15,7 @@
   color: var(--text-primary);
   background: var(--glass-layer-bg);
   border: 1px solid var(--glass-layer-border);
-  box-shadow: var(--glass-layer-shadow);
+  box-shadow: var(--elevation-4);
   background-clip: padding-box;
   border-radius: var(--radius-md);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -38,6 +37,14 @@
 
 .glassSurface:hover {
   box-shadow: var(--elevation-8);
+}
+
+.glassSurface.elevated {
+  box-shadow: var(--elevation-8);
+}
+
+.glassSurface.elevated:hover {
+  box-shadow: var(--elevation-16);
 }
 
 .glassSurface:focus-visible {

@@ -130,7 +130,7 @@ export function TimelineSection({ onComplete }: TimelineSectionProps) {
               {/* Timeline dot */}
               <div className={`absolute left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full transition-all duration-500 ${
                 visibleNodes.has(node.id) 
-                  ? 'bg-pb-blue scale-125 shadow-lg shadow-pb-blue/30' 
+                  ? 'bg-pb-blue scale-125 elevation-16' 
                   : 'bg-pb-blue/30 scale-100'
               }`}></div>
               

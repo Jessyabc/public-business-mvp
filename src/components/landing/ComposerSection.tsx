@@ -291,7 +291,7 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
               <Button
                 type="submit"
                 disabled={isSubmitting || content.length < MIN_CHARS || content.length > MAX_CHARS}
-                className="w-full bg-pb-blue text-white shadow-pbmd hover:shadow-pblg h-12 text-lg font-medium"
+                className="w-full bg-pb-blue text-white elevation-4 hover:elevation-8 h-12 text-lg font-medium"
               >
                 {isSubmitting ? 'Sharing Spark...' : 'Share Spark'}
               </Button>

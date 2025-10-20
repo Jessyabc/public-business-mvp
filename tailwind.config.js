@@ -17,16 +17,6 @@ const pbColors = {
   focus: theme.colors.focus,
 };
 
-// Map elevation scale to boxShadow utilities
-const elevationShadows = {
-  'elevation-1': theme.elevation[1],
-  'elevation-2': theme.elevation[2],
-  'elevation-4': theme.elevation[4],
-  'elevation-8': theme.elevation[8],
-  'elevation-16': theme.elevation[16],
-  'elevation-24': theme.elevation[24],
-};
-
 // Border radii scale
 const pbRadii = {
   'pb-sm': theme.radii.sm,
@@ -34,6 +24,21 @@ const pbRadii = {
   'pb-lg': theme.radii.lg,
   'pb-xl': theme.radii.xl,
 };
+
+/**
+ * Elevation Plugin
+ * Generates elevation-1 through elevation-24 utility classes.
+ * Each class uses the CSS variable injected by ThemeInjector at runtime.
+ */
+function elevationPlugin({ addUtilities }) {
+  const elevations = {};
+  for (let i = 1; i <= 24; i++) {
+    elevations[`.elevation-${i}`] = { 
+      boxShadow: `var(--elevation-${i})` 
+    };
+  }
+  addUtilities(elevations);
+}
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -52,11 +57,8 @@ export default {
         pb: pbColors,
       },
       boxShadow: {
-        // Legacy glass shadow
+        // Legacy glass shadow (deprecated, use elevation classes)
         glass: "0 8px 32px rgba(0,0,0,0.35)",
-        
-        // Elevation scale
-        ...elevationShadows,
       },
       borderRadius: {
         // PB-specific radii
@@ -73,6 +75,9 @@ export default {
     }
   },
   plugins: [
+    // Elevation utilities (elevation-1 through elevation-24)
+    elevationPlugin,
+    
     // Enable data-theme attribute variants
     function({ addVariant }) {
       addVariant('theme-public', '[data-theme="public"] &');

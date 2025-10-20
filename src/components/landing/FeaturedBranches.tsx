@@ -92,7 +92,7 @@ export function FeaturedBranches() {
             {displayBrainstorms.map((brainstorm, index) => (
               <div
                 key={brainstorm.id}
-                className="glass-card p-6 cursor-pointer hover:shadow-pblg transition-all duration-200"
+                className="glass-card p-6 cursor-pointer elevation-4 hover:elevation-8 transition-all duration-200"
                 onClick={() => handleCardClick(brainstorm)}
               >
                 <div className="scrim" />

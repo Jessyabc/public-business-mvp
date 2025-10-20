@@ -99,7 +99,7 @@ export function Header() {
                   <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="bg-white/80 text-ink-base border border-black/10 hover:bg-white/90">
                     Login
                   </Button>
-                  <Button onClick={() => setShowAuthModal(true)} className="bg-pb-blue text-white shadow-pbmd hover:shadow-pblg">
+                  <Button onClick={() => setShowAuthModal(true)} className="bg-pb-blue text-white elevation-4 hover:elevation-8">
                     Sign Up
                   </Button>
                 </>
