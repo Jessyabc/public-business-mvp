@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
@@ -23,7 +22,6 @@ export function DeveloperPanel() {
   const [selectorInput, setSelectorInput] = useState('');
   const [probeResult, setProbeResult] = useState<SelectorProbeResult | null>(null);
   const { mode, setMode } = useAppMode();
-  const navigate = useNavigate();
   const { isAdmin } = useUserRoles();
   
   const isDev = import.meta.env.DEV;
@@ -416,7 +414,7 @@ export function DeveloperPanel() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {showCustomizeButton && (
           <button
-            onClick={() => navigate('/customize')}
+            onClick={() => window.location.href = '/customize'}
             style={{
               width: '100%',
               padding: '8px',
