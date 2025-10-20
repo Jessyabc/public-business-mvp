@@ -7,14 +7,11 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 /** Layered animated glows for contrast behind dark UI */
 function BackgroundGlow() {
   return (
-    <div
-      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-      aria-hidden="true"
-    >
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
       {/* Center radial behind logo/headline */}
       <div
         className="
-          absolute left-1/2 top-[15%] -translate-x-1/2 -translate-y-1/2
+          absolute left-1/2 top-[0%] -translate-x-1/2 -translate-y-1/2
           w=[130vw] h=[130vw]
           bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),rgba(56,189,248,0.40)_18%,rgba(99,102,241,0.32)_36%,transparent_64%)]
           blur-[140px] opacity-90 mix-blend-screen
@@ -87,8 +84,7 @@ export function NewLanding() {
             [text-shadow:0_0_10px_rgba(255,255,255,0.10)]
           "
         >
-          Share your thoughts. Watch them evolve through collaboration. Build
-          something meaningful together.
+          Share your thoughts. Watch them evolve through collaboration. Build something meaningful together.
         </p>
 
         {/* Scroll indicator */}
@@ -111,9 +107,7 @@ export function NewLanding() {
       <section className="bg-slate-600 py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Featured Branches
-            </h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Featured Branches</h2>
             <p className="text-xl text-white/85 max-w-2xl mx-auto">
               See how ideas are already blossoming into collaboration
             </p>
@@ -126,9 +120,7 @@ export function NewLanding() {
       {/* Final CTA */}
       <section className="bg-accent/10 py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-8">
-            Ready to Start Collaborating?
-          </h2>
+          <h2 className="text-4xl font-bold text-white mb-8">Ready to Start Collaborating?</h2>
           <p className="text-xl text-white/85 mb-12">
             Join the community and turn your sparks into meaningful connections.
           </p>
@@ -137,4 +129,3 @@ export function NewLanding() {
     </div>
   );
 }
-
