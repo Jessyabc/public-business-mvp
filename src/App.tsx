@@ -6,6 +6,7 @@ import { RouterProvider } from "react-router-dom";
 import { AppModeProvider } from "@/contexts/AppModeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackgroundModeManager } from "@/components/layout/BackgroundModeManager";
+import { ThemeInjector } from "@/styles/ThemeInjector";
 import { router } from "./app/router";
 import { RightSidebar } from "@/components/layout/RightSidebar";
 import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
@@ -20,6 +21,7 @@ const App = () => (
       <AuthProvider>
         <AppModeProvider>
           <BackgroundModeManager />
+          <ThemeInjector />
           <div className="page-shell">
             <main className="page-content">
               <RouterProvider router={router} />
