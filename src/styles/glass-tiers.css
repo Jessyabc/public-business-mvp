@@ -21,32 +21,95 @@
   -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
-/* Admin glow effect - iridescent animated border */
+/* Admin glow effect - iridescent animated border with token-based colors */
+:root {
+  --admin-glow-primary: hsl(var(--primary));
+  --admin-glow-accent: hsl(var(--accent));
+  --admin-glow-secondary: hsl(206, 74%, 59%); /* fallback blue */
+}
+
 @keyframes admin-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(72, 159, 227, 0.6),
-                0 0 40px rgba(167, 200, 255, 0.4),
-                inset 0 0 20px rgba(72, 159, 227, 0.2);
-    border-color: rgba(72, 159, 227, 0.8);
+    box-shadow: 
+      0 0 20px color-mix(in srgb, var(--admin-glow-primary) 60%, transparent),
+      0 0 40px color-mix(in srgb, var(--admin-glow-primary) 40%, transparent),
+      inset 0 0 20px color-mix(in srgb, var(--admin-glow-primary) 20%, transparent);
+    border-color: color-mix(in srgb, var(--admin-glow-primary) 80%, transparent);
   }
   33% {
-    box-shadow: 0 0 25px rgba(139, 92, 246, 0.6),
-                0 0 45px rgba(167, 139, 250, 0.4),
-                inset 0 0 20px rgba(139, 92, 246, 0.2);
-    border-color: rgba(139, 92, 246, 0.8);
+    box-shadow: 
+      0 0 25px color-mix(in srgb, var(--admin-glow-accent) 60%, transparent),
+      0 0 45px color-mix(in srgb, var(--admin-glow-accent) 40%, transparent),
+      inset 0 0 20px color-mix(in srgb, var(--admin-glow-accent) 20%, transparent);
+    border-color: color-mix(in srgb, var(--admin-glow-accent) 80%, transparent);
   }
   66% {
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6),
-                0 0 45px rgba(147, 197, 253, 0.4),
-                inset 0 0 20px rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.8);
+    box-shadow: 
+      0 0 25px color-mix(in srgb, var(--admin-glow-secondary) 60%, transparent),
+      0 0 45px color-mix(in srgb, var(--admin-glow-secondary) 40%, transparent),
+      inset 0 0 20px color-mix(in srgb, var(--admin-glow-secondary) 20%, transparent);
+    border-color: color-mix(in srgb, var(--admin-glow-secondary) 80%, transparent);
+  }
+}
+
+/* Fallback for browsers without color-mix support */
+@supports not (color: color-mix(in srgb, white, black)) {
+  @keyframes admin-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(72, 159, 227, 0.6),
+                  0 0 40px rgba(167, 200, 255, 0.4),
+                  inset 0 0 20px rgba(72, 159, 227, 0.2);
+      border-color: rgba(72, 159, 227, 0.8);
+    }
+    33% {
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.6),
+                  0 0 45px rgba(167, 139, 250, 0.4),
+                  inset 0 0 20px rgba(139, 92, 246, 0.2);
+      border-color: rgba(139, 92, 246, 0.8);
+    }
+    66% {
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.6),
+                  0 0 45px rgba(147, 197, 253, 0.4),
+                  inset 0 0 20px rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.8);
+    }
   }
 }
 
 .admin-glow {
   position: relative;
-  border: 2px solid rgba(72, 159, 227, 0.6);
+  border: 2px solid color-mix(in srgb, var(--admin-glow-primary) 60%, transparent);
   animation: admin-glow 3s ease-in-out infinite;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .admin-glow,
+.dark .admin-glow {
+  --admin-glow-primary: hsl(206, 74%, 65%);
+  --admin-glow-accent: hsl(250, 84%, 70%);
+  --admin-glow-secondary: hsl(206, 84%, 65%);
+}
+
+/* Reduced motion: disable animation, keep static glow */
+@media (prefers-reduced-motion: reduce) {
+  .admin-glow {
+    animation: none;
+    box-shadow: 
+      0 0 15px color-mix(in srgb, var(--admin-glow-primary) 50%, transparent),
+      0 0 30px color-mix(in srgb, var(--admin-glow-primary) 30%, transparent),
+      inset 0 0 15px color-mix(in srgb, var(--admin-glow-primary) 15%, transparent);
+    border-color: color-mix(in srgb, var(--admin-glow-primary) 70%, transparent);
+  }
+  
+  /* Fallback for browsers without color-mix */
+  @supports not (color: color-mix(in srgb, white, black)) {
+    .admin-glow {
+      box-shadow: 0 0 15px rgba(72, 159, 227, 0.5),
+                  0 0 30px rgba(167, 200, 255, 0.3),
+                  inset 0 0 15px rgba(72, 159, 227, 0.15);
+      border-color: rgba(72, 159, 227, 0.7);
+    }
+  }
 }
 
 /* Subtle glass outline on hover/focus for nav icons */
