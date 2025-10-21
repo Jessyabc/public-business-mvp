@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
-import { Lightbulb, Settings } from "lucide-react";
-import styles from "@/components/effects/glassSurface.module.css";
+import { Lightbulb, Lock } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface OpenIdea {
   id: string;
@@ -18,15 +20,19 @@ interface OpenIdea {
 export function Admin() {
   const [ideas, setIdeas] = useState<OpenIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin: checkAdmin, loading: rolesLoading } = useUserRoles();
+  const navigate = useNavigate();
+
+  const isAdminUser = checkAdmin();
+  const loading = authLoading || rolesLoading;
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!loading && user && isAdminUser) {
       fetchIdeas();
     }
-  }, [isAuthenticated]);
+  }, [loading, user, isAdminUser]);
 
   const fetchIdeas = async () => {
     try {
@@ -90,53 +96,64 @@ export function Admin() {
     }
   };
 
-  const handleLogin = () => {
-    // Simple password check - in production, use proper authentication
-    if (password === "admin123") {
-      setIsAuthenticated(true);
-      toast({
-        title: "Welcome",
-        description: "Admin access granted.",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Invalid password.",
-        variant: "destructive",
-      });
-    }
-  };
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
-  if (!isAuthenticated) {
+  // Require authentication
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
 
         <GlassCard className="max-w-md w-full glass-card glass-content" padding="lg">
           <div className="text-center mb-6">
-            <Settings className="w-16 h-16 text-pb-blue mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-pb-text0">Admin Access</h1>
-            <p className="text-pb-text2">Enter password to manage curated ideas</p>
+            <Lock className="w-16 h-16 text-primary mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground">Authentication Required</h1>
+            <p className="text-muted-foreground">Please sign in to access the admin panel</p>
           </div>
           
-          <div className="space-y-4">
-            <input
-              type="password"
-              placeholder="Admin password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-xl glass-input border border-pb-blue/20 bg-transparent text-pb-text0 placeholder:text-pb-text2"
-              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-            />
-            <Button
-              onClick={handleLogin}
-              className={`w-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass`}
-            >
-              Access Admin Panel
-            </Button>
+          <Button
+            onClick={() => navigate('/auth')}
+            className="w-full"
+          >
+            Sign In
+          </Button>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  // Require admin role
+  if (!isAdminUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-destructive/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-destructive/10 rounded-full blur-3xl"></div>
+
+        <GlassCard className="max-w-md w-full glass-card glass-content" padding="lg">
+          <div className="text-center mb-6">
+            <Lock className="w-16 h-16 text-destructive mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
+            <p className="text-muted-foreground">You don't have permission to access this page</p>
           </div>
+          
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="w-full"
+          >
+            Return Home
+          </Button>
         </GlassCard>
       </div>
     );
