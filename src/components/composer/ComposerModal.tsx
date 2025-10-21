@@ -301,10 +301,10 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className={`backdrop-blur-xl max-w-lg border ${
+      <DialogContent className={`glass-med glass-modal-enhanced max-w-lg border ${
         mode === 'public' 
-          ? 'bg-black/20 border-white/20' 
-          : 'glass-business border-slate-500/30'
+          ? 'bg-background/80 border-border/40' 
+          : 'bg-card/80 border-border/40'
       }`}>
         <DialogHeader>
           <DialogTitle className="sr-only">Create New Content</DialogTitle>

@@ -8,7 +8,8 @@ import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, ToggleLeft, Sparkles, Plus } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
-import { BrainstormPreview } from "@/components/feeds/BrainstormPreview";
+import { LiveBrainstormPreview } from "@/components/feeds/LiveBrainstormPreview";
+import { AccordionPostCard } from "@/components/feeds/AccordionPostCard";
 import { useNavigate } from "react-router-dom";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -115,7 +116,7 @@ export function BusinessFeed() {
 
       {/* Fixed Header */}
       <header className="shrink-0 p-6 pb-4 relative z-10">
-        <div className="glass-business-header rounded-3xl p-6 backdrop-blur-xl max-w-4xl mx-auto">
+        <div className="glass-business-header glass-high rounded-3xl p-6 backdrop-blur-xl max-w-4xl mx-auto">
           {/* Top bar with title */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -206,19 +207,15 @@ export function BusinessFeed() {
               <>
                 {filteredPosts.map((post, index) => (
                   <div 
-                    key={post.id} 
-                    className="transform hover:scale-[1.01] transition-transform duration-200"
+                    key={post.id}
                     ref={index === filteredPosts.length - 1 ? lastPostRef : undefined}
                   >
-                    {/* Temporary simple card until proper business post mapping is implemented */}
-                    <div className="glass-business-card rounded-2xl p-6 mb-4">
-                      <h3 className="text-lg font-semibold text-foreground mb-2">{post.title}</h3>
-                      <p className="text-muted-foreground mb-4 line-clamp-3">{post.content}</p>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>T-Score: {post.t_score || 'N/A'}</span>
-                        <span>Views: {post.views_count || 0}</span>
-                      </div>
-                    </div>
+                    <AccordionPostCard
+                      post={post}
+                      onView={handleViewPost}
+                      onSave={handleSavePost}
+                      onShare={(postId) => console.log("Share post:", postId)}
+                    />
                   </div>
                 ))}
                 
@@ -244,9 +241,9 @@ export function BusinessFeed() {
             )}
           </div>
 
-          {/* Brainstorm Network Preview */}
+          {/* Live Brainstorm Network Preview */}
           <div className="mt-8">
-            <BrainstormPreview onExplore={() => navigate("/")} />
+            <LiveBrainstormPreview onExplore={() => navigate("/")} />
           </div>
         </div>
       </div>

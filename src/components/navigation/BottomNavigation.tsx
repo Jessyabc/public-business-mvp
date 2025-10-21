@@ -35,23 +35,20 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-slow ease-pb">
-      <div className="glass-card rounded-full px-4 py-3 glass-content">
+      <div className={`glass-card rounded-full px-4 py-3 glass-content glass-high ${isAdmin() ? 'admin-glow' : ''}`}>
         <div className="flex items-center space-x-3">
-          {/* Business Member Badge */}
+          {/* Business Member Badge - Icon only, admin glow indicates status */}
           {isBusinessMemberRole && (
-            <div className="flex items-center gap-2">
-              <BusinessMemberBadge className="text-xs" />
-              <NavLink
-                to="/business-dashboard"
-                className={`flex items-center px-2 py-1 rounded-lg transition-all duration-med ${
-                  location.pathname === '/business-dashboard'
-                    ? 'bg-pb-blue/20 text-pb-blue'
-                    : 'hover:bg-white/10 text-pb-text2 hover:text-pb-text0'
-                }`}
-              >
-                <Building2 className="w-4 h-4" />
-              </NavLink>
-            </div>
+            <NavLink
+              to="/business-dashboard"
+              className={`flex items-center px-2 py-1 rounded-lg transition-all duration-med glass-nav-item ${
+                location.pathname === '/business-dashboard'
+                  ? 'bg-pb-blue/20 text-pb-blue'
+                  : 'hover:bg-white/10 text-pb-text2 hover:text-pb-text0'
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+            </NavLink>
           )}
 
           {/* Mode Toggle */}
@@ -75,8 +72,8 @@ export function BottomNavigation() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`relative flex flex-col items-center space-y-1 px-2 py-2 rounded-xl transition-all duration-med ${
-                  isActive ? 'glass-nav-item bg-pb-blue/20 text-pb-blue' : 'text-pb-text2 hover:text-pb-text0 hover:bg-white/10'
+                className={`relative flex flex-col items-center space-y-1 px-2 py-2 rounded-xl transition-all duration-med glass-nav-item ${
+                  isActive ? 'bg-pb-blue/20 text-pb-blue' : 'text-pb-text2 hover:text-pb-text0 hover:bg-white/10'
                 }`}
               >
                 <IconComponent className="w-4 h-4 transition-all duration-med" />
