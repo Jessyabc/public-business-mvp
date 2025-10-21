@@ -35,32 +35,28 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-slow ease-pb max-w-[95vw] sm:max-w-none">
-      <div className={`glass-card rounded-full px-2 sm:px-4 py-2 sm:py-3 glass-content glass-high overflow-x-auto ${isAdmin() ? 'admin-glow' : ''}`}>
+      <div className={`glass-card rounded-full px-2 sm:px-4 py-2 sm:py-3 glass-content glass-high overflow-x-auto border-2 border-white/20 ${isAdmin() ? 'admin-glow' : ''}`}>
         <div className="flex items-center space-x-1 sm:space-x-3 min-w-max">
-          {/* Business Member Badge - Icon only, admin glow indicates status */}
-          {isBusinessMemberRole && (
-            <NavLink
-              to="/business-dashboard"
-              className={`flex items-center px-2 py-1 rounded-lg transition-all duration-med glass-nav-item ${
-                location.pathname === '/business-dashboard'
-                  ? 'bg-pb-blue/20 text-pb-blue'
-                  : 'hover:bg-white/10 text-pb-text2 hover:text-pb-text0'
-              }`}
-            >
-              <Building2 className="w-4 h-4" />
-            </NavLink>
-          )}
-
-          {/* Mode Toggle */}
-          <button onClick={toggleMode} className={`${styles.glassButton} glass-nav-item px-2 sm:px-3`}>
+          {/* Mode Toggle - only show one control */}
+          <button 
+            onClick={toggleMode} 
+            className={`${styles.glassButton} glass-nav-item px-2 sm:px-3 flex items-center gap-1 sm:gap-2`}
+          >
             {mode === 'public' ? (
-              <Home className="w-4 h-4 text-pb-blue transition-all duration-med" />
+              <>
+                <Home className="w-4 h-4 text-pb-blue transition-all duration-med" />
+                <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline">
+                  Public
+                </span>
+              </>
             ) : (
-              <Building2 className="w-4 h-4 text-pb-blue transition-all duration-med" />
+              <>
+                <Building2 className="w-4 h-4 text-pb-blue transition-all duration-med" />
+                <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline">
+                  Business
+                </span>
+              </>
             )}
-            <span className="text-xs font-medium text-pb-blue transition-all duration-med ml-1 sm:ml-2 hidden xs:inline">
-              {mode === 'public' ? 'Public' : 'Business'}
-            </span>
           </button>
 
           {/* Navigation Items */}
