@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,12 +11,11 @@ import { FeedsAdapter, type FeedItem, type HistoryItem } from '@/adapters/feedsA
 import { SHOW_RIGHT_SIDEBAR } from '@/config/flags';
 import styles from '@/components/effects/glassSurface.module.css';
 import { useAppMode } from '@/contexts/AppModeContext';
-import { usePosts } from '@/hooks/usePosts';
+import { LiveBrainstormWindow } from '@/components/brainstorm/LiveBrainstormWindow';
 
 export function RightSidebar() {
   const showSidebar = SHOW_RIGHT_SIDEBAR;
   const { mode } = useAppMode();
-  const { posts } = usePosts();
   
   const adapter = useMemo(() => new FeedsAdapter(), []);
   const [ideas, setIdeas] = useState<FeedItem[]>([]);
@@ -23,10 +23,7 @@ export function RightSidebar() {
   const [loadingIdeas, setLoadingIdeas] = useState(true);
   const [loadingHist, setLoadingHist] = useState(true);
   const [visible, setVisible] = useState({ ideas: 12 });
-  const [showBusinessPreview, setShowBusinessPreview] = useState(false);
-  
-  // Get business posts for preview
-  const businessPosts = posts.filter(p => p.mode === 'business').slice(0, 3);
+  const [showBrainstormPreview, setShowBrainstormPreview] = useState(false);
 
   useEffect(() => {
     if (!showSidebar) {
@@ -65,44 +62,45 @@ export function RightSidebar() {
     <aside className="right-sidebar-overlay glass-card glass-med p-3"
       aria-label="Right sidebar overlay"
     >
-      {/* Business Feed Preview Toggle */}
-      {mode === 'public' && (
+      {/* Brainstorm Feed Preview Toggle */}
+      {mode === 'business' && (
         <div className="mb-3">
           <Button
-            onClick={() => setShowBusinessPreview(!showBusinessPreview)}
+            onClick={() => setShowBrainstormPreview(!showBrainstormPreview)}
             variant="outline"
             size="sm"
-            className="w-full glass-low justify-between"
+            className="w-full glass-low justify-between focus-visible:ring-2 focus-visible:ring-primary"
+            aria-expanded={showBrainstormPreview}
+            aria-label="Toggle brainstorm preview"
           >
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
-              <span className="text-sm">Business Feed Preview</span>
+              <span className="text-sm">Brainstorm Feed Preview</span>
             </div>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showBusinessPreview ? 'rotate-180' : ''}`} />
+            <motion.div
+              animate={{ rotate: showBrainstormPreview ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown className="w-4 h-4" />
+            </motion.div>
           </Button>
           
-          {showBusinessPreview && (
-            <div className="mt-2 space-y-2 accordion-content expanded">
-              <div className="text-xs text-muted-foreground px-2 pb-1 border-b border-border/40">
-                Latest Business Insights
-              </div>
-              {businessPosts.length === 0 ? (
-                <div className="text-xs text-muted-foreground p-2">No business posts yet</div>
-              ) : (
-                businessPosts.map((post) => (
-                  <Card key={post.id} className={`${styles.glassSurface} glass-low cursor-pointer`}>
-                    <CardContent className="p-3">
-                      <div className="text-sm font-medium line-clamp-2">{post.title || post.content}</div>
-                      <div className="mt-1 text-xs text-muted-foreground flex items-center justify-between">
-                        <span>T-Score: {post.t_score || 'N/A'}</span>
-                        <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          )}
+          <AnimatePresence>
+            {showBrainstormPreview && (
+              <motion.div
+                initial={{ height: 0, opacity: 0, y: -10 }}
+                animate={{ height: 'auto', opacity: 1, y: 0 }}
+                exit={{ height: 0, opacity: 0, y: -10 }}
+                transition={{ 
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+                className="overflow-hidden mt-2"
+              >
+                <LiveBrainstormWindow dense className="!p-3" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
       

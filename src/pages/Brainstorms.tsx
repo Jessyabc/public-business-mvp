@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-import { BrainstormCard } from '@/components/brainstorms/BrainstormCard';
+import { AccordionCard } from '@/components/posts/AccordionCard';
 import { useBrainstorms, useBrainstormStats } from '@/hooks/useBrainstorms';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -17,6 +17,7 @@ export default function Brainstorms() {
   const debouncedSearch = useDebounce(search, 500);
   
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { brainstorms, loading, fetchBrainstorms } = useBrainstorms();
   const { stats, fetchStats } = useBrainstormStats();
 
@@ -104,14 +105,23 @@ export default function Brainstorms() {
               )}
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
               {brainstorms.map((brainstorm) => (
-                <Link key={brainstorm.id} to={`/brainstorms/${brainstorm.id}`}>
-                  <BrainstormCard
-                    brainstorm={brainstorm}
-                    stats={stats[brainstorm.id]}
-                  />
-                </Link>
+                <AccordionCard
+                  key={brainstorm.id}
+                  post={{
+                    id: brainstorm.id,
+                    title: brainstorm.title,
+                    content: brainstorm.content,
+                    created_at: brainstorm.created_at,
+                    mode: 'public',
+                    likes_count: stats[brainstorm.id]?.likes_count || 0,
+                    views_count: stats[brainstorm.id]?.comments_count || 0,
+                  }}
+                  onView={(id) => navigate(`/brainstorms/${id}`)}
+                  onSave={(id) => console.log('Save brainstorm:', id)}
+                  onShare={(id) => console.log('Share brainstorm:', id)}
+                />
               ))}
             </div>
           )}

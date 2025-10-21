@@ -8,8 +8,8 @@ import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, ToggleLeft, Sparkles, Plus } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
-import { LiveBrainstormPreview } from "@/components/feeds/LiveBrainstormPreview";
-import { AccordionPostCard } from "@/components/feeds/AccordionPostCard";
+import { LiveBrainstormWindow } from "@/components/brainstorm/LiveBrainstormWindow";
+import { AccordionCard } from "@/components/posts/AccordionCard";
 import { useNavigate } from "react-router-dom";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -210,7 +210,7 @@ export function BusinessFeed() {
                     key={post.id}
                     ref={index === filteredPosts.length - 1 ? lastPostRef : undefined}
                   >
-                    <AccordionPostCard
+                    <AccordionCard
                       post={post}
                       onView={handleViewPost}
                       onSave={handleSavePost}
@@ -241,9 +241,9 @@ export function BusinessFeed() {
             )}
           </div>
 
-          {/* Live Brainstorm Network Preview */}
+          {/* Live Brainstorm Window */}
           <div className="mt-8">
-            <LiveBrainstormPreview onExplore={() => navigate("/")} />
+            <LiveBrainstormWindow />
           </div>
         </div>
       </div>
