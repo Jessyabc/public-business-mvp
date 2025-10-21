@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { Button } from '@/components/ui/button';
-import { ToggleLeft, User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Search, Plus } from 'lucide-react';
+import { ToggleLeft, User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Search, Plus, Palette } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -202,6 +202,11 @@ export function GlobalNavigationMenu() {
               <DropdownMenuItem onClick={() => navigate('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => navigate('/customize')}>
+                <Palette className="mr-2 h-4 w-4" />
+                <span>Customize Theme</span>
               </DropdownMenuItem>
               
               {isAdmin() && (
