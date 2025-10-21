@@ -269,11 +269,11 @@ export default function Customize() {
   const currentSettings = settings[editingMode];
 
   return (
-    <div className="min-h-screen p-6 bg-background">
+    <div className="min-h-screen p-4 sm:p-6 bg-background pb-24">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Theme Customization</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Theme Customization</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Customize your application's appearance with live preview
           </p>
         </div>
@@ -285,18 +285,18 @@ export default function Customize() {
             <CardDescription>Switch between Public and Business themes</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 onClick={() => handleModeSwitch('public')}
                 variant={editingMode === 'public' ? 'default' : 'outline'}
-                className="flex-1"
+                className="flex-1 w-full"
               >
                 Public Mode
               </Button>
               <Button
                 onClick={() => handleModeSwitch('business')}
                 variant={editingMode === 'business' ? 'default' : 'outline'}
-                className="flex-1"
+                className="flex-1 w-full"
               >
                 Business Mode
               </Button>
@@ -305,30 +305,35 @@ export default function Customize() {
         </Card>
 
         {/* Actions */}
-        <div className="flex gap-4 mb-6">
-          <Button onClick={handlePreview} variant="outline" className="gap-2">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+          <Button onClick={handlePreview} variant="outline" className="gap-2 w-full sm:w-auto">
             <Eye className="w-4 h-4" />
-            Preview Locally
+            <span className="hidden sm:inline">Preview Locally</span>
+            <span className="sm:hidden">Preview</span>
           </Button>
-          <Button onClick={handleSaveToAccount} disabled={saving} className="gap-2">
+          <Button onClick={handleSaveToAccount} disabled={saving} className="gap-2 w-full sm:w-auto">
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save to Account'}
           </Button>
-          <Button onClick={handleRevert} variant="destructive" className="gap-2">
+          <Button onClick={handleRevert} variant="destructive" className="gap-2 w-full sm:w-auto">
             <RotateCcw className="w-4 h-4" />
-            Revert to Defaults
+            <span className="hidden sm:inline">Revert to Defaults</span>
+            <span className="sm:hidden">Reset</span>
           </Button>
         </div>
 
         <Tabs defaultValue="colors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="colors">Colors</TabsTrigger>
-            <TabsTrigger value="radii">Radii</TabsTrigger>
-            <TabsTrigger value="elevation">Elevation</TabsTrigger>
-            <TabsTrigger value="effects">Glass Effects</TabsTrigger>
-            <TabsTrigger value="guide">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Guide
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <TabsTrigger value="colors" className="text-xs sm:text-sm">Colors</TabsTrigger>
+            <TabsTrigger value="radii" className="text-xs sm:text-sm">Radii</TabsTrigger>
+            <TabsTrigger value="elevation" className="text-xs sm:text-sm">Elevation</TabsTrigger>
+            <TabsTrigger value="effects" className="text-xs sm:text-sm">
+              <span className="hidden sm:inline">Glass Effects</span>
+              <span className="sm:hidden">Effects</span>
+            </TabsTrigger>
+            <TabsTrigger value="guide" className="text-xs sm:text-sm col-span-2 sm:col-span-1">
+              <BookOpen className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Guide</span>
             </TabsTrigger>
           </TabsList>
 

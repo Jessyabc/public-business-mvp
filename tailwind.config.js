@@ -74,6 +74,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '475px',
+      },
       colors: {
         // Legacy colors (keep for backward compatibility)
         "pb-blue": "#0a1f3a",

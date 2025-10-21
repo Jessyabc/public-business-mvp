@@ -62,26 +62,26 @@ export function GlobalNavigationMenu() {
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-xl border-b ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2 sm:py-3 backdrop-blur-xl border-b ${
       mode === 'public' 
         ? 'bg-black/20 border-white/10' 
         : 'bg-white/70 border-slate-300/40'
     }`}>
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo and Navigation */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 sm:gap-6">
           <div 
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <Brain className={`w-8 h-8 ${mode === 'public' ? 'text-primary' : 'text-blue-600'}`} />
-            <span className={`text-xl font-bold ${mode === 'public' ? 'text-white' : 'text-slate-800'}`}>
+            <Brain className={`w-6 h-6 sm:w-8 sm:h-8 ${mode === 'public' ? 'text-primary' : 'text-blue-600'}`} />
+            <span className={`text-base sm:text-xl font-bold hidden xs:inline ${mode === 'public' ? 'text-white' : 'text-slate-800'}`}>
               PublicBusiness
             </span>
           </div>
           
           {/* Mode indicator */}
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
+          <div className={`hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border ${
             mode === 'public' 
               ? 'bg-primary/20 border-primary/30 text-primary' 
               : 'bg-blue-600/20 border-blue-600/30 text-blue-600'
@@ -101,34 +101,34 @@ export function GlobalNavigationMenu() {
         </div>
 
         {/* Right side - Actions and Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Mode Toggle */}
           <Button
             onClick={toggleMode}
             variant="ghost"
             size="sm"
-            className={`flex items-center gap-2 ${
+            className={`flex items-center gap-2 px-2 sm:px-3 ${
               mode === 'public' 
                 ? 'text-white hover:bg-white/10' 
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             <ToggleLeft className="w-4 h-4" />
-            Switch to {mode === 'public' ? 'Business' : 'Public'}
+            <span className="hidden md:inline">Switch to {mode === 'public' ? 'Business' : 'Public'}</span>
           </Button>
 
           {/* Create Content Button */}
           <Button
             onClick={handleCreateContent}
             size="sm"
-            className={
+            className={`px-2 sm:px-4 ${
               mode === 'public'
                 ? 'bg-primary hover:bg-primary/90 text-white'
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }
+            }`}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Create
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Create</span>
           </Button>
 
           {/* Profile Menu */}
@@ -153,10 +153,11 @@ export function GlobalNavigationMenu() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
-              className="w-56" 
+              className="w-56 bg-popover/95 backdrop-blur-md border-border shadow-lg" 
               align="end" 
               forceMount
               side="bottom"
+              sideOffset={8}
             >
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
