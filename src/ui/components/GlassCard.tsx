@@ -1,43 +1,46 @@
 import { forwardRef, HTMLAttributes } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
-import { useUIModeStore } from '@/stores/uiModeStore';
 
 interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  hover?: boolean;
+  interactive?: boolean;
 }
 
 export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, asChild = false, padding = 'md', hover = true, ...props }, ref) => {
-    const { uiMode } = useUIModeStore();
+  ({ className, asChild = false, padding = 'md', interactive = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'div';
 
     const paddingClasses = {
       none: '',
-      sm: 'p-3',
-      md: 'p-4',
-      lg: 'p-6',
+      sm: 'p-4',
+      md: 'p-6 md:p-8',
+      lg: 'p-8 md:p-12',
     };
 
     const baseClasses = cn(
-      // Base glass effect
-      'relative overflow-hidden',
-      'backdrop-blur-[20px] backdrop-saturate-150',
+      // Base card surface with proper contrast
       'rounded-2xl',
-      'transition-all duration-300 ease-out',
-      
-      // Mode-specific styling
-      uiMode === 'public' 
-        ? 'glass-card' // Uses existing CSS class for public mode
-        : 'glass-business-card', // Uses existing CSS class for business mode
+      'border border-[var(--card-border)]',
+      'bg-[var(--card-bg)]',
+      'text-[var(--card-fg)]',
+      'shadow-[var(--card-shadow)]',
+      'transition-colors duration-200',
       
       // Padding
       paddingClasses[padding],
       
-      // Hover effects
-      hover && 'cursor-pointer',
+      // Interactive states
+      interactive && [
+        'cursor-pointer',
+        'hover:bg-[var(--card-bg-hover)]',
+        'active:translate-y-px',
+        'focus-visible:outline-none',
+        'focus-visible:ring-2',
+        'focus-visible:ring-[var(--card-ring)]',
+        'focus-visible:ring-offset-2',
+      ],
       
       className
     );

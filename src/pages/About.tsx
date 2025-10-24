@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GlassCard } from "@/ui/components/GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Users, 
   Building2, 
@@ -138,7 +140,7 @@ export default function About() {
       </section>
 
       {/* Our Vision */}
-      <section className="py-16 px-4 bg-white/50">
+      <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <Badge variant="default" className="mb-4">
@@ -149,16 +151,14 @@ export default function About() {
           </div>
           
           <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <Card className="glass-card border-0 shadow-xl">
-              <CardContent className="p-8">
-                <p className="text-lg text-slate-700 leading-relaxed mb-6">
-                  To create a platform that becomes the heart of knowledge exchange across industries. We envision a future where every business, no matter its size, can share their insights, reach a wider audience, and gather feedback that drives meaningful change.
-                </p>
-                <p className="text-lg text-slate-700 leading-relaxed">
-                  For every curious individual, we want to offer the opportunity to influence the future by engaging in deep discussions and shaping ideas that matter.
-                </p>
-              </CardContent>
-            </Card>
+            <GlassCard>
+              <p className="text-lg text-[var(--card-fg-muted)] leading-relaxed mb-6">
+                To create a platform that becomes the heart of knowledge exchange across industries. We envision a future where every business, no matter its size, can share their insights, reach a wider audience, and gather feedback that drives meaningful change.
+              </p>
+              <p className="text-lg text-[var(--card-fg-muted)] leading-relaxed">
+                For every curious individual, we want to offer the opportunity to influence the future by engaging in deep discussions and shaping ideas that matter.
+              </p>
+            </GlassCard>
 
             <div className="space-y-6">
               <h3 className="text-2xl font-bold text-slate-900 mb-6">Our Core Values</h3>
@@ -216,7 +216,7 @@ export default function About() {
       </section>
 
       {/* Meet the Team */}
-      <section className="py-16 px-4 bg-muted/30">
+      <section className="py-16 px-4">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="mb-12">
             <Badge variant="default" className="mb-4">
@@ -226,19 +226,17 @@ export default function About() {
             <h2 className="text-4xl font-bold text-slate-900 mb-8">Meet the Team Behind Public Business</h2>
           </div>
           
-          <Card className="glass-card border-0 shadow-xl max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-accent-foreground text-2xl font-bold mx-auto mb-6">
-                JB
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">Jessy Alexander Beaudoin</h3>
-              <p className="text-blue-600 font-medium mb-4">CEO & Founder</p>
-              <p className="text-slate-700 leading-relaxed">
-                A visionary entrepreneur with a passion for bridging the gap between businesses and curious minds. 
-                Jessy believes in the power of knowledge-sharing to drive innovation and build sustainable business practices.
-              </p>
-            </CardContent>
-          </Card>
+          <GlassCard className="max-w-2xl mx-auto">
+            <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-accent-foreground text-2xl font-bold mx-auto mb-6">
+              JB
+            </div>
+            <h3 className="text-2xl font-bold text-[var(--card-fg)] mb-2">Jessy Alexander Beaudoin</h3>
+            <p className="text-accent font-medium mb-4">CEO & Founder</p>
+            <p className="text-[var(--card-fg-muted)] leading-relaxed">
+              A visionary entrepreneur with a passion for bridging the gap between businesses and curious minds. 
+              Jessy believes in the power of knowledge-sharing to drive innovation and build sustainable business practices.
+            </p>
+          </GlassCard>
         </div>
       </section>
 
@@ -261,7 +259,7 @@ export default function About() {
       </section>
 
       {/* Our Community */}
-      <section className="py-16 px-4 bg-white/50">
+      <section className="py-16 px-4">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="mb-12">
             <Badge variant="secondary" className="mb-4">
@@ -271,27 +269,25 @@ export default function About() {
             <h2 className="text-4xl font-bold text-slate-900 mb-8">Building a Community of Innovators</h2>
           </div>
           
-          <Card className="glass-card border-0 shadow-xl">
-            <CardContent className="p-8">
-              <p className="text-lg text-slate-700 leading-relaxed mb-6">
-                We are proud to have a growing community of businesses, thought leaders, and curious minds who are already contributing to the platform. Together, we're creating an ecosystem where ideas thrive, and innovation takes root.
-              </p>
-              <p className="text-lg text-slate-700 leading-relaxed mb-8">
-                Join the conversation and be part of a community that's shaping the future of industries. Whether you're a business or an individual, Public Business is the place where ideas come to life.
-              </p>
-              <Link to="/community">
-                <Button size="lg" className="bg-primary hover:bg-primary/90">
-                  Explore Our Community
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <GlassCard>
+            <p className="text-lg text-[var(--card-fg-muted)] leading-relaxed mb-6">
+              We are proud to have a growing community of businesses, thought leaders, and curious minds who are already contributing to the platform. Together, we're creating an ecosystem where ideas thrive, and innovation takes root.
+            </p>
+            <p className="text-lg text-[var(--card-fg-muted)] leading-relaxed mb-8">
+              Join the conversation and be part of a community that's shaping the future of industries. Whether you're a business or an individual, Public Business is the place where ideas come to life.
+            </p>
+            <Link to="/community">
+              <Button size="lg" className="bg-primary hover:bg-primary/90">
+                Explore Our Community
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </GlassCard>
         </div>
       </section>
 
       {/* Why Public Business */}
-      <section className="py-16 px-4 bg-white/50">
+      <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <Badge variant="default" className="mb-4">
@@ -303,15 +299,13 @@ export default function About() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {whyChooseUs.map((item, index) => (
-              <Card key={index} className="glass-card border-0 shadow-lg hover:shadow-xl transition-all duration-300 text-center">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mx-auto mb-4">
-                    {item.icon}
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-3">{item.title}</h3>
-                  <p className="text-sm text-slate-600">{item.description}</p>
-                </CardContent>
-              </Card>
+              <GlassCard key={index} className="text-center">
+                <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mx-auto mb-4">
+                  {item.icon}
+                </div>
+                <h3 className="font-semibold text-[var(--card-fg)] mb-3">{item.title}</h3>
+                <p className="text-sm text-[var(--card-fg-muted)]">{item.description}</p>
+              </GlassCard>
             ))}
           </div>
         </div>

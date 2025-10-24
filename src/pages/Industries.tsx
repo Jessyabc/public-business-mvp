@@ -190,20 +190,20 @@ export default function Industries() {
           {industries.map((industry) => (
             <GlassCard
               key={industry.id}
-              className="p-6 hover:scale-105 transition-all duration-300 cursor-pointer group"
+              interactive
               onClick={() => setSelectedIndustry(industry)}
             >
               <div className="w-16 h-16 rounded-xl bg-accent flex items-center justify-center text-accent-foreground mb-4 group-hover:scale-110 transition-transform duration-300">
                 {industry.icon}
               </div>
-              <h3 className="text-xl font-bold text-ink-base mb-3">
+              <h3 className="text-xl font-bold text-[var(--card-fg)] mb-3">
                 {industry.name}
               </h3>
-              <p className="text-ink-base/70 leading-relaxed">
+              <p className="text-[var(--card-fg-muted)] leading-relaxed">
                 {industry.description}
               </p>
               <div className="mt-4">
-                <Button variant="ghost" className="text-pb-blue hover:text-pb-blue/80 p-0 h-auto font-medium">
+                <Button variant="ghost" className="text-accent hover:text-accent/80 p-0 h-auto font-medium">
                   Learn More →
                 </Button>
               </div>
@@ -214,15 +214,15 @@ export default function Industries() {
 
       {/* Call to Action */}
       <section className="text-center">
-        <GlassCard className="p-12 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-ink-base mb-4">
+        <GlassCard padding="lg" className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-[var(--card-fg)] mb-4">
             Ready to Transform Your Industry?
           </h2>
-          <p className="text-lg text-ink-base/70 mb-8">
+          <p className="text-lg text-[var(--card-fg-muted)] mb-8">
             Join thousands of professionals collaborating to shape the future of their industries.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-pb-blue hover:bg-pb-blue/90 text-white">
+            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
               Join Public Business
             </Button>
             <Button size="lg" variant="outline">

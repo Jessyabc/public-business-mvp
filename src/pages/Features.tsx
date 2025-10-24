@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GlassCard } from "@/ui/components/GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -147,7 +148,7 @@ export default function Features() {
       </section>
 
       {/* Public Features */}
-      <section className="py-16 px-4 bg-white/50">
+      <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">
@@ -164,25 +165,21 @@ export default function Features() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {publicFeatures.map((feature, index) => (
-              <Card key={index} className="glass-card border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mb-4">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {feature.benefits.map((benefit, idx) => (
-                      <li key={idx} className="text-sm text-slate-600 flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <GlassCard key={index}>
+                <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center text-accent-foreground mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-[var(--card-fg)] mb-2">{feature.title}</h3>
+                <p className="text-[var(--card-fg-muted)] mb-4">{feature.description}</p>
+                <ul className="space-y-2">
+                  {feature.benefits.map((benefit, idx) => (
+                    <li key={idx} className="text-sm text-[var(--card-fg-muted)] flex items-start">
+                      <span className="text-green-500 mr-2">✓</span>
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+              </GlassCard>
             ))}
           </div>
         </div>

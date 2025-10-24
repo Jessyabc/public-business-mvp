@@ -129,6 +129,15 @@
   --glass-refraction-blur: 6px;
   --glass-displace: 8;
 
+  /* Card tokens – unified surface for landing cards */
+  --card-bg: hsl(210, 40%, 98%);                           /* Subtle card surface */
+  --card-fg: hsl(212, 84%, 7%);                            /* High contrast text */
+  --card-fg-muted: hsl(215, 16%, 47%);                     /* Secondary text */
+  --card-border: hsl(206, 30%, 85%);                       /* Subtle border */
+  --card-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+  --card-bg-hover: hsl(210, 40%, 96%);                     /* Slightly darker hover */
+  --card-ring: hsl(206, 74%, 59%);                         /* Focus ring */
+  
   /* Legacy tokens for backward compatibility */
   --pb-blue: #489FE3;
   --text-ink: var(--text-primary);
