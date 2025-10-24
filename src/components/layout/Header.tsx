@@ -62,7 +62,7 @@ export function Header() {
 
   return (
     <>
-      <header className="glass-card border border-pb-blue/20 fixed top-4 left-4 right-4 z-40 rounded-xl">
+      <header className="glass-card border border-pb-blue/20 fixed top-2 left-4 right-4 z-40 rounded-xl">
         <div className="scrim" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
           <div className="flex items-center justify-between">
