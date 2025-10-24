@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { GlassInput } from "@/components/ui/GlassInput";
 import { Label } from "@/components/ui/label";
 import { Brain, FileText, AlertCircle } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
@@ -148,13 +147,14 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="brainstorm-content">Your spark of inspiration</Label>
-        <Textarea
+        <Label htmlFor="brainstorm-content" className="text-[var(--text-primary)]">Your spark of inspiration</Label>
+        <GlassInput
+          as="textarea"
           id="brainstorm-content"
           placeholder="Share your idea, thought, or insight..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[200px] glass-ios-card resize-none"
+          className="min-h-[200px]"
           maxLength={PUBLIC_MAX_CHARS}
         />
         <div className="flex justify-between text-xs text-muted-foreground">
@@ -212,28 +212,28 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="insight-title">Title (optional)</Label>
-          <Input
+          <Label htmlFor="insight-title" className="text-[var(--text-primary)]">Title (optional)</Label>
+          <GlassInput
             id="insight-title"
             placeholder="Give your insight a title..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="glass-business-card"
             maxLength={200}
           />
-          <div className="text-xs text-muted-foreground text-right">
+          <div className="text-xs text-[var(--text-secondary)] text-right">
             {title.length} / 200
           </div>
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="insight-content">Content</Label>
-          <Textarea
+          <Label htmlFor="insight-content" className="text-[var(--text-primary)]">Content</Label>
+          <GlassInput
+            as="textarea"
             id="insight-content"
             placeholder="Share your professional insight, analysis, or findings..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[200px] glass-business-card resize-none"
+            className="min-h-[200px]"
             maxLength={BUSINESS_MAX_CHARS}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
@@ -258,11 +258,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className={`glass-med glass-modal-enhanced max-w-lg border ${
-        isPublicMode 
-          ? 'bg-background/80 border-border/40' 
-          : 'bg-card/80 border-border/40'
-      }`}>
+      <DialogContent className="max-w-lg border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
         <DialogHeader>
           <DialogTitle className="sr-only">
             {isPublicMode ? 'Create New Brainstorm' : 'Create New Business Insight'}

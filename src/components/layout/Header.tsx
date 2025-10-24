@@ -96,10 +96,17 @@ export function Header() {
             <div className="hidden lg:flex items-center space-x-4">
               {!user ? (
                 <>
-                  <Button variant="ghost" onClick={() => setShowAuthModal(true)} className="bg-white/80 text-ink-base border border-black/10 hover:bg-white/90">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setShowAuthModal(true)} 
+                    className="border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)]"
+                  >
                     Login
                   </Button>
-                  <Button onClick={() => setShowAuthModal(true)} className="bg-pb-blue text-white elevation-4 hover:elevation-8">
+                  <Button 
+                    onClick={() => setShowAuthModal(true)} 
+                    className="bg-[var(--accent)] text-[var(--accent-on)] border border-[var(--accent)] hover:bg-[var(--accent)]/80"
+                  >
                     Sign Up
                   </Button>
                 </>
@@ -169,10 +176,17 @@ export function Header() {
                 <div className="flex flex-col space-y-2 pt-4 border-t border-pb-blue/20">
                   {!user ? (
                     <>
-                      <Button variant="ghost" onClick={() => setShowAuthModal(true)} className={styles.glassButton}>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setShowAuthModal(true)} 
+                        className="border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)]"
+                      >
                         Login
                       </Button>
-                      <Button onClick={() => setShowAuthModal(true)} className={`${styles.glassButton} bg-pb-blue/20 text-pb-blue`}>
+                      <Button 
+                        onClick={() => setShowAuthModal(true)} 
+                        className="bg-[var(--accent)] text-[var(--accent-on)] hover:bg-[var(--accent)]/80"
+                      >
                         Sign Up
                       </Button>
                     </>

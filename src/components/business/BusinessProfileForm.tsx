@@ -3,8 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { GlassInput } from '@/components/ui/GlassInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -141,9 +140,8 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
                         Company Name
                       </FormLabel>
                       <FormControl>
-                         <Input 
+                         <GlassInput 
                            placeholder="Enter your company name" 
-                           className="glass-business-card"
                            {...field} 
                          />
                       </FormControl>
@@ -245,9 +243,8 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
                           Phone
                         </FormLabel>
                         <FormControl>
-                           <Input 
+                           <GlassInput 
                              placeholder="Enter phone number" 
-                             className="glass-business-card"
                              {...field} 
                            />
                         </FormControl>
@@ -265,9 +262,8 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
                           Website
                         </FormLabel>
                         <FormControl>
-                           <Input 
+                           <GlassInput 
                              placeholder="https://example.com" 
-                             className="glass-business-card"
                              {...field} 
                            />
                         </FormControl>
@@ -286,9 +282,8 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
                         LinkedIn Profile
                       </FormLabel>
                       <FormControl>
-                         <Input 
+                         <GlassInput 
                            placeholder="https://linkedin.com/in/yourprofile" 
-                           className="glass-business-card"
                            {...field} 
                          />
                       </FormControl>
@@ -306,9 +301,10 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
                         Company Bio
                       </FormLabel>
                       <FormControl>
-                         <Textarea 
+                         <GlassInput 
+                           as="textarea"
                            placeholder="Tell us about your company..."
-                           className="glass-business-card min-h-[100px]"
+                           className="min-h-[100px]"
                            {...field} 
                          />
                       </FormControl>

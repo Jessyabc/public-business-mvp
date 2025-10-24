@@ -1,8 +1,7 @@
 // src/components/profile/ProfileForm.tsx
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { GlassInput } from "@/components/ui/GlassInput";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -109,11 +108,9 @@ export function ProfileForm() {
 
   if (loading || !form) {
     return (
-      <Card className={`glass-card backdrop-blur-xl border transition-all duration-700 ${
-        mode === "public" ? "border-white/20 bg-black/20" : "border-blue-200/30 bg-white/40"
-      }`}>
+      <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
         <CardContent className="p-6">
-          <div className={`text-center ${mode === "public" ? "text-white" : "text-slate-800"}`}>
+          <div className="text-center text-[var(--text-primary)]">
             Loading profile...
           </div>
         </CardContent>
@@ -122,12 +119,10 @@ export function ProfileForm() {
   }
 
   return (
-    <Card className={`glass-card backdrop-blur-xl border transition-all duration-700 ${
-      mode === "public" ? "border-white/20 bg-black/20" : "border-blue-200/30 bg-white/40"
-    }`}>
+    <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
       <CardHeader>
-        <CardTitle className={`flex items-center gap-2 ${mode === "public" ? "text-white" : "text-slate-800"}`}>
-          <User className={`w-5 h-5 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
+        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
+          <User className="w-5 h-5 text-[var(--text-secondary)]" />
           Profile Settings
         </CardTitle>
       </CardHeader>
@@ -145,122 +140,85 @@ export function ProfileForm() {
           </Avatar>
 
           <div className="flex-1">
-            <Label htmlFor="display_name" className={mode === "public" ? "text-white" : "text-slate-700"}>
+            <Label htmlFor="display_name" className="text-[var(--text-primary)]">
               Display Name
             </Label>
-            <Input
+            <GlassInput
               id="display_name"
               value={form.display_name ?? ""}
               onChange={(e) => updateField("display_name", e.target.value)}
               placeholder="Your display name"
-              className={`backdrop-blur-sm transition-all duration-300 ${
-                mode === "public"
-                  ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-              }`}
             />
           </div>
         </div>
 
         {/* Bio */}
         <div className="space-y-2">
-          <Label htmlFor="bio" className={mode === "public" ? "text-white" : "text-slate-700"}>
+          <Label htmlFor="bio" className="text-[var(--text-primary)]">
             Bio
           </Label>
-          <Textarea
+          <GlassInput
+            as="textarea"
             id="bio"
             value={form.bio ?? ""}
             onChange={(e) => updateField("bio", e.target.value)}
             placeholder="Tell us about yourself..."
-            className={`backdrop-blur-sm transition-all duration-300 ${
-              mode === "public"
-                ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-            }`}
           />
         </div>
 
         {/* Company */}
         <div className="space-y-2">
-          <Label htmlFor="company" className={`flex items-center gap-2 ${
-            mode === "public" ? "text-white" : "text-slate-700"
-          }`}>
-            <Building className={`w-4 h-4 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
+          <Label htmlFor="company" className="flex items-center gap-2 text-[var(--text-primary)]">
+            <Building className="w-4 h-4 text-[var(--text-secondary)]" />
             Company
           </Label>
-          <Input
+          <GlassInput
             id="company"
             value={form.company ?? ""}
             onChange={(e) => updateField("company", e.target.value)}
             placeholder="Your company"
-            className={`backdrop-blur-sm transition-all duration-300 ${
-              mode === "public"
-                ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-            }`}
           />
         </div>
 
         {/* Location */}
         <div className="space-y-2">
-          <Label htmlFor="location" className={`flex items-center gap-2 ${
-            mode === "public" ? "text-white" : "text-slate-700"
-          }`}>
-            <MapPin className={`w-4 h-4 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
+          <Label htmlFor="location" className="flex items-center gap-2 text-[var(--text-primary)]">
+            <MapPin className="w-4 h-4 text-[var(--text-secondary)]" />
             Location
           </Label>
-          <Input
+          <GlassInput
             id="location"
             value={form.location ?? ""}
             onChange={(e) => updateField("location", e.target.value)}
             placeholder="Your location"
-            className={`backdrop-blur-sm transition-all duration-300 ${
-              mode === "public"
-                ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-            }`}
           />
         </div>
 
         {/* Links */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="website" className={`flex items-center gap-2 ${
-              mode === "public" ? "text-white" : "text-slate-700"
-            }`}>
-              <Globe className={`w-4 h-4 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
+            <Label htmlFor="website" className="flex items-center gap-2 text-[var(--text-primary)]">
+              <Globe className="w-4 h-4 text-[var(--text-secondary)]" />
               Website
             </Label>
-            <Input
+            <GlassInput
               id="website"
               value={form.website ?? ""}
               onChange={(e) => updateField("website", e.target.value)}
               placeholder="https://yourwebsite.com"
-              className={`backdrop-blur-sm transition-all duration-300 ${
-                mode === "public"
-                  ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-              }`}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="linkedin_url" className={`flex items-center gap-2 ${
-              mode === "public" ? "text-white" : "text-slate-700"
-            }`}>
-              <Linkedin className={`w-4 h-4 ${mode === "public" ? "text-white" : "text-slate-600"}`} />
+            <Label htmlFor="linkedin_url" className="flex items-center gap-2 text-[var(--text-primary)]">
+              <Linkedin className="w-4 h-4 text-[var(--text-secondary)]" />
               LinkedIn
             </Label>
-            <Input
+            <GlassInput
               id="linkedin_url"
               value={form.linkedin_url ?? ""}
               onChange={(e) => updateField("linkedin_url", e.target.value)}
               placeholder="https://linkedin.com/in/yourprofile"
-              className={`backdrop-blur-sm transition-all duration-300 ${
-                mode === "public"
-                  ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  : "bg-white/50 border-blue-200/30 text-slate-800 placeholder:text-slate-500"
-              }`}
             />
           </div>
         </div>
@@ -363,15 +321,11 @@ export function ProfileForm() {
                 </p>
                 <div className="space-y-3">
                   <div className="flex gap-2">
-                    <Input
+                    <GlassInput
                       value={inviteToken}
                       onChange={(e) => setInviteToken(e.target.value)}
                       placeholder="Paste your invite token here..."
-                      className={`flex-1 ${
-                        mode === "public"
-                          ? "bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                          : "bg-white border-yellow-200 text-slate-800"
-                      }`}
+                      className="flex-1"
                     />
                     <Button
                       onClick={handleAcceptInvite}

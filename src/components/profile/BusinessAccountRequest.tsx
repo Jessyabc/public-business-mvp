@@ -55,15 +55,9 @@ export function BusinessAccountRequest() {
 
   if (loading) {
     return (
-      <Card className={`glass-card backdrop-blur-xl border transition-all duration-700 ${
-        mode === 'public'
-          ? 'border-white/20 bg-black/20'
-          : 'border-blue-200/30 bg-white/40'
-      }`}>
+      <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
         <CardContent className="p-6">
-          <div className={`text-center ${
-            mode === 'public' ? 'text-white' : 'text-slate-800'
-          }`}>
+          <div className="text-center text-[var(--text-primary)]">
             Loading business account status...
           </div>
         </CardContent>
@@ -76,19 +70,11 @@ export function BusinessAccountRequest() {
   }
 
   return (
-    <Card className={`glass-card backdrop-blur-xl border transition-all duration-700 ${
-      mode === 'public'
-        ? 'border-white/20 bg-black/20'
-        : 'border-blue-200/30 bg-white/40'
-    }`}>
+    <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
       <CardHeader>
-        <CardTitle className={`flex items-center justify-between ${
-          mode === 'public' ? 'text-white' : 'text-slate-800'
-        }`}>
+        <CardTitle className="flex items-center justify-between text-[var(--text-primary)]">
           <div className="flex items-center gap-2">
-            <Building className={`w-5 h-5 ${
-              mode === 'public' ? 'text-white' : 'text-slate-600'
-            }`} />
+            <Building className="w-5 h-5 text-[var(--text-secondary)]" />
             Business Account
           </div>
           {getStatusBadge()}
@@ -97,18 +83,12 @@ export function BusinessAccountRequest() {
       <CardContent className="space-y-4">
         {!profile ? (
           <>
-            <p className={`text-sm ${
-              mode === 'public' ? 'text-white/80' : 'text-slate-600'
-            }`}>
+            <p className="text-sm text-[var(--text-secondary)]">
               Request a business account to access advanced features, create business insights, and connect with other companies.
             </p>
             <Button 
               onClick={handleRequestClick}
-              className={`w-full transition-all duration-300 ${
-                mode === 'public'
-                  ? 'bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20'
-                  : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 border border-blue-500/20'
-              }`}
+              className="w-full bg-[var(--accent)] text-[var(--accent-on)] hover:bg-[var(--accent)]/80"
             >
               {getStatusIcon()}
               Request Business Account
@@ -116,9 +96,7 @@ export function BusinessAccountRequest() {
           </>
         ) : (
           <>
-            <div className={`text-sm ${
-              mode === 'public' ? 'text-white/80' : 'text-slate-600'
-            }`}>
+            <div className="text-sm text-[var(--text-secondary)]">
               <p><strong>Company:</strong> {profile.company_name}</p>
               {profile.status === 'approved' && (
                 <p className="text-green-600 mt-2">
@@ -141,11 +119,7 @@ export function BusinessAccountRequest() {
               <Button 
                 onClick={handleRequestClick}
                 variant="outline"
-                className={`w-full transition-all duration-300 ${
-                  mode === 'public'
-                    ? 'border-white/20 text-white hover:bg-white/10'
-                    : 'border-blue-200/30 text-blue-600 hover:bg-blue-50/50'
-                }`}
+                className="w-full border-[var(--glass-border)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)]"
               >
                 {profile.status === 'rejected' ? 'Update & Resubmit' : 'Edit Request'}
               </Button>

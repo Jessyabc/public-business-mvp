@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { GlassInput } from '@/components/ui/GlassInput';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
@@ -80,58 +80,57 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border border-white/20 bg-black/20 backdrop-blur-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      <DialogContent className="sm:max-w-md border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-light text-center text-white">
-            Join Public Business
+          <DialogTitle className="text-2xl font-bold text-center text-[var(--text-primary)]">
+            Welcome to Public Business
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass bg-white/5">
-            <TabsTrigger value="signin" className="data-[state=active]:bg-white/10">
+          <TabsList className="grid w-full grid-cols-2 bg-[var(--glass-bg)]">
+            <TabsTrigger value="signin" className="data-[state=active]:bg-[var(--card-bg-hover)] data-[state=active]:text-[var(--text-primary)]">
               Sign In
             </TabsTrigger>
-            <TabsTrigger value="signup" className="data-[state=active]:bg-white/10">
+            <TabsTrigger value="signup" className="data-[state=active]:bg-[var(--card-bg-hover)] data-[state=active]:text-[var(--text-primary)]">
               Sign Up
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4 mt-6">
             <div className="space-y-2">
-              <Label htmlFor="signin-email" className="text-white">Email</Label>
-              <Input
+              <Label htmlFor="signin-email" className="text-[var(--text-primary)]">Email</Label>
+              <GlassInput
                 id="signin-email"
                 type="email"
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="glass border-white/20 text-white placeholder:text-white/60"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="signin-password" className="text-white">Password</Label>
+              <Label htmlFor="signin-password" className="text-[var(--text-primary)]">Password</Label>
               <div className="relative">
-                <Input
+                <GlassInput
                   id="signin-password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="glass border-white/20 text-white placeholder:text-white/60 pr-10"
+                  className="pr-10"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    <EyeOff className="h-4 w-4 text-[var(--text-secondary)]" />
                   ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <Eye className="h-4 w-4 text-[var(--text-secondary)]" />
                   )}
                 </Button>
               </div>
@@ -140,7 +139,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             <Button 
               onClick={handleSignIn} 
               disabled={loading}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-[var(--accent)] text-[var(--accent-on)] hover:bg-[var(--accent)]/80"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
@@ -148,60 +147,58 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="signup" className="space-y-4 mt-6">
             <div className="space-y-4">
-              <div className="text-center p-4 glass-card rounded-lg border border-white/10">
-                <p className="text-sm text-white/60">
+              <div className="text-center p-4 rounded-lg border-[var(--glass-border)] bg-[var(--glass-bg)]">
+                <p className="text-sm text-[var(--text-secondary)]">
                   Join as a Public Member. You can request business membership later through your profile.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-email" className="text-white">Email</Label>
-                <Input
+                <Label htmlFor="signup-email" className="text-[var(--text-primary)]">Email</Label>
+                <GlassInput
                   id="signup-email"
                   type="email"
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="glass border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-password" className="text-white">Password</Label>
+                <Label htmlFor="signup-password" className="text-[var(--text-primary)]">Password</Label>
                 <div className="relative">
-                  <Input
+                  <GlassInput
                     id="signup-password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="glass border-white/20 text-white placeholder:text-white/60 pr-10"
+                    className="pr-10"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      <EyeOff className="h-4 w-4 text-[var(--text-secondary)]" />
                     ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <Eye className="h-4 w-4 text-[var(--text-secondary)]" />
                     )}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-white">Confirm Password</Label>
-                <Input
+                <Label htmlFor="confirm-password" className="text-[var(--text-primary)]">Confirm Password</Label>
+                <GlassInput
                   id="confirm-password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="glass border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
             </div>
@@ -209,7 +206,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             <Button 
               onClick={handleSignUp} 
               disabled={loading}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-[var(--accent)] text-[var(--accent-on)] hover:bg-[var(--accent)]/80"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </Button>
