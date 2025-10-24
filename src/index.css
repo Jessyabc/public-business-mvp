@@ -93,26 +93,27 @@
 /* ========================================
    Root Variables (Hydrated at Runtime)
    ======================================== */
-:root {
-  /* Theme tokens – hydrated by ThemeInjector */
-  --background: hsl(210, 40%, 98%);
-  --surface: hsl(0, 0%, 100%);
-  --surface-raised: hsl(0, 0%, 100%);
-  --text-primary: hsl(212, 84%, 7%);
-  --text-secondary: hsl(215, 16%, 47%);
-  --text-tertiary: hsl(215, 20%, 65%);
-  --accent: hsl(202, 72%, 63%);
-  --accent-on: hsl(0, 0%, 100%);
-  --border: hsl(206, 30%, 85%);
-  --focus: hsl(206, 74%, 59%);
+:root,
+[data-theme="public"] {
+  /* Theme tokens – dark space-inspired public mode */
+  --background: #0b1f3a;
+  --surface: #0f274a;
+  --surface-raised: #132f54;
+  --text-primary: #e8eef6;
+  --text-secondary: #a9b7c7;
+  --text-tertiary: #6b7e94;
+  --accent: #489FE3;
+  --accent-on: #0b1f3a;
+  --border: rgba(255,255,255,0.15);
+  --focus: #60A5FA;
 
-  /* Elevation tokens */
-  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --elevation-2: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --elevation-4: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --elevation-8: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --elevation-16: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --elevation-24: 0 35px 60px -15px rgb(0 0 0 / 0.3);
+  /* Elevation tokens – enhanced for dark theme */
+  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --elevation-2: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --elevation-4: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --elevation-8: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  --elevation-16: 0 25px 50px -12px rgb(0 0 0 / 0.7);
+  --elevation-24: 0 35px 60px -15px rgb(0 0 0 / 0.8);
 
   /* Radius tokens */
   --radius-sm: 8px;
@@ -120,23 +121,24 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  /* Glass effect tokens – hydrated by ThemeInjector */
-  --glass-fill: rgba(255, 255, 255, 0.48);
-  --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-blur: 18px;
+  /* Glass effect tokens – translucent panels for dark theme */
+  --glass-fill: rgba(255, 255, 255, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-blur: 16px;
+  --glass-bg: rgba(255, 255, 255, 0.10);
   --glass-vibrancy: 1.15;
   --glass-bright: 1.06;
   --glass-refraction-blur: 6px;
-  --glass-displace: 8;
+  --glass-displace: 10;
 
-  /* Card tokens – unified surface for landing cards */
-  --card-bg: hsl(210, 40%, 98%);                           /* Subtle card surface */
-  --card-fg: hsl(212, 84%, 7%);                            /* High contrast text */
-  --card-fg-muted: hsl(215, 16%, 47%);                     /* Secondary text */
-  --card-border: hsl(206, 30%, 85%);                       /* Subtle border */
-  --card-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
-  --card-bg-hover: hsl(210, 40%, 96%);                     /* Slightly darker hover */
-  --card-ring: hsl(206, 74%, 59%);                         /* Focus ring */
+  /* Card tokens – glass surface for dark theme */
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --card-fg: #e8eef6;
+  --card-fg-muted: #a9b7c7;
+  --card-border: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 1px rgba(255,255,255,0.1);
+  --card-bg-hover: rgba(255, 255, 255, 0.12);
+  --card-ring: #60A5FA;
   
   /* Legacy tokens for backward compatibility */
   --pb-blue: #489FE3;
@@ -150,6 +152,43 @@
   --ease: cubic-bezier(.2, .6, .2, 1);
   --dock-h: 88px;
   --dock-gap: 24px;
+}
+
+/* Business mode – light theme override */
+[data-theme="business"] {
+  --background: hsl(0, 0%, 98%);
+  --surface: hsl(0, 0%, 100%);
+  --surface-raised: hsl(0, 0%, 100%);
+  --text-primary: hsl(212, 84%, 7%);
+  --text-secondary: hsl(215, 16%, 47%);
+  --text-tertiary: hsl(215, 20%, 65%);
+  --accent: hsl(221, 83%, 53%);
+  --accent-on: hsl(0, 0%, 100%);
+  --border: hsl(210, 20%, 88%);
+  --focus: hsl(221, 83%, 53%);
+
+  /* Elevation tokens – lighter shadows for light theme */
+  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --elevation-2: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --elevation-4: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --elevation-8: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --elevation-16: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --elevation-24: 0 35px 60px -15px rgb(0 0 0 / 0.3);
+
+  /* Glass effect tokens – light theme glass */
+  --glass-fill: rgba(255, 255, 255, 0.48);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-blur: 18px;
+  --glass-bg: rgba(255, 255, 255, 0.48);
+
+  /* Card tokens – light surfaces for business mode */
+  --card-bg: hsl(210, 40%, 98%);
+  --card-fg: hsl(212, 84%, 7%);
+  --card-fg-muted: hsl(215, 16%, 47%);
+  --card-border: hsl(206, 30%, 85%);
+  --card-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+  --card-bg-hover: hsl(210, 40%, 96%);
+  --card-ring: hsl(206, 74%, 59%);
 }
 
 /* ========================================

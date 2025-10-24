@@ -121,14 +121,14 @@ export default function Features() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-space">
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl font-bold text-foreground mb-6">
+          <h1 className="text-5xl font-bold text-[var(--text-primary)] mb-6">
             Powerful Features for Every User
           </h1>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-[var(--text-secondary)] mb-8 max-w-2xl mx-auto">
             Whether you're a public member exploring insights or a business building your professional presence, 
             we have the tools you need to succeed.
           </p>
@@ -155,10 +155,10 @@ export default function Features() {
               <Users className="h-4 w-4 mr-2" />
               Public Members
             </Badge>
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-4">
               Free Community Features
             </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
+            <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
               Join thousands of professionals sharing knowledge and insights in our open community platform.
             </p>
           </div>
@@ -193,10 +193,10 @@ export default function Features() {
               <Building2 className="h-4 w-4 mr-2" />
               Business Members
             </Badge>
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-4">
               Professional Business Tools
             </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
+            <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
               Elevate your business presence with advanced tools designed for professional organizations.
             </p>
           </div>
@@ -228,13 +228,13 @@ export default function Features() {
       </section>
 
       {/* System Features */}
-      <section className="py-16 px-4 bg-muted/30">
+      <section className="py-16 px-4 bg-[var(--surface)]">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-4">
               Platform Capabilities
             </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
+            <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
               Built on modern technology with features that enhance your experience.
             </p>
           </div>
@@ -242,13 +242,13 @@ export default function Features() {
           <div className="grid md:grid-cols-3 gap-6">
             {systemFeatures.map((feature, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg mx-auto mb-4">
-                  <div className="text-slate-700">
+                <div className="w-16 h-16 bg-[var(--glass-bg)] backdrop-blur-sm rounded-full flex items-center justify-center shadow-glass-dark mx-auto mb-4 border border-[var(--glass-border)]">
+                  <div className="text-[var(--accent)]">
                     {feature.icon}
                   </div>
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                <p className="text-sm text-slate-600">{feature.description}</p>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">{feature.title}</h3>
+                <p className="text-sm text-[var(--text-secondary)]">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -256,12 +256,12 @@ export default function Features() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-accent">
-        <div className="container mx-auto max-w-4xl text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">
+      <section className="py-16 px-4 bg-[var(--accent)]">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-bold mb-4 text-[var(--accent-on)]">
             Ready to Get Started?
           </h2>
-          <p className="text-xl mb-8 text-blue-100">
+          <p className="text-xl mb-8 text-[var(--accent-on)]/85">
             Join our community today and start exploring or building your business presence.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">

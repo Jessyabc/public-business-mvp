@@ -136,26 +136,26 @@ const base: Theme = {
  */
 export const modes = {
   /**
-   * Public mode – dreamy blue backdrop with soft gradient
-   * Features lighter surfaces and enhanced glass blur for a welcoming feel
+   * Public mode – dark space-inspired aesthetic with glass panels
+   * Features deep navy backdrop with translucent glass surfaces
    */
   public: {
     colors: {
-      background: 'hsl(220, 55%, 92%)',       // Soft blue-grey canvas (dreamy)
-      surface: 'hsl(210, 50%, 96%)',          // Very light blue-tinted surface
-      textPrimary: 'hsl(212, 84%, 7%)',       // Deep navy text
-      textSecondary: 'hsl(215, 16%, 47%)',    // Medium grey text
-      textTertiary: 'hsl(215, 20%, 65%)',     // Light grey text
-      accent: 'hsl(202, 72%, 63%)',           // Sky blue accent
-      accentOn: 'hsl(0, 0%, 100%)',           // White text on accent
-      border: 'hsl(210, 30%, 85%)',           // Soft blue-grey borders
-      focus: 'hsl(202, 72%, 63%)',            // Match accent for focus
+      background: '#0b1f3a',                  // Deep navy canvas (space-inspired)
+      surface: '#0f274a',                     // Slightly lighter surface
+      textPrimary: '#e8eef6',                 // Near-white text
+      textSecondary: '#a9b7c7',               // Muted light blue-grey
+      textTertiary: '#6b7e94',                // Even more muted
+      accent: '#489FE3',                      // Sky blue for actions
+      accentOn: '#0b1f3a',                    // Dark text on accent
+      border: 'rgba(255,255,255,0.15)',       // Subtle separators
+      focus: '#60A5FA',                       // Lighter blue ring
     },
     effects: {
-      glassBg: 'rgba(255, 255, 255, 0.55)',   // Lighter glass fill
-      glassBorder: 'rgba(255, 255, 255, 0.70)', // Softer glass border
-      glassBlur: '24px',                       // Higher blur for dreamy effect
-      warpDistortion: '8',                     // Same warp as business
+      glassBg: 'rgba(255, 255, 255, 0.10)',   // Translucent panel fill
+      glassBorder: 'rgba(255, 255, 255, 0.15)', // Subtle glass border
+      glassBlur: '16px',                       // Blur for glass effect
+      warpDistortion: '10',                    // Enhanced warp
     },
   },
 

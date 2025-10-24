@@ -49,10 +49,10 @@ export function NewLanding() {
   }, [analytics]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-space">
       {/* Hero Section */}
       <section 
-        className="relative flex flex-col items-center justify-center px-3 bg-background text-foreground overflow-hidden"
+        className="relative flex flex-col items-center justify-center px-3 overflow-hidden"
         style={{ 
           height: '100vh',
           minHeight: '-webkit-fill-available'
@@ -77,6 +77,7 @@ export function NewLanding() {
         <h1
           className="
             text-5xl md:text-7xl font-bold mb-6 text-center max-w-4xl z-10
+            text-[var(--text-primary)]
             [text-shadow:0_0_12px_rgba(255,255,255,0.12)]
           "
         >
@@ -86,7 +87,8 @@ export function NewLanding() {
         {/* Subheadline */}
         <p
           className="
-            text-xl md:text-2xl text-white/85 mb-12 text-center max-w-3xl leading-relaxed z-10
+            text-xl md:text-2xl mb-12 text-center max-w-3xl leading-relaxed z-10
+            text-[var(--text-secondary)]
             [text-shadow:0_0_10px_rgba(255,255,255,0.10)]
           "
         >
@@ -99,8 +101,8 @@ export function NewLanding() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10 cursor-pointer hover:scale-110 transition-transform"
           aria-label="Scroll to timeline"
         >
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/30 rounded-full mt-2"></div>
+          <div className="w-6 h-10 border-2 border-[var(--glass-border)] rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-[var(--glass-border)] rounded-full mt-2"></div>
           </div>
         </a>
       </section>
@@ -109,16 +111,16 @@ export function NewLanding() {
       <TimelineSection onComplete={() => setShowComposer(true)} />
 
       {/* Composer Section */}
-      <section className="bg-muted/50">
+      <section className="bg-[var(--surface)]">
         <ComposerSection isVisible={showComposer} />
       </section>
 
       {/* Featured Brainstorms Teaser */}
-      <section className="bg-slate-600 py-20 px-6">
+      <section className="bg-gradient-to-b from-[var(--surface)] to-[var(--background)] py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Featured Branches</h2>
-            <p className="text-xl text-white/85 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-[var(--text-primary)] mb-4">Featured Branches</h2>
+            <p className="text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
               See how ideas are already blossoming into collaboration
             </p>
           </div>
@@ -128,10 +130,10 @@ export function NewLanding() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-accent/10 py-20 px-6">
+      <section className="bg-[var(--accent)] py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-8">Ready to Start Collaborating?</h2>
-          <p className="text-xl text-white/85 mb-12">
+          <h2 className="text-4xl font-bold text-[var(--accent-on)] mb-8">Ready to Start Collaborating?</h2>
+          <p className="text-xl text-[var(--accent-on)]/85 mb-12">
             Join the community and turn your sparks into meaningful connections.
           </p>
         </div>

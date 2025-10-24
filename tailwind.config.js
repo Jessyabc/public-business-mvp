@@ -84,10 +84,22 @@ export default {
         
         // Semantic color system
         pb: pbColors,
+        
+        // Glass and theme tokens
+        'glass-bg': 'var(--glass-bg)',
+        'glass-border': 'var(--glass-border)',
+        'card-bg': 'var(--card-bg)',
+        'card-fg': 'var(--card-fg)',
+        'card-fg-muted': 'var(--card-fg-muted)',
       },
       boxShadow: {
-        // Legacy glass shadow (deprecated, use elevation classes)
-        glass: "0 8px 32px rgba(0,0,0,0.35)",
+        // Glass shadow for dark theme
+        glass: "0 0 12px rgba(0,0,0,0.35)",
+        'glass-dark': '0 4px 12px rgba(0,0,0,0.4), 0 0 1px rgba(255,255,255,0.1)',
+      },
+      backgroundImage: {
+        'gradient-space': 'linear-gradient(180deg, #0b1f3a 0%, #0d2548 50%, #020d1f 100%)',
+        'gradient-radial': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
       },
       borderRadius: {
         // PB-specific radii

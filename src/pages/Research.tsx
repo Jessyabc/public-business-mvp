@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, TrendingUp, Award, Clock, Filter, FileText, Users, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { GlassCard } from '@/ui/components/GlassCard';
 
 const Research = () => {
   const { mode } = useAppMode();
@@ -50,60 +51,36 @@ const Research = () => {
   };
 
   return (
-    <div className={`min-h-screen p-6 pb-32 transition-all duration-700 ease-in-out ${
-      'bg-background'
-    }`}>
+    <div className="min-h-screen p-6 pb-32 bg-gradient-space">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
-          <div className={`glass-card rounded-3xl p-8 backdrop-blur-xl transition-all duration-700 ${
-            mode === 'public'
-              ? 'border-white/20 bg-black/20'
-              : 'border-blue-200/30 bg-white/40'
-          }`}>
+          <GlassCard padding="lg">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <Search className={`w-8 h-8 ${
-                mode === 'public' ? 'text-[#489FE3]' : 'text-blue-600'
-              }`} />
-              <h1 className={`text-4xl font-light tracking-wide ${
-                mode === 'public' ? 'text-white' : 'text-slate-800'
-              }`}>
+              <Search className="w-8 h-8 text-[var(--accent)]" />
+              <h1 className="text-4xl font-light tracking-wide text-[var(--text-primary)]">
                 Research Hub
               </h1>
             </div>
-            <p className={`mt-2 font-light max-w-2xl mx-auto text-center ${
-              mode === 'public' ? 'text-white/80' : 'text-slate-600'
-            }`}>
+            <p className="mt-2 font-light max-w-2xl mx-auto text-center text-[var(--text-secondary)]">
               Explore high-value business reports, insights, and community brainstorms
             </p>
-          </div>
+          </GlassCard>
         </header>
 
         {/* Search and Filter Controls */}
-        <div className={`glass-card rounded-2xl p-6 mb-8 backdrop-blur-xl transition-all duration-700 ${
-          mode === 'public'
-            ? 'border-white/20 bg-black/20'
-            : 'border-blue-200/30 bg-white/40'
-        }`}>
+        <GlassCard padding="md" className="mb-8">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Input
                 placeholder="Search for insights, reports, or topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${
-                  mode === 'public'
-                    ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60'
-                    : 'bg-white/50 border-blue-200/30'
-                }`}
+                className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
               />
             </div>
             <div className="flex gap-2">
               <Select value={sortBy} onValueChange={handleSort}>
-                <SelectTrigger className={`w-40 ${
-                  mode === 'public'
-                    ? 'bg-white/10 border-white/20 text-white'
-                    : 'bg-white/50 border-blue-200/30'
-                }`}>
+                <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -118,11 +95,7 @@ const Research = () => {
                 </SelectContent>
               </Select>
               <Select value={filterIndustry} onValueChange={handleFilter}>
-                <SelectTrigger className={`w-40 ${
-                  mode === 'public'
-                    ? 'bg-white/10 border-white/20 text-white'
-                    : 'bg-white/50 border-blue-200/30'
-                }`}>
+                <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]">
                   <SelectValue placeholder="Industry" />
                 </SelectTrigger>
                 <SelectContent>
@@ -133,24 +106,16 @@ const Research = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button type="submit" className={`${
-                mode === 'public'
-                  ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}>
+              <Button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-on)]">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
           </form>
-        </div>
+        </GlassCard>
 
         {/* Research Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-4 ${
-            mode === 'public'
-              ? 'bg-black/20 border-white/20'
-              : 'bg-white/40 border-blue-200/30'
-          }`}>
+          <TabsList className="grid w-full grid-cols-4 bg-[var(--glass-bg)] border-[var(--glass-border)]">
             <TabsTrigger value="all" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               All Content
