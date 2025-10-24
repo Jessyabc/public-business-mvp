@@ -35,7 +35,7 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-slow ease-pb max-w-[95vw] sm:max-w-none">
-      <div className={`glass-card rounded-full px-2 sm:px-4 py-2 sm:py-3 glass-content glass-high overflow-x-auto border-2 border-white/20 ${isAdmin() ? 'admin-glow' : ''}`}>
+      <div className={`glass-card rounded-full px-2 sm:px-4 py-2 sm:py-3 glass-content glass-high overflow-x-auto border-2 border-white/20 backdrop-blur-xl bg-white/10 ${isAdmin() ? 'admin-glow' : ''}`}>
         <div className="flex items-center space-x-1 sm:space-x-3 min-w-max">
           {/* Mode Toggle - only show one control */}
           <button 
