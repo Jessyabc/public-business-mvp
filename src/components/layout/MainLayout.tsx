@@ -10,9 +10,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface MainLayoutProps {
   children: ReactNode;
+  noTopPadding?: boolean;
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) {
   const { user } = useAuth();
   const { mode } = useAppMode();
   const location = useLocation();
@@ -29,7 +30,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {!user && <Header />}
       
       {/* Main Content with smooth transitions */}
-      <main className={user ? "min-h-screen pt-16" : "min-h-screen"}>
+      <main className={user ? "min-h-screen pt-16" : noTopPadding ? "min-h-screen" : "min-h-screen pt-24"}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

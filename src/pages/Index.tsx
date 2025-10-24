@@ -29,7 +29,7 @@ const Index = () => {
 
   if (!user) {
     return (
-      <MainLayout>
+      <MainLayout noTopPadding>
         <Landing />
       </MainLayout>
     );
