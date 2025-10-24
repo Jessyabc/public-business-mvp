@@ -183,8 +183,21 @@
 /* ========================================
    Enforce Token-Based Background
    ======================================== */
-:root, body {
+html {
+  background: var(--background) !important;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+body {
   background: var(--background) !important;
   color: var(--text-primary) !important;
   transition: background 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }

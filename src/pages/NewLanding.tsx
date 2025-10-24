@@ -51,7 +51,13 @@ export function NewLanding() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-3 bg-background text-foreground overflow-hidden">
+      <section 
+        className="relative flex flex-col items-center justify-center px-3 bg-background text-foreground overflow-hidden"
+        style={{ 
+          height: '100vh',
+          minHeight: '-webkit-fill-available'
+        }}
+      >
         <BackgroundGlow />
 
         {/* Logo */}
