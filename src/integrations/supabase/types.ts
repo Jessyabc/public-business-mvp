@@ -507,6 +507,94 @@ export type Database = {
         }
         Relationships: []
       }
+      org_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_themes: {
+        Row: {
+          org_id: string
+          tokens: Json
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          org_id: string
+          tokens?: Json
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          org_id?: string
+          tokens?: Json
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_themes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orgs: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          slug: string
+          theme_version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          slug: string
+          theme_version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          theme_version?: number
+        }
+        Relationships: []
+      }
       post_relations: {
         Row: {
           child_post_id: string
@@ -557,6 +645,8 @@ export type Database = {
           likes_count: number | null
           metadata: Json | null
           mode: string
+          org_id: string | null
+          published_at: string | null
           status: string
           t_score: number | null
           title: string | null
@@ -577,6 +667,8 @@ export type Database = {
           likes_count?: number | null
           metadata?: Json | null
           mode: string
+          org_id?: string | null
+          published_at?: string | null
           status?: string
           t_score?: number | null
           title?: string | null
@@ -597,6 +689,8 @@ export type Database = {
           likes_count?: number | null
           metadata?: Json | null
           mode?: string
+          org_id?: string | null
+          published_at?: string | null
           status?: string
           t_score?: number | null
           title?: string | null
@@ -607,7 +701,15 @@ export type Database = {
           views_count?: number | null
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -934,10 +1036,7 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
-      consume_invite: {
-        Args: { p_token: string }
-        Returns: undefined
-      }
+      consume_invite: { Args: { p_token: string }; Returns: undefined }
       create_business_invite: {
         Args: { p_invitee_email: string; p_role?: string; p_ttl_days?: number }
         Returns: {
@@ -945,18 +1044,13 @@ export type Database = {
           token: string
         }[]
       }
-      current_user_email: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_client_ip: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      current_user_email: { Args: never; Returns: string }
+      get_client_ip: { Args: never; Returns: string }
       get_my_roles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      get_user_org_id: { Args: never; Returns: string }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -983,34 +1077,18 @@ export type Database = {
         }
         Returns: boolean
       }
-      hash_ip: {
-        Args: { ip_address: string }
-        Returns: string
-      }
-      increment_post_comments: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
-      increment_post_likes: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
-      increment_post_views: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never> | { uid: string }
-        Returns: boolean
-      }
-      is_business_member: {
-        Args: Record<PropertyKey, never> | { uid: string }
-        Returns: boolean
-      }
-      obfuscate_email: {
-        Args: { email: string }
-        Returns: string
-      }
+      hash_ip: { Args: { ip_address: string }; Returns: string }
+      increment_post_comments: { Args: { post_id: string }; Returns: undefined }
+      increment_post_likes: { Args: { post_id: string }; Returns: undefined }
+      increment_post_views: { Args: { post_id: string }; Returns: undefined }
+      is_admin:
+        | { Args: { uid: string }; Returns: boolean }
+        | { Args: never; Returns: boolean }
+      is_business_member:
+        | { Args: never; Returns: boolean }
+        | { Args: { uid: string }; Returns: boolean }
+      is_org_member: { Args: { p_org_id: string }; Returns: boolean }
+      obfuscate_email: { Args: { email: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"

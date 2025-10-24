@@ -99,20 +99,16 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         insertData.type = 'business_insight';
         insertData.visibility = 'org_public';
         insertData.mode = 'business';
-        // For alpha: org_id needs to be set by the user's org membership
-        // The RLS policy will validate this, so we query for user's org
-        const { data: orgData } = await supabase
-          .rpc('get_user_org_id' as any)
-          .maybeSingle() as any;
+        // Get the user's org_id from their membership
+        const { data: orgId, error: orgError } = await supabase.rpc('get_user_org_id');
         
-        if (orgData?.org_id) {
-          insertData.org_id = orgData.org_id;
-        } else {
-          // Fallback: try to get from a direct query (may fail due to types)
-          toast.error('Unable to determine organization membership. Please contact support.');
+        if (orgError || !orgId) {
+          toast.error('You must be a member of an organization to create business insights');
           setIsSubmitting(false);
           return;
         }
+        
+        insertData.org_id = orgId;
 
         if (title.trim()) {
           insertData.title = title.trim();
