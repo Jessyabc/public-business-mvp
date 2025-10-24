@@ -4,9 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Calendar, Eye, Heart, MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import styles from '@/components/effects/glassSurface.module.css';
 
 interface PostModalProps {
   isOpen: boolean;
@@ -88,9 +87,10 @@ export function PostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-2xl max-h-[80vh] overflow-y-auto ${styles.glassSurface} border-white/20 backdrop-blur-xl`}>
-        {/* Header */}
-        <DialogHeader className="space-y-4">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
+        <GlassSurface className="space-y-4">
+          {/* Header */}
+          <DialogHeader className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 flex-1">
               {emoji && (
@@ -117,14 +117,14 @@ export function PostModal({
               variant="ghost" 
               size="sm" 
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             >
               <X className="w-4 h-4" />
             </Button>
           </div>
 
           {/* Author and Date */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center justify-between text-sm text-[var(--text-secondary)]">
             <div className="flex items-center gap-2">
               <Avatar className="w-6 h-6">
                 <AvatarFallback className="text-xs">
@@ -140,53 +140,54 @@ export function PostModal({
           </div>
         </DialogHeader>
 
-        {/* Content */}
-        <div className="space-y-4">
-          <div className="prose prose-sm max-w-none">
-            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-              {content}
-            </p>
+          {/* Content */}
+          <div className="space-y-4">
+            <div className="prose prose-sm max-w-none">
+              <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
+                {content}
+              </p>
+            </div>
+
+            {/* Tags */}
+            {tags && tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag, index) => (
+                  <Badge 
+                    key={index} 
+                    variant="secondary" 
+                    className="text-xs bg-[var(--glass-bg)] border-[var(--glass-border)]"
+                  >
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Stats */}
+            {stats && (
+              <div className="flex items-center gap-4 pt-4 border-t border-[var(--glass-border)]">
+                {stats.likes && (
+                  <div className="flex items-center gap-1 text-sm text-[var(--text-secondary)]">
+                    <Heart className="w-4 h-4" />
+                    {stats.likes}
+                  </div>
+                )}
+                {stats.comments && (
+                  <div className="flex items-center gap-1 text-sm text-[var(--text-secondary)]">
+                    <MessageCircle className="w-4 h-4" />
+                    {stats.comments}
+                  </div>
+                )}
+                {stats.views && (
+                  <div className="flex items-center gap-1 text-sm text-[var(--text-secondary)]">
+                    <Eye className="w-4 h-4" />
+                    {stats.views} views
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-
-          {/* Tags */}
-          {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
-                <Badge 
-                  key={index} 
-                  variant="secondary" 
-                  className="text-xs bg-white/10 border-white/20"
-                >
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* Stats */}
-          {stats && (
-            <div className="flex items-center gap-4 pt-4 border-t border-white/10">
-              {stats.likes && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Heart className="w-4 h-4" />
-                  {stats.likes}
-                </div>
-              )}
-              {stats.comments && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <MessageCircle className="w-4 h-4" />
-                  {stats.comments}
-                </div>
-              )}
-              {stats.views && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Eye className="w-4 h-4" />
-                  {stats.views} views
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        </GlassSurface>
       </DialogContent>
     </Dialog>
   );

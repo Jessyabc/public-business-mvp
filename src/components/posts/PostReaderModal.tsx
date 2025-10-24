@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, User, Reply } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { Post } from "@/hooks/usePosts";
@@ -54,16 +54,13 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto backdrop-blur-xl border ${
-        mode === 'public' 
-          ? 'bg-black/20 border-white/20' 
-          : 'glass-business border-slate-500/30'
-      }`}>
-        <DialogHeader>
-          <DialogTitle className="sr-only">Post Details</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
+        <GlassSurface>
+          <DialogHeader>
+            <DialogTitle className="sr-only">Post Details</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
           {/* Post Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
@@ -74,8 +71,8 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-foreground">{post.user_id}</p>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <p className="font-medium text-[var(--text-primary)]">{post.user_id}</p>
+                <div className="flex items-center space-x-2 text-sm text-[var(--text-secondary)]">
                   <Calendar className="h-3 w-3" />
                   <span>{formatDate(post.created_at)}</span>
                 </div>
@@ -91,93 +88,87 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
             </div>
           </div>
 
-          {/* Post Content */}
-          <Card className={`${
-            mode === 'public' 
-              ? 'glass-ios-card border-white/20' 
-              : 'glass-business-card border-slate-500/30'
-          }`}>
-            <CardHeader>
+            {/* Post Content */}
+            <GlassSurface inset className="space-y-4">
               {post.title && (
-                <h2 className="text-2xl font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
                   {post.title}
                 </h2>
               )}
-            </CardHeader>
-            <CardContent className="space-y-4">
+              
               <div className="prose prose-invert max-w-none">
-                <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+                <p className="text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
                   {post.content}
                 </p>
               </div>
 
               {/* Post Metadata */}
               {post.metadata && Object.keys(post.metadata).length > 0 && (
-                <div className="mt-6 p-4 rounded-lg bg-black/20 border border-white/10">
-                  <h4 className="text-sm font-medium text-foreground mb-2">Additional Information</h4>
-                  <pre className="text-xs text-muted-foreground overflow-x-auto">
+                <div className="mt-6 p-4 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+                  <h4 className="text-sm font-medium text-[var(--text-primary)] mb-2">Additional Information</h4>
+                  <pre className="text-xs text-[var(--text-secondary)] overflow-x-auto">
                     {JSON.stringify(post.metadata, null, 2)}
                   </pre>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </GlassSurface>
 
-          {/* Post Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-white/10">
-            <div className="flex items-center space-x-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Heart className="h-4 w-4 mr-2" />
-                {post.likes_count || 0}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                {post.comments_count || 0}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                {post.views_count || 0}
-              </Button>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => openComposer({ parentPostId: post.id, relationType: 'continuation' })}
-              >
-                <Reply className="h-4 w-4 mr-2" />
-                Reply
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Bookmark className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
+            {/* Post Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
+              <div className="flex items-center space-x-6">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  {post.likes_count || 0}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  {post.comments_count || 0}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {post.views_count || 0}
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  onClick={() => openComposer({ parentPostId: post.id, relationType: 'continuation' })}
+                >
+                  <Reply className="h-4 w-4 mr-2" />
+                  Reply
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <Bookmark className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <Share2 className="h-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </GlassSurface>
       </DialogContent>
     </Dialog>
   );

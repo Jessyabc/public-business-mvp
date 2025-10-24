@@ -3,11 +3,9 @@ const { useState } = React;
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { GlassInput } from '@/components/ui/GlassInput';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -105,28 +103,27 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
   };
 
   return (
-    <Card className={`glass-card border-white/20 ${className}`}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <Shield className="h-5 w-5 text-blue-400" />
+    <GlassSurface className={className}>
+      <div className="mb-6">
+        <h3 className="flex items-center gap-2 text-xl font-semibold text-[var(--text-primary)] mb-2">
+          <Shield className="h-5 w-5 text-[var(--accent)]" />
           Secure Contact Form
-        </CardTitle>
-        <p className="text-blue-200 text-sm">
+        </h3>
+        <p className="text-[var(--text-secondary)] text-sm">
           Your information is protected and will never be shared publicly.
         </p>
-      </CardHeader>
+      </div>
       
-      <CardContent>
+      <div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name" className="text-blue-100">
+              <Label htmlFor="name" className="text-[var(--text-primary)]">
                 Name *
               </Label>
-              <Input
+              <GlassInput
                 id="name"
                 {...register('name')}
-                className="bg-white/10 border-white/20 text-white placeholder-blue-300"
                 placeholder="Your full name"
                 disabled={isSubmitting}
               />
@@ -136,14 +133,13 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-blue-100">
+              <Label htmlFor="email" className="text-[var(--text-primary)]">
                 Email *
               </Label>
-              <Input
+              <GlassInput
                 id="email"
                 type="email"
                 {...register('email')}
-                className="bg-white/10 border-white/20 text-white placeholder-blue-300"
                 placeholder="your@email.com"
                 disabled={isSubmitting}
               />
@@ -155,27 +151,25 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="company" className="text-blue-100">
+              <Label htmlFor="company" className="text-[var(--text-primary)]">
                 Company
               </Label>
-              <Input
+              <GlassInput
                 id="company"
                 {...register('company')}
-                className="bg-white/10 border-white/20 text-white placeholder-blue-300"
                 placeholder="Your company (optional)"
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <Label htmlFor="phone" className="text-blue-100">
+              <Label htmlFor="phone" className="text-[var(--text-primary)]">
                 Phone
               </Label>
-              <Input
+              <GlassInput
                 id="phone"
                 type="tel"
                 {...register('phone')}
-                className="bg-white/10 border-white/20 text-white placeholder-blue-300"
                 placeholder="Your phone number (optional)"
                 disabled={isSubmitting}
               />
@@ -183,13 +177,12 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
           </div>
 
           <div>
-            <Label htmlFor="subject" className="text-blue-100">
+            <Label htmlFor="subject" className="text-[var(--text-primary)]">
               Subject *
             </Label>
-            <Input
+            <GlassInput
               id="subject"
               {...register('subject')}
-              className="bg-white/10 border-white/20 text-white placeholder-blue-300"
               placeholder="What is this regarding?"
               disabled={isSubmitting}
             />
@@ -199,14 +192,14 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
           </div>
 
           <div>
-            <Label htmlFor="message" className="text-blue-100">
+            <Label htmlFor="message" className="text-[var(--text-primary)]">
               Message *
             </Label>
-            <Textarea
+            <GlassInput
+              as="textarea"
               id="message"
               rows={4}
               {...register('message')}
-              className="bg-white/10 border-white/20 text-white placeholder-blue-300 resize-none"
               placeholder="Please provide details about your inquiry..."
               disabled={isSubmitting}
             />
@@ -234,27 +227,27 @@ export function SecureContactForm({ className, onSuccess }: SecureContactFormPro
             </Alert>
           )}
 
-          <Button
+          <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full glassButton glassButton--accent"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
                 Sending Message...
               </>
             ) : (
               'Send Secure Message'
             )}
-          </Button>
+          </button>
 
-          <p className="text-xs text-blue-300 text-center">
+          <p className="text-xs text-[var(--text-secondary)] text-center">
             Protected by rate limiting and spam prevention. 
             Your email address will not be exposed publicly.
           </p>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </GlassSurface>
   );
 }

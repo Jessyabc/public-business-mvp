@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { GlassSurface } from "@/components/ui/GlassSurface";
+import { GlassInput } from "@/components/ui/GlassInput";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { GlassCard } from "@/ui/components/GlassCard";
 import { Lightbulb } from "lucide-react";
-import styles from "@/components/effects/glassSurface.module.css";
 
 interface OpenIdeaFormProps {
   onSuccess?: (ideaId: string) => void;
@@ -99,62 +96,61 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
 
   if (submitted) {
     return (
-      <GlassCard className="glass-card rounded-3xl text-center" padding="lg">
+      <GlassSurface className="rounded-3xl text-center p-8">
         <div className="mb-4">
-          <Lightbulb className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-foreground mb-2">
+          <Lightbulb className="w-16 h-16 text-[var(--accent)] mx-auto mb-4" />
+          <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
             Nice. We planted your idea.
           </h3>
-          <p className="text-muted-foreground mb-6">
-            Track it here: <a href={ideaUrl} className="text-primary underline">{ideaUrl}</a>
+          <p className="text-[var(--text-secondary)] mb-6">
+            Track it here: <a href={ideaUrl} className="text-[var(--accent)] underline">{ideaUrl}</a>
           </p>
         </div>
-        <Button
+        <button
           onClick={() => {
             setSubmitted(false);
             setContent("");
             setEmail("");
           }}
-          variant="outline"
-          className={`${styles.glassButton} bg-white/10 hover:bg-white/20 border border-white/30`}
+          className="glassButton glassButton--muted"
         >
           Share Another Idea
-        </Button>
-      </GlassCard>
+        </button>
+      </GlassSurface>
     );
   }
 
   return (
-    <GlassCard className="glass-card rounded-3xl" padding="lg">
+    <GlassSurface className="rounded-3xl p-8">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <Textarea
+          <GlassInput
+            as="textarea"
             placeholder="What's the question you can't stop thinking about?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[120px] glass-input border-pb-blue/20 resize-none focus-glass"
+            rows={5}
             maxLength={280}
             required
           />
-          <div className="flex justify-between text-sm text-pb-text2 mt-2">
+          <div className="flex justify-between text-sm text-[var(--text-secondary)] mt-2">
             <span>{content.length < 10 ? `${10 - content.length} more needed` : "Perfect length"}</span>
             <span>{content.length}/280</span>
           </div>
         </div>
 
         <div>
-          <Input
+          <GlassInput
             type="email"
             placeholder="Email for updates (optional)"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="glass-input border-pb-blue/20 focus-glass"
           />
         </div>
 
         {/* Honeypot field - hidden */}
         <div style={{ display: "none" }}>
-          <Input
+          <GlassInput
             type="text"
             name="website"
             value={website}
@@ -164,14 +160,14 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
           />
         </div>
 
-        <Button
+        <button
           type="submit"
           disabled={isSubmitting || content.length < 10 || content.length > 280}
-          className={`w-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border border-pb-blue/30 h-12 text-lg font-medium rounded-xl interactive-glass`}
+          className="w-full glassButton glassButton--accent h-12 text-lg font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Planting..." : "Drop Your Idea"}
-        </Button>
+        </button>
       </form>
-    </GlassCard>
+    </GlassSurface>
   );
 }

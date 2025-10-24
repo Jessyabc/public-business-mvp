@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Card } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 import { Switch } from '@/components/ui/switch';
 import { Shield, Eye, BarChart3, Cookie } from 'lucide-react';
 import {
@@ -57,101 +57,101 @@ export function ConsentDialog({ open, onConsentChange }: ConsentDialogProps) {
 
   return (
     <Dialog open={open}>
-      <DialogContent className="max-w-2xl glass-card border-white/20">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl text-white">
-            <Shield className="h-5 w-5 text-blue-400" />
-            Privacy & Cookie Consent
-          </DialogTitle>
-          <DialogDescription className="text-blue-200">
-            We respect your privacy. Choose how we can use cookies and collect data to improve your experience.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
+        <GlassSurface>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl text-[var(--text-primary)]">
+              <Shield className="h-5 w-5 text-[var(--accent)]" />
+              Privacy & Cookie Consent
+            </DialogTitle>
+            <DialogDescription className="text-[var(--text-secondary)]">
+              We respect your privacy. Choose how we can use cookies and collect data to improve your experience.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4 my-6">
-          {/* Essential Cookies */}
-          <Card className="p-4 bg-white/5 border-white/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Cookie className="h-5 w-5 text-blue-400" />
-                <div>
-                  <h4 className="font-medium text-white">Essential</h4>
-                  <p className="text-sm text-blue-200">Required for basic site functionality</p>
+          <div className="space-y-4 my-6">
+            {/* Essential Cookies */}
+            <GlassSurface inset>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Cookie className="h-5 w-5 text-[var(--accent)]" />
+                  <div>
+                    <h4 className="font-medium text-[var(--text-primary)]">Essential</h4>
+                    <p className="text-sm text-[var(--text-secondary)]">Required for basic site functionality</p>
                 </div>
               </div>
               <Switch 
                 checked={preferences.functional} 
                 disabled={true}
-                className="opacity-50"
-              />
-            </div>
-          </Card>
+                  className="opacity-50"
+                />
+              </div>
+            </GlassSurface>
 
-          {/* Analytics */}
-          <Card className="p-4 bg-white/5 border-white/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="h-5 w-5 text-green-400" />
-                <div>
-                  <h4 className="font-medium text-white">Analytics</h4>
-                  <p className="text-sm text-blue-200">Help us understand how you use our site</p>
+            {/* Analytics */}
+            <GlassSurface inset>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="h-5 w-5 text-[var(--accent)]" />
+                  <div>
+                    <h4 className="font-medium text-[var(--text-primary)]">Analytics</h4>
+                    <p className="text-sm text-[var(--text-secondary)]">Help us understand how you use our site</p>
+                  </div>
+                </div>
+                <Switch 
+                  checked={preferences.analytics} 
+                  onCheckedChange={(checked) => updatePreference('analytics', checked)}
+                />
+              </div>
+            </GlassSurface>
+
+            {/* Marketing */}
+            <GlassSurface inset>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Eye className="h-5 w-5 text-[var(--accent)]" />
+                  <div>
+                    <h4 className="font-medium text-[var(--text-primary)]">Marketing</h4>
+                    <p className="text-sm text-[var(--text-secondary)]">Personalized content and advertisements</p>
                 </div>
               </div>
-              <Switch 
-                checked={preferences.analytics} 
-                onCheckedChange={(checked) => updatePreference('analytics', checked)}
-              />
-            </div>
-          </Card>
-
-          {/* Marketing */}
-          <Card className="p-4 bg-white/5 border-white/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Eye className="h-5 w-5 text-purple-400" />
-                <div>
-                  <h4 className="font-medium text-white">Marketing</h4>
-                  <p className="text-sm text-blue-200">Personalized content and advertisements</p>
-                </div>
+                <Switch 
+                  checked={preferences.marketing} 
+                  onCheckedChange={(checked) => updatePreference('marketing', checked)}
+                />
               </div>
-              <Switch 
-                checked={preferences.marketing} 
-                onCheckedChange={(checked) => updatePreference('marketing', checked)}
-              />
-            </div>
-          </Card>
-        </div>
+            </GlassSurface>
+          </div>
 
-        <DialogFooter className="gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleRejectAll}
-            className="border-white/20 text-white hover:bg-white/10"
-          >
-            Reject All
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleCustomSave}
-            className="border-white/20 text-white hover:bg-white/10"
-          >
-            Save Preferences
-          </Button>
-          <Button 
-            onClick={handleAcceptAll}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Accept All
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="gap-2">
+            <button 
+              onClick={handleRejectAll}
+              className="glassButton glassButton--muted"
+            >
+              Reject All
+            </button>
+            <button 
+              onClick={handleCustomSave}
+              className="glassButton"
+            >
+              Save Preferences
+            </button>
+            <button 
+              onClick={handleAcceptAll}
+              className="glassButton glassButton--accent"
+            >
+              Accept All
+            </button>
+          </DialogFooter>
 
-        <p className="text-xs text-blue-300 mt-4">
-          You can change these preferences at any time in your privacy settings. 
-          For more information, see our{' '}
-          <a href="/privacy-policy" className="text-blue-400 hover:underline">
-            Privacy Policy
-          </a>.
-        </p>
+          <p className="text-xs text-[var(--text-secondary)] mt-4">
+            You can change these preferences at any time in your privacy settings. 
+            For more information, see our{' '}
+            <a href="/privacy-policy" className="text-[var(--accent)] hover:underline">
+              Privacy Policy
+            </a>.
+          </p>
+        </GlassSurface>
       </DialogContent>
     </Dialog>
   );
