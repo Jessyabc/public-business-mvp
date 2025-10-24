@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { GlassInput } from "@/components/ui/GlassInput";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 import { Label } from "@/components/ui/label";
 import { Brain, FileText, AlertCircle } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
@@ -142,8 +142,8 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const renderPublicForm = () => (
     <div className="space-y-4">
       <div className="flex items-center space-x-2 mb-4">
-        <Brain className="w-5 h-5 text-primary" />
-        <h3 className="text-lg font-semibold">New Brainstorm</h3>
+        <Brain className="w-5 h-5 text-[var(--accent)]" />
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Brainstorm</h3>
       </div>
       
       <div className="space-y-2">
@@ -154,61 +154,65 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your idea, thought, or insight..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="min-h-[200px]"
+          rows={6}
           maxLength={PUBLIC_MAX_CHARS}
         />
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-xs text-[var(--text-secondary)]">
           <span>Required</span>
-          <span className={content.length > PUBLIC_MAX_CHARS * 0.9 ? 'text-destructive' : ''}>
+          <span className={content.length > PUBLIC_MAX_CHARS * 0.9 ? 'text-red-400' : ''}>
             {content.length} / {PUBLIC_MAX_CHARS}
           </span>
         </div>
       </div>
 
       <div className="flex justify-end space-x-2 pt-2">
-        <Button variant="outline" onClick={handleClose}>
+        <button className="glassButton glassButton--muted" onClick={handleClose}>
           Cancel
-        </Button>
-        <Button onClick={handleCreate} disabled={!canSubmit || isSubmitting}>
+        </button>
+        <button 
+          className="glassButton glassButton--accent" 
+          onClick={handleCreate} 
+          disabled={!canSubmit || isSubmitting}
+        >
           {isSubmitting ? 'Creating...' : 'Create Brainstorm'}
-        </Button>
+        </button>
       </div>
     </div>
   );
 
   const renderBusinessForm = () => {
     if (!isBusinessMember()) {
-      return (
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2 mb-4">
-            <FileText className="w-5 h-5 text-foreground" />
-            <h3 className="text-lg font-semibold">New Business Insight</h3>
-          </div>
-          
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-            <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Business membership required</p>
-              <p className="text-xs text-muted-foreground">
-                You need to be a member of an organization to create business insights.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button variant="outline" onClick={handleClose}>
-              Close
-            </Button>
-          </div>
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2 mb-4">
+          <FileText className="w-5 h-5 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Business Insight</h3>
         </div>
-      );
+        
+        <GlassSurface inset className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-[var(--text-primary)]">Business membership required</p>
+            <p className="text-xs text-[var(--text-secondary)]">
+              You need to be a member of an organization to create business insights.
+            </p>
+          </div>
+        </GlassSurface>
+
+        <div className="flex justify-end pt-2">
+          <button className="glassButton glassButton--muted" onClick={handleClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    );
     }
 
     return (
       <div className="space-y-4">
         <div className="flex items-center space-x-2 mb-4">
-          <FileText className="w-5 h-5 text-foreground" />
-          <h3 className="text-lg font-semibold">New Business Insight</h3>
+          <FileText className="w-5 h-5 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Business Insight</h3>
         </div>
         
         <div className="space-y-2">
@@ -233,24 +237,28 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
             placeholder="Share your professional insight, analysis, or findings..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[200px]"
+            rows={6}
             maxLength={BUSINESS_MAX_CHARS}
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-xs text-[var(--text-secondary)]">
             <span>Required</span>
-            <span className={content.length > BUSINESS_MAX_CHARS * 0.9 ? 'text-destructive' : ''}>
+            <span className={content.length > BUSINESS_MAX_CHARS * 0.9 ? 'text-red-400' : ''}>
               {content.length} / {BUSINESS_MAX_CHARS}
             </span>
           </div>
         </div>
 
         <div className="flex justify-end space-x-2 pt-2">
-          <Button variant="outline" onClick={handleClose}>
+          <button className="glassButton glassButton--muted" onClick={handleClose}>
             Cancel
-          </Button>
-          <Button onClick={handleCreate} disabled={!canSubmit || isSubmitting}>
+          </button>
+          <button 
+            className="glassButton glassButton--accent" 
+            onClick={handleCreate} 
+            disabled={!canSubmit || isSubmitting}
+          >
             {isSubmitting ? 'Creating...' : 'Create Insight'}
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -258,20 +266,22 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
-        <DialogHeader>
-          <DialogTitle className="sr-only">
-            {isPublicMode ? 'Create New Brainstorm' : 'Create New Business Insight'}
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            {isPublicMode 
-              ? 'Share a spark of inspiration with the community'
-              : 'Share professional knowledge with your organization'
-            }
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-lg border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
+        <GlassSurface inset>
+          <DialogHeader>
+            <DialogTitle className="sr-only">
+              {isPublicMode ? 'Create New Brainstorm' : 'Create New Business Insight'}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {isPublicMode 
+                ? 'Share a spark of inspiration with the community'
+                : 'Share professional knowledge with your organization'
+              }
+            </DialogDescription>
+          </DialogHeader>
 
-        {isPublicMode ? renderPublicForm() : renderBusinessForm()}
+          {isPublicMode ? renderPublicForm() : renderBusinessForm()}
+        </GlassSurface>
       </DialogContent>
     </Dialog>
   );

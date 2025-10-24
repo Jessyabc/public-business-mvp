@@ -96,19 +96,18 @@ export function Header() {
             <div className="hidden lg:flex items-center space-x-4">
               {!user ? (
                 <>
-                  <Button 
-                    variant="ghost" 
+                  <button 
                     onClick={() => setShowAuthModal(true)} 
-                    className="border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)]"
+                    className="glassButton glassButton--muted"
                   >
                     Login
-                  </Button>
-                  <Button 
+                  </button>
+                  <button 
                     onClick={() => setShowAuthModal(true)} 
-                    className="bg-[var(--accent)] text-[var(--accent-on)] border border-[var(--accent)] hover:bg-[var(--accent)]/80"
+                    className="glassButton glassButton--accent"
                   >
                     Sign Up
-                  </Button>
+                  </button>
                 </>
               ) : (
                 <DropdownMenu>
@@ -176,19 +175,18 @@ export function Header() {
                 <div className="flex flex-col space-y-2 pt-4 border-t border-pb-blue/20">
                   {!user ? (
                     <>
-                      <Button 
-                        variant="ghost" 
+                      <button 
                         onClick={() => setShowAuthModal(true)} 
-                        className="border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)]"
+                        className="glassButton glassButton--muted w-full"
                       >
                         Login
-                      </Button>
-                      <Button 
+                      </button>
+                      <button 
                         onClick={() => setShowAuthModal(true)} 
-                        className="bg-[var(--accent)] text-[var(--accent-on)] hover:bg-[var(--accent)]/80"
+                        className="glassButton glassButton--accent w-full"
                       >
                         Sign Up
-                      </Button>
+                      </button>
                     </>
                   ) : (
                     <>

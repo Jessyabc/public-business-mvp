@@ -3,20 +3,24 @@ import { cn } from '@/lib/utils';
 
 interface GlassInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement>, 'as'> {
   as?: 'input' | 'textarea';
+  rows?: number;
 }
 
 export const GlassInput = React.forwardRef<
   HTMLInputElement | HTMLTextAreaElement,
   GlassInputProps
->(({ className, as: Component = 'input', ...props }, ref) => {
+>(({ className, as: Component = 'input', rows, ...props }, ref) => {
   const baseClasses = cn(
     'w-full rounded-lg px-4 py-3',
-    'bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]',
-    'border border-[var(--glass-border)]',
-    'text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]',
-    'focus:outline-none focus:ring-2 focus:ring-[var(--focus)]',
+    'border outline-none',
+    'bg-[var(--glass-bg)]',
+    'border-[var(--glass-border)]',
+    'backdrop-blur-[var(--glass-blur)]',
+    'text-[var(--text-primary)]',
+    'placeholder:text-[var(--text-secondary)]',
+    'focus:ring-2 focus:ring-[var(--focus)] focus:border-transparent',
     'transition-all duration-200',
-    Component === 'textarea' && 'resize-none min-h-[100px]',
+    Component === 'textarea' && 'resize-none',
     className,
   );
 
@@ -25,6 +29,7 @@ export const GlassInput = React.forwardRef<
       <textarea
         ref={ref as React.Ref<HTMLTextAreaElement>}
         className={baseClasses}
+        rows={rows || 6}
         {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
       />
     );

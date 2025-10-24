@@ -99,13 +99,13 @@
   --background: #0b1f3a;
   --surface: #0f274a;
   --surface-raised: #132f54;
-  --text-primary: #e8eef6;
-  --text-secondary: #a9b7c7;
+  --text-primary: #E6F0FF;
+  --text-secondary: #9FB4D1;
   --text-tertiary: #6b7e94;
-  --accent: #489FE3;
-  --accent-on: #0b1f3a;
-  --border: rgba(255,255,255,0.15);
-  --focus: #60A5FA;
+  --accent: #1E66F5;
+  --accent-on: #FFFFFF;
+  --border: rgba(180,200,255,0.18);
+  --focus: #7AA2FF;
 
   /* Elevation tokens – enhanced for dark theme */
   --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.3);
@@ -122,23 +122,23 @@
   --radius-xl: 24px;
 
   /* Glass effect tokens – translucent panels for dark theme */
-  --glass-fill: rgba(255, 255, 255, 0.10);
-  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-fill: rgba(8, 19, 40, 0.55);
+  --glass-border: rgba(180, 200, 255, 0.18);
   --glass-blur: 16px;
-  --glass-bg: rgba(255, 255, 255, 0.10);
+  --glass-bg: rgba(8, 19, 40, 0.55);
   --glass-vibrancy: 1.15;
   --glass-bright: 1.06;
   --glass-refraction-blur: 6px;
   --glass-displace: 10;
 
   /* Card tokens – glass surface for dark theme */
-  --card-bg: rgba(255, 255, 255, 0.08);
-  --card-fg: #e8eef6;
-  --card-fg-muted: #a9b7c7;
-  --card-border: rgba(255, 255, 255, 0.12);
-  --card-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 1px rgba(255,255,255,0.1);
-  --card-bg-hover: rgba(255, 255, 255, 0.12);
-  --card-ring: #60A5FA;
+  --card-bg: rgba(8, 19, 40, 0.55);
+  --card-fg: #E6F0FF;
+  --card-fg-muted: #9FB4D1;
+  --card-border: rgba(180, 200, 255, 0.18);
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 1px rgba(180,200,255,0.1);
+  --card-bg-hover: rgba(8, 19, 40, 0.7);
+  --card-ring: #7AA2FF;
   
   /* Legacy tokens for backward compatibility */
   --pb-blue: #489FE3;
@@ -248,4 +248,48 @@ body {
 #root {
   min-height: 100vh;
   min-height: -webkit-fill-available;
+}
+
+/* ========================================
+   Glass Button Utility
+   ======================================== */
+@layer components {
+  .glassButton {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .glassButton:hover {
+    background: color-mix(in oklab, var(--glass-bg), white 4%);
+  }
+  
+  .glassButton:active {
+    transform: translateY(1px);
+  }
+  
+  .glassButton--accent {
+    background: var(--accent);
+    color: var(--accent-on);
+    border-color: var(--accent);
+  }
+  
+  .glassButton--accent:hover {
+    background: color-mix(in oklab, var(--accent), white 8%);
+  }
+  
+  .glassButton--muted {
+    color: var(--text-secondary);
+  }
+  
+  .glassButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
