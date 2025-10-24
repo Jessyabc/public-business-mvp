@@ -103,8 +103,10 @@ export function TimelineSection({ onComplete }: TimelineSectionProps) {
   };
 
   return (
-    <section className="py-20 px-6">
-      <div className="max-w-4xl mx-auto">
+    <section id="timeline" className="py-20 px-6 relative overflow-hidden">
+      {/* Background with brand color hues */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-pb-blue/5 to-background pointer-events-none" aria-hidden="true" />
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Scroll indicator */}
         <div className="text-center mb-16">
           <ChevronDown className="w-8 h-8 text-pb-blue mx-auto animate-bounce" />
