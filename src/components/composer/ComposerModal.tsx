@@ -4,200 +4,147 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Brain, Sparkles, FileText, Lock, Link2 } from "lucide-react";
+import { Brain, FileText, AlertCircle } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { toast } from 'sonner';
-
-type RelationType = 'continuation' | 'linking';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const PUBLIC_MAX_CHARS = 5000;
+const BUSINESS_MAX_CHARS = 10000;
+
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const { mode } = useAppMode();
-  const { canCreateBusinessPosts } = useUserRoles();
-  const { context, setContext } = useComposerStore();
-  const [composerType, setComposerType] = useState<'brainstorm' | 'insight' | null>(null);
+  const { user } = useAuth();
+  const { isBusinessMember } = useUserRoles();
+  const { setContext } = useComposerStore();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
-  const [postType, setPostType] = useState<string>("");
-  const [visibility, setVisibility] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [relationType, setRelationType] = useState<RelationType>('continuation');
 
-  const handleRelationTypeChange = (value: RelationType | '') => {
-    if (value) {
-      setRelationType(value);
-    }
-  };
+  const isPublicMode = mode === 'public';
+  const maxChars = isPublicMode ? PUBLIC_MAX_CHARS : BUSINESS_MAX_CHARS;
+  const canSubmit = content.trim().length > 0 && content.length <= maxChars;
 
+  // Load draft from localStorage
   useEffect(() => {
-    if (context?.relationType) {
-      setRelationType(context.relationType);
+    if (isOpen) {
+      const draftKey = isPublicMode ? 'composer:brainstorm' : 'composer:insight';
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        try {
+          const draft = JSON.parse(savedDraft);
+          setContent(draft.content || '');
+          setTitle(draft.title || '');
+        } catch (e) {
+          console.error('Failed to load draft:', e);
+        }
+      }
     }
-  }, [context?.relationType]);
+  }, [isOpen, isPublicMode]);
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (isOpen && (content || title)) {
+      const draftKey = isPublicMode ? 'composer:brainstorm' : 'composer:insight';
+      const draft = { content, title };
+      localStorage.setItem(draftKey, JSON.stringify(draft));
+    }
+  }, [content, title, isOpen, isPublicMode]);
 
   const handleClose = () => {
-    setComposerType(null);
     setContent("");
     setTitle("");
-    setPostType("");
-    setVisibility("");
-    setRelationType('continuation');
     setContext(null);
     onClose();
   };
 
+  const clearDraft = () => {
+    const draftKey = isPublicMode ? 'composer:brainstorm' : 'composer:insight';
+    localStorage.removeItem(draftKey);
+  };
+
   const handleCreate = async () => {
-    if (!content.trim()) return;
+    if (!canSubmit || isSubmitting) return;
+
+    // Business mode validation
+    if (!isPublicMode && !isBusinessMember()) {
+      toast.error('Business membership required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Map composer types to post kinds
-      let kind: string;
-      if (composerType === 'brainstorm') {
-        kind = context?.parentPostId ? 'brainstorm_continue' : 'brainstorm';
-      } else {
-        // Map post types to kinds
-        const typeMap: Record<string, string> = {
-          'insight': 'insight',
-          'report': 'insight',
-          'whitepaper': 'white_paper',
-          'webinar': 'insight',
-          'video': mode === 'public' ? 'video_brainstorm' : 'video_insight',
-        };
-        kind = typeMap[postType] || 'insight';
-      }
-
-      const postData = {
-        kind,
+      const insertData: any = {
+        user_id: user?.id,
         content: content.trim(),
-        ...(title.trim() && { title: title.trim() }),
-        ...(context?.parentPostId && { parent_post_id: context.parentPostId }),
-        tags: [], // Could be added in future
-        meta: {
-          visibility: visibility || 'public',
-          mode: mode,
-          composer_type: composerType,
-          post_type: postType,
-        },
+        published_at: new Date().toISOString(),
       };
 
-      console.log('Creating post via edge function:', postData);
+      if (isPublicMode) {
+        // Public brainstorm
+        insertData.type = 'brainstorm';
+        insertData.visibility = 'public';
+        insertData.mode = 'public';
+        insertData.org_id = null;
+      } else {
+        // Business insight - org_id will be determined by RLS/backend
+        insertData.type = 'business_insight';
+        insertData.visibility = 'org_public';
+        insertData.mode = 'business';
+        // For alpha: org_id needs to be set by the user's org membership
+        // The RLS policy will validate this, so we query for user's org
+        const { data: orgData } = await supabase
+          .rpc('get_user_org_id' as any)
+          .maybeSingle() as any;
+        
+        if (orgData?.org_id) {
+          insertData.org_id = orgData.org_id;
+        } else {
+          // Fallback: try to get from a direct query (may fail due to types)
+          toast.error('Unable to determine organization membership. Please contact support.');
+          setIsSubmitting(false);
+          return;
+        }
 
-      const { data, error } = await supabase.functions.invoke('create-post', {
-        body: postData,
-      });
+        if (title.trim()) {
+          insertData.title = title.trim();
+        }
+      }
+
+      const { error } = await supabase
+        .from('posts')
+        .insert(insertData);
 
       if (error) {
         console.error('Error creating post:', error);
-        toast.error('Failed to create post');
+        if (error.message.includes('org_id')) {
+          toast.error('You must be a member of an organization to create business insights');
+        } else {
+          toast.error(error.message || 'Failed to create post');
+        }
         return;
       }
 
-      console.log('Post created successfully:', data);
-      toast.success(`${composerType === 'brainstorm' ? 'Brainstorm' : 'Post'} created successfully and is pending approval`);
-      
-      // If this is a relation (continuation/linking), create the post relation
-      if (context?.parentPostId && data?.post_id) {
-        try {
-          const { error: relationError } = await supabase
-            .from('post_relations')
-            .insert({
-              parent_post_id: context.parentPostId,
-              child_post_id: data.post_id,
-              relation_type: relationType,
-            });
-          
-          if (relationError) {
-            console.error('Error creating post relation:', relationError);
-            toast.error('Post created but linking failed');
-          }
-        } catch (relationErr) {
-          console.error('Relation creation error:', relationErr);
-        }
-      }
-      
+      toast.success(`${isPublicMode ? 'Brainstorm' : 'Insight'} created successfully`);
+      clearDraft();
       handleClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      toast.error(error?.message || 'Failed to create post');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const renderTypeSelection = () => (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-center">What would you like to create?</h3>
-      <div className="grid grid-cols-1 gap-4">
-        <Button
-          onClick={() => setComposerType('brainstorm')}
-          className={`h-20 flex flex-col items-center justify-center space-y-2 ${
-            mode === 'public' 
-              ? 'glass-ios-card hover:glass-ios-widget text-primary' 
-              : 'glass-business-card hover:glass-business text-blue-600'
-          }`}
-        >
-          <Brain className="w-6 h-6" />
-          <div className="text-center">
-            <div className="font-semibold">New Brainstorm</div>
-            <div className="text-xs opacity-80">Share a spark of inspiration</div>
-          </div>
-        </Button>
-
-        <Button
-          onClick={() => setComposerType('insight')}
-          disabled={mode === 'business' && !canCreateBusinessPosts}
-          className={`h-20 flex flex-col items-center justify-center space-y-2 relative ${
-            mode === 'public' 
-              ? 'glass-ios-card hover:glass-ios-widget text-foreground' 
-              : 'glass-business-card hover:glass-business text-blue-600'
-          } ${mode === 'business' && !canCreateBusinessPosts ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          {mode === 'business' && !canCreateBusinessPosts && (
-            <Lock className="absolute top-2 right-2 w-4 h-4" />
-          )}
-          <FileText className="w-6 h-6" />
-          <div className="text-center">
-            <div className="font-semibold">New Business Insight</div>
-            <div className="text-xs opacity-80">
-              {mode === 'business' && !canCreateBusinessPosts 
-                ? 'Business membership required' 
-                : 'Share professional knowledge'
-              }
-            </div>
-          </div>
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderReplyContext = () => (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 text-sm">
-        <Link2 className="w-4 h-4 text-primary" />
-        <span>
-          Linking to parent post
-        </span>
-      </div>
-      <div>
-        <Label>Choose link type</Label>
-        <ToggleGroup type="single" value={relationType} onValueChange={handleRelationTypeChange} className="mt-2">
-          <ToggleGroupItem value="continuation" className="px-3 py-2">Continuing Brainstorm</ToggleGroupItem>
-          <ToggleGroupItem value="linking" className="px-3 py-2">Linking Brainstorm</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
-    </div>
-  );
-
-  const renderBrainstormComposer = () => (
+  const renderPublicForm = () => (
     <div className="space-y-4">
       <div className="flex items-center space-x-2 mb-4">
         <Brain className="w-5 h-5 text-primary" />
@@ -211,112 +158,128 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           placeholder="Share your idea, thought, or insight..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className={`min-h-[100px] ${mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}`}
+          className="min-h-[200px] glass-ios-card resize-none"
+          maxLength={PUBLIC_MAX_CHARS}
         />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Required</span>
+          <span className={content.length > PUBLIC_MAX_CHARS * 0.9 ? 'text-destructive' : ''}>
+            {content.length} / {PUBLIC_MAX_CHARS}
+          </span>
+        </div>
       </div>
 
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-2 pt-2">
         <Button variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button onClick={handleCreate} disabled={!content.trim() || isSubmitting}>
-          <Sparkles className="w-4 h-4 mr-2" />
+        <Button onClick={handleCreate} disabled={!canSubmit || isSubmitting}>
           {isSubmitting ? 'Creating...' : 'Create Brainstorm'}
         </Button>
       </div>
     </div>
   );
 
-  const renderInsightComposer = () => (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-2 mb-4">
-        <FileText className="w-5 h-5 text-foreground" />
-        <h3 className="text-lg font-semibold">New Business Insight</h3>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="insight-title">Title</Label>
-        <Input
-          id="insight-title"
-          placeholder="Give your insight a compelling title..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className={mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}
-        />
-      </div>
+  const renderBusinessForm = () => {
+    if (!isBusinessMember()) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <FileText className="w-5 h-5 text-foreground" />
+            <h3 className="text-lg font-semibold">New Business Insight</h3>
+          </div>
+          
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
+            <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Business membership required</p>
+              <p className="text-xs text-muted-foreground">
+                You need to be a member of an organization to create business insights.
+              </p>
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="post-type">Type</Label>
-        <Select value={postType} onValueChange={setPostType}>
-          <SelectTrigger className={mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}>
-            <SelectValue placeholder="Select post type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="insight">Insight</SelectItem>
-            <SelectItem value="report">Report</SelectItem>
-            <SelectItem value="whitepaper">White Paper</SelectItem>
-            <SelectItem value="webinar">Webinar</SelectItem>
-            <SelectItem value="video">Video</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="flex justify-end pt-2">
+            <Button variant="outline" onClick={handleClose}>
+              Close
+            </Button>
+          </div>
+        </div>
+      );
+    }
 
-      <div className="space-y-2">
-        <Label htmlFor="visibility">Visibility</Label>
-        <Select value={visibility} onValueChange={setVisibility}>
-          <SelectTrigger className={mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}>
-            <SelectValue placeholder="Who can see this?" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="public">🌍 Public - Everyone</SelectItem>
-            <SelectItem value="my_business">🏠 My Business Only</SelectItem>
-            <SelectItem value="other_businesses">🏢 Selected Businesses</SelectItem>
-            <SelectItem value="draft">📝 Draft - Save for later</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="insight-content">Content</Label>
-        <Textarea
-          id="insight-content"
-          placeholder="Share your professional insight, analysis, or findings..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className={`min-h-[120px] ${mode === 'public' ? 'glass-ios-card' : 'glass-business-card'}`}
-        />
-      </div>
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2 mb-4">
+          <FileText className="w-5 h-5 text-foreground" />
+          <h3 className="text-lg font-semibold">New Business Insight</h3>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="insight-title">Title (optional)</Label>
+          <Input
+            id="insight-title"
+            placeholder="Give your insight a title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="glass-business-card"
+            maxLength={200}
+          />
+          <div className="text-xs text-muted-foreground text-right">
+            {title.length} / 200
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="insight-content">Content</Label>
+          <Textarea
+            id="insight-content"
+            placeholder="Share your professional insight, analysis, or findings..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[200px] glass-business-card resize-none"
+            maxLength={BUSINESS_MAX_CHARS}
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Required</span>
+            <span className={content.length > BUSINESS_MAX_CHARS * 0.9 ? 'text-destructive' : ''}>
+              {content.length} / {BUSINESS_MAX_CHARS}
+            </span>
+          </div>
+        </div>
 
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button onClick={handleCreate} disabled={!content.trim() || !title.trim() || !postType || !visibility || isSubmitting}>
-          <Sparkles className="w-4 h-4 mr-2" />
-          {isSubmitting ? 'Creating...' : 'Create Insight'}
-        </Button>
+        <div className="flex justify-end space-x-2 pt-2">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} disabled={!canSubmit || isSubmitting}>
+            {isSubmitting ? 'Creating...' : 'Create Insight'}
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className={`glass-med glass-modal-enhanced max-w-lg border ${
-        mode === 'public' 
+        isPublicMode 
           ? 'bg-background/80 border-border/40' 
           : 'bg-card/80 border-border/40'
       }`}>
         <DialogHeader>
-          <DialogTitle className="sr-only">Create New Content</DialogTitle>
+          <DialogTitle className="sr-only">
+            {isPublicMode ? 'Create New Brainstorm' : 'Create New Business Insight'}
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            Create a new brainstorm or business insight
+            {isPublicMode 
+              ? 'Share a spark of inspiration with the community'
+              : 'Share professional knowledge with your organization'
+            }
           </DialogDescription>
         </DialogHeader>
 
-        {context?.parentPostId && renderReplyContext()}
-        {!composerType && renderTypeSelection()}
-        {composerType === 'brainstorm' && renderBrainstormComposer()}
-        {composerType === 'insight' && renderInsightComposer()}
+        {isPublicMode ? renderPublicForm() : renderBusinessForm()}
       </DialogContent>
     </Dialog>
   );

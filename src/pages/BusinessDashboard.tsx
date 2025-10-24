@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { BusinessInvitations } from '@/components/business/BusinessInvitations';
-import { BusinessInsightComposer } from '@/components/composer/BusinessInsightComposer';
+import { useComposerStore } from '@/hooks/useComposerStore';
 import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
 import { 
   Building2, 
@@ -22,7 +22,7 @@ import {
 export function BusinessDashboard() {
   const { isBusinessMember, isAdmin, canCreateBusinessPosts } = useUserRoles();
   const { profile } = useBusinessProfile();
-  const [showComposer, setShowComposer] = useState(false);
+  const { openComposer } = useComposerStore();
 
   const isBusinessMemberRole = isBusinessMember() || isAdmin();
   const isAdminRole = isAdmin();
@@ -63,7 +63,7 @@ export function BusinessDashboard() {
         </div>
         
         {canCreateBusinessPosts && (
-          <Button onClick={() => setShowComposer(true)} className="flex items-center gap-2">
+          <Button onClick={() => openComposer()} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Create Business Insight
           </Button>
@@ -157,7 +157,7 @@ export function BusinessDashboard() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
-                  onClick={() => setShowComposer(true)} 
+                  onClick={() => openComposer()} 
                   className="w-full justify-start"
                   variant="outline"
                 >
@@ -229,7 +229,7 @@ export function BusinessDashboard() {
                 No business insights posted yet. 
                 <Button 
                   variant="link" 
-                  onClick={() => setShowComposer(true)}
+                  onClick={() => openComposer()}
                   className="ml-1 p-0 h-auto"
                 >
                   Create your first insight
@@ -270,14 +270,6 @@ export function BusinessDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* Business Insight Composer */}
-      <BusinessInsightComposer 
-        open={showComposer}
-        onOpenChange={setShowComposer}
-        onSuccess={() => {
-          // Refresh data or update UI
-        }}
-      />
     </div>
   );
 }
