@@ -15,6 +15,7 @@ const Admin = lazy(() => import('@/pages/Admin'));
 const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
+const Insights = lazy(() => import('@/pages/Insights'));
 
 // Public/landing
 import { Landing } from '@/pages/Landing';
@@ -40,6 +41,16 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     element: (
       <MainLayout>
         <LazyWrapper><BrainstormPage /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+
+  // Business insights feed
+  {
+    path: '/app/insights',
+    element: (
+      <MainLayout>
+        <LazyWrapper><Insights /></LazyWrapper>
       </MainLayout>
     ),
   },
