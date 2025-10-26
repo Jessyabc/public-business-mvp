@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import Index from '@/pages/Index';
 import { LazyWrapper, LoadingFallback, NotFound } from './router-helpers';
+import { RequireOrg } from '@/features/orgs/components/RequireOrg';
 
 // Canonical brainstorm page
 const BrainstormPage = lazy(() => import('@/features/brainstorm/BrainstormPage'));
@@ -16,6 +17,7 @@ const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
 const Insights = lazy(() => import('@/pages/Insights'));
+const CreateOrganization = lazy(() => import('@/features/orgs/pages/CreateOrganization'));
 
 // Public/landing
 import { Landing } from '@/pages/Landing';
@@ -45,12 +47,24 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     ),
   },
 
-  // Business insights feed
+  // Business insights feed (requires org)
   {
     path: '/app/insights',
     element: (
       <MainLayout>
-        <LazyWrapper><Insights /></LazyWrapper>
+        <RequireOrg>
+          <LazyWrapper><Insights /></LazyWrapper>
+        </RequireOrg>
+      </MainLayout>
+    ),
+  },
+
+  // Organization creation
+  {
+    path: '/org/new',
+    element: (
+      <MainLayout>
+        <LazyWrapper><CreateOrganization /></LazyWrapper>
       </MainLayout>
     ),
   },

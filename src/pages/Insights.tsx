@@ -3,12 +3,11 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import type { Post } from '@/lib/types/post';
 import { useState } from 'react';
+import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 
 const Insights = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-  
-  // TODO: Replace with actual org ID from context/auth
-  const activeOrgId = undefined;
+  const { data: activeOrgId } = useUserOrgId();
 
   const handlePostCreated = (post: Post) => {
     setPosts([post, ...posts]);
