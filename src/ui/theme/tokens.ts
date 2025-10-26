@@ -43,11 +43,19 @@ export const tokens = {
   // Mode-specific gradients
   gradients: {
     public: {
-      background: 'radial-gradient(ellipse 80% 80% at 50% -20%, hsl(206 74% 59% / 0.15) 0%, transparent 50%), radial-gradient(ellipse 80% 80% at 80% 50%, hsl(206 74% 59% / 0.1) 0%, transparent 50%)',
+      background: `
+        radial-gradient(1200px 800px at 18% -10%, rgba(176, 204, 255, 0.10), transparent 60%),
+        radial-gradient(900px 620px at 85% 100%, rgba(32, 106, 255, 0.22), transparent 55%),
+        radial-gradient(800px 800px at 50% 60%, rgba(254, 94, 180, 0.08), transparent 60%)
+      `,
       card: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.08) 100%)',
     },
     business: {
-      background: 'radial-gradient(ellipse 70% 70% at 30% 20%, hsl(206 74% 59% / 0.08) 0%, transparent 40%), radial-gradient(ellipse 90% 90% at 80% 80%, hsl(220 60% 70% / 0.06) 0%, transparent 50%), radial-gradient(ellipse 100% 60% at 50% -10%, hsl(200 80% 65% / 0.04) 0%, transparent 60%), linear-gradient(135deg, hsl(210 20% 98%) 0%, hsl(220 15% 96%) 100%)',
+      background: `
+        radial-gradient(900px 600px at 15% 10%, rgba(66, 133, 244, 0.10), transparent 55%),
+        radial-gradient(1000px 700px at 90% 85%, rgba(255, 170, 120, 0.08), transparent 58%),
+        radial-gradient(1200px 900px at 50% 120%, rgba(80, 120, 200, 0.06), transparent 60%)
+      `,
       card: 'linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(248, 250, 252, 0.35) 50%, rgba(241, 245, 249, 0.4) 100%)',
     },
   },
