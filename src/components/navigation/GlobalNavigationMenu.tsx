@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 
 export function GlobalNavigationMenu() {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ export function GlobalNavigationMenu() {
   const { openComposer } = useComposerStore();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: orgId } = useUserOrgId();
 
   const handleSignOut = async () => {
     try {
@@ -194,6 +196,13 @@ export function GlobalNavigationMenu() {
               </div>
               
               <DropdownMenuSeparator />
+              
+              {!orgId && (
+                <DropdownMenuItem onClick={() => navigate('/org/new')}>
+                  <Building2 className="mr-2 h-4 w-4" />
+                  <span>Create Organization</span>
+                </DropdownMenuItem>
+              )}
               
               <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <User className="mr-2 h-4 w-4" />
