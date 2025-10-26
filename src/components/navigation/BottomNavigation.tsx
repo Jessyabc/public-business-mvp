@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
 import styles from '@/components/effects/glassSurface.module.css';
-import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
@@ -18,22 +17,16 @@ export function BottomNavigation() {
   const { mode, toggleMode } = useAppMode();
   const { isBusinessMember, isAdmin } = useUserRoles();
   const location = useLocation();
-  const { data: orgId } = useUserOrgId();
 
   const isBusinessMemberRole = isBusinessMember() || isAdmin();
 
-  const baseNavItems = [
+  const navItems = [
     { to: '/', icon: Home, label: 'Feed', badge: null },              // root shows dynamic feed by mode
     { to: '/my-posts', icon: MessageSquare, label: 'My Posts', badge: null },
     { to: '/profile', icon: History, label: 'Profile', badge: null },
     { to: '/notifications', icon: Bell, label: 'Notifications', badge: null },
     { to: '/research', icon: Search, label: 'Research', badge: null }
   ];
-
-  // Add "Create Organization" link if user has no org
-  const navItems = !orgId 
-    ? [...baseNavItems, { to: '/org/new', icon: Building2, label: 'Create Org', badge: null }]
-    : baseNavItems;
 
   // Only show navigation for logged-in users
   if (!user) {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createOrganization, addOwnerToOrg } from '../api/orgs';
-import { supabase } from '@/integrations/supabase/client';
+import { createOrganization } from '../api/orgs';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 import { GlassInput } from '@/components/ui/GlassInput';
 import { Button } from '@/components/ui/button';
@@ -17,14 +16,8 @@ export default function CreateOrganization() {
     if (!name.trim()) return;
     
     setBusy(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    
     try {
-      if (!user?.id) throw new Error('Not authenticated');
-      
-      const org = await createOrganization({ name: name.trim() });
-      await addOwnerToOrg(org.id, user.id);
-      
+      await createOrganization({ name: name.trim(), description: null });
       toast.success('Organization created successfully!');
       nav('/app/insights');
     } catch (e: any) {
