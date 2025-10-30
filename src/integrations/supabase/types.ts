@@ -335,7 +335,7 @@ export type Database = {
             foreignKeyName: "idea_brainstorms_idea_id_fkey"
             columns: ["idea_id"]
             isOneToOne: false
-            referencedRelation: "open_ideas"
+            referencedRelation: "open_ideas_legacy"
             referencedColumns: ["id"]
           },
           {
@@ -391,7 +391,7 @@ export type Database = {
             foreignKeyName: "idea_interactions_idea_id_fkey"
             columns: ["idea_id"]
             isOneToOne: false
-            referencedRelation: "open_ideas"
+            referencedRelation: "open_ideas_legacy"
             referencedColumns: ["id"]
           },
           {
@@ -459,7 +459,31 @@ export type Database = {
         }
         Relationships: []
       }
-      open_ideas: {
+      open_ideas_intake: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_hash: string | null
+          status: Database["public"]["Enums"]["open_idea_status"]
+          text: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          status?: Database["public"]["Enums"]["open_idea_status"]
+          text: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          status?: Database["public"]["Enums"]["open_idea_status"]
+          text?: string
+        }
+        Relationships: []
+      }
+      open_ideas_legacy: {
         Row: {
           content: string
           created_at: string
@@ -503,6 +527,30 @@ export type Database = {
           status?: string | null
           subscribe_newsletter?: boolean | null
           updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      open_ideas_user: {
+        Row: {
+          created_at: string | null
+          id: string
+          status: Database["public"]["Enums"]["open_idea_status"]
+          text: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["open_idea_status"]
+          text: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["open_idea_status"]
+          text?: string
           user_id?: string | null
         }
         Relationships: []
@@ -571,6 +619,8 @@ export type Database = {
       orgs: {
         Row: {
           created_at: string
+          created_by: string | null
+          description: string | null
           id: string
           logo_url: string | null
           name: string
@@ -579,6 +629,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          description?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -587,6 +639,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          description?: string | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -622,7 +676,21 @@ export type Database = {
             foreignKeyName: "post_relations_child_post_id_fkey"
             columns: ["child_post_id"]
             isOneToOne: false
+            referencedRelation: "my_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_relations_child_post_id_fkey"
+            columns: ["child_post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_relations_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "my_posts_view"
             referencedColumns: ["id"]
           },
           {
@@ -865,6 +933,107 @@ export type Database = {
           },
         ]
       }
+      my_open_ideas_view: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: never
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      my_posts_view: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          department_id: string | null
+          id: string | null
+          industry_id: string | null
+          likes_count: number | null
+          metadata: Json | null
+          mode: string | null
+          org_id: string | null
+          published_at: string | null
+          status: string | null
+          t_score: number | null
+          title: string | null
+          type: string | null
+          u_score: number | null
+          updated_at: string | null
+          user_id: string | null
+          views_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string | null
+          org_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          t_score?: number | null
+          title?: string | null
+          type?: string | null
+          u_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string | null
+          org_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          t_score?: number | null
+          title?: string | null
+          type?: string | null
+          u_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       open_ideas_members: {
         Row: {
           content: string | null
@@ -916,6 +1085,15 @@ export type Database = {
           is_curated?: boolean | null
           linked_brainstorms_count?: number | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      open_ideas_public_view: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string | null
+          source: string | null
         }
         Relationships: []
       }
@@ -1044,6 +1222,10 @@ export type Database = {
           token: string
         }[]
       }
+      create_org_and_owner: {
+        Args: { p_description?: string; p_name: string }
+        Returns: string
+      }
       current_user_email: { Args: never; Returns: string }
       get_client_ip: { Args: never; Returns: string }
       get_my_roles: {
@@ -1051,10 +1233,12 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       get_user_org_id: { Args: never; Returns: string }
-      get_user_role: {
-        Args: { user_uuid: string }
-        Returns: Database["public"]["Enums"]["app_role"]
-      }
+      get_user_role:
+        | {
+            Args: { user_uuid: string }
+            Returns: Database["public"]["Enums"]["app_role"]
+          }
+        | { Args: never; Returns: string }
       get_user_roles: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -1092,6 +1276,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"
+      open_idea_status: "pending" | "approved" | "spam" | "flagged"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1220,6 +1405,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "business_user", "public_user", "business_member"],
+      open_idea_status: ["pending", "approved", "spam", "flagged"],
     },
   },
 } as const

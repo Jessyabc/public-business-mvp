@@ -17,7 +17,7 @@ interface OpenIdeaRow {
   id: string;
   content: string;
   created_at: string;
-  linked_brainstorms_count: number | null;
+  source?: string;
 }
 
 interface FeedEventProperties {
@@ -104,14 +104,13 @@ export class FeedsAdapter {
   async getOpenIdeasFeed(): Promise<FeedItem[]> {
     try {
       const { data, error } = await supabase
-        .from(TABLES.OPEN_IDEAS)
-        .select('id, content, created_at, linked_brainstorms_count')
-        .eq('status', 'approved')
-        .order('updated_at', { ascending: false })
+        .from('open_ideas_public_view')
+        .select('id, content, created_at')
+        .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) {
-        console.warn(`Failed to load open ideas from ${TABLES.OPEN_IDEAS}:`, error.message);
+        console.warn(`Failed to load open ideas from public view:`, error.message);
         return [];
       }
 
@@ -126,11 +125,11 @@ export class FeedsAdapter {
         created_at: idea.created_at,
         stats: {
           likes: 0,
-          comments: idea.linked_brainstorms_count || 0
+          comments: 0
         }
       }));
     } catch (err) {
-      console.warn(`Table ${TABLES.OPEN_IDEAS} may not exist or is not accessible:`, err);
+      console.warn(`Open ideas public view not accessible:`, err);
       return [];
     }
   }

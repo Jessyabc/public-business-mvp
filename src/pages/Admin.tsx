@@ -37,7 +37,7 @@ export function Admin() {
   const fetchIdeas = async () => {
     try {
       const { data, error } = await supabase
-        .from("open_ideas")
+        .from("open_ideas_legacy")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -64,7 +64,7 @@ export function Admin() {
   const toggleCurated = async (ideaId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from("open_ideas")
+        .from("open_ideas_legacy")
         .update({ is_curated: !currentStatus })
         .eq("id", ideaId);
 
