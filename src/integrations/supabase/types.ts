@@ -676,6 +676,13 @@ export type Database = {
             foreignKeyName: "post_relations_child_post_id_fkey"
             columns: ["child_post_id"]
             isOneToOne: false
+            referencedRelation: "business_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_relations_child_post_id_fkey"
+            columns: ["child_post_id"]
+            isOneToOne: false
             referencedRelation: "my_posts_view"
             referencedColumns: ["id"]
           },
@@ -687,6 +694,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "post_relations_child_post_id_fkey"
+            columns: ["child_post_id"]
+            isOneToOne: false
+            referencedRelation: "public_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_relations_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "business_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "post_relations_parent_post_id_fkey"
             columns: ["parent_post_id"]
             isOneToOne: false
@@ -700,16 +721,25 @@ export type Database = {
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "post_relations_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "public_posts_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       posts: {
         Row: {
+          body: string
           comments_count: number | null
           content: string
           created_at: string
           department_id: string | null
           id: string
           industry_id: string | null
+          kind: Database["public"]["Enums"]["post_kind"]
           likes_count: number | null
           metadata: Json | null
           mode: string
@@ -726,12 +756,14 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          body: string
           comments_count?: number | null
           content: string
           created_at?: string
           department_id?: string | null
           id?: string
           industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"]
           likes_count?: number | null
           metadata?: Json | null
           mode: string
@@ -748,12 +780,14 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          body?: string
           comments_count?: number | null
           content?: string
           created_at?: string
           department_id?: string | null
           id?: string
           industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"]
           likes_count?: number | null
           metadata?: Json | null
           mode?: string
@@ -885,6 +919,89 @@ export type Database = {
         }
         Relationships: []
       }
+      business_posts_view: {
+        Row: {
+          body: string | null
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          department_id: string | null
+          id: string | null
+          industry_id: string | null
+          kind: Database["public"]["Enums"]["post_kind"] | null
+          likes_count: number | null
+          metadata: Json | null
+          mode: string | null
+          org_id: string | null
+          published_at: string | null
+          status: string | null
+          t_score: number | null
+          title: string | null
+          type: string | null
+          u_score: number | null
+          updated_at: string | null
+          user_id: string | null
+          views_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          body?: string | null
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"] | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string | null
+          org_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          t_score?: number | null
+          title?: string | null
+          type?: string | null
+          u_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          body?: string | null
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"] | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string | null
+          org_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          t_score?: number | null
+          title?: string | null
+          type?: string | null
+          u_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_profiles_public: {
         Row: {
           company_name: string | null
@@ -959,12 +1076,14 @@ export type Database = {
       }
       my_posts_view: {
         Row: {
+          body: string | null
           comments_count: number | null
           content: string | null
           created_at: string | null
           department_id: string | null
           id: string | null
           industry_id: string | null
+          kind: Database["public"]["Enums"]["post_kind"] | null
           likes_count: number | null
           metadata: Json | null
           mode: string | null
@@ -981,12 +1100,14 @@ export type Database = {
           visibility: string | null
         }
         Insert: {
+          body?: string | null
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
           department_id?: string | null
           id?: string | null
           industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"] | null
           likes_count?: number | null
           metadata?: Json | null
           mode?: string | null
@@ -1003,12 +1124,14 @@ export type Database = {
           visibility?: string | null
         }
         Update: {
+          body?: string | null
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
           department_id?: string | null
           id?: string | null
           industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"] | null
           likes_count?: number | null
           metadata?: Json | null
           mode?: string | null
@@ -1148,6 +1271,89 @@ export type Database = {
         }
         Relationships: []
       }
+      public_posts_view: {
+        Row: {
+          body: string | null
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          department_id: string | null
+          id: string | null
+          industry_id: string | null
+          kind: Database["public"]["Enums"]["post_kind"] | null
+          likes_count: number | null
+          metadata: Json | null
+          mode: string | null
+          org_id: string | null
+          published_at: string | null
+          status: string | null
+          t_score: number | null
+          title: string | null
+          type: string | null
+          u_score: number | null
+          updated_at: string | null
+          user_id: string | null
+          views_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          body?: string | null
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"] | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string | null
+          org_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          t_score?: number | null
+          title?: string | null
+          type?: string | null
+          u_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          body?: string | null
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          id?: string | null
+          industry_id?: string | null
+          kind?: Database["public"]["Enums"]["post_kind"] | null
+          likes_count?: number | null
+          metadata?: Json | null
+          mode?: string | null
+          org_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          t_score?: number | null
+          title?: string | null
+          type?: string | null
+          u_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_business_invitation: {
@@ -1226,6 +1432,15 @@ export type Database = {
         Args: { p_description?: string; p_name: string }
         Returns: string
       }
+      create_post: {
+        Args: {
+          p_body: string
+          p_kind: string
+          p_org_id?: string
+          p_title: string
+        }
+        Returns: string
+      }
       current_user_email: { Args: never; Returns: string }
       get_client_ip: { Args: never; Returns: string }
       get_my_roles: {
@@ -1277,6 +1492,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"
       open_idea_status: "pending" | "approved" | "spam" | "flagged"
+      post_kind: "Spark" | "BusinessInsight" | "Insight"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1406,6 +1622,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "business_user", "public_user", "business_member"],
       open_idea_status: ["pending", "approved", "spam", "flagged"],
+      post_kind: ["Spark", "BusinessInsight", "Insight"],
     },
   },
 } as const
