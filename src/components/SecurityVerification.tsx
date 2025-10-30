@@ -82,11 +82,8 @@ export function SecurityVerification() {
     // RLS policy checks
     if (user) {
       try {
-        // Test user_roles access
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id);
+        // Test user_roles access via RPC
+        const { data: roleData, error: roleError } = await supabase.rpc('get_my_roles');
 
         newChecks.push({
           name: 'RLS Policies - User Roles',
