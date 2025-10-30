@@ -6,7 +6,11 @@ const corsHeaders = {
 }
 
 interface SubmitIdeaRequest {
-  text: string;
+  content: string;
+  email?: string;
+  notify_on_interaction?: boolean;
+  subscribe_newsletter?: boolean;
+  session_id?: string;
 }
 
 Deno.serve(async (req) => {
@@ -30,19 +34,19 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     )
 
-    const { text } = await req.json() as SubmitIdeaRequest;
+    const { content, email, notify_on_interaction = false, subscribe_newsletter = false, session_id } = await req.json() as SubmitIdeaRequest;
 
     // Validate content
-    if (!text || text.trim().length < 10) {
+    if (!content || content.trim().length < 10) {
       return new Response(
-        JSON.stringify({ error: 'Text must be at least 10 characters long' }),
+        JSON.stringify({ error: 'Content must be at least 10 characters long' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    if (text.length > 500) {
+    if (content.length > 500) {
       return new Response(
-        JSON.stringify({ error: 'Text must be less than 500 characters' }),
+        JSON.stringify({ error: 'Content must be less than 500 characters' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -65,7 +69,7 @@ Deno.serve(async (req) => {
       const { data: ideaData, error: ideaError } = await supabaseUser
         .from('open_ideas_user')
         .insert({
-          text: text.trim(),
+          text: content.trim(),
           user_id: user.id,
           status: 'pending'
         })
@@ -108,9 +112,9 @@ Deno.serve(async (req) => {
 
       // Basic spam check
       const spamWords = ['viagra', 'casino', 'lottery', 'pills', 'sex', 'porn'];
-      const lowerText = text.toLowerCase();
-      if (spamWords.some(word => lowerText.includes(word))) {
-        console.log('Spam detected:', text);
+      const lowerContent = content.toLowerCase();
+      if (spamWords.some(word => lowerContent.includes(word))) {
+        console.log('Spam detected:', content);
         return new Response(
           JSON.stringify({ error: 'Content not allowed' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -120,7 +124,7 @@ Deno.serve(async (req) => {
       const { data: ideaData, error: ideaError } = await supabaseAdmin
         .from('open_ideas_intake')
         .insert({
-          text: text.trim(),
+          text: content.trim(),
           ip_hash: ipHash,
           status: 'pending'
         })
@@ -148,10 +152,34 @@ Deno.serve(async (req) => {
         properties: {
           target_id: ideaId,
           table: tableName,
-          text_length: text.length,
-          is_authenticated: isAuthenticated
+          content_length: content.length,
+          is_authenticated: isAuthenticated,
+          has_email: !!email,
+          notify_on_interaction,
+          subscribe_newsletter
         }
       });
+
+    // Handle email subscription if provided
+    if (email && subscribe_newsletter) {
+      await supabaseAdmin
+        .from('email_subscriptions')
+        .upsert({ 
+          email: email.toLowerCase(),
+          source: 'open_idea_composer'
+        })
+        .select();
+    }
+
+    // Store lead if email provided
+    if (email) {
+      await supabaseAdmin
+        .from('leads')
+        .insert({
+          email: email.toLowerCase(),
+          source: 'open_idea'
+        });
+    }
 
     console.log('Analytics event logged for idea:', ideaId);
 
