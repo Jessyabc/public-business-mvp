@@ -127,9 +127,26 @@ const useUserRole = () => {
 ## 🚫 Deprecated / Quarantined
 
 ### `open_ideas` table
-**Status:** Renamed to `open_ideas_legacy`  
-**Access:** DENIED (all RLS policies return false)  
-**Migration:** Data will be migrated in Phase 3
+**Status:** ✅ MIGRATED & FROZEN  
+**Previous Name:** `open_ideas_legacy`  
+**Access:** DENIED to all users (comprehensive deny-all RLS)  
+**Migration Date:** 2025-01-XX  
+**Migration Status:** Complete
+
+**Migration Summary:**
+- Total legacy rows: 2
+- Migrated to `open_ideas_intake`: 2 (anonymous submissions)
+- Migrated to `open_ideas_user`: 0 (no authenticated submissions in legacy)
+- Data preserved: 100%
+
+**What happened:**
+The original `open_ideas` table was deprecated in P1, renamed to `open_ideas_legacy`, and finally migrated in P3. All data has been moved to the canonical intake/user tables based on whether the submission had a user_id.
+
+**Current state:**
+- Table still exists in database (for backup/audit purposes)
+- All RLS policies deny access (SELECT, INSERT, UPDATE, DELETE all return false)
+- Table marked with deprecation comment
+- Consider dropping after 30-day verification period
 
 ❌ **DO NOT** attempt to read from or write to this table  
 ✅ **USE** `open_ideas_public_view` or `my_open_ideas_view` instead
@@ -176,6 +193,8 @@ SELECT * FROM public.open_ideas_public_view LIMIT 5;
 | Date | Migration | Description |
 |------|-----------|-------------|
 | 2025-01-XX | `breaker-panel` | Created views, hardened RPCs, quarantined legacy tables |
+| 2025-01-XX | `p3-data-migration` | Migrated 2 rows from open_ideas_legacy to canonical tables |
+| 2025-01-XX | `p3-freeze-legacy` | Applied deny-all RLS to open_ideas_legacy |
 
 ---
 

@@ -36,13 +36,15 @@ export function Admin() {
 
   const fetchIdeas = async () => {
     try {
-      const { data, error } = await supabase
-        .from("open_ideas_legacy")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setIdeas(data || []);
+      // Note: open_ideas_legacy is now frozen with deny-all RLS
+      // Admin functionality should be migrated to work with open_ideas_intake/user tables
+      // For now, return empty array to prevent errors
+      setIdeas([]);
+      
+      toast({
+        title: "Legacy Table Migrated",
+        description: "The admin panel needs to be updated to work with the new table structure. Please contact support.",
+      });
     } catch (error: unknown) {
       console.error('Failed to fetch ideas', error);
       let description = 'Failed to fetch ideas.';
@@ -62,38 +64,11 @@ export function Admin() {
   };
 
   const toggleCurated = async (ideaId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from("open_ideas_legacy")
-        .update({ is_curated: !currentStatus })
-        .eq("id", ideaId);
-
-      if (error) throw error;
-
-      setIdeas(ideas.map(idea => 
-        idea.id === ideaId 
-          ? { ...idea, is_curated: !currentStatus }
-          : idea
-      ));
-
-      toast({
-        title: "Success",
-        description: `Idea ${!currentStatus ? "added to" : "removed from"} curated feed.`,
-      });
-    } catch (error: unknown) {
-      console.error('Failed to update idea', error);
-      let description = 'Failed to update idea.';
-      if (error instanceof Error) {
-        description = error.message;
-      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
-        description = (error as { message: string }).message;
-      }
-      toast({
-        title: "Error",
-        description,
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Admin Panel Update Required",
+      description: "This functionality needs to be migrated to work with the new table structure.",
+      variant: "destructive",
+    });
   };
 
   // Show loading state
