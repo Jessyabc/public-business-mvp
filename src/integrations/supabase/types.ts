@@ -299,7 +299,7 @@ export type Database = {
         }
         Relationships: []
       }
-      idea_brainstorms: {
+      idea_brainstorms_legacy: {
         Row: {
           author_display_name: string
           author_user_id: string | null
