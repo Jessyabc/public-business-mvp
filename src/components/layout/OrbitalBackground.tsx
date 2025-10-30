@@ -7,16 +7,20 @@ export function OrbitalBackground() {
   return (
     <div
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      style={{
-        backgroundColor: 'var(--background)',
-        backgroundImage: tokens.gradients[mode].background,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-      }}
     >
-      {/* Animated gradient orbs */}
-      <div className="absolute inset-0">
+      {/* Base gradient layer from tokens */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          backgroundImage: tokens.gradients[mode].background,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }}
+      />
+      
+      {/* Animated gradient orbs layer */}
+      <div className="absolute inset-0" style={{ mixBlendMode: 'screen' }}>
         {/* Blue orb top left */}
         <div 
           className="absolute w-[600px] h-[600px] rounded-full opacity-40 blur-[100px] animate-float"
