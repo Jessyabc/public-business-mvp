@@ -1,5 +1,4 @@
 import { PostComposer } from '@/components/posts/PostComposer';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import type { Post } from '@/lib/types/post';
 import { useState } from 'react';
@@ -15,8 +14,7 @@ const Insights = () => {
 
   return (
     <ProtectedRoute requireAuth={true}>
-      <MainLayout>
-        <div className="max-w-4xl mx-auto space-y-6 p-4">
+      <div className="max-w-4xl mx-auto space-y-6 p-4">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">
               Organization Insights
@@ -61,8 +59,7 @@ const Insights = () => {
               </p>
             </div>
           )}
-        </div>
-      </MainLayout>
+      </div>
     </ProtectedRoute>
   );
 };
