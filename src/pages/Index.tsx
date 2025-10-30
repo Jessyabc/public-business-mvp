@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { Landing } from './Landing';
 import BrainstormPage from '@/features/brainstorm/BrainstormPage';
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
-import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const Index = () => {
@@ -28,11 +27,7 @@ const Index = () => {
   }
 
   if (!user) {
-    return (
-      <MainLayout noTopPadding>
-        <Landing />
-      </MainLayout>
-    );
+    return <Landing />;
   }
 
   // If user is connected, show the feeds
@@ -40,9 +35,7 @@ const Index = () => {
   
   return (
     <ProtectedRoute requireAuth={true}>
-      <MainLayout>
-        {feedContent}
-      </MainLayout>
+      {feedContent}
     </ProtectedRoute>
   );
 };
