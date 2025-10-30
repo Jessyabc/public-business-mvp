@@ -4,10 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 export interface OpenIdea {
   id: string;
   content: string;
-  is_curated: boolean;
-  linked_brainstorms_count: number;
   created_at: string;
-  status?: string;
+  source: 'intake' | 'user';
 }
 
 export interface IdeaBrainstorm {
@@ -26,9 +24,8 @@ export function useCuratedIdeas() {
     queryKey: ["curated-ideas"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("open_ideas_public")
+        .from("open_ideas_public_view")
         .select("*")
-        .eq("is_curated", true)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -62,7 +59,7 @@ export function useOpenIdea(id: string) {
     queryKey: ["open-idea", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("open_ideas_public")
+        .from("open_ideas_public_view")
         .select("*")
         .eq("id", id)
         .single();

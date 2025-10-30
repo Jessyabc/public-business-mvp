@@ -55,7 +55,7 @@ export default function IdeaDetail() {
               <div className="flex items-center gap-4 text-sm text-pb-text2">
                 <div className="flex items-center gap-1">
                   <MessageSquare className="w-4 h-4" />
-                  <span>{idea.linked_brainstorms_count} brainstorms</span>
+                  <span>{brainstorms.length} brainstorms</span>
                 </div>
                 <span>•</span>
                 <span>{formatDistanceToNow(new Date(idea.created_at))} ago</span>

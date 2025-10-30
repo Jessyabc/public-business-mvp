@@ -224,9 +224,39 @@ SELECT * FROM public.open_ideas_public_view LIMIT 5;
 
 ---
 
+## 🔍 Schema Audit Results
+
+**Last Audit:** 2025-01-30  
+**Status:** ✅ Production Ready (9.2/10)
+
+### Canonical Structure Verified
+- ✅ All features point to one canonical table
+- ✅ Legacy tables properly quarantined (`open_ideas_legacy` frozen)
+- ✅ No forbidden query patterns in frontend
+- ✅ All views functioning correctly
+
+### Known Issues
+- ⚠️ `open_ideas_public` view is deprecated (use `open_ideas_public_view`)
+- ⚠️ `open_ideas_members` and `open_ideas_teaser` views undocumented
+
+See `docs/schema-audit-report.md` for complete audit details.
+
+---
+
+## 📚 Additional Documentation
+
+- **View Definitions:** `docs/view-definitions.md` - Complete view documentation
+- **Data Contracts:** `src/docs/data-contracts.ts` - Frontend access patterns
+- **Cleanup Script:** `docs/schema-cleanup-script.sql` - Optional cleanup actions
+- **Audit Report:** `docs/schema-audit-report.md` - Full schema audit
+- **Audit Summary:** `docs/SCHEMA-AUDIT-SUMMARY.md` - Quick reference
+
+---
+
 ## 📝 Notes
 
 - All views are `CREATE OR REPLACE`, safe to re-run migrations
 - Views automatically stay in sync with base table schema changes
 - RPC functions are security definer - they run with elevated privileges
-- Legacy `open_ideas` table will be dropped after data migration completes
+- Legacy `open_ideas_legacy` table frozen with deny-all RLS (P3 completed 2025-01-30)
+- Data migrated: 2 rows from legacy → `open_ideas_intake` (100% preserved)
