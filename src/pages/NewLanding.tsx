@@ -128,16 +128,6 @@ export function NewLanding() {
           <BrainstormPreviewList />
         </div>
       </section>
-
-      {/* Final CTA */}
-      <section className="bg-[var(--accent)] py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-[var(--accent-on)] mb-8">Ready to Start Collaborating?</h2>
-          <p className="text-xl text-[var(--accent-on)]/85 mb-12">
-            Join the community and turn your sparks into meaningful connections.
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
