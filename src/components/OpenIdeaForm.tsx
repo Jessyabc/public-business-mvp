@@ -44,29 +44,23 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Insert open idea
-      const { data: idea, error: ideaError } = await supabase
-        .from("open_ideas")
-        .insert({ 
+      // Call the edge function to submit the idea
+      const { data, error: functionError } = await supabase.functions.invoke('submit-open-idea', {
+        body: { 
           content, 
-          email: email || null 
-        })
-        .select()
-        .single();
+          email: email || null,
+          notify_on_interaction: false,
+          subscribe_newsletter: !!email
+        }
+      });
 
-      if (ideaError) throw ideaError;
-
-      // Store email as lead if provided
-      if (email) {
-        await supabase
-          .from("leads")
-          .insert({ 
-            email, 
-            source: "open_idea" 
-          });
+      if (functionError) throw functionError;
+      
+      if (!data?.success || !data?.id) {
+        throw new Error('Failed to submit idea');
       }
 
-      const url = `${window.location.origin}/idea/${idea.id}`;
+      const url = `${window.location.origin}/idea/${data.id}`;
       setIdeaUrl(url);
       setSubmitted(true);
       
@@ -75,7 +69,7 @@ export function OpenIdeaForm({ onSuccess }: OpenIdeaFormProps) {
         description: "Your idea is now live and ready for brainstorms.",
       });
 
-      onSuccess?.(idea.id);
+      onSuccess?.(data.id);
     } catch (error: unknown) {
       console.error('Failed to submit idea', error);
       let description = 'Failed to submit idea. Please try again.';

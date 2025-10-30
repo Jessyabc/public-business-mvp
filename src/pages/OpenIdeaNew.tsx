@@ -52,27 +52,19 @@ export default function OpenIdeaNew() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('open_ideas').insert({
-        content: sanitizeText(data.content),
-        notify_on_interaction: data.notify_on_interaction,
-        subscribe_newsletter: data.subscribe_newsletter,
-        user_id: user?.id || null,
-        status: 'pending', // Will be reviewed by admins
+      // Call the edge function to submit the idea
+      const { data: responseData, error: functionError } = await supabase.functions.invoke('submit-open-idea', {
+        body: { 
+          content: sanitizeText(data.content),
+          notify_on_interaction: data.notify_on_interaction,
+          subscribe_newsletter: data.subscribe_newsletter
+        }
       });
 
-      if (error) throw error;
-
-      // Track analytics if user consented
-      if (user) {
-        await supabase.from('analytics_events').insert({
-          event_name: 'open_idea_submitted',
-          user_id: user.id,
-          properties: {
-            has_account: true,
-            notify_on_interaction: data.notify_on_interaction,
-            subscribe_newsletter: data.subscribe_newsletter,
-          },
-        });
+      if (functionError) throw functionError;
+      
+      if (!responseData?.success) {
+        throw new Error(responseData?.error || 'Failed to submit idea');
       }
 
       setSubmitted(true);
