@@ -41,6 +41,8 @@ export async function insertBrainstormPublic(
       .insert({
         user_id: user.id,
         content: input.content,
+        body: input.content,
+        kind: 'Spark',
         title: input.title || null,
         type: 'brainstorm',
         visibility: 'public',
@@ -48,7 +50,7 @@ export async function insertBrainstormPublic(
         org_id: null,
         published_at: new Date().toISOString(),
         status: 'active',
-      })
+      } as any)
       .select()
       .single();
 
@@ -82,6 +84,8 @@ export async function insertInsightForOrg(
       .insert({
         user_id: user.id,
         content: input.content,
+        body: input.content,
+        kind: 'BusinessInsight',
         title: input.title || null,
         type: 'insight',
         visibility: 'my_business',
@@ -89,7 +93,7 @@ export async function insertInsightForOrg(
         org_id: input.org_id,
         published_at: new Date().toISOString(),
         status: 'active',
-      })
+      } as any)
       .select()
       .single();
 

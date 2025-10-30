@@ -87,6 +87,8 @@ export class BrainstormSupabaseAdapter {
           user_id: user.id,
           title: nodeData.title,
           content: nodeData.content,
+          body: nodeData.content,
+          kind: 'Spark',
           type: BRAINSTORM_FILTERS.TYPE,
           mode: BRAINSTORM_FILTERS.MODE,
           visibility: 'public',
@@ -96,7 +98,7 @@ export class BrainstormSupabaseAdapter {
             tags: nodeData.tags,
             position: nodeData.position
           } as any
-        })
+        } as any)
         .select('id, title, content, metadata, created_at, user_id')
         .single();
 

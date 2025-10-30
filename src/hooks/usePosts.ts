@@ -113,9 +113,11 @@ export function usePosts() {
         .insert({
           user_id: user.id,
           ...postData,
+          body: postData.content,
+          kind: postData.mode === 'business' ? 'BusinessInsight' : 'Spark',
           visibility: postData.visibility || 'public',
           metadata: postData.metadata || {},
-        })
+        } as any)
         .select()
         .single();
 
