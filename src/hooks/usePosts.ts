@@ -322,11 +322,10 @@ export function usePosts() {
     setLoading(true);
     setError(null);
     try {
+      // Use my_posts_view for permission-safe access to user's posts
       const { data, error } = await supabase
-        .from('posts')
+        .from('my_posts_view')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

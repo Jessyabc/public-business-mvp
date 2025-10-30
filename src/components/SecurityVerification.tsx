@@ -92,9 +92,9 @@ export function SecurityVerification() {
           icon: <Shield className="w-4 h-4" />
         });
 
-        // Test posts access
+        // Test my_posts_view access (permission-safe)
         const { data: postsData, error: postsError } = await supabase
-          .from('posts')
+          .from('my_posts_view')
           .select('id')
           .limit(1);
 
