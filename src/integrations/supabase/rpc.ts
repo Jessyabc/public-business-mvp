@@ -40,3 +40,17 @@ export async function rpcTrackEvent(
     p_props: p_props || {} 
   });
 }
+
+export async function rpcCreatePost(
+  kind: 'Spark' | 'BusinessInsight' | 'Insight',
+  title: string,
+  body: string,
+  org_id?: string | null
+) {
+  return supabase.rpc("create_post", {
+    p_kind: kind,
+    p_title: title,
+    p_body: body,
+    p_org_id: org_id || null
+  });
+}

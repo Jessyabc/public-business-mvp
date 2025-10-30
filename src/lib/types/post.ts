@@ -1,6 +1,9 @@
 export const POST_TYPES = ['brainstorm', 'insight', 'report', 'whitepaper', 'webinar', 'video'] as const;
 export type PostType = typeof POST_TYPES[number];
 
+export const POST_KINDS = ['Spark', 'BusinessInsight', 'Insight'] as const;
+export type PostKind = typeof POST_KINDS[number];
+
 export const POST_VISIBILITIES = ['public', 'my_business', 'other_businesses', 'draft'] as const;
 export type PostVisibility = typeof POST_VISIBILITIES[number];
 
@@ -15,6 +18,8 @@ export interface Post {
   user_id: string;
   title?: string | null;
   content: string;
+  body?: string | null;
+  kind?: PostKind;
   type: PostType;
   visibility: PostVisibility;
   mode: PostMode;
@@ -43,4 +48,8 @@ export function isValidPostVisibility(value: unknown): value is PostVisibility {
 
 export function isValidPostMode(value: unknown): value is PostMode {
   return typeof value === 'string' && POST_MODES.includes(value as PostMode);
+}
+
+export function isValidPostKind(value: unknown): value is PostKind {
+  return typeof value === 'string' && POST_KINDS.includes(value as PostKind);
 }
