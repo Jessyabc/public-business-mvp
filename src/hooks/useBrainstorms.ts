@@ -5,13 +5,16 @@ import { toast } from '@/hooks/use-toast';
 
 export interface Brainstorm {
   id: string;
-  idea_id?: string;
   title: string;
   content: string;
-  author_user_id?: string;
-  author_display_name: string;
-  is_public: boolean;
+  user_id: string;
+  author_user_id?: string; // alias for compatibility
+  author_display_name?: string;
+  visibility: string;
+  is_public: boolean; // computed from visibility
   created_at: string;
+  likes_count: number;
+  comments_count: number;
 }
 
 export interface BrainstormStats {
@@ -43,14 +46,16 @@ export function useBrainstorms() {
 
     try {
       let query = supabase
-        .from('idea_brainstorms')
-        .select('id, idea_id, title, content, author_user_id, author_display_name, is_public, created_at');
+        .from('posts')
+        .select('*')
+        .eq('type', 'brainstorm')
+        .eq('status', 'active');
 
       // Apply filters
       if (filter === 'mine' && user) {
-        query = query.eq('author_user_id', user.id);
+        query = query.eq('user_id', user.id);
       } else if (filter !== 'mine') {
-        query = query.eq('is_public', true);
+        query = query.eq('visibility', 'public');
       }
 
       // Apply search
@@ -60,8 +65,7 @@ export function useBrainstorms() {
 
       // Apply ordering
       if (filter === 'most_interacted') {
-        // For most interacted, we'll fetch all and sort client-side for now
-        query = query.order('created_at', { ascending: false });
+        query = query.order('likes_count', { ascending: false });
       } else {
         query = query.order('created_at', { ascending: false });
       }
@@ -71,7 +75,15 @@ export function useBrainstorms() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setBrainstorms(data || []);
+      
+      // Map the data to include computed fields for backward compatibility
+      const mappedData = (data || []).map((post: any) => ({
+        ...post,
+        author_user_id: post.user_id,
+        is_public: post.visibility === 'public',
+      }));
+      
+      setBrainstorms(mappedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch brainstorms');
       toast({ title: "Error", description: "Failed to fetch brainstorms", variant: "destructive" });
@@ -83,13 +95,19 @@ export function useBrainstorms() {
   const getBrainstorm = async (id: string): Promise<Brainstorm | null> => {
     try {
       const { data, error } = await supabase
-        .from('idea_brainstorms')
-        .select('id, idea_id, title, content, author_user_id, author_display_name, is_public, created_at')
+        .from('posts')
+        .select('*')
         .eq('id', id)
+        .eq('type', 'brainstorm')
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        ...data,
+        author_user_id: data.user_id,
+        is_public: data.visibility === 'public',
+      } as Brainstorm;
     } catch (err) {
       console.error('Error fetching brainstorm:', err);
       return null;
@@ -100,19 +118,21 @@ export function useBrainstorms() {
     title: string;
     content: string;
     is_public: boolean;
-    idea_id?: string;
   }) => {
     if (!user) throw new Error('Must be logged in to create brainstorms');
 
     const { error } = await supabase
-      .from('idea_brainstorms')
+      .from('posts')
       .insert({
         title: data.title,
         content: data.content,
-        is_public: data.is_public,
-        idea_id: data.idea_id,
-        author_user_id: user.id,
-        author_display_name: user.user_metadata?.name || user.email || 'Anonymous',
+        body: data.content,
+        type: 'brainstorm',
+        mode: 'public',
+        visibility: data.is_public ? 'public' : 'private',
+        status: 'active',
+        user_id: user.id,
+        kind: 'Spark',
       });
 
     if (error) throw error;
@@ -127,10 +147,16 @@ export function useBrainstorms() {
     if (!user) throw new Error('Must be logged in to update brainstorms');
 
     const { error } = await supabase
-      .from('idea_brainstorms')
-      .update(data)
+      .from('posts')
+      .update({
+        title: data.title,
+        content: data.content,
+        body: data.content,
+        visibility: data.is_public ? 'public' : 'private',
+      })
       .eq('id', id)
-      .eq('author_user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('type', 'brainstorm');
 
     if (error) throw error;
     toast({ title: "Success", description: "Brainstorm updated successfully!" });
@@ -140,10 +166,11 @@ export function useBrainstorms() {
     if (!user) throw new Error('Must be logged in to delete brainstorms');
 
     const { error } = await supabase
-      .from('idea_brainstorms')
+      .from('posts')
       .delete()
       .eq('id', id)
-      .eq('author_user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('type', 'brainstorm');
 
     if (error) throw error;
     toast({ title: "Success", description: "Brainstorm deleted successfully!" });

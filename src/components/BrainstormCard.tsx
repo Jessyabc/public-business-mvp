@@ -6,9 +6,9 @@ interface IdeaBrainstorm {
   id: string;
   title: string;
   content: string;
-  author_display_name: string;
+  author_display_name?: string;
   created_at: string;
-  idea_id: string;
+  idea_id?: string; // optional
 }
 
 interface BrainstormCardProps {
@@ -44,7 +44,7 @@ export function BrainstormCard({ brainstorm, onClick, showFreeBadge }: Brainstor
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <User className="w-4 h-4" />
-            <span>{brainstorm.author_display_name}</span>
+            <span>{brainstorm.author_display_name || 'Anonymous'}</span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
