@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 
 interface TimelineNode {
   id: string;
@@ -104,8 +105,6 @@ export function TimelineSection({ onComplete }: TimelineSectionProps) {
 
   return (
     <section id="timeline" className="py-20 px-6 relative overflow-hidden">
-      {/* Background with brand color hues */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-pb-blue/5 to-background pointer-events-none" aria-hidden="true" />
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Scroll indicator */}
         <div className="text-center mb-16">
@@ -137,21 +136,20 @@ export function TimelineSection({ onComplete }: TimelineSectionProps) {
               }`}></div>
               
               {/* Content card */}
-              <div className={`glass-card max-w-lg mx-auto ${
-                index % 2 === 0 ? 'lg:mr-auto lg:ml-0' : 'lg:ml-auto lg:mr-0'
-              } ${index % 2 === 0 ? 'lg:translate-x-8' : 'lg:-translate-x-8'}`}>
-                <div className="scrim" />
-                <div className="relative z-10 p-8">
-                  <h3 className="text-2xl font-bold text-ink-base mb-4 leading-tight">
-                    {node.title}
-                  </h3>
-                  {node.description && (
-                    <p className="text-ink-base/70 leading-relaxed">
-                      {node.description}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <GlassSurface 
+                className={`max-w-lg mx-auto ${
+                  index % 2 === 0 ? 'lg:mr-auto lg:ml-0' : 'lg:ml-auto lg:mr-0'
+                } ${index % 2 === 0 ? 'lg:translate-x-8' : 'lg:-translate-x-8'}`}
+              >
+                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-4 leading-tight">
+                  {node.title}
+                </h3>
+                {node.description && (
+                  <p className="text-[var(--text-secondary)] leading-relaxed">
+                    {node.description}
+                  </p>
+                )}
+              </GlassSurface>
             </div>
           ))}
         </div>

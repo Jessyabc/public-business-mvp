@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Lightbulb } from 'lucide-react';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 
 interface ComposerSectionProps {
   isVisible: boolean;
@@ -164,25 +165,21 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}>
         <div className="max-w-2xl mx-auto text-center">
-          <div className="glass-card p-8">
-            <div className="scrim" />
-            <div className="relative z-10">
-              <Lightbulb className="w-16 h-16 text-pb-blue mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-ink-base mb-2">
-                Nice. We planted your spark.
-              </h3>
-              <p className="text-ink-base/70 mb-6">
-                Your idea is now live and ready for collaboration.
-              </p>
-              <Button
-                onClick={resetForm}
-                variant="outline"
-                className="bg-white/80 text-ink-base border border-black/10 hover:bg-white/90"
-              >
-                Share Another Spark
-              </Button>
-            </div>
-          </div>
+          <GlassSurface>
+            <Lightbulb className="w-16 h-16 text-[var(--text-accent)] mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+              Nice. We planted your spark.
+            </h3>
+            <p className="text-[var(--text-secondary)] mb-6">
+              Your idea is now live and ready for collaboration.
+            </p>
+            <Button
+              onClick={resetForm}
+              variant="outline"
+            >
+              Share Another Spark
+            </Button>
+          </GlassSurface>
         </div>
       </section>
     );
@@ -195,27 +192,26 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
       }`}>
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-ink-base mb-4">
+            <h2 className="text-4xl font-bold text-[var(--text-primary)] mb-4">
               Got a spark of your own?
             </h2>
-            <p className="text-ink-base/70 text-lg">
+            <p className="text-[var(--text-secondary)] text-lg">
               Drop your idea and watch the community build on it
             </p>
           </div>
 
-          <div className="glass-card p-8">
-            <div className="scrim" />
-            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+          <GlassSurface>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Textarea
                   placeholder="Drop your open idea…"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[120px] resize-none border-pb-blue/20 text-ink-base placeholder:text-ink-base/50"
+                  className="min-h-[120px] resize-none"
                   maxLength={MAX_CHARS}
                   required
                 />
-                <div className="flex justify-between text-sm text-ink-base/60 mt-2">
+                <div className="flex justify-between text-sm text-[var(--text-muted)] mt-2">
                   <span>
                     {content.length < MIN_CHARS 
                       ? `${MIN_CHARS - content.length} more characters needed` 
@@ -235,7 +231,6 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
                     placeholder="Enter your email to get notified when someone builds on your spark."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="border-pb-blue/20 text-ink-base placeholder:text-ink-base/50"
                   />
                 </div>
               )}
@@ -251,7 +246,7 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
                       checked={notifyInteraction}
                       onCheckedChange={(checked) => setNotifyInteraction(!!checked)}
                     />
-                    <Label htmlFor="notify" className="text-sm text-ink-base">
+                    <Label htmlFor="notify" className="text-sm text-[var(--text-primary)]">
                       Notify me when others interact with my spark.
                     </Label>
                   </div>
@@ -261,7 +256,7 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
                       checked={subscribeNews}
                       onCheckedChange={(checked) => setSubscribeNews(!!checked)}
                     />
-                    <Label htmlFor="newsletter" className="text-sm text-ink-base">
+                    <Label htmlFor="newsletter" className="text-sm text-[var(--text-primary)]">
                       Send me the brightest new sparks from PB.
                     </Label>
                   </div>
@@ -280,7 +275,7 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
                       analytics.trackCreateAccountClick();
                       setShowAuthModal(true);
                     }}
-                    className="w-full bg-white/80 text-ink-base border border-black/10 hover:bg-white/90"
+                    className="w-full"
                   >
                     Create your PB account
                   </Button>
@@ -291,12 +286,12 @@ export function ComposerSection({ isVisible }: ComposerSectionProps) {
               <Button
                 type="submit"
                 disabled={isSubmitting || content.length < MIN_CHARS || content.length > MAX_CHARS}
-                className="w-full bg-pb-blue text-white elevation-4 hover:elevation-8 h-12 text-lg font-medium"
+                className="w-full h-12 text-lg font-medium"
               >
                 {isSubmitting ? 'Sharing Spark...' : 'Share Spark'}
               </Button>
             </form>
-          </div>
+          </GlassSurface>
         </div>
       </section>
 

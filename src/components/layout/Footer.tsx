@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { Linkedin, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 
 export function Footer() {
   const { user } = useAuth();
@@ -38,9 +39,8 @@ export function Footer() {
   };
 
   return (
-    <footer className="glass-card py-16 mt-32 border-t border-pb-blue/20">
-      <div className="scrim" />
-      <div className="container mx-auto px-6 relative z-10">
+    <footer className="mt-32">
+      <GlassSurface className="container mx-auto border-t border-[var(--glass-border)]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-1">
@@ -50,17 +50,17 @@ export function Footer() {
               </div>
               <span className="text-xl font-bold text-ink-base">Public Business</span>
             </div>
-            <p className="text-ink-base/70 text-sm mb-6 leading-relaxed">
+            <p className="text-[var(--text-secondary)] text-sm mb-6 leading-relaxed">
               Linking industries the right way. Engage, share, thrive with business leaders and thought partners.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-ink-base/70 hover:text-pb-blue transition-colors">
+              <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="#" className="text-ink-base/70 hover:text-pb-blue transition-colors">
+              <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="mailto:contact@public-business.ca" className="text-ink-base/70 hover:text-pb-blue transition-colors">
+              <a href="mailto:contact@public-business.ca" className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
@@ -68,13 +68,13 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-semibold text-ink-base mb-4">Company</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">Company</h3>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -85,13 +85,13 @@ export function Footer() {
 
           {/* Members Links */}
           <div>
-            <h3 className="font-semibold text-ink-base mb-4">Members</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">Members</h3>
             <ul className="space-y-3">
               {footerLinks.members.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -102,13 +102,13 @@ export function Footer() {
 
           {/* Support Links */}
           <div>
-            <h3 className="font-semibold text-ink-base mb-4">Support</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">Support</h3>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -119,13 +119,13 @@ export function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h3 className="font-semibold text-ink-base mb-4">Legal</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">Legal</h3>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.to}>
                   <NavLink 
                     to={link.to} 
-                    className="text-ink-base/70 hover:text-pb-blue transition-colors text-sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors text-sm"
                   >
                     {link.label}
                   </NavLink>
@@ -136,42 +136,42 @@ export function Footer() {
         </div>
 
         {/* Contact Info */}
-        <div className="border-t border-border mt-12 pt-8">
+        <div className="border-t border-[var(--glass-border)] mt-12 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="flex items-center space-x-3">
-              <Mail className="h-5 w-5 text-pb-blue" />
+              <Mail className="h-5 w-5 text-[var(--text-accent)]" />
               <div>
-                <div className="font-medium text-ink-base">Email</div>
-                <div className="text-sm text-ink-base/70">contact@public-business.ca</div>
+                <div className="font-medium text-[var(--text-primary)]">Email</div>
+                <div className="text-sm text-[var(--text-secondary)]">contact@public-business.ca</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Phone className="h-5 w-5 text-pb-blue" />
+              <Phone className="h-5 w-5 text-[var(--text-accent)]" />
               <div>
-                <div className="font-medium text-ink-base">Phone</div>
-                <div className="text-sm text-ink-base/70">+1 (555) 123-4567</div>
+                <div className="font-medium text-[var(--text-primary)]">Phone</div>
+                <div className="text-sm text-[var(--text-secondary)]">+1 (555) 123-4567</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <MapPin className="h-5 w-5 text-pb-blue" />
+              <MapPin className="h-5 w-5 text-[var(--text-accent)]" />
               <div>
-                <div className="font-medium text-ink-base">Location</div>
-                <div className="text-sm text-ink-base/70">Mascouche, QC, Canada (Remote-first)</div>
+                <div className="font-medium text-[var(--text-primary)]">Location</div>
+                <div className="text-sm text-[var(--text-secondary)]">Mascouche, QC, Canada (Remote-first)</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between">
-          <p className="text-sm text-ink-base/70">
+        <div className="border-t border-[var(--glass-border)] pt-8 flex flex-col md:flex-row items-center justify-between">
+          <p className="text-sm text-[var(--text-secondary)]">
             © {currentYear} Public Business. All rights reserved.
           </p>
-          <p className="text-sm text-ink-base/70 mt-2 md:mt-0">
+          <p className="text-sm text-[var(--text-secondary)] mt-2 md:mt-0">
             Built with ❤️ for connecting industries
           </p>
         </div>
-      </div>
+      </GlassSurface>
     </footer>
   );
 }
