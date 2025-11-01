@@ -24,7 +24,7 @@ export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) 
 
   return (
     <div 
-      className="relative min-h-screen w-full"
+      className="relative min-h-screen w-full bg-transparent"
       style={{ color: 'var(--text-primary)' }}
     >
       <GlobalBackground />

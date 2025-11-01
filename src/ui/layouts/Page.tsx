@@ -35,10 +35,10 @@ export function Page({
   return (
     <div 
       className={cn(
-        // Base layout
-        'min-h-screen w-full relative',
+        // Base layout - transparent to allow orbital background through
+        'min-h-screen w-full relative bg-transparent',
         
-        // Mode-specific background (handled by body data-mode attribute in CSS)
+        // Mode-specific transitions
         'transition-all duration-700 ease-in-out',
         
         className

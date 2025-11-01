@@ -232,20 +232,21 @@
    Enforce Token-Based Background
    ======================================== */
 html {
-  background: var(--background) !important;
+  background: transparent;
   min-height: 100vh;
   min-height: -webkit-fill-available;
 }
 
 body {
-  background: var(--background) !important;
+  background: transparent;
   color: var(--text-primary) !important;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: color 0.3s ease;
   min-height: 100vh;
   min-height: -webkit-fill-available;
 }
 
 #root {
+  background: transparent;
   min-height: 100vh;
   min-height: -webkit-fill-available;
 }
