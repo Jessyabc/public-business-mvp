@@ -86,14 +86,19 @@ export default function Auth() {
 
   return (
     <main className="container mx-auto max-w-xl px-4 py-12 mt-24">
-      <header className="text-center mb-8">
-        <h1 className="text-3xl font-semibold flex items-center justify-center gap-2 text-ink-base">
-          <Brain className="w-6 h-6 text-pb-blue" /> Sign in or Create account
+      <header className="text-center mb-8 flex flex-col items-center gap-4">
+        <img 
+          src="/lovable-uploads/e501941c-3e1a-4f5a-a8d1-d3ad167d2e0c.png" 
+          alt="Public Business Logo" 
+          className="h-20 w-auto"
+        />
+        <h1 className="text-3xl font-semibold text-foreground">
+          Sign in or Create account
         </h1>
-        <p className="text-ink-base/70 mt-2">Access brainstorms and business insights.</p>
+        <p className="text-muted-foreground mt-2">Access brainstorms and business insights.</p>
       </header>
 
-      <section className="glass-card border rounded-xl p-6">
+      <section className="glass-card border rounded-xl p-6 bg-background/95 backdrop-blur-md">
         <div className="scrim" />
         <div className="relative z-10">
         <Tabs defaultValue="signin" className="w-full">
@@ -103,89 +108,93 @@ export default function Auth() {
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4 mt-6">
-            <div className="space-y-2">
-              <Label htmlFor="signin-email">Email</Label>
-              <Input id="signin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signin-password">Password</Label>
-              <div className="relative">
-                <Input id="signin-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pr-10" />
-                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 py-2" onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-            <Button className="w-full" onClick={handleSignIn} disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</Button>
-          </TabsContent>
-
-          <TabsContent value="signup" className="space-y-6 mt-6">
-            {/* Basic Account Info */}
-            <div className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); handleSignIn(); }} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-email">Email *</Label>
-                <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+                <Label htmlFor="signin-email">Email</Label>
+                <Input id="signin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
               </div>
-              
               <div className="space-y-2">
-                <Label htmlFor="display-name">Full Name *</Label>
-                <Input id="display-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your full name" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">Password *</Label>
+                <Label htmlFor="signin-password">Password</Label>
                 <div className="relative">
-                  <Input id="signup-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pr-10" />
+                  <Input id="signin-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pr-10" />
                   <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 py-2" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="signup-confirm">Confirm Password *</Label>
-                <Input id="signup-confirm" type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" />
-              </div>
-            </div>
-            
-            {/* Personal Profile Fields */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-sm text-ink-base/70 uppercase tracking-wide">Profile Information (Optional)</h3>
-              
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us about yourself..." rows={3} />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</Button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="signup" className="space-y-6 mt-6">
+            <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-6">
+              {/* Basic Account Info */}
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Your location" />
+                  <Label htmlFor="signup-email">Email *</Label>
+                  <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourwebsite.com" />
+                  <Label htmlFor="display-name">Full Name *</Label>
+                  <Input id="display-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your full name" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password *</Label>
+                  <div className="relative">
+                    <Input id="signup-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pr-10" />
+                    <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 py-2" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm">Confirm Password *</Label>
+                  <Input id="signup-confirm" type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" />
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="linkedin">LinkedIn Profile</Label>
-                <Input id="linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+              {/* Personal Profile Fields */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Profile Information (Optional)</h3>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us about yourself..." rows={3} />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Your location" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourwebsite.com" />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin">LinkedIn Profile</Label>
+                  <Input id="linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+                </div>
+                
+                <div className="bg-blue-50/50 p-4 rounded-lg border">
+                  <p className="text-sm text-blue-700 mb-2">
+                    <strong>Note:</strong> All users start as Public Members. Business membership is invite-only.
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    Complete your profile after signup, then use an invite token to upgrade to Business Member.
+                  </p>
+                </div>
               </div>
               
-              <div className="bg-blue-50/50 p-4 rounded-lg border">
-                <p className="text-sm text-blue-700 mb-2">
-                  <strong>Note:</strong> All users start as Public Members. Business membership is invite-only.
-                </p>
-                <p className="text-xs text-blue-600">
-                  Complete your profile after signup, then use an invite token to upgrade to Business Member.
-                </p>
-              </div>
-            </div>
-            
-            <Button className="w-full" onClick={handleSignUp} disabled={loading}>
-              {loading ? 'Creating account...' : 'Create Public Account'}
-            </Button>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Creating account...' : 'Create Public Account'}
+              </Button>
+            </form>
           </TabsContent>
         </Tabs>
         </div>
