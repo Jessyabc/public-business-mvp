@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { AppModeProvider } from "@/contexts/AppModeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { BackgroundModeManager } from "@/components/layout/BackgroundModeManager";
 import { ThemeInjector } from "@/styles/ThemeInjector";
 import { router } from "./app/router";
 import { RightSidebar } from "@/components/layout/RightSidebar";
@@ -20,7 +19,6 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <AppModeProvider>
-          <BackgroundModeManager />
           <ThemeInjector />
           <div className="page-shell">
             <main className="page-content">

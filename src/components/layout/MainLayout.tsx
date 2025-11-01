@@ -1,11 +1,10 @@
 import { ReactNode, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
 import { GlobalNavigationMenu } from '@/components/navigation/GlobalNavigationMenu';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { OrbitalBackground } from '@/components/layout/OrbitalBackground';
+import { GlobalBackground } from '@/components/layout/GlobalBackground';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -16,7 +15,6 @@ interface MainLayoutProps {
 
 export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) {
   const { user } = useAuth();
-  const { mode } = useAppMode();
   const location = useLocation();
 
   // Scroll to top on route change
@@ -26,10 +24,10 @@ export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) 
 
   return (
     <div 
-      className="relative min-h-screen w-full transition-all duration-700 ease-in-out"
+      className="relative min-h-screen w-full"
       style={{ color: 'var(--text-primary)' }}
     >
-      <OrbitalBackground />
+      <GlobalBackground />
       
       {/* Global Navigation Menu - always visible */}
       <GlobalNavigationMenu />

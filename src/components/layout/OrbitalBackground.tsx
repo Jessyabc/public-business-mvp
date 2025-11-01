@@ -1,86 +1,150 @@
-import { useAppMode } from '@/contexts/AppModeContext';
-import { tokens } from '@/ui/theme/tokens';
+import { motion } from 'framer-motion';
 
-export function OrbitalBackground() {
-  const { mode } = useAppMode();
+interface OrbitalBackgroundProps {
+  mode: 'public' | 'business';
+}
+
+export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
+  const isPublic = mode === 'public';
+  
+  // Define orb configurations for each mode
+  const publicOrbs = [
+    {
+      size: 600,
+      top: '10%',
+      left: '5%',
+      color: 'rgba(72, 159, 227, 0.25)', // PB Blue
+      blur: 80,
+      duration: 32,
+      x: [-40, 40, -40],
+      y: [-60, 60, -60],
+    },
+    {
+      size: 500,
+      top: '15%',
+      right: '8%',
+      color: 'rgba(103, 255, 216, 0.18)', // PB Aqua
+      blur: 90,
+      duration: 38,
+      x: [50, -50, 50],
+      y: [-40, 70, -40],
+    },
+    {
+      size: 550,
+      bottom: '10%',
+      left: '10%',
+      color: 'rgba(255, 200, 91, 0.15)', // PB Gold
+      blur: 85,
+      duration: 35,
+      x: [-60, 60, -60],
+      y: [40, -50, 40],
+    },
+    {
+      size: 650,
+      top: '40%',
+      left: '50%',
+      color: 'rgba(254, 94, 180, 0.12)', // Magenta
+      blur: 100,
+      duration: 40,
+      x: [-70, 70, -70],
+      y: [-80, 80, -80],
+    },
+    {
+      size: 480,
+      bottom: '15%',
+      right: '12%',
+      color: 'rgba(72, 159, 227, 0.20)', // PB Blue variant
+      blur: 75,
+      duration: 30,
+      x: [60, -60, 60],
+      y: [-50, 50, -50],
+    },
+  ];
+
+  const businessOrbs = [
+    {
+      size: 500,
+      top: '12%',
+      left: '8%',
+      color: 'rgba(255, 170, 120, 0.12)', // Warm orange
+      blur: 80,
+      duration: 34,
+      x: [-45, 45, -45],
+      y: [-55, 55, -55],
+    },
+    {
+      size: 450,
+      top: '20%',
+      right: '10%',
+      color: 'rgba(80, 120, 200, 0.10)', // Cool blue
+      blur: 85,
+      duration: 36,
+      x: [50, -50, 50],
+      y: [-45, 65, -45],
+    },
+    {
+      size: 520,
+      bottom: '12%',
+      left: '12%',
+      color: 'rgba(72, 159, 227, 0.12)', // PB Blue accent
+      blur: 90,
+      duration: 32,
+      x: [-55, 55, -55],
+      y: [45, -55, 45],
+    },
+    {
+      size: 480,
+      bottom: '18%',
+      right: '15%',
+      color: 'rgba(103, 255, 216, 0.08)', // Aqua shimmer
+      blur: 75,
+      duration: 38,
+      x: [60, -60, 60],
+      y: [-50, 50, -50],
+    },
+  ];
+
+  const orbs = isPublic ? publicOrbs : businessOrbs;
+  const baseBackground = isPublic ? '#020617' : '#F8FAFC';
+  const blendMode = isPublic ? 'screen' : 'overlay';
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden transition-colors duration-800"
+      style={{ backgroundColor: baseBackground }}
     >
-      {/* Base gradient layer from tokens */}
+      {/* Animated orbital gradient orbs */}
       <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: tokens.gradients[mode].background,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed',
-        }}
-      />
-      
-      {/* Animated gradient orbs layer */}
-      <div className="absolute inset-0" style={{ mixBlendMode: 'screen' }}>
-        {/* Blue orb top left */}
-        <div 
-          className="absolute w-[600px] h-[600px] rounded-full opacity-40 blur-[100px] animate-float"
-          style={{
-            top: '10%',
-            left: '5%',
-            background: 'radial-gradient(circle, hsl(210, 80%, 60%) 0%, hsl(210, 70%, 40%) 30%, transparent 70%)',
-            animationDelay: '0s',
-            animationDuration: '25s',
-          }}
-        />
-        
-        {/* Orange/Coral orb top right */}
-        <div 
-          className="absolute w-[500px] h-[500px] rounded-full opacity-35 blur-[90px] animate-float"
-          style={{
-            top: '15%',
-            right: '8%',
-            background: 'radial-gradient(circle, hsl(20, 85%, 65%) 0%, hsl(340, 70%, 55%) 40%, transparent 70%)',
-            animationDelay: '3s',
-            animationDuration: '28s',
-          }}
-        />
-        
-        {/* Cyan orb bottom left */}
-        <div 
-          className="absolute w-[550px] h-[550px] rounded-full opacity-30 blur-[95px] animate-float"
-          style={{
-            bottom: '10%',
-            left: '10%',
-            background: 'radial-gradient(circle, hsl(180, 75%, 55%) 0%, hsl(200, 65%, 45%) 35%, transparent 70%)',
-            animationDelay: '6s',
-            animationDuration: '30s',
-          }}
-        />
-        
-        {/* Purple/Pink orb center */}
-        <div 
-          className="absolute w-[650px] h-[650px] rounded-full opacity-25 blur-[120px] animate-float"
-          style={{
-            top: '40%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'radial-gradient(circle, hsl(280, 70%, 55%) 0%, hsl(320, 65%, 50%) 30%, transparent 70%)',
-            animationDelay: '9s',
-            animationDuration: '35s',
-          }}
-        />
-        
-        {/* Teal orb bottom right */}
-        <div 
-          className="absolute w-[480px] h-[480px] rounded-full opacity-35 blur-[85px] animate-float"
-          style={{
-            bottom: '15%',
-            right: '12%',
-            background: 'radial-gradient(circle, hsl(170, 70%, 60%) 0%, hsl(190, 60%, 45%) 40%, transparent 70%)',
-            animationDelay: '12s',
-            animationDuration: '26s',
-          }}
-        />
+        className="absolute inset-0" 
+        style={{ mixBlendMode: blendMode as any }}
+      >
+        {orbs.map((orb, index) => (
+          <motion.div
+            key={index}
+            className="absolute rounded-full"
+            style={{
+              width: `${orb.size}px`,
+              height: `${orb.size}px`,
+              top: orb.top,
+              bottom: orb.bottom,
+              left: orb.left,
+              right: orb.right,
+              background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+              filter: `blur(${orb.blur}px)`,
+              ...(orb.left === '50%' && { transform: 'translateX(-50%)' }),
+            }}
+            animate={{
+              x: orb.x,
+              y: orb.y,
+            }}
+            transition={{
+              duration: orb.duration,
+              ease: 'easeInOut',
+              repeat: Infinity,
+              repeatType: 'reverse',
+            }}
+          />
+        ))}
       </div>
     </div>
   );
