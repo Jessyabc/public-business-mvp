@@ -30,7 +30,7 @@ export function NewLanding() {
             src={pbLogoHero}
             alt="Public Business"
             className="
-              h-52 sm:h-64 lg:h-80 xl:h-96
+              h-[26rem] sm:h-[32rem] lg:h-[40rem] xl:h-[48rem]
               object-contain mx-auto
               drop-shadow-brand
             "

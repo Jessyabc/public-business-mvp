@@ -15,7 +15,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       left: '5%',
       color: 'rgba(72, 159, 227, 0.25)', // PB Blue
       blur: 80,
-      duration: 32,
+      duration: 16,
       x: [-40, 40, -40],
       y: [-60, 60, -60],
     },
@@ -25,7 +25,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       right: '8%',
       color: 'rgba(103, 255, 216, 0.18)', // PB Aqua
       blur: 80,
-      duration: 38,
+      duration: 19,
       x: [50, -50, 50],
       y: [-40, 70, -40],
     },
@@ -35,7 +35,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       left: '10%',
       color: 'rgba(255, 200, 91, 0.15)', // PB Gold
       blur: 80,
-      duration: 35,
+      duration: 17,
       x: [-60, 60, -60],
       y: [40, -50, 40],
     },
@@ -45,7 +45,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       left: '50%',
       color: 'rgba(254, 94, 180, 0.12)', // Magenta
       blur: 80,
-      duration: 40,
+      duration: 20,
       x: [-70, 70, -70],
       y: [-80, 80, -80],
     },
@@ -55,7 +55,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       right: '12%',
       color: 'rgba(72, 159, 227, 0.20)', // PB Blue variant
       blur: 80,
-      duration: 30,
+      duration: 15,
       x: [60, -60, 60],
       y: [-50, 50, -50],
     },
@@ -68,7 +68,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       left: '8%',
       color: 'rgba(255, 170, 120, 0.12)', // Warm orange
       blur: 80,
-      duration: 34,
+      duration: 17,
       x: [-45, 45, -45],
       y: [-55, 55, -55],
     },
@@ -78,7 +78,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       right: '10%',
       color: 'rgba(80, 120, 200, 0.10)', // Cool blue
       blur: 80,
-      duration: 36,
+      duration: 18,
       x: [50, -50, 50],
       y: [-45, 65, -45],
     },
@@ -88,7 +88,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       left: '12%',
       color: 'rgba(72, 159, 227, 0.12)', // PB Blue accent
       blur: 80,
-      duration: 32,
+      duration: 16,
       x: [-55, 55, -55],
       y: [45, -55, 45],
     },
@@ -98,7 +98,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       right: '15%',
       color: 'rgba(103, 255, 216, 0.08)', // Aqua shimmer
       blur: 80,
-      duration: 38,
+      duration: 19,
       x: [60, -60, 60],
       y: [-50, 50, -50],
     },
