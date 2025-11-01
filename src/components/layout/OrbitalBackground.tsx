@@ -24,7 +24,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       top: '15%',
       right: '8%',
       color: 'rgba(103, 255, 216, 0.18)', // PB Aqua
-      blur: 90,
+      blur: 80,
       duration: 38,
       x: [50, -50, 50],
       y: [-40, 70, -40],
@@ -34,7 +34,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       bottom: '10%',
       left: '10%',
       color: 'rgba(255, 200, 91, 0.15)', // PB Gold
-      blur: 85,
+      blur: 80,
       duration: 35,
       x: [-60, 60, -60],
       y: [40, -50, 40],
@@ -44,7 +44,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       top: '40%',
       left: '50%',
       color: 'rgba(254, 94, 180, 0.12)', // Magenta
-      blur: 100,
+      blur: 80,
       duration: 40,
       x: [-70, 70, -70],
       y: [-80, 80, -80],
@@ -54,7 +54,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       bottom: '15%',
       right: '12%',
       color: 'rgba(72, 159, 227, 0.20)', // PB Blue variant
-      blur: 75,
+      blur: 80,
       duration: 30,
       x: [60, -60, 60],
       y: [-50, 50, -50],
@@ -77,7 +77,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       top: '20%',
       right: '10%',
       color: 'rgba(80, 120, 200, 0.10)', // Cool blue
-      blur: 85,
+      blur: 80,
       duration: 36,
       x: [50, -50, 50],
       y: [-45, 65, -45],
@@ -87,7 +87,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       bottom: '12%',
       left: '12%',
       color: 'rgba(72, 159, 227, 0.12)', // PB Blue accent
-      blur: 90,
+      blur: 80,
       duration: 32,
       x: [-55, 55, -55],
       y: [45, -55, 45],
@@ -97,7 +97,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
       bottom: '18%',
       right: '15%',
       color: 'rgba(103, 255, 216, 0.08)', // Aqua shimmer
-      blur: 75,
+      blur: 80,
       duration: 38,
       x: [60, -60, 60],
       y: [-50, 50, -50],
@@ -110,7 +110,7 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden transition-colors duration-800"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden transition-colors duration-[800ms]"
       style={{ backgroundColor: baseBackground }}
     >
       {/* Animated orbital gradient orbs */}

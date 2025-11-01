@@ -98,7 +98,6 @@ export default {
         'glass-dark': '0 4px 12px rgba(0,0,0,0.4), 0 0 1px rgba(255,255,255,0.1)',
       },
       backgroundImage: {
-        'gradient-space': 'linear-gradient(180deg, #0b1f3a 0%, #0d2548 50%, #020d1f 100%)',
         'gradient-radial': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
       },
       borderRadius: {

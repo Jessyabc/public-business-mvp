@@ -4,42 +4,6 @@ import { ComposerSection } from "@/components/landing/ComposerSection";
 import { BrainstormPreviewList } from "@/components/BrainstormPreviewList";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
-/** Layered animated glows for contrast behind dark UI */
-function BackgroundGlow() {
-  return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-      {/* Center radial behind logo/headline */}
-      <div
-        className="
-          absolute left-1/2 top-[0%] -translate-x-1/2 -translate-y-1/2
-          w=[130vw] h=[100vw]
-          bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),rgba(56,189,248,0.40)_18%,rgba(99,102,241,0.32)_36%,transparent_64%)]
-          blur-[140px] opacity-90 mix-blend-screen
-          animate-glow-center motion-reduce:animate-none
-        "
-      />
-      {/* Corner blobs */}
-      <div
-        className="
-          absolute top-[18%] left-[12%]
-          w-[48rem] h-[48rem]
-          bg-blue-500/22 rounded-full blur-3xl mix-blend-screen
-          animate-glow motion-reduce:animate-none
-        "
-      />
-      <div
-        className="
-          absolute bottom-[14%] right-[10%]
-          w-[50rem] h-[50rem]
-          bg-purple-500/20 rounded-full blur-3xl mix-blend-screen
-          animate-glow motion-reduce:animate-none
-        "
-        style={{ animationDelay: "2.1s" }}
-      />
-    </div>
-  );
-}
-
 export function NewLanding() {
   const [showComposer, setShowComposer] = useState(false);
   const analytics = useAnalytics();
@@ -49,7 +13,7 @@ export function NewLanding() {
   }, [analytics]);
 
   return (
-    <div className="min-h-screen bg-gradient-space">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section 
         className="relative flex flex-col items-center justify-center px-3 overflow-hidden"
@@ -58,7 +22,6 @@ export function NewLanding() {
           minHeight: '-webkit-fill-available'
         }}
       >
-        <BackgroundGlow />
 
         {/* Logo */}
         <div className="mb-14 z-10">
