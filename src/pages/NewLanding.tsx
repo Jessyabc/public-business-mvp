@@ -16,14 +16,13 @@ export function NewLanding() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section 
+      <section
         className="relative flex flex-col items-center justify-center px-3 overflow-hidden"
-        style={{ 
-          height: '100vh',
-          minHeight: '-webkit-fill-available'
+        style={{
+          height: "120vh",
+          minHeight: "-webkit-fill-available",
         }}
       >
-
         {/* Logo */}
         <div className="mb-14 z-10">
           <img
@@ -60,8 +59,8 @@ export function NewLanding() {
         </p>
 
         {/* Scroll indicator */}
-        <a 
-          href="#timeline" 
+        <a
+          href="#timeline"
           className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10 cursor-pointer hover:scale-110 transition-transform"
           aria-label="Scroll to timeline"
         >
