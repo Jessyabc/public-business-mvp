@@ -9,6 +9,18 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
   
   // Define orb configurations for each mode
   const publicOrbs = [
+    // Central warping orb - more defined
+    {
+      size: 700,
+      top: '50%',
+      left: '50%',
+      color: 'rgba(72, 159, 227, 0.35)', // PB Blue - stronger
+      blur: 40,
+      duration: 25,
+      x: [-20, 20, -20],
+      y: [-20, 20, -20],
+      scale: [1, 1.15, 1],
+    },
     {
       size: 600,
       top: '10%',
@@ -62,6 +74,18 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
   ];
 
   const businessOrbs = [
+    // Central warping orb - more defined
+    {
+      size: 650,
+      top: '50%',
+      left: '50%',
+      color: 'rgba(72, 159, 227, 0.25)', // PB Blue
+      blur: 40,
+      duration: 25,
+      x: [-20, 20, -20],
+      y: [-20, 20, -20],
+      scale: [1, 1.15, 1],
+    },
     {
       size: 500,
       top: '12%',
@@ -131,11 +155,14 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
               right: orb.right,
               background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
               filter: `blur(${orb.blur}px)`,
-              ...(orb.left === '50%' && { transform: 'translateX(-50%)' }),
+              ...(orb.left === '50%' && orb.top === '50%' && { 
+                transform: 'translate(-50%, -50%)',
+              }),
             }}
             animate={{
               x: orb.x,
               y: orb.y,
+              scale: (orb as any).scale || 1,
             }}
             transition={{
               duration: orb.duration,
