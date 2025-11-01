@@ -3,6 +3,7 @@ import { TimelineSection } from "@/components/landing/TimelineSection";
 import { ComposerSection } from "@/components/landing/ComposerSection";
 import { BrainstormPreviewList } from "@/components/BrainstormPreviewList";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import pbLogoHero from "@/assets/pb-logo-hero.png";
 
 export function NewLanding() {
   const [showComposer, setShowComposer] = useState(false);
@@ -26,7 +27,7 @@ export function NewLanding() {
         {/* Logo */}
         <div className="mb-14 z-10">
           <img
-            src="/lovable-uploads/7b84831f-eb6d-4acd-bf51-5d3d7be705ba.png"
+            src={pbLogoHero}
             alt="Public Business"
             className="
               h-52 sm:h-64 lg:h-80 xl:h-96
