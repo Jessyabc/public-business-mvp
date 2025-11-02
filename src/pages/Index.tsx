@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Landing } from './Landing';
-import BrainstormPage from '@/features/brainstorm/BrainstormPage';
+import BrainstormFeed from '@/pages/brainstorm/BrainstormFeed';
 import { BusinessFeed } from "@/components/feeds/BusinessFeed";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
@@ -31,7 +31,7 @@ const Index = () => {
   }
 
   // If user is connected, show the feeds
-  const feedContent = mode === 'business' ? <BusinessFeed /> : <BrainstormPage />;
+  const feedContent = mode === 'business' ? <BusinessFeed /> : <BrainstormFeed />;
   
   return (
     <ProtectedRoute requireAuth={true}>
