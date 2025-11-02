@@ -104,6 +104,95 @@ export type Database = {
         }
         Relationships: []
       }
+      brainstorms: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          parent_id: string | null
+          parent_type: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          parent_id?: string | null
+          parent_type?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          parent_id?: string | null
+          parent_type?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      business_insights: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          org_id: string | null
+          parent_id: string | null
+          parent_type: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          org_id?: string | null
+          parent_id?: string | null
+          parent_type?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          org_id?: string | null
+          parent_id?: string | null
+          parent_type?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_insights_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_invitations: {
         Row: {
           consumed_at: string | null
@@ -299,7 +388,7 @@ export type Database = {
         }
         Relationships: []
       }
-      idea_brainstorms_legacy: {
+      idea_brainstorms_archive: {
         Row: {
           author_display_name: string
           author_user_id: string | null
@@ -416,6 +505,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      idea_links: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          source_id: string
+          source_type: string | null
+          target_id: string
+          target_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          source_id: string
+          source_type?: string | null
+          target_id: string
+          target_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          source_id?: string
+          source_type?: string | null
+          target_id?: string
+          target_type?: string | null
+        }
+        Relationships: []
       }
       industries: {
         Row: {
@@ -1050,6 +1169,19 @@ export type Database = {
           },
         ]
       }
+      idea_lineage_view: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          creator_name: string | null
+          id: string | null
+          source_id: string | null
+          source_type: string | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Relationships: []
+      }
       my_open_ideas_view: {
         Row: {
           content: string | null
@@ -1421,6 +1553,10 @@ export type Database = {
         Returns: boolean
       }
       consume_invite: { Args: { p_token: string }; Returns: undefined }
+      count_links_for_entity: {
+        Args: { entity_id: string; entity_type: string }
+        Returns: number
+      }
       create_business_invite: {
         Args: { p_invitee_email: string; p_role?: string; p_ttl_days?: number }
         Returns: {
@@ -1443,6 +1579,17 @@ export type Database = {
       }
       current_user_email: { Args: never; Returns: string }
       get_client_ip: { Args: never; Returns: string }
+      get_lineage_chain: {
+        Args: { start_id: string; start_type: string }
+        Returns: {
+          depth: number
+          id: string
+          source_id: string
+          source_type: string
+          target_id: string
+          target_type: string
+        }[]
+      }
       get_my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]

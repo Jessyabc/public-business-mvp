@@ -49,12 +49,12 @@ export function useIdeaLinks() {
   async function fetchLinks() {
     try {
       const { data, error } = await supabase
-        .from("idea_links")
+        .from("idea_links" as any)
         .select("*")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      setLinks((data || []) as IdeaLink[]);
+      setLinks((data || []) as unknown as IdeaLink[]);
     } catch (error) {
       console.error("Error fetching idea links:", error);
     } finally {
@@ -86,7 +86,7 @@ export function useIdeaLinks() {
 
     try {
       const { data, error } = await supabase
-        .from("idea_links")
+        .from("idea_links" as any)
         .insert([
           {
             source_id,
@@ -95,7 +95,7 @@ export function useIdeaLinks() {
             target_type,
             created_by: user.id
           }
-        ])
+        ] as any)
         .select()
         .single();
 
@@ -107,7 +107,7 @@ export function useIdeaLinks() {
       });
 
       await fetchLinks();
-      return { data, error: null };
+      return { data: data as unknown as IdeaLink, error: null };
     } catch (error) {
       console.error("Error creating link:", error);
       toast({
