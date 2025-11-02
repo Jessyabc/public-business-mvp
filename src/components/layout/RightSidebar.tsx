@@ -31,8 +31,7 @@ export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
           {
             event: '*',
             schema: 'public',
-            table: 'posts',
-            filter: 'type=eq.brainstorm'
+            table: 'brainstorms'
           },
           () => {
             fetchFeeds();
@@ -48,17 +47,14 @@ export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
 
   const fetchFeeds = async () => {
     try {
-      // Fetch recent brainstorms
+      // Fetch recent brainstorms from brainstorms table
       const { data: brainstorms } = await supabase
-        .from('posts')
+        .from('brainstorms' as any)
         .select('id, title, content, created_at')
-        .eq('type', 'brainstorm')
-        .eq('visibility', 'public')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      setRecentBrainstorms(brainstorms || []);
+      setRecentBrainstorms((brainstorms || []) as any);
 
       // Fetch open ideas from open_ideas_public_view
       const { data: openIdeas } = await supabase
