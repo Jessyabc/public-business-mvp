@@ -220,9 +220,12 @@ export function useBrainstormStats() {
   return { stats, fetchStats };
 }
 
+// Note: This hook uses the legacy idea_interactions table for backward compatibility.
+// Interactions reference post IDs via the idea_id column.
 export function useBrainstormInteractions(brainstormId: string) {
   const [comments, setComments] = useState<BrainstormInteraction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   const { user } = useAuth();
 
   const fetchComments = async () => {
@@ -244,6 +247,24 @@ export function useBrainstormInteractions(brainstormId: string) {
     }
   };
 
+  const checkLikeStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('idea_interactions')
+        .select('id')
+        .eq('idea_id', brainstormId)
+        .eq('type', 'like')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setIsLiked(!!data);
+    } catch (err) {
+      console.error('Error checking like status:', err);
+    }
+  };
+
   const addComment = async (text: string) => {
     if (!user) {
       toast({ title: "Error", description: "Must be logged in to comment", variant: "destructive" });
@@ -261,6 +282,10 @@ export function useBrainstormInteractions(brainstormId: string) {
         });
 
       if (error) throw error;
+      
+      // Increment post comment count
+      await supabase.rpc('increment_post_comments', { post_id: brainstormId });
+      
       await fetchComments();
       toast({ title: "Success", description: "Comment added!" });
     } catch (err) {
@@ -276,14 +301,13 @@ export function useBrainstormInteractions(brainstormId: string) {
     }
 
     try {
-      // Check if already liked
       const { data: existing } = await supabase
         .from('idea_interactions')
         .select('id')
         .eq('idea_id', brainstormId)
         .eq('type', 'like')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Remove like
@@ -293,6 +317,7 @@ export function useBrainstormInteractions(brainstormId: string) {
           .eq('id', existing.id);
 
         if (error) throw error;
+        setIsLiked(false);
       } else {
         // Add like
         const { error } = await supabase
@@ -305,7 +330,17 @@ export function useBrainstormInteractions(brainstormId: string) {
           });
 
         if (error) throw error;
+        
+        // Increment post like count
+        await supabase.rpc('increment_post_likes', { post_id: brainstormId });
+        
+        setIsLiked(true);
       }
+      
+      toast({ 
+        title: "Success", 
+        description: isLiked ? "Like removed" : "Post liked!" 
+      });
     } catch (err) {
       console.error('Error toggling like:', err);
       toast({ title: "Error", description: "Failed to update like", variant: "destructive" });
@@ -315,12 +350,14 @@ export function useBrainstormInteractions(brainstormId: string) {
   useEffect(() => {
     if (brainstormId) {
       fetchComments();
+      checkLikeStatus();
     }
   }, [brainstormId]);
 
   return {
     comments,
     loading,
+    isLiked,
     addComment,
     toggleLike,
     refetch: fetchComments,

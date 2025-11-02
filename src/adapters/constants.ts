@@ -6,7 +6,6 @@ export const TABLES = {
   
   // Open ideas and related data  
   OPEN_IDEAS: 'open_ideas',
-  IDEA_BRAINSTORMS: 'idea_brainstorms',
   
   // User activity tracking
   HISTORY: 'analytics_events',
