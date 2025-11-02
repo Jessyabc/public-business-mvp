@@ -5,23 +5,38 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Building2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ChevronDown, Building2, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { FeedsAdapter, type FeedItem, type HistoryItem } from '@/adapters/feedsAdapter';
 import { SHOW_RIGHT_SIDEBAR } from '@/config/flags';
 import styles from '@/components/effects/glassSurface.module.css';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { LiveBrainstormWindow } from '@/components/brainstorm/LiveBrainstormWindow';
+import { supabase } from '@/integrations/supabase/client';
 
-export function RightSidebar() {
+type RecentBrainstorm = {
+  id: string;
+  title: string;
+  created_at: string;
+  likes_count: number;
+};
+
+interface RightSidebarProps {
+  variant?: 'default' | 'feed';
+}
+
+export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
   const showSidebar = SHOW_RIGHT_SIDEBAR;
   const { mode } = useAppMode();
   
   const adapter = useMemo(() => new FeedsAdapter(), []);
   const [ideas, setIdeas] = useState<FeedItem[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [recentBrainstorms, setRecentBrainstorms] = useState<RecentBrainstorm[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(true);
   const [loadingHist, setLoadingHist] = useState(true);
+  const [loadingBrainstorms, setLoadingBrainstorms] = useState(true);
   const [visible, setVisible] = useState({ ideas: 12 });
   const [showBrainstormPreview, setShowBrainstormPreview] = useState(false);
 
@@ -32,7 +47,7 @@ export function RightSidebar() {
 
     (async () => {
       try {
-        const list = await adapter.getOpenIdeasFeed();      // uses existing adapter
+        const list = await adapter.getOpenIdeasFeed();
         setIdeas(list ?? []);
       } catch (e) {
         console.warn('Open ideas load failed:', e);
@@ -43,7 +58,7 @@ export function RightSidebar() {
 
     (async () => {
       try {
-        const list = await adapter.getHistory();            // recent views/opens
+        const list = await adapter.getHistory();
         setHistory(list ?? []);
       } catch (e) {
         console.warn('History load failed:', e);
@@ -51,7 +66,29 @@ export function RightSidebar() {
         setLoadingHist(false);
       }
     })();
-  }, [adapter, showSidebar]);
+
+    // Load recent brainstorms for feed variant
+    if (variant === 'feed') {
+      (async () => {
+        try {
+          const { data, error } = await supabase
+            .from('posts')
+            .select('id, title, created_at, likes_count')
+            .eq('type', 'brainstorm')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+          if (error) throw error;
+          setRecentBrainstorms(data || []);
+        } catch (err) {
+          console.error('Error loading recent brainstorms:', err);
+        } finally {
+          setLoadingBrainstorms(false);
+        }
+      })();
+    }
+  }, [adapter, showSidebar, variant]);
 
   const loadMoreIdeas = () =>
     setVisible(v => ({ ...v, ideas: Math.min(v.ideas + 12, ideas.length) }));
@@ -59,12 +96,46 @@ export function RightSidebar() {
   if (!showSidebar) return null;
 
   return (
-    <aside className="right-sidebar-overlay glass-card glass-med p-3"
-      aria-label="Right sidebar overlay"
-    >
-      {/* Brainstorm Feed Preview Toggle */}
-      {mode === 'business' && (
-        <div className="mb-3">
+    <div className="h-full flex flex-col bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-inner overflow-hidden">
+      {/* Header: Recent Brainstorms (feed variant only) */}
+      {variant === 'feed' && (
+        <div className="p-4 border-b border-white/10">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-sm">Recent Activity</h3>
+          </div>
+          {loadingBrainstorms ? (
+            <div className="space-y-2">
+              <Skeleton className="h-12 w-full rounded-lg" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+          ) : recentBrainstorms.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No recent activity</p>
+          ) : (
+            <ScrollArea className="max-h-48">
+              <div className="space-y-2">
+                {recentBrainstorms.map((bs) => (
+                  <div
+                    key={bs.id}
+                    className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    <p className="text-xs font-medium line-clamp-1 mb-1">{bs.title}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{bs.likes_count} likes</span>
+                      <span>•</span>
+                      <span>{new Date(bs.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
+      )}
+
+      {/* Brainstorm Feed Preview Toggle (business mode, default variant) */}
+      {variant === 'default' && mode === 'business' && (
+        <div className="p-3 border-b border-white/10">
           <Button
             onClick={() => setShowBrainstormPreview(!showBrainstormPreview)}
             variant="outline"
@@ -180,7 +251,7 @@ export function RightSidebar() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
-    </aside>
+    </div>
   );
 }
 

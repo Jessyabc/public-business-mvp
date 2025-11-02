@@ -5,8 +5,9 @@ import Index from '@/pages/Index';
 import { LazyWrapper, LoadingFallback, NotFound } from './router-helpers';
 import { RequireOrg } from '@/features/orgs/components/RequireOrg';
 
-// Canonical brainstorm page
+// Canonical brainstorm pages
 const BrainstormPage = lazy(() => import('@/features/brainstorm/BrainstormPage'));
+const BrainstormFeed = lazy(() => import('@/pages/brainstorm/BrainstormFeed'));
 
 // Pages we actually render
 const IdeaDetail = lazy(() => import('@/pages/IdeaDetail'));
@@ -37,13 +38,19 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     ),
   },
 
-  // Canonical brainstorm route
+  // Canonical brainstorm routes
   {
     path: '/brainstorm',
     element: (
       <MainLayout>
         <LazyWrapper><BrainstormPage /></LazyWrapper>
       </MainLayout>
+    ),
+  },
+  {
+    path: '/brainstorm/feed',
+    element: (
+      <LazyWrapper><BrainstormFeed /></LazyWrapper>
     ),
   },
 
