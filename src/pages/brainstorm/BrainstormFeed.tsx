@@ -6,32 +6,23 @@ import { RightSidebar } from '@/components/layout/RightSidebar';
  * BrainstormFeed - Full-screen brainstorm visualization
  * 
  * Layout:
- * - Left: Hierarchical brainstorm map (1000px flex-2)
- * - Right: Sidebar with History + Open Ideas (500px flex-1)
- * - Background: Global orbital background (no duplication)
+ * - 100vh height, no scroll
+ * - Two-column grid (2fr + 1fr)
+ * - Global background remains visible
+ * - Glass-styled panels with blur and transparency
  */
 export default function BrainstormFeed() {
   return (
-    <>
-      <GlobalBackground />
+    <main className="relative h-screen w-full overflow-hidden grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 p-8 text-white">
+      <GlobalBackground /> 
       
-      <main className="relative h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 p-6 lg:p-8">
-        {/* Left: Brainstorm Map */}
-        <section 
-          className="relative overflow-hidden"
-          aria-label="Brainstorm visualization map"
-        >
-          <BrainstormMap />
-        </section>
+      <section className="relative flex items-center justify-center rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-inner overflow-hidden">
+        <BrainstormMap />
+      </section>
 
-        {/* Right: Sidebar (History + Open Ideas) */}
-        <aside 
-          className="relative overflow-hidden"
-          aria-label="Activity sidebar"
-        >
-          <RightSidebar variant="feed" />
-        </aside>
-      </main>
-    </>
+      <aside className="relative flex flex-col rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-inner overflow-hidden">
+        <RightSidebar variant="feed" />
+      </aside>
+    </main>
   );
 }
