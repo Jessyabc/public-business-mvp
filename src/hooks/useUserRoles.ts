@@ -45,9 +45,10 @@ export function useUserRoles() {
     hasRole,
     hasAnyRole,
     isAdmin: () => hasRole('admin'),
-    isBusinessMember: () => hasRole('business_member'),
+    isBusinessMember: () => hasRole('business_member') || hasRole('business_user'),
+    isBusinessUser: () => hasRole('business_user'),
     isPublicUser: () => hasRole('public_user'),
-    canCreateBusinessPosts: hasAnyRole(['admin', 'business_member']),
+    canCreateBusinessPosts: hasAnyRole(['admin', 'business_member', 'business_user']),
     // Backward compatibility
     userRoles: roles,
     refetch: () => {

@@ -5,9 +5,11 @@ import { GlassSurface } from '@/components/ui/GlassSurface';
 import { GlassInput } from '@/components/ui/GlassInput';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export default function CreateOrganization() {
   const nav = useNavigate();
+  const { refetch } = useUserRoles();
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -18,7 +20,9 @@ export default function CreateOrganization() {
     setBusy(true);
     try {
       await createOrganization({ name: name.trim(), description: null });
-      toast.success('Organization created successfully!');
+      toast.success('Organization created successfully! You are now a business user.');
+      // Refetch user roles to update UI with new business_user role
+      await refetch();
       nav('/app/insights');
     } catch (e: any) {
       toast.error(e.message ?? 'Failed to create organization');

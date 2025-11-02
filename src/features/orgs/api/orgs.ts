@@ -33,3 +33,12 @@ export async function addOwnerToOrg(orgId: string, userId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function inviteUserToOrg(targetUserId: string, targetOrgId: string, role: string = 'member') {
+  const { error } = await supabase.rpc('invite_to_org', {
+    p_target_user: targetUserId,
+    p_target_org: targetOrgId,
+    p_role: role
+  });
+  if (error) throw error;
+}

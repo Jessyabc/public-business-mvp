@@ -1599,6 +1599,10 @@ export type Database = {
       }
       get_user_org_id: { Args: never; Returns: string }
       get_user_role: { Args: never; Returns: string }
+      get_user_roles: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
       grant_role: {
         Args: { p_role: string; p_user: string }
         Returns: undefined
@@ -1621,8 +1625,13 @@ export type Database = {
       increment_post_comments: { Args: { post_id: string }; Returns: undefined }
       increment_post_likes: { Args: { post_id: string }; Returns: undefined }
       increment_post_views: { Args: { post_id: string }; Returns: undefined }
+      invite_to_org: {
+        Args: { p_role?: string; p_target_org: string; p_target_user: string }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
       is_business_member: { Args: never; Returns: boolean }
+      is_business_user: { Args: { p_user_id?: string }; Returns: boolean }
       is_org_member: { Args: { p_org_id: string }; Returns: boolean }
       obfuscate_email: { Args: { email: string }; Returns: string }
     }

@@ -54,3 +54,21 @@ export async function rpcCreatePost(
     p_org_id: org_id || null
   });
 }
+
+export async function rpcInviteToOrg(
+  p_target_user: string,
+  p_target_org: string,
+  p_role: string = 'member'
+) {
+  return supabase.rpc("invite_to_org", {
+    p_target_user,
+    p_target_org,
+    p_role
+  });
+}
+
+export async function rpcIsBusinessUser(user_uuid?: string) {
+  return supabase.rpc("is_business_user", { 
+    p_user_id: user_uuid || null 
+  });
+}
