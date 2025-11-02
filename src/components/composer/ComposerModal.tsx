@@ -27,6 +27,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [composerMode, setComposerMode] = useState<'post' | 'open-idea'>('post');
 
   const isPublicMode = mode === 'public';
   const maxChars = isPublicMode ? PUBLIC_MAX_CHARS : BUSINESS_MAX_CHARS;
@@ -61,6 +62,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const handleClose = () => {
     setContent("");
     setTitle("");
+    setComposerMode('post');
     setContext(null);
     onClose();
   };
@@ -139,6 +141,88 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     }
   };
 
+  const handleCreateOpenIdea = async () => {
+    if (!content.trim() || isSubmitting) return;
+
+    if (content.length < 10 || content.length > 280) {
+      toast.error('Open ideas must be between 10-280 characters');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data, error: functionError } = await supabase.functions.invoke('submit-open-idea', {
+        body: { 
+          content: content.trim(),
+          email: null,
+          notify_on_interaction: false,
+          subscribe_newsletter: false
+        }
+      });
+
+      if (functionError) throw functionError;
+      
+      if (!data?.success || !data?.id) {
+        throw new Error('Failed to submit idea');
+      }
+
+      toast.success('Open idea created successfully');
+      clearDraft();
+      handleClose();
+    } catch (error: any) {
+      console.error('Error creating open idea:', error);
+      toast.error(error?.message || 'Failed to create open idea');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderOpenIdeaForm = () => (
+    <div className="space-y-4">
+      <div className="flex items-center space-x-2 mb-4">
+        <Brain className="w-5 h-5 text-[var(--accent)]" />
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Open Idea</h3>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="open-idea-content" className="text-[var(--text-primary)]">
+          What question can't you stop thinking about?
+        </Label>
+        <GlassInput
+          as="textarea"
+          id="open-idea-content"
+          placeholder="Share your question or idea..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={5}
+          maxLength={280}
+        />
+        <div className="flex justify-between text-xs text-[var(--text-secondary)]">
+          <span>{content.length < 10 ? `${10 - content.length} more needed` : 'Perfect length'}</span>
+          <span className={content.length > 250 ? 'text-red-400' : ''}>
+            {content.length} / 280
+          </span>
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-2">
+        <button 
+          className="glassButton glassButton--muted" 
+          onClick={() => setComposerMode('post')}
+        >
+          Back to {isPublicMode ? 'Brainstorm' : 'Insight'}
+        </button>
+        <button 
+          className="glassButton glassButton--accent" 
+          onClick={handleCreateOpenIdea} 
+          disabled={content.length < 10 || content.length > 280 || isSubmitting}
+        >
+          {isSubmitting ? 'Creating...' : 'Create Open Idea'}
+        </button>
+      </div>
+    </div>
+  );
+
   const renderPublicForm = () => (
     <div className="space-y-4">
       <div className="flex items-center space-x-2 mb-4">
@@ -165,17 +249,28 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-2">
-        <button className="glassButton glassButton--muted" onClick={handleClose}>
-          Cancel
-        </button>
-        <button 
-          className="glassButton glassButton--accent" 
-          onClick={handleCreate} 
-          disabled={!canSubmit || isSubmitting}
-        >
-          {isSubmitting ? 'Creating...' : 'Create Brainstorm'}
-        </button>
+      <div className="flex flex-col gap-2 pt-2">
+        <div className="flex justify-end space-x-2">
+          <button className="glassButton glassButton--muted" onClick={handleClose}>
+            Cancel
+          </button>
+          <button 
+            className="glassButton glassButton--accent" 
+            onClick={handleCreate} 
+            disabled={!canSubmit || isSubmitting}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Brainstorm'}
+          </button>
+        </div>
+        <div className="flex justify-center">
+          <button 
+            type="button"
+            className="glassButton glassButton--muted text-xs py-1 px-3"
+            onClick={() => setComposerMode('open-idea')}
+          >
+            Or create an Open Idea instead
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -280,7 +375,10 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
             </DialogDescription>
           </DialogHeader>
 
-          {isPublicMode ? renderPublicForm() : renderBusinessForm()}
+          {composerMode === 'open-idea' 
+            ? renderOpenIdeaForm() 
+            : (isPublicMode ? renderPublicForm() : renderBusinessForm())
+          }
         </GlassSurface>
       </DialogContent>
     </Dialog>
