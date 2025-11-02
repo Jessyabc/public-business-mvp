@@ -746,7 +746,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
-          slug: string
+          slug: string | null
           theme_version: number
         }
         Insert: {
@@ -756,7 +756,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
-          slug: string
+          slug?: string | null
           theme_version?: number
         }
         Update: {
@@ -766,7 +766,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
-          slug?: string
+          slug?: string | null
           theme_version?: number
         }
         Relationships: []
@@ -854,7 +854,7 @@ export type Database = {
       }
       posts: {
         Row: {
-          body: string
+          body: string | null
           comments_count: number | null
           content: string
           created_at: string
@@ -878,7 +878,7 @@ export type Database = {
           visibility: string
         }
         Insert: {
-          body: string
+          body?: string | null
           comments_count?: number | null
           content: string
           created_at?: string
@@ -902,7 +902,7 @@ export type Database = {
           visibility?: string
         }
         Update: {
-          body?: string
+          body?: string | null
           comments_count?: number | null
           content?: string
           created_at?: string
