@@ -156,6 +156,7 @@ export type Database = {
           title: string | null
           updated_at: string | null
           user_id: string | null
+          visibility: string | null
         }
         Insert: {
           comments_count?: number | null
@@ -169,6 +170,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string | null
+          visibility?: string | null
         }
         Update: {
           comments_count?: number | null
@@ -182,6 +184,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string | null
+          visibility?: string | null
         }
         Relationships: [
           {

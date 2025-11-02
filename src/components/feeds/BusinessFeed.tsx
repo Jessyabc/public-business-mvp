@@ -199,8 +199,24 @@ export function BusinessFeed() {
               <div className="text-center py-12">
                 <div className="glass-business-card rounded-2xl p-8">
                   <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No posts found</h3>
-                  <p className="text-muted-foreground">Be the first to share a business insight!</p>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    {filters.search ? 'No posts match your search' : 'No business posts yet'}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {filters.search 
+                      ? 'Try adjusting your search terms or filters'
+                      : 'Be the first to share a business insight!'
+                    }
+                  </p>
+                  {!filters.search && user && (
+                    <Button 
+                      onClick={handleCreatePost}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Business Post
+                    </Button>
+                  )}
                 </div>
               </div>
             ) : (
