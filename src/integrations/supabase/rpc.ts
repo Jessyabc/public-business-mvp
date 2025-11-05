@@ -72,3 +72,17 @@ export async function rpcIsBusinessUser(user_uuid?: string) {
     p_user_id: user_uuid || null 
   });
 }
+
+export async function rpcSpaceChainHard(
+  p_start: string,
+  p_direction: string = 'forward',
+  p_limit: number = 25,
+  p_max_depth: number = 500
+) {
+  return supabase.rpc("api_space_chain_hard", {
+    p_start,
+    p_direction,
+    p_limit,
+    p_max_depth
+  });
+}

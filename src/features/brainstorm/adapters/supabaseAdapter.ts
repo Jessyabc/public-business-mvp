@@ -1,5 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
-import { rpcListBrainstormNodes, rpcListBrainstormEdgesForNodes } from '@/integrations/supabase/rpc';
+import { 
+  rpcListBrainstormNodes, 
+  rpcListBrainstormEdgesForNodes,
+  rpcSpaceChainHard 
+} from '@/integrations/supabase/rpc';
 import { BrainstormNode, BrainstormEdge } from '../types';
 import { TABLES, BRAINSTORM_FILTERS } from '@/adapters/constants';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
@@ -282,5 +286,68 @@ export class BrainstormSupabaseAdapter {
       toast.error(errorMsg);
       throw err;
     }
+  }
+
+  async fetchChainHard(
+    startId: string, 
+    direction: 'forward' | 'backward' = 'forward',
+    limit: number = 25,
+    maxDepth: number = 500
+  ): Promise<BrainstormNode[]> {
+    try {
+      const { data, error } = await rpcSpaceChainHard(startId, direction, limit, maxDepth);
+
+      if (error) {
+        console.warn(`Failed to fetch hard chain:`, error.message);
+        return [];
+      }
+
+      return (data || []).map((post: any) => ({
+        id: post.id,
+        title: post.title || 'Untitled',
+        content: post.content || '',
+        emoji: '💡',
+        tags: [],
+        position: { x: 0, y: 0 },
+        created_at: post.created_at,
+        author: 'Anonymous'
+      }));
+    } catch (err) {
+      console.warn(`Failed to fetch hard chain:`, err);
+      return [];
+    }
+  }
+}
+
+export async function getBrainstormGraph(): Promise<{ nodes: BrainstormNode[]; edges: BrainstormEdge[] }> {
+  const adapter = new BrainstormSupabaseAdapter();
+  
+  try {
+    const nodes = await adapter.loadNodes({ limit: 500 });
+    console.log(`✅ Fetched ${nodes.length} brainstorm nodes`);
+    
+    if (nodes.length === 0) {
+      console.log('⚠️ No nodes found in database');
+      return { nodes: [], edges: [] };
+    }
+
+    const nodeIds = nodes.map(n => n.id);
+    const edges = await adapter.loadEdgesForNodes(nodeIds);
+    console.log(`✅ Fetched ${edges.length} brainstorm edges`);
+
+    // Validate edges reference existing nodes
+    const nodeIdSet = new Set(nodeIds);
+    const orphanedEdges = edges.filter(e => 
+      !nodeIdSet.has(e.source) || !nodeIdSet.has(e.target)
+    );
+    
+    if (orphanedEdges.length > 0) {
+      console.warn(`⚠️ Found ${orphanedEdges.length} edges referencing missing nodes`);
+    }
+
+    return { nodes, edges };
+  } catch (err) {
+    console.error('Failed to fetch brainstorm graph:', err);
+    return { nodes: [], edges: [] };
   }
 }
