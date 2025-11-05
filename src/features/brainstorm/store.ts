@@ -64,7 +64,9 @@ type Store = {
   setThreadQueue: (items: ThreadItem[]) => void;
   appendThread: (items: ThreadItem[]) => void;
   clearThread: () => void;
-  buildHardChainFrom: (startId: string) => Promise<BrainstormNode[]>;
+  backtrackToRoot: (startId: string) => BrainstormNode;
+  walkForward: (startId: string) => BrainstormNode[];
+  buildFullHardChainFrom: (startId: string) => BrainstormNode[];
   rebuildThreadFromSelection: () => Promise<void>;
   continueThreadAfterEnd: () => Promise<void>;
   setFetchingMore: (fetching: boolean) => void;
@@ -292,29 +294,53 @@ export const useBrainstormStore = create<Store>((set, get) => ({
   
   clearThread: () => set({ threadQueue: [] }),
   
-  // Build the contiguous HARD link chain starting at a node (parent -> child with relation_type='hard')
-  buildHardChainFrom: async (startId: string) => {
+  // Walk HARD links backward to the root (find parent whose child = current)
+  backtrackToRoot: (startId: string) => {
+    const s = get();
+    let current = s.nodes.find(n => n.id === startId);
+    const visited = new Set<string>();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      const prevEdge = s.edges.find(
+        e => e.target === current!.id && e.type === 'hard'
+      );
+      if (!prevEdge) break;
+      current = s.nodes.find(n => n.id === prevEdge.source);
+    }
+    return current ?? s.nodes.find(n => n.id === startId)!;
+  },
+
+  // Walk HARD links forward from a given start node
+  walkForward: (startId: string) => {
     const s = get();
     const chain: BrainstormNode[] = [];
     let current = s.nodes.find(n => n.id === startId);
     const visited = new Set<string>();
-
     while (current && !visited.has(current.id)) {
       chain.push(current);
       visited.add(current.id);
-      const nextEdge = s.edges.find(e => e.source === current!.id && e.type === 'hard');
+      const nextEdge = s.edges.find(
+        e => e.source === current!.id && e.type === 'hard'
+      );
       if (!nextEdge) break;
       current = s.nodes.find(n => n.id === nextEdge.target);
     }
     return chain;
   },
 
-  // Rebuild the visible thread from the current selection
+  // Build FULL hard-link chain around a selection: root → … → leaf
+  buildFullHardChainFrom: (startId: string) => {
+    const s = get();
+    const root = s.backtrackToRoot(startId);
+    return s.walkForward(root.id);
+  },
+
+  // Rebuild the visible thread from the current selection (root → leaf)
   rebuildThreadFromSelection: async () => {
     const s = get();
     if (!s.selectedNodeId) return;
-    const hard = await s.buildHardChainFrom(s.selectedNodeId);
-    set({ threadQueue: hard.map(p => ({ kind: 'post', post: p })) });
+    const full = s.buildFullHardChainFrom(s.selectedNodeId);
+    set({ threadQueue: full.map(p => ({ kind: 'post', post: p })) });
   },
 
   // When the chain ends, append dotted handoff + next chain via most-liked soft link
@@ -326,8 +352,8 @@ export const useBrainstormStore = create<Store>((set, get) => ({
     const nextSoft = s.topSoftLinkByLikes(lastPost.id);
     if (!nextSoft) return;
     s.appendThread([{ kind: 'handoff', handoffTo: nextSoft }]);
-    const nextChain = await s.buildHardChainFrom(nextSoft.id);
-    s.appendThread(nextChain.map(p => ({ kind: 'post', post: p })));
+    const nextFull = s.buildFullHardChainFrom(nextSoft.id);
+    s.appendThread(nextFull.map(p => ({ kind: 'post', post: p })));
   },
   
   setFetchingMore: (fetching) => set({ isFetchingMore: fetching }),
