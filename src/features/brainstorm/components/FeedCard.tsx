@@ -7,6 +7,8 @@ import type { PostNode } from '@/types/brainstorm';
 type Props = {
   node: PostNode;
   index: number;
+  isExpanded?: boolean;
+  onClick?: () => void;
 };
 
 function HardPathBar() {
@@ -24,7 +26,7 @@ function HardPathBar() {
   );
 }
 
-export function FeedCard({ node, index }: Props) {
+export function FeedCard({ node, index, isExpanded = false, onClick }: Props) {
   const [likes, setLikes] = useState(node.likes_count ?? 0);
   const [views, setViews] = useState(node.views_count ?? 0);
   const [hasLiked, setHasLiked] = useState(false);
@@ -34,7 +36,8 @@ export function FeedCard({ node, index }: Props) {
     setViews((v) => v + 1);
   }, [node.id]);
 
-  const handleLike = async () => {
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
     if (hasLiked) return;
     try {
       await likePost(node.id);
@@ -46,7 +49,12 @@ export function FeedCard({ node, index }: Props) {
   };
 
   return (
-    <GlowCard className="mx-3 my-4 relative z-10">
+    <GlowCard 
+      className={`mx-3 my-4 relative z-10 cursor-pointer transition-all ${
+        isExpanded ? 'ring-2 ring-primary/50 shadow-[0_0_30px_rgba(72,159,227,0.3)]' : ''
+      }`}
+      onClick={onClick}
+    >
       <div className="p-4 md:p-6">
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-lg/7 md:text-xl/8 font-semibold text-slate-100">

@@ -140,9 +140,13 @@ export default function ThreadScroller() {
                 }}
               />
             ) : (
-              <div key={node.id} onClick={() => handleCardClick(node.id)}>
-                <FeedCard node={node} index={i} />
-              </div>
+              <FeedCard 
+                key={node.id} 
+                node={node} 
+                index={i}
+                isExpanded={expandedPostId === node.id}
+                onClick={() => handleCardClick(node.id)}
+              />
             )
           )}
           {isFetchingMore && (
