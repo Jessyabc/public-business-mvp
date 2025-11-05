@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBrainstormStore } from '../store';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 import { supabase } from '@/integrations/supabase/client';
 import { GlassCard } from '@/ui/components/GlassCard';
@@ -102,11 +102,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
   const onSubmit = async (data: NodeFormData) => {
     if (!BRAINSTORM_WRITES_ENABLED) {
-      toast({
-        title: 'Writes disabled',
-        description: 'Brainstorm creation is currently disabled',
-        variant: 'destructive',
-      });
+      toast.error('Brainstorm creation is currently disabled');
       return;
     }
 
@@ -119,11 +115,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast({
-          title: 'Not authenticated',
-          description: 'You must be logged in to create brainstorms',
-          variant: 'destructive',
-        });
+        toast.error('You must be logged in to create brainstorms');
         return;
       }
 
@@ -146,11 +138,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
       if (error) {
         console.error('Insert error:', error);
-        toast({
-          title: 'Error',
-          description: error.message || 'Failed to create brainstorm',
-          variant: 'destructive',
-        });
+        toast.error(error.message || 'Failed to create brainstorm');
         return;
       }
 
@@ -205,10 +193,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
         setLastCreatedId(newPost.id);
       }
 
-      toast({
-        title: 'Success!',
-        description: mode === 'root' ? 'New brainstorm created' : 'Brainstorm continued',
-      });
+      toast.success(mode === 'root' ? 'New brainstorm created' : 'Brainstorm continued');
 
       form.reset();
       setSelectedSoftLinks([]);
@@ -216,11 +201,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       onOpenChange(false);
     } catch (error) {
       console.error('Unexpected error:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      toast.error('An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }
