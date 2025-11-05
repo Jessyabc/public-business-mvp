@@ -11,17 +11,27 @@ export default function BrainstormFeed() {
   const { setNodes, setEdges, nodes, selectById, clearThread } = useBrainstormStore();
   const [isLoading, setIsLoading] = useState(true);
 
+  const pickInitial = (nodes: any[], edges: any[]) => {
+    const byNew = [...nodes].sort(
+      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    );
+    // choose newest with at least one hard edge
+    const withHard = byNew.find(n =>
+      edges.some(e =>
+        e.type === 'hard' && (e.source === n.id || e.target === n.id)
+      )
+    );
+    return withHard ?? byNew[0];
+  };
+
   const loadGraph = async () => {
     setIsLoading(true);
     try {
       const payload = await getBrainstormGraph();
       setNodes(payload.nodes);
       setEdges(payload.edges);
-
-      const mostRecent = [...payload.nodes].sort(
-        (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-      )[0];
-      if (mostRecent?.id) selectById(mostRecent.id);
+      const initial = pickInitial(payload.nodes, payload.edges);
+      if (initial?.id) selectById(initial.id);
     } catch (e) {
       console.error('Failed to load brainstorm graph:', e);
     } finally {
