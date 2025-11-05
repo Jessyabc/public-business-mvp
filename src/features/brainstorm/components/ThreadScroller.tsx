@@ -83,103 +83,91 @@ function FeedCard({
           </button>
         </div>
 
-        {expanded && <SoftLinksList postId={post.id} />}
-
         <div className="mt-4"><HardBar/></div>
       </GlowCard>
     </motion.div>
   );
 }
 
-function SoftLinksList({ postId }: { postId: string }) {
-  const { softLinksForPost, selectById } = useBrainstormStore();
-  const items = softLinksForPost(postId);
-  if (!items.length) return null;
-  return (
-    <div className="mt-3 text-sm">
-      <div className="mb-2 text-slate-300/80">Soft links</div>
-      <div className="flex flex-wrap gap-2">
-        {items.map(x => (
-          <button
-            key={x.id}
-            onClick={() => selectById(x.id)}
-            className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 hover:bg-white/10"
-            title={x.post_type || "Soft link"}
-          >
-            {x.title ?? "Untitled"} {typeof x.like_count === "number" ? ` • ❤️ ${x.like_count}` : ""}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function ThreadScroller() {
   const {
-    selectedNodeId, threadQueue, rebuildThreadFromSelection,
-    continueThreadAfterEnd, selectById
+    threadQueue, softLinksForPost, buildFullHardChainFrom, selectById
   } = useBrainstormStore();
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Rebuild the FULL chain whenever selection changes
-  useEffect(() => {
-    rebuildThreadFromSelection().then(() => setExpandedId(selectedNodeId ?? null));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNodeId]);
-
-  // Infinite scroll: after end, append dotted handoff + next chain
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const onScroll = async () => {
-      const nearEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 240;
-      if (nearEnd && !loadingMore) {
-        setLoadingMore(true);
-        try { await continueThreadAfterEnd(); } finally { setLoadingMore(false); }
-      }
-    };
-    el.addEventListener('scroll', onScroll);
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [loadingMore, continueThreadAfterEnd]);
+  const handleToggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
 
   return (
     <div className="relative z-10 p-0 overflow-hidden">
-      <div ref={scrollerRef} className="h-[70vh] md:h-[76vh] overflow-auto">
+      <div ref={scrollerRef} className="h-[70vh] md:h-[76vh] overflow-auto space-y-2">
         {threadQueue.map((item, idx) => {
-          if (item.kind === 'handoff' && item.handoffTo) {
-            return (
-              <SoftHandoff
-                key={`handoff-${idx}`}
-                title={item.handoffTo.title ?? "Untitled"}
-                onClick={() => selectById(item.handoffTo!.id)}
-              />
-            );
-          }
           if (item.kind === 'post' && item.post) {
             const p = item.post;
+            const isExpanded = expandedId === p.id;
+            const chain = isExpanded ? buildFullHardChainFrom(p.id) : [];
+            const softLinks = isExpanded ? softLinksForPost(p.id) : [];
+
             return (
-              <FeedCard
-                key={p.id}
-                post={p}
-                expanded={expandedId === p.id}
-                onToggleExpand={() => setExpandedId(expandedId === p.id ? null : p.id)}
-                onContinue={() => {
-                  // Open your continue composer for p.id (event keeps coupling low)
-                  window.dispatchEvent(new CustomEvent('pb:brainstorm:continue', { detail: { parentId: p.id }}));
-                }}
-                onLink={() => {
-                  // Open your link/history picker for p.id
-                  window.dispatchEvent(new CustomEvent('pb:brainstorm:link', { detail: { sourceId: p.id }}));
-                }}
-              />
+              <div key={p.id}>
+                <FeedCard
+                  post={p}
+                  expanded={isExpanded}
+                  onToggleExpand={() => handleToggleExpand(p.id)}
+                  onContinue={() => {
+                    window.dispatchEvent(new CustomEvent('pb:brainstorm:continue', { detail: { parentId: p.id }}));
+                  }}
+                  onLink={() => {
+                    window.dispatchEvent(new CustomEvent('pb:brainstorm:link', { detail: { sourceId: p.id }}));
+                  }}
+                />
+                
+                {isExpanded && chain.length > 1 && (
+                  <div className="mt-2 px-4 text-sm text-slate-300/70">
+                    <div className="mb-1">Hard-linked thread ({chain.length} posts):</div>
+                    <div className="flex flex-wrap gap-2">
+                      {chain.map((n, i) => (
+                        <button 
+                          key={n.id}
+                          onClick={() => selectById(n.id)}
+                          className={`rounded-full px-3 py-1 text-xs transition ${
+                            n.id === p.id 
+                              ? 'bg-primary/20 ring-1 ring-primary text-primary' 
+                              : 'bg-white/5 ring-1 ring-white/10 hover:bg-white/10'
+                          }`}
+                        >
+                          {i + 1}. {n.title ?? 'Untitled'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {isExpanded && softLinks.length > 0 && (
+                  <div className="mt-3 px-4 text-sm">
+                    <div className="mb-2 text-slate-300/80">Soft links ({softLinks.length})</div>
+                    <div className="flex flex-wrap gap-2">
+                      {softLinks.map(x => (
+                        <button
+                          key={x.id}
+                          onClick={() => selectById(x.id)}
+                          className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10"
+                          title={x.post_type || 'Soft link'}
+                        >
+                          {x.title ?? 'Untitled'} {typeof x.like_count === 'number' ? ` • ❤️ ${x.like_count}` : ''}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           }
           return null;
         })}
-        {loadingMore && <div className="p-4 text-slate-400">Loading more…</div>}
       </div>
     </div>
   );

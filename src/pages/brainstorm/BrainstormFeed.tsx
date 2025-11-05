@@ -18,18 +18,6 @@ export default function BrainstormFeed() {
   const [linkPickerOpen, setLinkPickerOpen] = useState(false);
   const [linkSourceId, setLinkSourceId] = useState<string | null>(null);
 
-  const pickInitial = (nodes: any[], edges: any[]) => {
-    const byNew = [...nodes].sort(
-      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-    );
-    // choose newest with at least one hard edge
-    const withHard = byNew.find(n =>
-      edges.some(e =>
-        e.type === 'hard' && (e.source === n.id || e.target === n.id)
-      )
-    );
-    return withHard ?? byNew[0];
-  };
 
   const loadGraph = async () => {
     setIsLoading(true);
@@ -37,8 +25,8 @@ export default function BrainstormFeed() {
       const payload = await getBrainstormGraph();
       setNodes(payload.nodes);
       setEdges(payload.edges);
-      const initial = pickInitial(payload.nodes, payload.edges);
-      if (initial?.id) selectById(initial.id);
+      // Show ALL posts in unified feed
+      await useBrainstormStore.getState().rebuildFeed();
     } catch (e) {
       console.error('Failed to load brainstorm graph:', e);
     } finally {

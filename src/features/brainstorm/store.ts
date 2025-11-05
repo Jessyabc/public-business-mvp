@@ -68,6 +68,7 @@ type Store = {
   walkForward: (startId: string) => BrainstormNode[];
   buildFullHardChainFrom: (startId: string) => BrainstormNode[];
   rebuildThreadFromSelection: () => Promise<void>;
+  rebuildFeed: () => Promise<void>;
   continueThreadAfterEnd: () => Promise<void>;
   setFetchingMore: (fetching: boolean) => void;
   setExpandedPostId: (id: string | null) => void;
@@ -341,6 +342,15 @@ export const useBrainstormStore = create<Store>((set, get) => ({
     if (!s.selectedNodeId) return;
     const full = s.buildFullHardChainFrom(s.selectedNodeId);
     set({ threadQueue: full.map(p => ({ kind: 'post', post: p })) });
+  },
+
+  // Show ALL brainstorms in chronological order (unified feed)
+  rebuildFeed: async () => {
+    const s = get();
+    const allNodes = [...s.nodes].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    set({ threadQueue: allNodes.map(p => ({ kind: 'post', post: p })) });
   },
 
   // When the chain ends, append dotted handoff + next chain via most-liked soft link
