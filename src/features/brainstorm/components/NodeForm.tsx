@@ -199,6 +199,9 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       setSelectedSoftLinks([]);
       setSearchQuery('');
       onOpenChange(false);
+      
+      // Trigger a graph reload event
+      window.dispatchEvent(new CustomEvent('pb:brainstorm:reload'));
     } catch (error) {
       console.error('Unexpected error:', error);
       toast.error('An unexpected error occurred');

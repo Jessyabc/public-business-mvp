@@ -6,10 +6,14 @@ import { useBrainstormStore } from '@/features/brainstorm/store';
 import { getBrainstormGraph } from '@/features/brainstorm/adapters/supabaseAdapter';
 import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { Loader2, RefreshCcw } from 'lucide-react';
+import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 
 export default function BrainstormFeed() {
   const { setNodes, setEdges, nodes, selectById, clearThread } = useBrainstormStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerMode, setComposerMode] = useState<'root' | 'continue'>('root');
+  const [composerParentId, setComposerParentId] = useState<string | null>(null);
 
   const pickInitial = (nodes: any[], edges: any[]) => {
     const byNew = [...nodes].sort(
@@ -45,24 +49,30 @@ export default function BrainstormFeed() {
   useEffect(() => {
     const handleContinue = (e: any) => {
       const parentId = e.detail.parentId;
-      console.log('Continue clicked for parent:', parentId);
-      // TODO: Open NodeForm in continue mode
-      // openNodeForm({ mode: 'continue', parentId });
+      setComposerMode('continue');
+      setComposerParentId(parentId);
+      setComposerOpen(true);
     };
 
     const handleLink = (e: any) => {
       const sourceId = e.detail.sourceId;
       console.log('Link clicked for source:', sourceId);
       // TODO: Open soft-link history picker
-      // openLinkPicker({ sourceId });
+      // This would need a separate LinkPicker modal component
+    };
+
+    const handleReload = () => {
+      loadGraph();
     };
 
     window.addEventListener('pb:brainstorm:continue', handleContinue);
     window.addEventListener('pb:brainstorm:link', handleLink);
+    window.addEventListener('pb:brainstorm:reload', handleReload);
 
     return () => {
       window.removeEventListener('pb:brainstorm:continue', handleContinue);
       window.removeEventListener('pb:brainstorm:link', handleLink);
+      window.removeEventListener('pb:brainstorm:reload', handleReload);
     };
   }, []);
 
@@ -106,6 +116,19 @@ export default function BrainstormFeed() {
           <RightSidebar variant="feed" />
         </aside>
       </div>
+
+      {/* NodeForm Modal */}
+      <NodeForm
+        open={composerOpen}
+        onOpenChange={(open) => {
+          setComposerOpen(open);
+          if (!open) {
+            setComposerParentId(null);
+          }
+        }}
+        mode={composerMode}
+        parentId={composerParentId}
+      />
     </main>
   );
 }
