@@ -1505,6 +1505,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      api_create_soft_links: {
+        Args: { p_children: string[]; p_parent: string }
+        Returns: {
+          child_post_id: string
+          created_at: string
+          id: string
+          parent_post_id: string
+          relation_type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "post_relations"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       api_list_brainstorm_edges_for_nodes: {
         Args: { p_node_ids: string[] }
         Returns: {
@@ -1525,6 +1541,15 @@ export type Database = {
           metadata: Json
           title: string
           user_id: string
+        }[]
+      }
+      api_list_recent_public_posts: {
+        Args: { p_limit?: number; p_q?: string }
+        Returns: {
+          created_at: string
+          post_id: string
+          post_type: string
+          title: string
         }[]
       }
       api_space_chain_hard: {
