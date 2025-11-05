@@ -15,6 +15,10 @@ type Store = {
   lastCreatedId: string | null;
   isLoadingGraph: boolean;
   graphError: string | null;
+  
+  // Thread navigation
+  threadNodes: BrainstormNode[];
+  currentIndex: number;
 
   setNodes: (nodes: BrainstormNode[]) => void;
   setEdges: (edges: BrainstormEdge[]) => void;
@@ -41,12 +45,27 @@ type Store = {
   reset: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  
+  // Thread navigation methods
+  goNextInThread: () => void;
+  goPrevInThread: () => void;
+  selectById: (id: string) => void;
+  
+  // Selectors
+  hardNeighborsFor: (id: string) => BrainstormNode[];
+  softLinksForSelected: () => Array<{
+    child_post_id: string;
+    child_title?: string;
+    child_post_type?: string;
+    child_like_count?: number;
+  }>;
+  topSoftLinkByLikes: (id: string) => BrainstormNode | null;
 };
 
 const makeId = () =>
   (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2));
 
-export const useBrainstormStore = create<Store>((set) => ({
+export const useBrainstormStore = create<Store>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNode: null,
@@ -60,6 +79,8 @@ export const useBrainstormStore = create<Store>((set) => ({
   lastCreatedId: null,
   isLoadingGraph: false,
   graphError: null,
+  threadNodes: [],
+  currentIndex: 0,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -187,4 +208,69 @@ export const useBrainstormStore = create<Store>((set) => ({
 
   setLoading: (loading) => set({ isLoadingGraph: loading }),
   setError: (error) => set({ graphError: error }),
+
+  // Thread navigation
+  goNextInThread: () => {
+    const { currentIndex, threadNodes } = get();
+    if (currentIndex < threadNodes.length - 1) {
+      const nextIndex = currentIndex + 1;
+      set({ currentIndex: nextIndex, selectedNodeId: threadNodes[nextIndex]?.id ?? null });
+    }
+  },
+
+  goPrevInThread: () => {
+    const { currentIndex, threadNodes } = get();
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      set({ currentIndex: prevIndex, selectedNodeId: threadNodes[prevIndex]?.id ?? null });
+    }
+  },
+
+  selectById: (id: string) => {
+    const { threadNodes } = get();
+    const index = threadNodes.findIndex((n) => n.id === id);
+    if (index >= 0) {
+      set({ selectedNodeId: id, currentIndex: index });
+    } else {
+      set({ selectedNodeId: id });
+    }
+  },
+
+  // Selectors
+  hardNeighborsFor: (id: string) => {
+    const { nodes, edges } = get();
+    const hardEdges = edges.filter((e) => e.type === 'hard' && (e.source === id || e.target === id));
+    const neighborIds = hardEdges.map((e) => (e.source === id ? e.target : e.source));
+    return nodes.filter((n) => neighborIds.includes(n.id));
+  },
+
+  softLinksForSelected: () => {
+    const { selectedNodeId, nodes, edges } = get();
+    if (!selectedNodeId) return [];
+    
+    const softEdges = edges.filter((e) => e.type === 'soft' && e.source === selectedNodeId);
+    return softEdges.map((edge) => {
+      const childNode = nodes.find((n) => n.id === edge.target);
+      return {
+        child_post_id: edge.target,
+        child_title: childNode?.title,
+        child_post_type: childNode?.emoji,
+        child_like_count: childNode?.likes_count,
+      };
+    });
+  },
+
+  topSoftLinkByLikes: (id: string) => {
+    const { nodes, edges } = get();
+    const softEdges = edges.filter((e) => e.type === 'soft' && e.source === id);
+    const softNeighbors = softEdges
+      .map((e) => nodes.find((n) => n.id === e.target))
+      .filter((n): n is BrainstormNode => n !== undefined);
+    
+    if (softNeighbors.length === 0) return null;
+    
+    return softNeighbors.reduce((best, current) =>
+      (current.likes_count ?? 0) > (best.likes_count ?? 0) ? current : best
+    );
+  },
 }));
