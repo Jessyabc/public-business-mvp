@@ -41,6 +41,31 @@ export default function BrainstormFeed() {
 
   useEffect(() => { loadGraph(); }, []);
 
+  // Listen for Continue and Link events from ThreadScroller
+  useEffect(() => {
+    const handleContinue = (e: any) => {
+      const parentId = e.detail.parentId;
+      console.log('Continue clicked for parent:', parentId);
+      // TODO: Open NodeForm in continue mode
+      // openNodeForm({ mode: 'continue', parentId });
+    };
+
+    const handleLink = (e: any) => {
+      const sourceId = e.detail.sourceId;
+      console.log('Link clicked for source:', sourceId);
+      // TODO: Open soft-link history picker
+      // openLinkPicker({ sourceId });
+    };
+
+    window.addEventListener('pb:brainstorm:continue', handleContinue);
+    window.addEventListener('pb:brainstorm:link', handleLink);
+
+    return () => {
+      window.removeEventListener('pb:brainstorm:continue', handleContinue);
+      window.removeEventListener('pb:brainstorm:link', handleLink);
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
