@@ -19,6 +19,8 @@ type Store = {
   // Thread navigation
   threadNodes: BrainstormNode[];
   currentIndex: number;
+  threadQueue: BrainstormNode[];
+  isFetchingMore: boolean;
 
   setNodes: (nodes: BrainstormNode[]) => void;
   setEdges: (edges: BrainstormEdge[]) => void;
@@ -50,6 +52,11 @@ type Store = {
   goNextInThread: () => void;
   goPrevInThread: () => void;
   selectById: (id: string) => void;
+  setThreadQueue: (nodes: BrainstormNode[]) => void;
+  appendThread: (nodes: BrainstormNode[]) => void;
+  buildHardChainFrom: (startId: string) => Promise<BrainstormNode[]>;
+  loadMoreHardSegment: () => Promise<void>;
+  setFetchingMore: (fetching: boolean) => void;
   
   // Selectors
   hardNeighborsFor: (id: string) => BrainstormNode[];
@@ -81,6 +88,8 @@ export const useBrainstormStore = create<Store>((set, get) => ({
   graphError: null,
   threadNodes: [],
   currentIndex: 0,
+  threadQueue: [],
+  isFetchingMore: false,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -273,4 +282,69 @@ export const useBrainstormStore = create<Store>((set, get) => ({
       (current.likes_count ?? 0) > (best.likes_count ?? 0) ? current : best
     );
   },
+
+  // Thread queue management
+  setThreadQueue: (nodes) => set({ threadQueue: nodes }),
+  
+  appendThread: (nodes) => {
+    set((state) => ({ threadQueue: [...state.threadQueue, ...nodes] }));
+  },
+  
+  buildHardChainFrom: async (startId: string) => {
+    const { BrainstormSupabaseAdapter } = await import('@/features/brainstorm/adapters/supabaseAdapter');
+    const adapter = new BrainstormSupabaseAdapter();
+    const chain = await adapter.fetchChainHard(startId, 'forward', 25, 500);
+    return chain;
+  },
+  
+  loadMoreHardSegment: async () => {
+    const { threadQueue, topSoftLinkByLikes, buildHardChainFrom, appendThread, setFetchingMore, edges } = get();
+    
+    if (threadQueue.length === 0) return;
+    
+    const lastNode = threadQueue[threadQueue.length - 1];
+    if (!lastNode) return;
+    
+    setFetchingMore(true);
+    
+    try {
+      // Check if there are more hard links
+      const hardEdges = edges.filter((e) => e.type === 'hard' && e.source === lastNode.id);
+      
+      if (hardEdges.length > 0) {
+        // Continue with hard chain
+        const moreChain = await buildHardChainFrom(lastNode.id);
+        if (moreChain.length > 1) {
+          appendThread(moreChain.slice(1)); // Skip first as it's already last
+        }
+      } else {
+        // End of hard chain - check for soft handoff
+        const nextSoft = topSoftLinkByLikes(lastNode.id);
+        if (nextSoft) {
+          // Add handoff marker (special sentinel node)
+          const handoffMarker: BrainstormNode = {
+            id: `handoff-${lastNode.id}-${nextSoft.id}`,
+            title: nextSoft.title || 'Continue thread',
+            content: '',
+            emoji: '🔗',
+            tags: ['handoff'],
+            position: { x: 0, y: 0 },
+            created_at: new Date().toISOString(),
+            author: 'System',
+          };
+          appendThread([handoffMarker]);
+          
+          // Build chain from soft target
+          const softChain = await buildHardChainFrom(nextSoft.id);
+          appendThread(softChain);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load more:', err);
+    } finally {
+      setFetchingMore(false);
+    }
+  },
+  
+  setFetchingMore: (fetching) => set({ isFetchingMore: fetching }),
 }));
