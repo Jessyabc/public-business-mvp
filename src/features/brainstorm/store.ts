@@ -13,6 +13,8 @@ type Store = {
   depth: 0 | 1 | 2;
   selectedNodeId: string | null;
   lastCreatedId: string | null;
+  isLoadingGraph: boolean;
+  graphError: string | null;
 
   setNodes: (nodes: BrainstormNode[]) => void;
   setEdges: (edges: BrainstormEdge[]) => void;
@@ -37,6 +39,8 @@ type Store = {
   fitToView: () => void;
   autoArrange: () => void;
   reset: () => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
 };
 
 const makeId = () =>
@@ -54,6 +58,8 @@ export const useBrainstormStore = create<Store>((set) => ({
   depth: 0,
   selectedNodeId: null,
   lastCreatedId: null,
+  isLoadingGraph: false,
+  graphError: null,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -175,5 +181,10 @@ export const useBrainstormStore = create<Store>((set) => ({
       depth: 0,
       selectedNodeId: null,
       lastCreatedId: null,
+      isLoadingGraph: false,
+      graphError: null,
     }),
+
+  setLoading: (loading) => set({ isLoadingGraph: loading }),
+  setError: (error) => set({ graphError: error }),
 }));

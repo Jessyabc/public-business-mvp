@@ -1,3 +1,22 @@
+// New shared types for brainstorm posts
+export interface PostNode {
+  id: string;
+  title?: string;
+  content?: string;
+  created_at?: string;
+  likes_count?: number;
+  views_count?: number;
+  kind?: string;
+  type?: string;
+}
+
+export interface PostEdge {
+  parent_post_id: string;
+  child_post_id: string;
+  relation_type: 'hard' | 'soft';
+}
+
+// Legacy types for compatibility
 export interface Brainstorm {
   id: string;
   content: string;
@@ -12,6 +31,6 @@ export interface Brainstorm {
 export interface BrainstormConnection {
   fromId: string;
   toId: string;
-  type: 'inspiration' | 'continuation' | 'linking'; // inspiration = fresh idea, continuation = thread, linking = manual connection
-  strength: number; // 0-1, how strongly connected the ideas are
+  type: 'inspiration' | 'continuation' | 'linking';
+  strength: number;
 }
