@@ -1581,6 +1581,10 @@ export type Database = {
         Returns: string
       }
       current_user_email: { Args: never; Returns: string }
+      enforce_rate_limit: {
+        Args: { limit_count: number; window_seconds: number }
+        Returns: boolean
+      }
       get_client_ip: { Args: never; Returns: string }
       get_lineage_chain: {
         Args: { start_id: string; start_type: string }
