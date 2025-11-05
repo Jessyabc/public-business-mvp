@@ -8,8 +8,8 @@ type Props = {
 };
 
 export default function SoftLinksPanel({ className }: Props) {
-  const { softLinksForSelected, selectById, selectedNodeId } = useBrainstormStore();
-  const items = softLinksForSelected();
+  const { softLinksForPost, selectById, selectedNodeId } = useBrainstormStore();
+  const items = selectedNodeId ? softLinksForPost(selectedNodeId) : [];
 
   return (
     <GlassCard className={cn('p-4 md:p-5 h-full flex flex-col overflow-hidden', className)}>
@@ -25,16 +25,16 @@ export default function SoftLinksPanel({ className }: Props) {
         ) : (
           items.map((x) => (
             <button
-              key={x.child_post_id}
-              onClick={() => selectById(x.child_post_id)}
+              key={x.id}
+              onClick={() => selectById(x.id)}
               className={cn(
                 'w-full text-left rounded-xl px-3 py-2 transition-all',
                 'bg-background/5 ring-1 ring-foreground/10 hover:bg-background/10',
-                selectedNodeId === x.child_post_id && 'ring-2 ring-accent/40 bg-accent/10'
+                selectedNodeId === x.id && 'ring-2 ring-accent/40 bg-accent/10'
               )}
             >
               <div className="text-sm text-foreground/90 line-clamp-2 mb-1">
-                {x.child_title ?? 'Untitled'}
+                {x.title ?? 'Untitled'}
               </div>
               
               <div className="mt-1 text-[11px] text-foreground/60 flex items-center gap-2 flex-wrap">
@@ -42,16 +42,16 @@ export default function SoftLinksPanel({ className }: Props) {
                   Soft link
                 </span>
                 
-                {x.child_post_type && (
+                {x.post_type && (
                   <span className="rounded-full bg-background/5 ring-1 ring-foreground/10 px-2 py-[2px]">
-                    {x.child_post_type}
+                    {x.post_type}
                   </span>
                 )}
                 
-                {typeof x.child_like_count === 'number' && x.child_like_count > 0 && (
+                {typeof x.like_count === 'number' && x.like_count > 0 && (
                   <span className="flex items-center gap-1">
                     <Heart className="w-3 h-3 fill-red-400 text-red-400" />
-                    {x.child_like_count}
+                    {x.like_count}
                   </span>
                 )}
               </div>

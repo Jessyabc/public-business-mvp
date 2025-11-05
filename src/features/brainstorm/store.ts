@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import type { BrainstormNode, BrainstormEdge } from './types';
 
+// Types used by the thread feed
+export interface ThreadItem {
+  kind: 'post' | 'handoff';
+  post?: BrainstormNode;
+  handoffTo?: BrainstormNode;
+}
+
 type Store = {
   nodes: BrainstormNode[];
   edges: BrainstormEdge[];
@@ -19,7 +26,7 @@ type Store = {
   // Thread navigation
   threadNodes: BrainstormNode[];
   currentIndex: number;
-  threadQueue: BrainstormNode[];
+  threadQueue: ThreadItem[];
   isFetchingMore: boolean;
   seenPostIds: Set<string>;
   expandedPostId: string | null;
@@ -54,20 +61,22 @@ type Store = {
   goNextInThread: () => void;
   goPrevInThread: () => void;
   selectById: (id: string) => void;
-  setThreadQueue: (nodes: BrainstormNode[]) => void;
-  appendThread: (nodes: BrainstormNode[]) => void;
+  setThreadQueue: (items: ThreadItem[]) => void;
+  appendThread: (items: ThreadItem[]) => void;
+  clearThread: () => void;
   buildHardChainFrom: (startId: string) => Promise<BrainstormNode[]>;
-  loadMoreHardSegment: () => Promise<void>;
+  rebuildThreadFromSelection: () => Promise<void>;
+  continueThreadAfterEnd: () => Promise<void>;
   setFetchingMore: (fetching: boolean) => void;
   setExpandedPostId: (id: string | null) => void;
   
   // Selectors
   hardNeighborsFor: (id: string) => BrainstormNode[];
-  softLinksForSelected: () => Array<{
-    child_post_id: string;
-    child_title?: string;
-    child_post_type?: string;
-    child_like_count?: number;
+  softLinksForPost: (postId: string) => Array<{
+    id: string;
+    title?: string;
+    post_type?: string;
+    like_count?: number;
   }>;
   topSoftLinkByLikes: (id: string) => BrainstormNode | null;
 };
@@ -241,13 +250,7 @@ export const useBrainstormStore = create<Store>((set, get) => ({
   },
 
   selectById: (id: string) => {
-    const { threadNodes } = get();
-    const index = threadNodes.findIndex((n) => n.id === id);
-    if (index >= 0) {
-      set({ selectedNodeId: id, currentIndex: index });
-    } else {
-      set({ selectedNodeId: id });
-    }
+    set({ selectedNodeId: id });
   },
 
   // Selectors
@@ -258,147 +261,73 @@ export const useBrainstormStore = create<Store>((set, get) => ({
     return nodes.filter((n) => neighborIds.includes(n.id));
   },
 
-  softLinksForSelected: () => {
-    const { selectedNodeId, nodes, edges } = get();
-    if (!selectedNodeId) return [];
-    
-    const softEdges = edges.filter((e) => e.type === 'soft' && e.source === selectedNodeId);
-    return softEdges.map((edge) => {
-      const childNode = nodes.find((n) => n.id === edge.target);
-      return {
-        child_post_id: edge.target,
-        child_title: childNode?.title,
-        child_post_type: childNode?.emoji,
-        child_like_count: childNode?.likes_count,
-      };
-    });
+  softLinksForPost: (postId: string) => {
+    const { nodes, edges } = get();
+    return edges
+      .filter(e => e.source === postId && e.type === 'soft')
+      .map(e => {
+        const n = nodes.find(nn => nn.id === e.target);
+        return n ? { id: n.id, title: n.title, post_type: n.emoji, like_count: n.likes_count } : null;
+      })
+      .filter(Boolean) as { id: string; title?: string; post_type?: string; like_count?: number }[];
   },
 
   topSoftLinkByLikes: (id: string) => {
     const { nodes, edges } = get();
     const softEdges = edges.filter((e) => e.type === 'soft' && e.source === id);
-    const softNeighbors = softEdges
-      .map((e) => nodes.find((n) => n.id === e.target))
-      .filter((n): n is BrainstormNode => n !== undefined);
+    const softNodes = softEdges
+      .map(e => nodes.find(n => n.id === e.target))
+      .filter(Boolean) as BrainstormNode[];
     
-    if (softNeighbors.length === 0) return null;
+    if (!softNodes.length) return null;
     
-    return softNeighbors.reduce((best, current) =>
-      (current.likes_count ?? 0) > (best.likes_count ?? 0) ? current : best
-    );
+    softNodes.sort((a, b) => (b.likes_count ?? 0) - (a.likes_count ?? 0));
+    return softNodes[0] ?? null;
   },
 
   // Thread queue management
-  setThreadQueue: (nodes) => {
-    const seenIds = new Set(nodes.map(n => n.id));
-    set({ threadQueue: nodes, seenPostIds: seenIds });
-  },
+  setThreadQueue: (items) => set({ threadQueue: items }),
   
-  appendThread: (nodes) => {
-    set((state) => {
-      const newNodes = nodes.filter(n => !state.seenPostIds.has(n.id));
-      const newSeenIds = new Set([...Array.from(state.seenPostIds), ...newNodes.map(n => n.id)]);
-      return {
-        threadQueue: [...state.threadQueue, ...newNodes],
-        seenPostIds: newSeenIds
-      };
-    });
-  },
+  appendThread: (items) => set({ threadQueue: [...get().threadQueue, ...items] }),
   
+  clearThread: () => set({ threadQueue: [] }),
+  
+  // Build the contiguous HARD link chain starting at a node (parent -> child with relation_type='hard')
   buildHardChainFrom: async (startId: string) => {
-    const { BrainstormSupabaseAdapter } = await import('@/features/brainstorm/adapters/supabaseAdapter');
-    const adapter = new BrainstormSupabaseAdapter();
-    const chain = await adapter.fetchChainHard(startId, 'forward', 25, 500);
+    const s = get();
+    const chain: BrainstormNode[] = [];
+    let current = s.nodes.find(n => n.id === startId);
+    const visited = new Set<string>();
+
+    while (current && !visited.has(current.id)) {
+      chain.push(current);
+      visited.add(current.id);
+      const nextEdge = s.edges.find(e => e.source === current!.id && e.type === 'hard');
+      if (!nextEdge) break;
+      current = s.nodes.find(n => n.id === nextEdge.target);
+    }
     return chain;
   },
-  
-  loadMoreHardSegment: async () => {
-    const { 
-      threadQueue, 
-      topSoftLinkByLikes, 
-      buildHardChainFrom, 
-      appendThread, 
-      setFetchingMore, 
-      edges,
-      nodes,
-      seenPostIds 
-    } = get();
-    
-    if (threadQueue.length === 0) return;
-    
-    const lastNode = threadQueue[threadQueue.length - 1];
-    if (!lastNode) return;
-    
-    setFetchingMore(true);
-    
-    try {
-      // Priority 1: Check for more hard links from current node
-      const hardEdges = edges.filter((e) => e.type === 'hard' && e.source === lastNode.id);
-      const unseenHardTargets = hardEdges
-        .map(e => e.target)
-        .filter(id => !seenPostIds.has(id));
-      
-      if (unseenHardTargets.length > 0) {
-        // Continue with hard chain
-        const moreChain = await buildHardChainFrom(lastNode.id);
-        const unseenChain = moreChain.filter(n => !seenPostIds.has(n.id));
-        if (unseenChain.length > 0) {
-          appendThread(unseenChain);
-          return;
-        }
-      }
-      
-      // Priority 2: Pick ONE soft link (most liked, unseen)
-      const softEdges = edges.filter((e) => e.type === 'soft' && e.source === lastNode.id);
-      const unseenSoftTargets = softEdges
-        .map((e) => {
-          const targetNode = nodes.find(n => n.id === e.target);
-          return targetNode;
-        })
-        .filter((n): n is BrainstormNode => n !== undefined && !seenPostIds.has(n.id))
-        .sort((a, b) => (b.likes_count ?? 0) - (a.likes_count ?? 0));
-      
-      if (unseenSoftTargets.length > 0) {
-        const nextSoft = unseenSoftTargets[0];
-        
-        // Add handoff marker
-        const handoffMarker: BrainstormNode = {
-          id: `handoff-${lastNode.id}-${nextSoft.id}`,
-          title: nextSoft.title || 'Continue thread',
-          content: '',
-          emoji: '🔗',
-          tags: ['handoff'],
-          position: { x: 0, y: 0 },
-          created_at: new Date().toISOString(),
-          author: 'System',
-        };
-        appendThread([handoffMarker]);
-        
-        // Build hard chain from soft target
-        const softChain = await buildHardChainFrom(nextSoft.id);
-        const unseenSoftChain = softChain.filter(n => !seenPostIds.has(n.id));
-        appendThread(unseenSoftChain);
-        return;
-      }
-      
-      // Priority 3: Show other unseen brainstorms
-      const unseenNodes = nodes.filter(n => !seenPostIds.has(n.id));
-      if (unseenNodes.length > 0) {
-        // Sort by recency
-        const sortedUnseen = unseenNodes.sort((a, b) => 
-          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-        );
-        
-        // Add a few at a time
-        const nextBatch = sortedUnseen.slice(0, 3);
-        appendThread(nextBatch);
-      }
-      
-    } catch (err) {
-      console.error('Failed to load more:', err);
-    } finally {
-      setFetchingMore(false);
-    }
+
+  // Rebuild the visible thread from the current selection
+  rebuildThreadFromSelection: async () => {
+    const s = get();
+    if (!s.selectedNodeId) return;
+    const hard = await s.buildHardChainFrom(s.selectedNodeId);
+    set({ threadQueue: hard.map(p => ({ kind: 'post', post: p })) });
+  },
+
+  // When the chain ends, append dotted handoff + next chain via most-liked soft link
+  continueThreadAfterEnd: async () => {
+    const s = get();
+    const q = s.threadQueue;
+    const lastPost = [...q].reverse().find(i => i.kind === 'post')?.post;
+    if (!lastPost) return;
+    const nextSoft = s.topSoftLinkByLikes(lastPost.id);
+    if (!nextSoft) return;
+    s.appendThread([{ kind: 'handoff', handoffTo: nextSoft }]);
+    const nextChain = await s.buildHardChainFrom(nextSoft.id);
+    s.appendThread(nextChain.map(p => ({ kind: 'post', post: p })));
   },
   
   setFetchingMore: (fetching) => set({ isFetchingMore: fetching }),
