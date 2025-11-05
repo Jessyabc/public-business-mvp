@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { GlassCard } from '@/ui/components/GlassCard';
 import { SpaceAdapter, type BrainstormPost } from '../adapters/spaceAdapter';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -127,35 +127,64 @@ export default function SpaceCanvas({ startId, className }: Props) {
 
   // ----- rendering helpers
   const CurrentCard = ({ post }: { post: BrainstormPost }) => (
-    <Card className="w-[560px] max-w-[92vw] bg-white/10 backdrop-blur-xl border-white/20 text-white shadow-2xl">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">
-          {post.title || 'PublicBusiness • Brainstorm'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {post.content && <p className="text-white/90 leading-relaxed">{post.content}</p>}
-        <div className="flex items-center gap-2 text-xs text-white/60">
-          <Badge variant="outline" className="border-white/30 text-white/80">Brainstorm</Badge>
+    <GlassCard 
+      className="w-full max-w-2xl backdrop-blur-xl border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
+      padding="lg"
+    >
+      <h2 className="text-2xl font-semibold text-white mb-4">
+        {post.title || 'PublicBusiness • Brainstorm'}
+      </h2>
+      
+      <div className="space-y-4">
+        {post.content && (
+          <p className="text-white/90 leading-relaxed text-base">{post.content}</p>
+        )}
+        
+        <div className="flex items-center gap-3 text-sm text-white/60">
+          <Badge 
+            variant="outline" 
+            className="border-white/30 bg-white/10 text-white/90 backdrop-blur-sm hover:bg-white/15 transition-colors"
+          >
+            Brainstorm
+          </Badge>
           <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
         </div>
-        <div className="flex items-center gap-2 pt-1">
-          <Button size="sm" variant="secondary" className="bg-white/15 hover:bg-white/25 text-white/90 border-white/20"
-            onClick={jumpLatest}>Jump to latest</Button>
+        
+        <div className="flex items-center gap-2 pt-2">
+          <Button 
+            size="sm" 
+            className="bg-white/15 hover:bg-white/25 active:bg-white/30 text-white border border-white/20 backdrop-blur-sm transition-all shadow-lg hover:shadow-xl"
+            onClick={jumpLatest}
+          >
+            Jump to latest
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </GlassCard>
   );
 
   const SoftCard = ({ post, onOpen }: { post: BrainstormPost; onOpen: (id: string) => void }) => (
-    <button
+    <GlassCard
+      interactive
+      padding="sm"
       onClick={() => onOpen(post.id)}
-      className="block text-left w-72 bg-white/8 hover:bg-white/14 transition-colors rounded-xl p-3 border border-white/15 text-white/90"
+      className="w-full backdrop-blur-md border-white/15 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+      asChild
     >
-      <div className="text-sm font-semibold mb-1">{post.title || 'Related brainstorm'}</div>
-      {post.content && <div className="text-xs line-clamp-3 text-white/75">{post.content}</div>}
-      <div className="mt-2 text-[11px] text-white/60">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</div>
-    </button>
+      <button className="text-left">
+        <div className="text-sm font-semibold text-white/95 mb-1.5">
+          {post.title || 'Related brainstorm'}
+        </div>
+        {post.content && (
+          <div className="text-xs line-clamp-3 text-white/75 leading-relaxed mb-2">
+            {post.content}
+          </div>
+        )}
+        <div className="text-[11px] text-white/60">
+          {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+        </div>
+      </button>
+    </GlassCard>
   );
 
   if (loading) {
@@ -208,60 +237,84 @@ export default function SpaceCanvas({ startId, className }: Props) {
 
       {/* Hard link “nexts” as luminous beacons */}
       {forwardNext && (
-        <div className="absolute right-10 top-10">
-          <div className="mb-2 text-xs uppercase tracking-wide text-accent">Hard link →</div>
-          <div className="w-64 rounded-xl p-[1px] bg-accent/60">
-            <div className="rounded-[10px] bg-surface/70 p-3">
-              <div className="text-sm font-semibold text-white/90 line-clamp-2">{forwardNext.title || 'Next in thread'}</div>
-              {forwardNext.content && <div className="text-xs text-white/70 line-clamp-3 mt-1">{forwardNext.content}</div>}
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-[11px] text-white/60">
-                  {formatDistanceToNow(new Date(forwardNext.created_at), { addSuffix: true })}
-                </span>
-                <Button size="sm" variant="secondary"
-                  className="h-7 bg-[#3aa0ff]/20 hover:bg-[#3aa0ff]/30 text-white border-[#3aa0ff]/30"
-                  onClick={() => setCurrent(forwardNext)}
-                >
-                  Open
-                </Button>
-              </div>
-            </div>
+        <div className="absolute right-8 top-8">
+          <div className="mb-2 text-xs uppercase tracking-wide text-white/70 font-medium">
+            Hard link →
           </div>
+          <GlassCard 
+            padding="sm"
+            className="w-72 backdrop-blur-lg border-[#3aa0ff]/40 shadow-[0_8px_24px_rgba(58,160,255,0.25),inset_0_1px_0_rgba(255,255,255,0.1)]"
+          >
+            <div className="text-sm font-semibold text-white/95 line-clamp-2 mb-2">
+              {forwardNext.title || 'Next in thread'}
+            </div>
+            {forwardNext.content && (
+              <div className="text-xs text-white/75 line-clamp-3 mb-3 leading-relaxed">
+                {forwardNext.content}
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/60">
+                {formatDistanceToNow(new Date(forwardNext.created_at), { addSuffix: true })}
+              </span>
+              <Button 
+                size="sm"
+                className="h-7 bg-[#3aa0ff]/25 hover:bg-[#3aa0ff]/40 active:bg-[#3aa0ff]/50 text-white border border-[#3aa0ff]/40 backdrop-blur-sm transition-all shadow-lg"
+                onClick={() => setCurrent(forwardNext)}
+              >
+                Open
+              </Button>
+            </div>
+          </GlassCard>
         </div>
       )}
       {backwardNext && (
-        <div className="absolute left-10 top-10">
-          <div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">← Previous</div>
-          <div className="w-64 rounded-xl p-[1px] bg-border">
-            <div className="rounded-[10px] bg-surface/60 p-3">
-              <div className="text-sm font-semibold text-white/90 line-clamp-2">{backwardNext.title || 'Earlier idea'}</div>
-              {backwardNext.content && <div className="text-xs text-white/70 line-clamp-3 mt-1">{backwardNext.content}</div>}
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-[11px] text-white/60">
-                  {formatDistanceToNow(new Date(backwardNext.created_at), { addSuffix: true })}
-                </span>
-                <Button size="sm" variant="secondary"
-                  className="h-7 bg-white/15 hover:bg-white/25 text-white border-white/20"
-                  onClick={() => setCurrent(backwardNext)}
-                >
-                  Open
-                </Button>
-              </div>
-            </div>
+        <div className="absolute left-8 top-8">
+          <div className="mb-2 text-xs uppercase tracking-wide text-white/70 font-medium">
+            ← Previous
           </div>
+          <GlassCard 
+            padding="sm"
+            className="w-72 backdrop-blur-lg border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]"
+          >
+            <div className="text-sm font-semibold text-white/95 line-clamp-2 mb-2">
+              {backwardNext.title || 'Earlier idea'}
+            </div>
+            {backwardNext.content && (
+              <div className="text-xs text-white/75 line-clamp-3 mb-3 leading-relaxed">
+                {backwardNext.content}
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/60">
+                {formatDistanceToNow(new Date(backwardNext.created_at), { addSuffix: true })}
+              </span>
+              <Button 
+                size="sm"
+                className="h-7 bg-white/15 hover:bg-white/25 active:bg-white/30 text-white border border-white/20 backdrop-blur-sm transition-all shadow-lg"
+                onClick={() => setCurrent(backwardNext)}
+              >
+                Open
+              </Button>
+            </div>
+          </GlassCard>
         </div>
       )}
 
       {/* Soft neighbors rail */}
       {softNeighbors.length > 0 && (
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-[320px] space-y-3">
-          <div className="text-xs uppercase tracking-wide text-white/70 mb-2">Soft links</div>
-          {softNeighbors.slice(0, 5).map(n => (
-            <SoftCard key={n.id} post={n} onOpen={(id) => {
-              const target = softNeighbors.find(x => x.id === id);
-              if (target) setCurrent(target);
-            }} />
-          ))}
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-80 space-y-3">
+          <div className="text-xs uppercase tracking-wide text-white/80 font-medium mb-3 px-1">
+            Soft links
+          </div>
+          <div className="space-y-2.5">
+            {softNeighbors.slice(0, 5).map(n => (
+              <SoftCard key={n.id} post={n} onOpen={(id) => {
+                const target = softNeighbors.find(x => x.id === id);
+                if (target) setCurrent(target);
+              }} />
+            ))}
+          </div>
         </div>
       )}
 
