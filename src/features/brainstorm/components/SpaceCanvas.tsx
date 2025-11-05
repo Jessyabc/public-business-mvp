@@ -329,10 +329,12 @@ export default function SpaceCanvas({ startId, className }: Props) {
         </Button>
       </div>
 
-      {/* Center current with fade-in */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-fade-in">
-        <CurrentCard post={current} />
-      </div>
+      {/* Center current with fade-in - only render if current exists */}
+      {current && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-fade-in">
+          <CurrentCard post={current} />
+        </div>
+      )}
 
       {/* Hard link "nexts" with glowing connection line */}
       {forwardNext && (
