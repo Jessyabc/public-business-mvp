@@ -212,7 +212,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[var(--card-bg)] backdrop-blur-xl border-white/20 text-white max-w-lg">
+      <DialogContent className="bg-[var(--card-bg)] backdrop-blur-xl border-white/20 text-white max-w-lg max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">
             {mode === 'root' ? 'New Brainstorm' : 'Continue Brainstorm'}
@@ -220,7 +220,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-4 overflow-hidden flex flex-col">
             <FormField
               control={form.control}
               name="title"
@@ -263,11 +263,11 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
             />
 
             {/* Soft Links Section */}
-            <div className="space-y-3">
-              <FormLabel className="text-white/90">Inspiration (soft links)</FormLabel>
+            <div className="flex-1 space-y-3 overflow-hidden flex flex-col">
+              <FormLabel className="text-white/90 flex-shrink-0">Inspiration (soft links)</FormLabel>
               
               {/* Search */}
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
                 <Input
                   value={searchQuery}
@@ -280,7 +280,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
               {/* Selected soft links */}
               {selectedSoftLinks.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 flex-shrink-0">
                   {selectedSoftLinks.map(id => {
                     const post = recentPosts.find(p => p.post_id === id);
                     return (
@@ -301,7 +301,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
               )}
 
               {/* Recent posts list */}
-              <ScrollArea className="h-[180px] rounded-md border border-white/10 bg-white/5 p-2">
+              <ScrollArea className="flex-1 rounded-md border border-white/10 bg-white/5 p-2">
                 {isLoadingHistory ? (
                   <div className="text-center text-white/50 py-8">Loading...</div>
                 ) : recentPosts.length === 0 ? (
@@ -348,12 +348,12 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
                   </div>
                 )}
               </ScrollArea>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-white/60 flex-shrink-0">
                 {selectedSoftLinks.length} / 5 soft links selected
               </p>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-2 flex-shrink-0">
               <Button
                 type="submit"
                 disabled={isSubmitting}

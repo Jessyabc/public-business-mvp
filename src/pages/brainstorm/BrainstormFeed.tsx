@@ -7,6 +7,7 @@ import { getBrainstormGraph } from '@/features/brainstorm/adapters/supabaseAdapt
 import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { Loader2, RefreshCcw } from 'lucide-react';
 import { NodeForm } from '@/features/brainstorm/components/NodeForm';
+import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
 
 export default function BrainstormFeed() {
   const { setNodes, setEdges, nodes, selectById, clearThread } = useBrainstormStore();
@@ -14,6 +15,8 @@ export default function BrainstormFeed() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerMode, setComposerMode] = useState<'root' | 'continue'>('root');
   const [composerParentId, setComposerParentId] = useState<string | null>(null);
+  const [linkPickerOpen, setLinkPickerOpen] = useState(false);
+  const [linkSourceId, setLinkSourceId] = useState<string | null>(null);
 
   const pickInitial = (nodes: any[], edges: any[]) => {
     const byNew = [...nodes].sort(
@@ -56,9 +59,8 @@ export default function BrainstormFeed() {
 
     const handleLink = (e: any) => {
       const sourceId = e.detail.sourceId;
-      console.log('Link clicked for source:', sourceId);
-      // TODO: Open soft-link history picker
-      // This would need a separate LinkPicker modal component
+      setLinkSourceId(sourceId);
+      setLinkPickerOpen(true);
     };
 
     const handleReload = () => {
@@ -128,6 +130,18 @@ export default function BrainstormFeed() {
         }}
         mode={composerMode}
         parentId={composerParentId}
+      />
+
+      {/* LinkPicker Modal */}
+      <LinkPicker
+        open={linkPickerOpen}
+        onOpenChange={(open) => {
+          setLinkPickerOpen(open);
+          if (!open) {
+            setLinkSourceId(null);
+          }
+        }}
+        sourceId={linkSourceId}
       />
     </main>
   );
