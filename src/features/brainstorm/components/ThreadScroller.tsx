@@ -124,10 +124,11 @@ export default function ThreadScroller() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Build/refresh thread when selection changes
+  // Rebuild the FULL chain whenever selection changes
   useEffect(() => {
     rebuildThreadFromSelection().then(() => setExpandedId(selectedNodeId ?? null));
-  }, [selectedNodeId, rebuildThreadFromSelection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNodeId]);
 
   // Infinite scroll: after end, append dotted handoff + next chain
   useEffect(() => {
