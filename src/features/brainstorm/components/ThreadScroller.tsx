@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useBrainstormStore } from "@/features/brainstorm/store";
 import { likePost, viewPost } from "@/features/brainstorm/adapters/supabaseAdapter";
 import { GlowCard } from "@/components/ui/GlowCard";
+import { LinkPulse } from "./LinkPulse";
 
 function HardBar() {
   return (
@@ -50,6 +51,10 @@ function FeedCard({
 }) {
   useEffect(() => { viewPost(post.id).catch(()=>{}); }, [post.id]);
 
+  const triggerPulse = (type: 'hard' | 'soft') => {
+    window.dispatchEvent(new CustomEvent('linkPulse', { detail: { id: post.id, type } }));
+  };
+
   return (
     <motion.div
       initial={{ y: 14, opacity: 0 }}
@@ -84,10 +89,22 @@ function FeedCard({
             <button onClick={onToggleExpand} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
               {expanded ? "Collapse" : "Expand"}
             </button>
-            <button onClick={onContinue} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
+            <button 
+              onClick={() => {
+                triggerPulse('hard');
+                onContinue();
+              }} 
+              className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10"
+            >
               Continue
             </button>
-            <button onClick={onLink} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
+            <button 
+              onClick={() => {
+                triggerPulse('soft');
+                onLink();
+              }} 
+              className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10"
+            >
               Link
             </button>
           </div>
@@ -105,11 +122,23 @@ export default function ThreadScroller() {
   } = useBrainstormStore();
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [pulse, setPulse] = useState<{ id: string; type: 'hard' | 'soft' } | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const handleToggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
+  // Listen for link pulse events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ id: string; type: 'hard' | 'soft' }>).detail;
+      setPulse(detail);
+      setTimeout(() => setPulse(null), 1600);
+    };
+    window.addEventListener('linkPulse', handler);
+    return () => window.removeEventListener('linkPulse', handler);
+  }, []);
 
   return (
     <div className="relative z-10 p-0 overflow-hidden">
@@ -170,6 +199,9 @@ export default function ThreadScroller() {
                               '0 0 12px rgba(72,159,227,0.4), 0 0 24px rgba(103,255,216,0.3)',
                           }}
                         />
+                        {pulse && pulse.id === p.id && (
+                          <LinkPulse type={pulse.type} />
+                        )}
                       </motion.div>
                     );
                   }
