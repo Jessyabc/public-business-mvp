@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,11 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBrainstormStore } from '../store';
 import { toast } from '@/hooks/use-toast';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 import { supabase } from '@/integrations/supabase/client';
 import { GlassCard } from '@/ui/components/GlassCard';
+import { fetchRecentPublicPosts, createSoftLinks } from '../adapters/supabaseAdapter';
+import { Search, X, Plus } from 'lucide-react';
 
 const nodeSchema = z.object({
   title: z.string().max(100, 'Title must be less than 100 characters').optional(),
@@ -27,8 +31,19 @@ type NodeFormProps = {
   parentId?: string | null;
 };
 
+type RecentPost = {
+  post_id: string;
+  post_type: string;
+  title: string;
+  created_at: string;
+};
+
 export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
+  const [selectedSoftLinks, setSelectedSoftLinks] = useState<string[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const { addNodeOptimistic, addEdgeOptimistic, setLastCreatedId } = useBrainstormStore();
 
   const form = useForm<NodeFormData>({
@@ -38,6 +53,52 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       content: '',
     },
   });
+
+  // Load recent posts when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadRecentPosts();
+      setSelectedSoftLinks([]);
+    }
+  }, [open]);
+
+  // Search when query changes
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => loadRecentPosts(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [searchQuery, open]);
+
+  const loadRecentPosts = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const posts = await fetchRecentPublicPosts(searchQuery || undefined, 15);
+      // Filter out parent if in continue mode
+      const filtered = mode === 'continue' && parentId
+        ? posts.filter(p => p.post_id !== parentId)
+        : posts;
+      setRecentPosts(filtered);
+    } catch (err) {
+      console.error('Failed to load recent posts:', err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const toggleSoftLink = (postId: string) => {
+    setSelectedSoftLinks(prev => 
+      prev.includes(postId)
+        ? prev.filter(id => id !== postId)
+        : prev.length < 5
+          ? [...prev, postId]
+          : prev
+    );
+  };
+
+  const removeSoftLink = (postId: string) => {
+    setSelectedSoftLinks(prev => prev.filter(id => id !== postId));
+  };
 
   const onSubmit = async (data: NodeFormData) => {
     if (!BRAINSTORM_WRITES_ENABLED) {
@@ -109,6 +170,11 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
         }
       }
 
+      // Create soft links if any selected
+      if (selectedSoftLinks.length > 0 && newPost) {
+        await createSoftLinks(newPost.id, selectedSoftLinks);
+      }
+
       // Optimistic update to store
       if (newPost) {
         addNodeOptimistic({
@@ -127,6 +193,15 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
           });
         }
 
+        // Add soft link edges
+        selectedSoftLinks.forEach(targetId => {
+          addEdgeOptimistic({
+            parent_post_id: newPost.id,
+            child_post_id: targetId,
+            relation_type: 'soft',
+          });
+        });
+
         setLastCreatedId(newPost.id);
       }
 
@@ -136,6 +211,8 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       });
 
       form.reset();
+      setSelectedSoftLinks([]);
+      setSearchQuery('');
       onOpenChange(false);
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -200,6 +277,97 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
                 </FormItem>
               )}
             />
+
+            {/* Soft Links Section */}
+            <div className="space-y-3">
+              <FormLabel className="text-white/90">Inspiration (soft links)</FormLabel>
+              
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search recent posts..."
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Selected soft links */}
+              {selectedSoftLinks.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedSoftLinks.map(id => {
+                    const post = recentPosts.find(p => p.post_id === id);
+                    return (
+                      <Badge
+                        key={id}
+                        variant="secondary"
+                        className="bg-[#3aa0ff]/20 text-white border-[#3aa0ff]/40 gap-1"
+                      >
+                        {post?.title || 'Unknown'}
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-red-400"
+                          onClick={() => removeSoftLink(id)}
+                        />
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Recent posts list */}
+              <ScrollArea className="h-[180px] rounded-md border border-white/10 bg-white/5 p-2">
+                {isLoadingHistory ? (
+                  <div className="text-center text-white/50 py-8">Loading...</div>
+                ) : recentPosts.length === 0 ? (
+                  <div className="text-center text-white/50 py-8">No recent posts found</div>
+                ) : (
+                  <div className="space-y-2">
+                    {recentPosts.map((post) => {
+                      const isSelected = selectedSoftLinks.includes(post.post_id);
+                      const canAdd = selectedSoftLinks.length < 5;
+                      
+                      return (
+                        <GlassCard
+                          key={post.post_id}
+                          className={`p-3 cursor-pointer transition-all ${
+                            isSelected 
+                              ? 'border-[#3aa0ff]/60 bg-[#3aa0ff]/10' 
+                              : 'hover:bg-white/10'
+                          }`}
+                          onClick={() => canAdd || isSelected ? toggleSoftLink(post.post_id) : null}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-white truncate">
+                                {post.title || 'Untitled'}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs border-white/20 text-white/70">
+                                  {post.post_type}
+                                </Badge>
+                                <span className="text-xs text-white/50">
+                                  {new Date(post.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            {isSelected ? (
+                              <X className="h-4 w-4 text-[#3aa0ff] flex-shrink-0" />
+                            ) : canAdd ? (
+                              <Plus className="h-4 w-4 text-white/50 flex-shrink-0" />
+                            ) : null}
+                          </div>
+                        </GlassCard>
+                      );
+                    })}
+                  </div>
+                )}
+              </ScrollArea>
+              <p className="text-xs text-white/60">
+                {selectedSoftLinks.length} / 5 soft links selected
+              </p>
+            </div>
 
             <div className="flex gap-3 pt-2">
               <Button

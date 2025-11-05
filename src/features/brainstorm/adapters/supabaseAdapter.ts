@@ -2,7 +2,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   rpcListBrainstormNodes, 
   rpcListBrainstormEdgesForNodes,
-  rpcSpaceChainHard 
+  rpcSpaceChainHard,
+  rpcListRecentPublicPosts,
+  rpcCreateSoftLinks
 } from '@/integrations/supabase/rpc';
 import { BrainstormNode, BrainstormEdge } from '../types';
 import { TABLES, BRAINSTORM_FILTERS } from '@/adapters/constants';
@@ -349,5 +351,28 @@ export async function getBrainstormGraph(): Promise<{ nodes: BrainstormNode[]; e
   } catch (err) {
     console.error('Failed to fetch brainstorm graph:', err);
     return { nodes: [], edges: [] };
+  }
+}
+
+export async function fetchRecentPublicPosts(q?: string, limit = 15) {
+  try {
+    const { data, error } = await rpcListRecentPublicPosts(q, limit);
+    if (error) throw error;
+    return (data ?? []) as { post_id: string; post_type: string; title: string; created_at: string }[];
+  } catch (err) {
+    console.error('Failed to fetch recent public posts:', err);
+    return [];
+  }
+}
+
+export async function createSoftLinks(parentId: string, childIds: string[]) {
+  if (!childIds.length) return [];
+  try {
+    const { data, error } = await rpcCreateSoftLinks(parentId, childIds);
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error('Failed to create soft links:', err);
+    return [];
   }
 }

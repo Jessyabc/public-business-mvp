@@ -86,3 +86,17 @@ export async function rpcSpaceChainHard(
     p_max_depth
   });
 }
+
+export async function rpcListRecentPublicPosts(p_q?: string, p_limit?: number) {
+  return supabase.rpc("api_list_recent_public_posts", {
+    p_q: p_q || null,
+    p_limit: p_limit || 15
+  });
+}
+
+export async function rpcCreateSoftLinks(p_parent: string, p_children: string[]) {
+  return supabase.rpc("api_create_soft_links", {
+    p_parent,
+    p_children
+  });
+}

@@ -184,12 +184,17 @@ export default function SpaceCanvas({ startId, className }: Props) {
       interactive
       padding="sm"
       onClick={() => onOpen(post.id)}
-      className="w-full backdrop-blur-md border-white/15 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+      className="w-full backdrop-blur-md border-dashed border-white/15 opacity-80 hover:opacity-100 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
       asChild
     >
       <button className="text-left">
-        <div className="text-sm font-semibold text-white/95 mb-1.5">
-          {post.title || 'Related brainstorm'}
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="text-sm font-semibold text-white/95">
+            {post.title || 'Related brainstorm'}
+          </div>
+          <Badge variant="outline" className="text-[10px] border-white/20 text-white/60 px-1.5 py-0">
+            soft
+          </Badge>
         </div>
         {post.content && (
           <div className="text-xs line-clamp-3 text-white/75 leading-relaxed mb-2">
@@ -333,8 +338,11 @@ export default function SpaceCanvas({ startId, className }: Props) {
       {/* Soft neighbors rail */}
       {softNeighbors.length > 0 && (
         <div className="absolute right-8 top-1/2 -translate-y-1/2 w-80 space-y-3">
-          <div className="text-xs uppercase tracking-wide text-white/80 font-medium mb-3 px-1">
-            Soft links
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <div className="text-xs uppercase tracking-wide text-white/80 font-medium">
+              Soft links
+            </div>
+            <div className="h-[1px] flex-1 border-t border-dashed border-white/30" />
           </div>
           <div className="space-y-2.5">
             {softNeighbors.slice(0, 5).map(n => (
