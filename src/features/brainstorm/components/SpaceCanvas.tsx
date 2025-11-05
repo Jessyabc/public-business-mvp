@@ -5,6 +5,9 @@ import { GlassCard } from '@/ui/components/GlassCard';
 import { SpaceAdapter, type BrainstormPost } from '../adapters/spaceAdapter';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { NodeForm } from './NodeForm';
+import { Plus, ArrowRight } from 'lucide-react';
+import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 
 type Props = {
   /** Optional: start on this post id if provided */
@@ -19,6 +22,8 @@ export default function SpaceCanvas({ startId, className }: Props) {
   const [backwardNext, setBackwardNext] = useState<BrainstormPost | null>(null);
   const [softNeighbors, setSoftNeighbors] = useState<BrainstormPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [showContinueForm, setShowContinueForm] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -151,9 +156,20 @@ export default function SpaceCanvas({ startId, className }: Props) {
         </div>
         
         <div className="flex items-center gap-2 pt-2">
+          {BRAINSTORM_WRITES_ENABLED && (
+            <Button 
+              size="sm"
+              onClick={() => setShowContinueForm(true)}
+              className="bg-[#3aa0ff]/25 hover:bg-[#3aa0ff]/40 active:bg-[#3aa0ff]/50 text-white border border-[#3aa0ff]/40 backdrop-blur-sm transition-all shadow-lg"
+            >
+              <ArrowRight className="w-4 h-4 mr-1" />
+              Continue here
+            </Button>
+          )}
           <Button 
             size="sm" 
-            className="bg-white/15 hover:bg-white/25 active:bg-white/30 text-white border border-white/20 backdrop-blur-sm transition-all shadow-lg hover:shadow-xl"
+            variant="ghost"
+            className="bg-white/15 hover:bg-white/25 active:bg-white/30 text-white border border-white/20 backdrop-blur-sm transition-all shadow-lg"
             onClick={jumpLatest}
           >
             Jump to latest
@@ -229,6 +245,19 @@ export default function SpaceCanvas({ startId, className }: Props) {
     >
       {/* Stars layer */}
       <div className="pointer-events-none absolute inset-0 [background-image:radial-gradient(1px_1px_at_20%_30%,rgba(255,255,255,0.25),transparent_1px),radial-gradient(1px_1px_at_60%_70%,rgba(255,255,255,0.2),transparent_1px)] opacity-60" />
+
+      {/* Floating "New Brainstorm" button */}
+      {BRAINSTORM_WRITES_ENABLED && (
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20">
+          <Button
+            onClick={() => setShowNewForm(true)}
+            className="bg-[#3aa0ff]/30 hover:bg-[#3aa0ff]/45 text-white border border-[#3aa0ff]/50 backdrop-blur-lg shadow-[0_4px_16px_rgba(58,160,255,0.3)] transition-all"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Brainstorm
+          </Button>
+        </div>
+      )}
 
       {/* Center current */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -322,6 +351,19 @@ export default function SpaceCanvas({ startId, className }: Props) {
       <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-xs">
         Scroll to move along hard links • Click a soft card to branch
       </div>
+
+      {/* Modals */}
+      <NodeForm
+        open={showNewForm}
+        onOpenChange={setShowNewForm}
+        mode="root"
+      />
+      <NodeForm
+        open={showContinueForm}
+        onOpenChange={setShowContinueForm}
+        mode="continue"
+        parentId={current?.id}
+      />
     </div>
   );
 }

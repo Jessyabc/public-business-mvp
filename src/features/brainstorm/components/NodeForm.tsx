@@ -5,129 +5,174 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Plus, X } from 'lucide-react';
 import { useBrainstormStore } from '../store';
 import { toast } from '@/hooks/use-toast';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
-import styles from '@/components/effects/glassSurface.module.css';
-
+import { supabase } from '@/integrations/supabase/client';
+import { GlassCard } from '@/ui/components/GlassCard';
 
 const nodeSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
-  content: z.string().min(1, 'Content is required').max(500, 'Content must be less than 500 characters'),
-  emoji: z.string().min(1, 'Emoji is required'),
-  tags: z.array(z.string()).max(5, 'Maximum 5 tags allowed'),
+  title: z.string().max(100, 'Title must be less than 100 characters').optional(),
+  content: z.string().min(10, 'Content must be at least 10 characters').max(1000, 'Content must be less than 1000 characters'),
 });
 
 type NodeFormData = z.infer<typeof nodeSchema>;
 
-export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const [tagInput, setTagInput] = useState('');
-  const { addNode } = useBrainstormStore();
+type NodeFormProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mode: 'root' | 'continue';
+  parentId?: string | null;
+};
+
+export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addNodeOptimistic, addEdgeOptimistic, setLastCreatedId } = useBrainstormStore();
 
   const form = useForm<NodeFormData>({
     resolver: zodResolver(nodeSchema),
     defaultValues: {
       title: '',
       content: '',
-      emoji: '💡',
-      tags: [],
     },
   });
 
-  const onSubmit = (data: NodeFormData) => {
-    
-
+  const onSubmit = async (data: NodeFormData) => {
     if (!BRAINSTORM_WRITES_ENABLED) {
       toast({
-        title: 'Draft not saved',
-        description: 'Backend not connected - cannot persist ideas',
+        title: 'Writes disabled',
+        description: 'Brainstorm creation is currently disabled',
         variant: 'destructive',
       });
-      setOpen(false);
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      // Add to local state
-      addNode({
-        title: data.title,
-        content: data.content,
-        emoji: data.emoji,
-        tags: data.tags,
-        position: {
-          x: Math.random() * 400 - 200,
-          y: Math.random() * 300 - 150,
-        },
-        author: 'Current User', // Would come from auth context
-      });
+      // Determine kind based on mode
+      const kind = mode === 'root' ? 'Spark' : 'Spark';
+      const parent_post_id = mode === 'continue' ? parentId : null;
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: 'Not authenticated',
+          description: 'You must be logged in to create brainstorms',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Insert into posts table
+      const { data: newPost, error } = await supabase
+        .from('posts')
+        .insert([{
+          kind,
+          title: data.title || null,
+          content: data.content,
+          body: data.content,
+          type: 'brainstorm',
+          mode: 'public',
+          visibility: 'public',
+          status: 'active', // Auto-approve in dev
+          user_id: user.id,
+        }])
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Insert error:', error);
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to create brainstorm',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // If continue mode, create the relation
+      if (mode === 'continue' && parentId && newPost) {
+        const { error: relationError } = await supabase
+          .from('post_relations')
+          .insert([{
+            parent_post_id: parentId,
+            child_post_id: newPost.id,
+            relation_type: 'hard',
+          }]);
+
+        if (relationError) {
+          console.error('Relation error:', relationError);
+          // Don't fail the whole operation, just log
+        }
+      }
+
+      // Optimistic update to store
+      if (newPost) {
+        addNodeOptimistic({
+          id: newPost.id,
+          title: newPost.title || '',
+          content: newPost.content,
+          created_at: newPost.created_at,
+          user_id: newPost.user_id,
+        });
+
+        if (mode === 'continue' && parentId) {
+          addEdgeOptimistic({
+            parent_post_id: parentId,
+            child_post_id: newPost.id,
+            relation_type: 'hard',
+          });
+        }
+
+        setLastCreatedId(newPost.id);
+      }
 
       toast({
-        title: 'Idea added!',
-        description: 'Your idea has been added to the canvas',
+        title: 'Success!',
+        description: mode === 'root' ? 'New brainstorm created' : 'Brainstorm continued',
       });
 
       form.reset();
-      setOpen(false);
+      onOpenChange(false);
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add idea',
+        description: 'An unexpected error occurred',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const addTag = () => {
-    const tag = tagInput.trim();
-    if (tag && !form.getValues('tags').includes(tag) && form.getValues('tags').length < 5) {
-      form.setValue('tags', [...form.getValues('tags'), tag]);
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    form.setValue('tags', form.getValues('tags').filter(tag => tag !== tagToRemove));
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {trigger}
-      </SheetTrigger>
-      <SheetContent className={styles.glassSurface}>
-        <SheetHeader>
-          <SheetTitle className="text-foreground">Add New Idea</SheetTitle>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-[var(--card-bg)] backdrop-blur-xl border-white/20 text-white max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-white">
+            {mode === 'root' ? 'New Brainstorm' : 'Continue Brainstorm'}
+          </DialogTitle>
+        </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
-            <FormField
-              control={form.control}
-              name="emoji"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Emoji</FormLabel>
-                  <FormControl>
-                    <Input {...field} className={`text-2xl h-12 text-center ${styles.glassSurface}`} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 mt-4">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel className="text-white/90">Title (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Brief title for your idea..." className={styles.glassSurface} />
+                    <Input
+                      {...field}
+                      placeholder="Brief title..."
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,74 +184,44 @@ export function NodeForm({ trigger }: { trigger: React.ReactNode }) {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Content</FormLabel>
+                  <FormLabel className="text-white/90">Content *</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="Describe your idea in detail..."
-                      className={`min-h-[100px] ${styles.glassSurface}`}
+                      placeholder="Describe your idea..."
+                      className="min-h-[120px] bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
+                  <p className="text-xs text-white/60 mt-1">
+                    {field.value?.length || 0} / 1000 characters
+                  </p>
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="tags"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Tags</FormLabel>
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a tag..."
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                        className={styles.glassSurface}
-                      />
-                      <Button type="button" onClick={addTag} size="sm" className={styles.glassButton}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {form.watch('tags').map((tag) => (
-                        <Badge key={tag} variant="secondary" className={styles.glassSurface}>
-                          {tag}
-                          <button
-                            type="button"
-                            onClick={() => removeTag(tag)}
-                            className="ml-2 hover:text-destructive"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex gap-3 pt-4">
-              <Button type="submit" className={`flex-1 ${styles.glassButton}`}>
-                Add Idea
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-[#3aa0ff]/30 hover:bg-[#3aa0ff]/40 text-white border border-[#3aa0ff]/40 backdrop-blur-sm"
+              >
+                {isSubmitting ? 'Creating...' : mode === 'root' ? 'Create' : 'Continue'}
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
-                className={styles.glassButton}
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20"
               >
                 Cancel
               </Button>
             </div>
           </form>
         </Form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

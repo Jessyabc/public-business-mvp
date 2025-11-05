@@ -12,13 +12,16 @@ type Store = {
   showSoftEdges: boolean;
   depth: 0 | 1 | 2;
   selectedNodeId: string | null;
+  lastCreatedId: string | null;
 
   setNodes: (nodes: BrainstormNode[]) => void;
   setEdges: (edges: BrainstormEdge[]) => void;
   addNode: (node: Omit<BrainstormNode, 'id' | 'created_at'>) => void;
+  addNodeOptimistic: (node: { id: string; title: string; content: string; created_at: string; user_id: string }) => void;
   updateNode: (id: string, updates: Partial<BrainstormNode>) => void;
   deleteNode: (id: string) => void;
   addEdge: (edge: Omit<BrainstormEdge, 'id' | 'created_at'>) => void;
+  addEdgeOptimistic: (edge: { parent_post_id: string; child_post_id: string; relation_type: string }) => void;
   deleteEdge: (id: string) => void;
   setSelectedNode: (id: string | null) => void;
   setSelectedEdge: (id: string | null) => void;
@@ -28,6 +31,7 @@ type Store = {
   toggleSoftEdges: () => void;
   setDepth: (depth: 0 | 1 | 2) => void;
   setSelectedNodeId: (id: string | null) => void;
+  setLastCreatedId: (id: string | null) => void;
   fitToView: () => void;
   autoArrange: () => void;
   reset: () => void;
@@ -47,6 +51,7 @@ export const useBrainstormStore = create<Store>((set) => ({
   showSoftEdges: true,
   depth: 0,
   selectedNodeId: null,
+  lastCreatedId: null,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -59,6 +64,20 @@ export const useBrainstormStore = create<Store>((set) => ({
       created_at: new Date().toISOString(),
     };
     set((state) => ({ nodes: [...state.nodes, node] }));
+  },
+
+  addNodeOptimistic: (node) => {
+    const brainstormNode: BrainstormNode = {
+      id: node.id,
+      title: node.title,
+      content: node.content,
+      created_at: node.created_at,
+      emoji: '💡',
+      tags: [],
+      position: { x: 0, y: 0 },
+      author: 'You',
+    };
+    set((state) => ({ nodes: [...state.nodes, brainstormNode] }));
   },
 
   updateNode: (id, updates) => {
@@ -89,6 +108,18 @@ export const useBrainstormStore = create<Store>((set) => ({
     set((state) => ({ edges: [...state.edges, edge] }));
   },
 
+  addEdgeOptimistic: (edge) => {
+    const id = makeId();
+    const brainstormEdge: BrainstormEdge = {
+      id,
+      source: edge.parent_post_id,
+      target: edge.child_post_id,
+      type: edge.relation_type as 'hard' | 'soft',
+      created_at: new Date().toISOString(),
+    };
+    set((state) => ({ edges: [...state.edges, brainstormEdge] }));
+  },
+
   deleteEdge: (id) => {
     set((state) => ({
       edges: state.edges.filter((edge) => edge.id !== id),
@@ -104,6 +135,7 @@ export const useBrainstormStore = create<Store>((set) => ({
   toggleSoftEdges: () => set((state) => ({ showSoftEdges: !state.showSoftEdges })),
   setDepth: (depth) => set({ depth }),
   setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+  setLastCreatedId: (id) => set({ lastCreatedId: id }),
   fitToView: () => {},
   autoArrange: () => {},
 
@@ -119,5 +151,6 @@ export const useBrainstormStore = create<Store>((set) => ({
       showSoftEdges: true,
       depth: 0,
       selectedNodeId: null,
+      lastCreatedId: null,
     }),
 }));
