@@ -58,40 +58,50 @@ function FeedCard({
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="px-2"
     >
-      <GlowCard className="p-4 md:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="text-lg/7 md:text-xl/8 font-semibold text-slate-100">{post.title ?? "Untitled"}</h2>
-          <div className="flex items-center gap-3 text-sm text-slate-300/80">
-            <button onClick={() => likePost(post.id)} className="hover:text-cyan-300 transition">❤️ {post.likes_count ?? 0}</button>
-            <span>👁 {post.views_count ?? 0}</span>
+      <motion.div
+        layout
+        animate={{
+          boxShadow: expanded
+            ? '0 0 25px rgba(72,159,227,0.5), 0 0 60px rgba(103,255,216,0.4)'
+            : '0 0 10px rgba(72,159,227,0.2)',
+        }}
+        transition={{ duration: 0.6 }}
+      >
+        <GlowCard className="p-4 md:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-lg/7 md:text-xl/8 font-semibold text-slate-100">{post.title ?? "Untitled"}</h2>
+            <div className="flex items-center gap-3 text-sm text-slate-300/80">
+              <button onClick={() => likePost(post.id)} className="hover:text-cyan-300 transition">❤️ {post.likes_count ?? 0}</button>
+              <span>👁 {post.views_count ?? 0}</span>
+            </div>
           </div>
-        </div>
 
-        {expanded && post.content && (
-          <p className="mt-3 text-[15px]/7 text-slate-200/90 whitespace-pre-wrap">{post.content}</p>
-        )}
+          {expanded && post.content && (
+            <p className="mt-3 text-[15px]/7 text-slate-200/90 whitespace-pre-wrap">{post.content}</p>
+          )}
 
-        <div className="mt-4 flex items-center gap-2">
-          <button onClick={onToggleExpand} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
-            {expanded ? "Collapse" : "Expand"}
-          </button>
-          <button onClick={onContinue} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
-            Continue
-          </button>
-          <button onClick={onLink} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
-            Link
-          </button>
-        </div>
+          <div className="mt-4 flex items-center gap-2">
+            <button onClick={onToggleExpand} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
+              {expanded ? "Collapse" : "Expand"}
+            </button>
+            <button onClick={onContinue} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
+              Continue
+            </button>
+            <button onClick={onLink} className="rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs hover:bg-white/10">
+              Link
+            </button>
+          </div>
 
-        <div className="mt-4"><HardBar/></div>
-      </GlowCard>
+          <div className="mt-4"><HardBar/></div>
+        </GlowCard>
+      </motion.div>
     </motion.div>
   );
 }
 
 export default function ThreadScroller() {
   const {
-    threadQueue, softLinksForPost, buildFullHardChainFrom, selectById
+    threadQueue, softLinksForPost, buildFullHardChainFrom, selectById, edges
   } = useBrainstormStore();
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -103,7 +113,7 @@ export default function ThreadScroller() {
 
   return (
     <div className="relative z-10 p-0 overflow-hidden">
-      <div ref={scrollerRef} className="h-[70vh] md:h-[76vh] overflow-auto space-y-2">
+      <div ref={scrollerRef} className="h-[70vh] md:h-[76vh] overflow-auto">
         {threadQueue.map((item, idx) => {
           if (item.kind === 'post' && item.post) {
             const p = item.post;
@@ -124,6 +134,47 @@ export default function ThreadScroller() {
                     window.dispatchEvent(new CustomEvent('pb:brainstorm:link', { detail: { sourceId: p.id }}));
                   }}
                 />
+
+                {/* Glowing connector line to next card */}
+                {threadQueue[idx + 1] && (() => {
+                  const nextPost = threadQueue[idx + 1].post;
+                  const isHardLink = edges.find(
+                    (e) =>
+                      e.source === p.id &&
+                      e.target === nextPost?.id &&
+                      e.type === 'hard'
+                  );
+                  const isSoftLink = edges.find(
+                    (e) =>
+                      e.source === p.id &&
+                      e.target === nextPost?.id &&
+                      e.type === 'soft'
+                  );
+
+                  if (isHardLink || isSoftLink) {
+                    return (
+                      <motion.div
+                        key={`link-${p.id}-${nextPost?.id}`}
+                        className="relative mx-auto my-4"
+                        style={{ width: '2px', height: '60px' }}
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                      >
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: isHardLink
+                              ? 'linear-gradient(to bottom, #489FE3, #67FFD8)'
+                              : 'repeating-linear-gradient(to bottom, #67FFD8 0px, #FFC85B 4px, transparent 8px, transparent 12px)',
+                            boxShadow:
+                              '0 0 12px rgba(72,159,227,0.4), 0 0 24px rgba(103,255,216,0.3)',
+                          }}
+                        />
+                      </motion.div>
+                    );
+                  }
+                  return <div className="h-4" />;
+                })()}
                 
                 {isExpanded && chain.length > 1 && (
                   <div className="mt-2 px-4 text-sm text-slate-300/70">
