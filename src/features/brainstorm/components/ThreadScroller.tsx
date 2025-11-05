@@ -5,26 +5,40 @@ import { Badge } from '@/components/ui/badge';
 import { FeedCard } from './FeedCard';
 import { SoftHandoff } from './SoftHandoff';
 import type { PostNode } from '@/types/brainstorm';
-import { formatDistanceToNow } from 'date-fns';
 
 /**
- * ThreadScroller - Infinite feed scrolling hard-link chains with soft handoffs
+ * ThreadScroller - Intelligent infinite feed 
+ * Priority: Hard links → Soft link → Hard links → Soft link → Unseen brainstorms
  */
 export default function ThreadScroller() {
   const {
     threadQueue,
     isFetchingMore,
     selectedNodeId,
+    expandedPostId,
     buildHardChainFrom,
     setThreadQueue,
     loadMoreHardSegment,
     selectById,
+    setExpandedPostId,
     softLinksForSelected,
   } = useBrainstormStore();
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
-  const softLinks = softLinksForSelected();
+
+  // Get soft links for expanded post
+  const softLinks = expandedPostId ? useBrainstormStore.getState().edges
+    .filter((e) => e.type === 'soft' && e.source === expandedPostId)
+    .map((edge) => {
+      const childNode = useBrainstormStore.getState().nodes.find((n) => n.id === edge.target);
+      return {
+        child_post_id: edge.target,
+        child_title: childNode?.title,
+        child_post_type: childNode?.emoji,
+        child_like_count: childNode?.likes_count,
+      };
+    }) : [];
 
   // Initialize thread on mount or when selection changes
   useEffect(() => {
@@ -58,10 +72,15 @@ export default function ThreadScroller() {
     return node.id.startsWith('handoff-');
   };
 
+  const handleCardClick = (nodeId: string) => {
+    // Toggle expanded state
+    setExpandedPostId(expandedPostId === nodeId ? null : nodeId);
+  };
+
   return (
     <div className="relative h-full w-full flex">
-      {/* Soft links panel - Left side */}
-      {softLinks.length > 0 && (
+      {/* Soft links panel - Left side (only when expanded) */}
+      {expandedPostId && softLinks.length > 0 && (
         <div className="absolute left-8 top-0 bottom-0 w-80 py-8 flex flex-col animate-fade-in z-20">
           <div className="flex items-center gap-2 mb-3 px-1">
             <div className="text-xs uppercase tracking-wide text-foreground/80 font-medium">
@@ -74,7 +93,10 @@ export default function ThreadScroller() {
             {softLinks.map((link) => (
               <button
                 key={link.child_post_id}
-                onClick={() => selectById(link.child_post_id)}
+                onClick={() => {
+                  selectById(link.child_post_id);
+                  setExpandedPostId(null);
+                }}
                 className="w-full text-left"
               >
                 <GlassCard className="w-full backdrop-blur-md border-dashed border-accent/40 opacity-80 hover:opacity-100 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] hover:ring-2 hover:ring-accent/40 p-4 cursor-pointer">
@@ -118,7 +140,9 @@ export default function ThreadScroller() {
                 }}
               />
             ) : (
-              <FeedCard key={node.id} node={node} index={i} />
+              <div key={node.id} onClick={() => handleCardClick(node.id)}>
+                <FeedCard node={node} index={i} />
+              </div>
             )
           )}
           {isFetchingMore && (
