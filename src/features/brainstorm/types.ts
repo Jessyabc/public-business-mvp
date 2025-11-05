@@ -7,6 +7,8 @@ export interface BrainstormNode {
   position: { x: number; y: number };
   created_at: string;
   author: string;
+  likes_count?: number;
+  views_count?: number;
 }
 
 export interface BrainstormEdge {

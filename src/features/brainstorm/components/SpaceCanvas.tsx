@@ -6,8 +6,10 @@ import { SpaceAdapter, type BrainstormPost } from '../adapters/spaceAdapter';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { NodeForm } from './NodeForm';
-import { Plus, ArrowRight } from 'lucide-react';
+import { Plus, ArrowRight, Heart, Eye } from 'lucide-react';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
+import { likePost, viewPost } from '../adapters/supabaseAdapter';
+import { toast } from 'sonner';
 
 type Props = {
   /** Optional: start on this post id if provided */
@@ -24,6 +26,7 @@ export default function SpaceCanvas({ startId, className }: Props) {
   const [loading, setLoading] = useState(true);
   const [showNewForm, setShowNewForm] = useState(false);
   const [showContinueForm, setShowContinueForm] = useState(false);
+  const [hasLiked, setHasLiked] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +66,10 @@ export default function SpaceCanvas({ startId, className }: Props) {
     setBackwardNext(pickNext(bwd, nodeId));
     setSoftNeighbors(soft.filter(p => p.id !== nodeId));
     adapter.trackOpen(nodeId).catch(() => {});
+    
+    // Track view
+    viewPost(nodeId).catch(() => {});
+    setHasLiked(false); // Reset like state when viewing new node
   }, [adapter]);
 
   const goForward = useCallback(async () => {
@@ -130,6 +137,21 @@ export default function SpaceCanvas({ startId, className }: Props) {
     if (current?.id) void loadContext(current.id);
   }, [current?.id, loadContext]);
 
+  // Handle like interaction
+  const handleLike = async () => {
+    if (!current?.id || hasLiked) return;
+    
+    try {
+      await likePost(current.id);
+      // Optimistic update
+      setCurrent(prev => prev ? { ...prev, likes_count: (prev.likes_count ?? 0) + 1 } : null);
+      setHasLiked(true);
+      toast.success('Liked!');
+    } catch (err) {
+      toast.error('You must be logged in to like');
+    }
+  };
+
   // ----- rendering helpers
   const CurrentCard = ({ post }: { post: BrainstormPost }) => (
     <GlassCard 
@@ -145,7 +167,7 @@ export default function SpaceCanvas({ startId, className }: Props) {
           <p className="text-white/90 leading-relaxed text-base">{post.content}</p>
         )}
         
-        <div className="flex items-center gap-3 text-sm text-white/60">
+        <div className="flex items-center gap-4 text-sm text-white/70">
           <Badge 
             variant="outline" 
             className="border-white/30 bg-white/10 text-white/90 backdrop-blur-sm hover:bg-white/15 transition-colors"
@@ -153,6 +175,27 @@ export default function SpaceCanvas({ startId, className }: Props) {
             Brainstorm
           </Badge>
           <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+          
+          {/* Interaction counters */}
+          <div className="flex items-center gap-3 ml-auto">
+            <button
+              onClick={handleLike}
+              disabled={hasLiked}
+              className={cn(
+                "flex items-center gap-1.5 transition-colors",
+                hasLiked 
+                  ? "text-red-400 cursor-not-allowed" 
+                  : "hover:text-red-300 cursor-pointer"
+              )}
+            >
+              <Heart className={cn("w-4 h-4", hasLiked && "fill-current")} />
+              <span className="text-xs">{post.likes_count ?? 0}</span>
+            </button>
+            <div className="flex items-center gap-1.5 text-white/60">
+              <Eye className="w-4 h-4" />
+              <span className="text-xs">{post.views_count ?? 0}</span>
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center gap-2 pt-2">

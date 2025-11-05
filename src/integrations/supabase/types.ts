@@ -771,6 +771,59 @@ export type Database = {
         }
         Relationships: []
       }
+      post_interactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          kind: string
+          post_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          kind: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          kind?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_interactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "business_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_interactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "my_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_interactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_interactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "public_posts_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_relations: {
         Row: {
           child_post_id: string
@@ -1652,8 +1705,8 @@ export type Database = {
       }
       hash_ip: { Args: { ip_address: string }; Returns: string }
       increment_post_comments: { Args: { post_id: string }; Returns: undefined }
-      increment_post_likes: { Args: { post_id: string }; Returns: undefined }
-      increment_post_views: { Args: { post_id: string }; Returns: undefined }
+      increment_post_likes: { Args: { p_post_id: string }; Returns: undefined }
+      increment_post_views: { Args: { p_post_id: string }; Returns: undefined }
       invite_to_org: {
         Args: { p_role?: string; p_target_org: string; p_target_user: string }
         Returns: undefined

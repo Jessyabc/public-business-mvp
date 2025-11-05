@@ -4,7 +4,9 @@ import {
   rpcListBrainstormEdgesForNodes,
   rpcSpaceChainHard,
   rpcListRecentPublicPosts,
-  rpcCreateSoftLinks
+  rpcCreateSoftLinks,
+  rpcIncrementPostViews,
+  rpcIncrementPostLikes
 } from '@/integrations/supabase/rpc';
 import { BrainstormNode, BrainstormEdge } from '../types';
 import { TABLES, BRAINSTORM_FILTERS } from '@/adapters/constants';
@@ -29,7 +31,9 @@ export class BrainstormSupabaseAdapter {
         tags: (post.metadata as any)?.tags || [],
         position: (post.metadata as any)?.position || { x: Math.random() * 400, y: Math.random() * 300 },
         created_at: post.created_at,
-        author: post.display_name || 'Anonymous'
+        author: post.display_name || 'Anonymous',
+        likes_count: post.likes_count ?? 0,
+        views_count: post.views_count ?? 0
       }));
     } catch (err) {
       console.warn(`Failed to load brainstorm nodes:`, err);
@@ -374,5 +378,25 @@ export async function createSoftLinks(parentId: string, childIds: string[]) {
   } catch (err) {
     console.error('Failed to create soft links:', err);
     return [];
+  }
+}
+
+export async function likePost(postId: string) {
+  try {
+    const { error } = await rpcIncrementPostLikes(postId);
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to like post:', err);
+    throw err;
+  }
+}
+
+export async function viewPost(postId: string) {
+  try {
+    const { error } = await rpcIncrementPostViews(postId);
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to track view:', err);
+    // Don't throw for views - fail silently
   }
 }

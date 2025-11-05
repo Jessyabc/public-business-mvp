@@ -332,7 +332,7 @@ export function useBrainstormInteractions(brainstormId: string) {
         if (error) throw error;
         
         // Increment post like count
-        await supabase.rpc('increment_post_likes', { post_id: brainstormId });
+        await supabase.rpc('increment_post_likes', { p_post_id: brainstormId });
         
         setIsLiked(true);
       }

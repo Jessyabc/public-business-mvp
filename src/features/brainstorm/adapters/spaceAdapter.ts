@@ -6,6 +6,8 @@ export type BrainstormPost = {
   content: string | null;
   user_id: string | null;
   created_at: string;
+  likes_count?: number;
+  views_count?: number;
 };
 
 export type LinkCount = { id: string; link_count: number };
@@ -16,7 +18,7 @@ export class SpaceAdapter {
     // Use direct query for now since RPC functions aren't available
     const { data, error } = await supabase
       .from('posts')
-      .select('id, title, content, user_id, created_at')
+      .select('id, title, content, user_id, created_at, likes_count, views_count')
       .limit(limit)
       .order('created_at', { ascending: false });
     
@@ -44,7 +46,7 @@ export class SpaceAdapter {
   async latestHard(startId: string): Promise<BrainstormPost | null> {
     const { data, error } = await supabase
       .from('posts')
-      .select('id, title, content, user_id, created_at')
+      .select('id, title, content, user_id, created_at, likes_count, views_count')
       .eq('id', startId)
       .single();
       

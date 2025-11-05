@@ -100,3 +100,11 @@ export async function rpcCreateSoftLinks(p_parent: string, p_children: string[])
     p_children
   });
 }
+
+export async function rpcIncrementPostViews(p_post_id: string) {
+  return supabase.rpc("increment_post_views", { p_post_id });
+}
+
+export async function rpcIncrementPostLikes(p_post_id: string) {
+  return supabase.rpc("increment_post_likes", { p_post_id });
+}

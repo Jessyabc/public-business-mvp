@@ -32,6 +32,8 @@ type Store = {
   setDepth: (depth: 0 | 1 | 2) => void;
   setSelectedNodeId: (id: string | null) => void;
   setLastCreatedId: (id: string | null) => void;
+  likeNode: (id: string) => void;
+  viewNode: (id: string) => void;
   fitToView: () => void;
   autoArrange: () => void;
   reset: () => void;
@@ -136,6 +138,27 @@ export const useBrainstormStore = create<Store>((set) => ({
   setDepth: (depth) => set({ depth }),
   setSelectedNodeId: (id) => set({ selectedNodeId: id }),
   setLastCreatedId: (id) => set({ lastCreatedId: id }),
+  
+  likeNode: (id) => {
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === id
+          ? { ...node, likes_count: (node.likes_count ?? 0) + 1 }
+          : node
+      ),
+    }));
+  },
+
+  viewNode: (id) => {
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === id
+          ? { ...node, views_count: (node.views_count ?? 0) + 1 }
+          : node
+      ),
+    }));
+  },
+
   fitToView: () => {},
   autoArrange: () => {},
 
