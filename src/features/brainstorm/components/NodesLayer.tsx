@@ -1,4 +1,4 @@
-import React from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { BasePost } from '../types';
 import { GlassCard } from '@/ui/components/GlassCard';
 import { Badge } from '@/components/ui/badge';
@@ -10,9 +10,52 @@ type Props = {
   onHover: (id: string | null) => void;
   selectedId?: string;
   hoveredId?: string;
+  onAnchorUpdate?: (getAnchor: (id: string) => { x: number; y: number } | null) => void;
 };
 
-export function NodesLayer({ posts, onSelect, onHover, selectedId, hoveredId }: Props) {
+export function NodesLayer({ posts, onSelect, onHover, selectedId, hoveredId, onAnchorUpdate }: Props) {
+  const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const getNodeAnchor = useCallback((id: string): { x: number; y: number } | null => {
+    const nodeElement = nodeRefs.current.get(id);
+    if (!nodeElement) return null;
+
+    const rect = nodeElement.getBoundingClientRect();
+    const containerRect = nodeElement.parentElement?.getBoundingClientRect();
+    if (!containerRect) return null;
+
+    // Calculate center-bottom of the card relative to container
+    const x = rect.left - containerRect.left + rect.width / 2;
+    const y = rect.top - containerRect.top + rect.height;
+
+    return { x, y };
+  }, []);
+
+  // Update anchor callback when it changes
+  useEffect(() => {
+    if (onAnchorUpdate) {
+      onAnchorUpdate(getNodeAnchor);
+    }
+  }, [getNodeAnchor, onAnchorUpdate]);
+
+  // Recalculate anchors when posts change or on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (onAnchorUpdate) {
+        // Small delay to ensure DOM has updated
+        setTimeout(() => {
+          onAnchorUpdate(getNodeAnchor);
+        }, 0);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial calculation
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [posts, getNodeAnchor, onAnchorUpdate]);
   const getPostTypeLabel = (type: BasePost['type']): string => {
     const labels: Record<BasePost['type'], string> = {
       spark: 'Spark',
@@ -40,8 +83,16 @@ export function NodesLayer({ posts, onSelect, onHover, selectedId, hoveredId }: 
     return cn(baseRing, ringWidth);
   };
 
+  if (posts.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <p>No posts to display</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-row gap-6 p-6 overflow-x-auto">
+    <div className="flex flex-row gap-6 p-6 overflow-x-auto h-full">
       {posts.map((post) => {
         const isSelected = selectedId === post.id;
         const isHovered = hoveredId === post.id;
@@ -49,6 +100,13 @@ export function NodesLayer({ posts, onSelect, onHover, selectedId, hoveredId }: 
         return (
           <div
             key={post.id}
+            ref={(el) => {
+              if (el) {
+                nodeRefs.current.set(post.id, el);
+              } else {
+                nodeRefs.current.delete(post.id);
+              }
+            }}
             onMouseEnter={() => onHover(post.id)}
             onMouseLeave={() => onHover(null)}
             onClick={() => onSelect(post.id)}
