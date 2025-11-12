@@ -6,6 +6,8 @@ import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { RefreshCcw } from 'lucide-react';
 import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
+import { BrainstormCanvasShell } from '@/features/brainstorm/BrainstormCanvasShell';
+import { convertFeedPostToUniversal } from '@/features/brainstorm/utils/postConverter';
 
 export default function BrainstormFeed() {
   const [composerOpen, setComposerOpen] = useState(false);
@@ -55,7 +57,25 @@ export default function BrainstormFeed() {
 
       <div className="grid grid-cols-[70%_30%] gap-0 h-screen">
         <section className="relative overflow-hidden p-4 md:p-6">
-          <FeedContainer mode="public" initialKinds={['brainstorm']} />
+          <FeedContainer 
+            mode="public" 
+            initialKinds={['brainstorm']}
+            renderFeed={(items, feed) => {
+              // Convert feed posts to Universal Post Model format
+              const universalPosts = items.map(convertFeedPostToUniversal);
+              
+              return (
+                <div className="h-full">
+                  <BrainstormCanvasShell posts={universalPosts} className="h-full" />
+                  {feed.loading && (
+                    <div className="text-center py-4 text-muted-foreground">
+                      Loading more posts...
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
         </section>
         <aside className="border-l border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden">
           <RightSidebar variant="feed" />
