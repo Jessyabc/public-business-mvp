@@ -25,9 +25,11 @@ export function convertFeedPostToUniversal(feedPost: FeedBasePost): UniversalBas
     utility: feedPost.metrics?.u_score ?? undefined,
   };
 
-  // Convert privacy
+  // Convert privacy: 'org' maps to 'private' since org-level posts are not publicly visible
   const privacy: 'public' | 'private' = 
-    feedPost.privacy === 'private' ? 'private' : 'public';
+    feedPost.privacy === 'private' || feedPost.privacy === 'org' 
+      ? 'private' 
+      : 'public';
 
   return {
     id: feedPost.id,
