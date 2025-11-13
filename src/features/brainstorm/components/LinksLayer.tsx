@@ -33,10 +33,9 @@ export function LinksLayer({ links, getNodeAnchor, containerWidth, containerHeig
 
   return (
     <svg
-      className="absolute inset-0 pointer-events-none"
+      className="absolute inset-0 pointer-events-none z-0"
       width={containerWidth}
       height={containerHeight}
-      style={{ zIndex: 1 }}
     >
       {links.map((link) => {
         const sourceAnchor = getNodeAnchor(link.source_post_id);

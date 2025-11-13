@@ -92,7 +92,7 @@ export function NodesLayer({ posts, onSelect, onHover, selectedId, hoveredId, on
   }
 
   return (
-    <div className="flex flex-row gap-6 p-6 overflow-x-auto h-full">
+    <div className="relative z-10 flex flex-row gap-6 p-6 overflow-x-auto h-full">
       {posts.map((post) => {
         const isSelected = selectedId === post.id;
         const isHovered = hoveredId === post.id;

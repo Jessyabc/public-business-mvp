@@ -35,13 +35,13 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading }:
 
   return (
     <>
-      <div>
+      <div className="space-y-4">
         {items.map((item) => (
           <FeedItemAdapter key={item.id} post={item} />
         ))}
       </div>
       {loading ? (
-        <div style={{ padding: '1rem', textAlign: 'center' }}>Loading...</div>
+        <div className="py-4 text-center text-muted-foreground">Loading...</div>
       ) : null}
       <div ref={sentinelRef} style={{ height: '1px' }} />
     </>
