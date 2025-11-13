@@ -6,8 +6,7 @@ import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { RefreshCcw } from 'lucide-react';
 import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
-import { BrainstormCanvasShell } from '@/features/brainstorm/BrainstormCanvasShell';
-import { convertFeedPostToUniversal } from '@/features/brainstorm/utils/postConverter';
+import { BrainstormFeedRenderer } from '@/features/brainstorm/components/BrainstormFeedRenderer';
 
 export default function BrainstormFeed() {
   const [composerOpen, setComposerOpen] = useState(false);
@@ -45,38 +44,27 @@ export default function BrainstormFeed() {
       <GlobalBackground />
       <GlowDefs />
 
-      {/* Refresh - reserved for future use */}
-      <div className="absolute z-20 left-4 top-3 flex items-center gap-2">
-        <button
-          onClick={() => window.location.reload()}
-          className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10"
-        >
-          <RefreshCcw size={16}/> Refresh
-        </button>
-      </div>
-
       <div className="grid grid-cols-[70%_30%] gap-0 h-screen">
-        <section className="relative overflow-hidden p-4 md:p-6">
-          <FeedContainer 
-            mode="public" 
-            initialKinds={['brainstorm']}
-            renderFeed={(items, feed) => {
-              // Convert feed posts to Universal Post Model format
-              const universalPosts = items.map(convertFeedPostToUniversal);
-              
-              return (
-                <div className="h-full">
-                  <BrainstormCanvasShell posts={universalPosts} className="h-full" />
-                  {feed.loading && (
-                    <div className="text-center py-4 text-muted-foreground">
-                      Loading more posts...
-                    </div>
-                  )}
-                </div>
-              );
-            }}
-          />
-        </section>
+      <section className="relative overflow-hidden p-4 md:p-6">
+        <FeedContainer 
+          mode="public" 
+          initialKinds={['brainstorm']}
+          renderFeed={(items, feed) => (
+            <>
+              <div className="mb-4 flex items-center gap-2">
+                <button
+                  onClick={feed.refresh}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10"
+                >
+                  <RefreshCcw size={16}/> Refresh
+                </button>
+              </div>
+              <BrainstormFeedRenderer items={items} loading={feed.loading} />
+            </>
+          )}
+        />
+      </section>
+
         <aside className="border-l border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden">
           <RightSidebar variant="feed" />
         </aside>
