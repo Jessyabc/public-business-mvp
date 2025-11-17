@@ -145,7 +145,9 @@ export default function BrainstormDetail() {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold mb-3">{sanitizeText(brainstorm.title)}</h1>
+              <h1 className="text-2xl font-bold mb-3">
+                {sanitizeText(brainstorm.title ?? 'Untitled brainstorm')}
+              </h1>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <User className="w-4 h-4" />
                 <span>{brainstorm.author_display_name}</span>

@@ -25,8 +25,6 @@ export default function BrainstormNew() {
     try {
       await createBrainstorm(data);
       navigate('/brainstorms');
-    } catch (error) {
-      throw error; // Let the form handle the error
     } finally {
       setIsSubmitting(false);
     }
