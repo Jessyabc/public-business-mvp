@@ -1,20 +1,15 @@
+@import "./styles/glass-tiers.css";
+@import "./styles/reduced-motion.css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@400;500;600;700;800;900&display=swap');
+
 /* ========================================
    Design System Entry Point
    ======================================== */
 
-/* Tailwind must come first */
+/* Tailwind directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Custom glass tier effects */
-@import "./styles/glass-tiers.css";
-
-/* Reduced motion support */
-@import "./styles/reduced-motion.css";
-
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@400;500;600;700;800;900&display=swap');
 
 /* ========================================
    Typography System (Raleway Roles)
