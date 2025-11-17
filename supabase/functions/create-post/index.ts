@@ -88,7 +88,7 @@ serve(async (req) => {
     }
 
     // Validate parent for continuation posts
-    if (rules.parentRequired && !parent_post_id) {
+    if ('parentRequired' in rules && rules.parentRequired && !parent_post_id) {
       return new Response(
         JSON.stringify({ error: 'Parent post ID is required for continuation posts' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -96,7 +96,7 @@ serve(async (req) => {
     }
 
     // Validate media for video posts
-    if (rules.mediaRequired && !media_url) {
+    if ('mediaRequired' in rules && rules.mediaRequired && !media_url) {
       return new Response(
         JSON.stringify({ error: 'Media URL is required for video posts' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
