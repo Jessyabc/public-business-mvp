@@ -13,29 +13,63 @@ export type PostMode = typeof POST_MODES[number];
 export const POST_STATUSES = ['active', 'archived', 'deleted'] as const;
 export type PostStatus = typeof POST_STATUSES[number];
 
+export const POST_RELATION_TYPES = ['hard', 'soft', 'biz_in', 'biz_out'] as const;
+export type PostRelationType = typeof POST_RELATION_TYPES[number];
+
+export type PostMetadata = Record<string, unknown> | null;
+
 export interface Post {
   id: string;
   user_id: string;
   title?: string | null;
   content: string;
   body?: string | null;
-  kind?: PostKind;
   type: PostType;
+  kind: PostKind;
   visibility: PostVisibility;
   mode: PostMode;
+  status: PostStatus;
   org_id?: string | null;
   industry_id?: string | null;
   department_id?: string | null;
-  metadata?: Record<string, any>;
+  metadata: PostMetadata;
   likes_count: number;
   comments_count: number;
   views_count: number;
   t_score?: number | null;
   u_score?: number | null;
-  status: PostStatus;
   published_at?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export type PostInsertPayload = {
+  user_id: string;
+  content: string;
+  type: PostType;
+  mode: PostMode;
+  title?: string | null;
+  body?: string | null;
+  kind?: PostKind;
+  visibility?: PostVisibility;
+  status?: PostStatus;
+  org_id?: string | null;
+  industry_id?: string | null;
+  department_id?: string | null;
+  metadata?: PostMetadata;
+  t_score?: number | null;
+  u_score?: number | null;
+  published_at?: string | null;
+};
+
+export type PostUpdatePayload = Partial<Omit<PostInsertPayload, 'user_id'>>;
+
+export interface PostRelation {
+  id: string;
+  parent_post_id: string;
+  child_post_id: string;
+  relation_type: PostRelationType;
+  created_at: string;
 }
 
 export function isValidPostType(value: unknown): value is PostType {
@@ -52,4 +86,12 @@ export function isValidPostMode(value: unknown): value is PostMode {
 
 export function isValidPostKind(value: unknown): value is PostKind {
   return typeof value === 'string' && POST_KINDS.includes(value as PostKind);
+}
+
+export function isValidPostStatus(value: unknown): value is PostStatus {
+  return typeof value === 'string' && POST_STATUSES.includes(value as PostStatus);
+}
+
+export function isValidPostRelationType(value: unknown): value is PostRelationType {
+  return typeof value === 'string' && POST_RELATION_TYPES.includes(value as PostRelationType);
 }
