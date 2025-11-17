@@ -1,14 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-
-export type BrainstormPost = {
-  id: string;
-  title: string | null;
-  content: string | null;
-  user_id: string | null;
-  created_at: string;
-  likes_count?: number;
-  views_count?: number;
-};
+import type { BrainstormPost } from '../types';
 
 export type LinkCount = { id: string; link_count: number };
 
@@ -23,7 +14,15 @@ export class SpaceAdapter {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return (data ?? []) as BrainstormPost[];
+    return (data ?? []).map((post) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      user_id: post.user_id,
+      created_at: post.created_at,
+      likes_count: post.likes_count ?? 0,
+      views_count: post.views_count ?? 0,
+    }));
   }
 
   /** Follow HARD chain forward/backward from a given node */
@@ -51,7 +50,15 @@ export class SpaceAdapter {
       .single();
       
     if (error) return null;
-    return data as BrainstormPost;
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      user_id: data.user_id,
+      created_at: data.created_at,
+      likes_count: data.likes_count ?? 0,
+      views_count: data.views_count ?? 0,
+    };
   }
 
   /** Link counts for a set of post ids (for UI badges) */
