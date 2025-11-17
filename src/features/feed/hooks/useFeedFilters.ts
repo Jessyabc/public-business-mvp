@@ -8,7 +8,9 @@ export type FeedFilters = {
 };
 
 export function useFeedFilters(initial?: Partial<FeedFilters>) {
-  const [kinds, setKinds] = useState<PostKind[]>(initial?.kinds ?? ['open_idea','brainstorm','business_insight']);
+  const [kinds, setKinds] = useState<PostKind[]>(
+    initial?.kinds ?? ['brainstorm','spark','business_insight']
+  );
   const [sort, setSort] = useState<FeedFilters['sort']>(initial?.sort ?? 'new');
   const [search, setSearch] = useState<string | null>(initial?.search ?? null);
 

@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
-import { FeedContainer } from '@/features/feed/FeedContainer';
-import { RightSidebar } from '@/components/layout/RightSidebar';
 import { GlowDefs } from '@/components/graphics/GlowDefs';
-import { RefreshCcw } from 'lucide-react';
+import { RightSidebar } from '@/components/layout/RightSidebar';
+import { FeedContainer } from '@/features/feed/FeedContainer';
 import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
 import { BrainstormFeedRenderer } from '@/features/brainstorm/components/BrainstormFeedRenderer';
+import { BrainstormLayoutShell } from '@/features/brainstorm/components/BrainstormLayoutShell';
+import { LastSeenFeed } from '@/features/brainstorm/components/LastSeenFeed';
+import { CrossLinksFeed } from '@/features/brainstorm/components/CrossLinksFeed';
 
+/**
+ * BrainstormFeed stitches together the 3-column Brainstorm layout:
+ * - Left: last seen history
+ * - Center: canonical FeedContainer + canvas
+ * - Right: cross-links and sidebar tabs
+ */
 export default function BrainstormFeed() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerMode, setComposerMode] = useState<'root' | 'continue'>('root');
@@ -40,35 +48,42 @@ export default function BrainstormFeed() {
   }, []);
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
+    <main className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       <GlobalBackground />
       <GlowDefs />
 
-      <div className="grid grid-cols-[70%_30%] gap-0 h-screen">
-      <section className="relative overflow-hidden p-4 md:p-6">
-        <FeedContainer 
-          mode="public" 
-          initialKinds={['brainstorm']}
-          renderFeed={(items, feed) => (
-            <>
-              <div className="mb-4 flex items-center gap-2">
-                <button
-                  onClick={feed.refresh}
-                  className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10"
-                >
-                  <RefreshCcw size={16}/> Refresh
-                </button>
+      <BrainstormLayoutShell
+        leftColumn={
+          <div className="flex h-full flex-col gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-primary/70">History</p>
+              <h3 className="text-lg font-semibold text-white">Last seen</h3>
+            </div>
+            <LastSeenFeed />
+          </div>
+        }
+        centerColumn={
+          <FeedContainer
+            mode="brainstorm_main"
+            initialKinds={['brainstorm','spark','business_insight']}
+            renderFeed={(items, feed) => (
+              <BrainstormFeedRenderer items={items} loading={feed.loading} onRefresh={feed.refresh} />
+            )}
+          />
+        }
+        rightColumn={
+          <div className="flex h-full flex-col gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4">
+              <div className="mb-3">
+                <p className="text-xs uppercase tracking-wide text-primary/70">Network</p>
+                <h3 className="text-lg font-semibold text-white">Cross-links</h3>
               </div>
-              <BrainstormFeedRenderer items={items} loading={feed.loading} />
-            </>
-          )}
-        />
-      </section>
-
-        <aside className="border-l border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden">
-          <RightSidebar variant="feed" />
-        </aside>
-      </div>
+              <CrossLinksFeed />
+            </div>
+            <RightSidebar variant="feed" />
+          </div>
+        }
+      />
 
       {/* NodeForm Modal */}
       <NodeForm

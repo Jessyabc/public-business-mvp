@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { NodesLayer } from './components/NodesLayer';
 import { LinksLayer } from './components/LinksLayer';
 import { NavHUD } from './components/NavHUD';
-import { useNodeInteraction } from './hooks/useNodeInteraction';
 import { BasePost, PostLink } from './types';
 import { cn } from '@/lib/utils';
 
@@ -12,20 +11,24 @@ type Props = {
   /** Optional: links to display. If not provided, uses mock data */
   links?: PostLink[];
   className?: string;
+  selectedId?: string | null;
+  breadcrumbPath?: BasePost[];
+  onSelect?: (post: BasePost) => void;
+  onNavigateBreadcrumb?: (index: number) => void;
+  onClearBreadcrumbs?: () => void;
 };
 
-export function BrainstormCanvasShell({ posts: providedPosts, links: providedLinks, className }: Props) {
-  // Milestone 5: Use interaction hook for hover/select/breadcrumb management
-  const {
-    hoveredId,
-    selectedId,
-    breadcrumbPath,
-    handleHover,
-    handleSelect: handleSelectFromHook,
-    navigateToBreadcrumb,
-    clearBreadcrumb,
-  } = useNodeInteraction();
-
+export function BrainstormCanvasShell({
+  posts: providedPosts,
+  links: providedLinks,
+  className,
+  selectedId,
+  breadcrumbPath = [],
+  onSelect,
+  onNavigateBreadcrumb,
+  onClearBreadcrumbs,
+}: Props) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [getNodeAnchor, setGetNodeAnchor] = useState<((id: string) => { x: number; y: number } | null) | null>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -117,14 +120,13 @@ export function BrainstormCanvasShell({ posts: providedPosts, links: providedLin
   const postsToDisplay = providedPosts && providedPosts.length > 0 ? providedPosts : mockPosts;
   const linksToDisplay = providedLinks && providedLinks.length > 0 ? providedLinks : mockLinks;
 
-  // Enhanced select handler that includes post data for breadcrumb
+  // Enhanced select handler that notifies parent
   const handleSelectWithPost = useCallback((id: string) => {
     const post = postsToDisplay.find((p) => p.id === id);
-    if (post) {
-      handleSelectFromHook(id, post);
-      console.log('Selected post:', id);
+    if (post && onSelect) {
+      onSelect(post);
     }
-  }, [postsToDisplay, handleSelectFromHook]);
+  }, [postsToDisplay, onSelect]);
 
   // Update container size on mount and resize
   useEffect(() => {
@@ -153,12 +155,12 @@ export function BrainstormCanvasShell({ posts: providedPosts, links: providedLin
       ) : (
         <>
           {/* Milestone 5: NavHUD for breadcrumb navigation */}
-          <NavHUD
-            breadcrumbPath={breadcrumbPath}
-            onNavigateToBreadcrumb={navigateToBreadcrumb}
-            onClear={clearBreadcrumb}
-            selectedId={selectedId}
-          />
+            <NavHUD
+              breadcrumbPath={breadcrumbPath}
+              onNavigateToBreadcrumb={onNavigateBreadcrumb ?? (() => {})}
+              onClear={onClearBreadcrumbs ?? (() => {})}
+              selectedId={selectedId ?? undefined}
+            />
           
           {/* Links layer rendered beneath nodes */}
           {getNodeAnchor && containerSize.width > 0 && containerSize.height > 0 && (
@@ -173,8 +175,8 @@ export function BrainstormCanvasShell({ posts: providedPosts, links: providedLin
           <NodesLayer
             posts={postsToDisplay}
             onSelect={handleSelectWithPost}
-            onHover={handleHover}
-            selectedId={selectedId}
+              onHover={setHoveredId}
+              selectedId={selectedId ?? undefined}
             hoveredId={hoveredId}
             onAnchorUpdate={handleAnchorUpdate}
           />
