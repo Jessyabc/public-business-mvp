@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { BrainstormPost } from '../types';
+import type { BrainstormPost } from '../postTypes';
 
 export type LinkCount = { id: string; link_count: number };
 

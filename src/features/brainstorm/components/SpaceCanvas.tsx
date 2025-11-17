@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GlassCard } from '@/ui/components/GlassCard';
 import { SpaceAdapter } from '../adapters/spaceAdapter';
-import type { BrainstormPost } from '../types';
+import type { BrainstormPost } from '../postTypes';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { NodeForm } from './NodeForm';
