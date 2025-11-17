@@ -1,16 +1,19 @@
-import type { BasePost, PostRelationType } from '@/types/post';
-
 // New shared types for brainstorm posts
-export type PostNode = {
-  id: BasePost['id'];
-} & Partial<
-  Pick<BasePost, 'title' | 'content' | 'created_at' | 'likes_count' | 'views_count' | 'kind' | 'type'>
->;
+export interface PostNode {
+  id: string;
+  title?: string;
+  content?: string;
+  created_at?: string;
+  likes_count?: number;
+  views_count?: number;
+  kind?: string;
+  type?: string;
+}
 
 export interface PostEdge {
   parent_post_id: string;
   child_post_id: string;
-  relation_type: Extract<PostRelationType, 'hard' | 'soft'>;
+  relation_type: 'hard' | 'soft';
 }
 
 // Legacy types for compatibility

@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { Handle, Position, Node } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { Post } from '@/types/post';
+import { Post } from '@/hooks/usePosts';
 import { Brain, MessageCircle, Clock, ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 

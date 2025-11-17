@@ -24,9 +24,7 @@ export function BrainstormCard({ brainstorm, stats, onClick, className }: Brains
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg truncate">
-                {sanitizeText(brainstorm.title ?? 'Untitled brainstorm')}
-              </h3>
+            <h3 className="font-semibold text-lg truncate">{sanitizeText(brainstorm.title)}</h3>
             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
               <User className="w-4 h-4" />
               <span className="truncate">{brainstorm.author_display_name}</span>

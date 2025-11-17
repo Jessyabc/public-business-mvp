@@ -19,7 +19,26 @@ export function CreateBusiness() {
   const navigate = useNavigate();
   const { industries, departments } = useBusinessProfile();
   const { isAdmin } = useUserRoles();
-  const isAdminUser = isAdmin();
+
+  // Only admins can access this page
+  if (!isAdmin()) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
+            <p className="text-muted-foreground mb-4">
+              This page is only accessible to administrators. Business membership is now invite-only.
+            </p>
+            <Button onClick={() => navigate('/')}>
+              Return Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,26 +60,6 @@ export function CreateBusiness() {
     '501-1000 employees',
     '1000+ employees'
   ];
-
-  // Only admins can access this page
-  if (!isAdminUser) {
-    return (
-      <div className="container mx-auto p-6 max-w-2xl">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
-            <p className="text-muted-foreground mb-4">
-              This page is only accessible to administrators. Business membership is now invite-only.
-            </p>
-            <Button onClick={() => navigate('/')}>
-              Return Home
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

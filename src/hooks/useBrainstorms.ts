@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import type { BasePost } from '@/types/post';
 
-export interface Brainstorm
-  extends Pick<
-    BasePost,
-    'id' | 'title' | 'content' | 'user_id' | 'visibility' | 'created_at' | 'likes_count' | 'comments_count'
-  > {
+export interface Brainstorm {
+  id: string;
+  title: string;
+  content: string;
+  user_id: string;
   author_user_id?: string; // alias for compatibility
   author_display_name?: string;
+  visibility: string;
   is_public: boolean; // computed from visibility
+  created_at: string;
+  likes_count: number;
+  comments_count: number;
 }
 
 export interface BrainstormStats {
