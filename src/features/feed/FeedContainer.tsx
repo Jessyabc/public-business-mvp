@@ -1,35 +1,100 @@
 import * as React from 'react';
+import { BasePost, PostKind } from '@/types/post';
+import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
 import { useUniversalFeed } from './hooks/useUniversalFeed';
 import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
 
+type BrainstormFeedMode =
+  | 'brainstorm_main'
+  | 'brainstorm_open_ideas'
+  | 'brainstorm_cross_links'
+  | 'brainstorm_last_seen';
+
 type Props = {
-  mode: 'public' | 'business';
-  orgId?: string | null;
-  initialKinds?: ('open_idea' | 'brainstorm' | 'business_insight')[];
+  mode: BrainstormFeedMode;
+  activePostId?: string | null;
+  initialKinds?: PostKind[];
+  onItemsChange?: (items: BasePost[]) => void;
   /** Optional: render function to customize the feed display */
-  renderFeed?: (items: ReturnType<typeof useUniversalFeed>['items'], feed: ReturnType<typeof useUniversalFeed>) => React.ReactNode;
+  renderFeed?: (items: BasePost[], feed: ReturnType<typeof useUniversalFeed>) => React.ReactNode;
 };
 
-export function FeedContainer({ mode, orgId = null, initialKinds, renderFeed }: Props) {
-  const filters = useFeedFilters({ kinds: initialKinds });
+const DEFAULT_MAIN_KINDS: PostKind[] = ['brainstorm','spark','business_insight'];
+
+/**
+ * FeedContainer now powers the Brainstorm layout columns via specialized modes:
+ * - brainstorm_main: canonical public feed + filters
+ * - brainstorm_last_seen: local history store
+ * - brainstorm_cross_links: relation-driven feed
+ * - brainstorm_open_ideas: spark-only list for the sidebar
+ */
+
+export function FeedContainer({
+  mode,
+  activePostId = null,
+  initialKinds,
+  onItemsChange,
+  renderFeed,
+}: Props) {
+  const lastSeen = useBrainstormExperienceStore((state) => state.lastSeen);
+  const resolvedKinds =
+    initialKinds ??
+    (mode === 'brainstorm_open_ideas'
+      ? ['open_idea']
+      : DEFAULT_MAIN_KINDS);
+
+  const filters = useFeedFilters({ kinds: resolvedKinds });
+
+  React.useEffect(() => {
+    if (mode !== 'brainstorm_last_seen') return;
+    onItemsChange?.(lastSeen);
+  }, [mode, lastSeen, onItemsChange]);
+
   const feed = useUniversalFeed({
     mode,
-    kinds: filters.kinds,
-    sort: filters.sort,
-    search: filters.search,
-    org_id: mode === 'business' ? orgId ?? null : null,
+    kinds: mode === 'brainstorm_main' ? filters.kinds : resolvedKinds,
+    sort: mode === 'brainstorm_main' ? filters.sort : undefined,
+    search: mode === 'brainstorm_main' ? filters.search : undefined,
+    activePostId,
     pageSize: 20,
   });
 
-  // If custom render function provided, use it
+  React.useEffect(() => {
+    if (mode === 'brainstorm_last_seen') return;
+    onItemsChange?.(feed.items);
+  }, [mode, feed.items, onItemsChange]);
+
+  if (mode === 'brainstorm_last_seen') {
+    const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
+      items: lastSeen,
+      loadMore: () => {},
+      loading: false,
+      eof: true,
+      refresh: () => {},
+    };
+
+    if (renderFeed) {
+      return <>{renderFeed(lastSeen, syntheticFeed)}</>;
+    }
+
+    return (
+      <div style={{ flex: 1 }}>
+        <FeedList
+          items={syntheticFeed.items}
+          onEndReached={syntheticFeed.loadMore}
+          loading={syntheticFeed.loading}
+        />
+      </div>
+    );
+  }
+
   if (renderFeed) {
     return <>{renderFeed(feed.items, feed)}</>;
   }
 
   return (
     <div style={{ flex: 1 }}>
-      {/* reserved: future filter bar / pulses / breadcrumbs */}
       <FeedList
         items={feed.items}
         onEndReached={feed.loadMore}

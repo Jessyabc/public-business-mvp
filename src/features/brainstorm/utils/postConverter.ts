@@ -7,13 +7,18 @@ import { BasePost as UniversalBasePost, PostType, PostMode, BaseMetrics } from '
 export function convertFeedPostToUniversal(feedPost: FeedBasePost): UniversalBasePost {
   // Map kind to type
   const typeMap: Record<FeedBasePost['kind'], PostType> = {
-    'open_idea': 'spark',
-    'brainstorm': 'brainstorm',
-    'business_insight': 'insight',
+    open_idea: 'spark',
+    brainstorm: 'brainstorm',
+    spark: 'spark',
+    business_insight: 'insight',
+    insight: 'insight',
   };
 
   // Determine mode based on kind
-  const mode: PostMode = feedPost.kind === 'business_insight' ? 'business' : 'public';
+  const mode: PostMode =
+    feedPost.kind === 'business_insight' || feedPost.kind === 'insight'
+      ? 'business'
+      : 'public';
 
   // Convert metrics
   const metrics: BaseMetrics = {

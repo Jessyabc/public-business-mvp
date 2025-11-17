@@ -1,4 +1,9 @@
-export type PostKind = 'open_idea' | 'brainstorm' | 'business_insight';
+export type PostKind =
+  | 'open_idea'
+  | 'brainstorm'
+  | 'spark'
+  | 'business_insight'
+  | 'insight';
 
 export type BasePost = {
   id: string;
@@ -30,9 +35,11 @@ export type PostLink = {
   created_at: string;
 };
 
-export const isBrainstorm = (p: BasePost) => p.kind === 'brainstorm';
+export const isBrainstorm = (p: BasePost) =>
+  p.kind === 'brainstorm' || p.kind === 'spark';
 
 export const isOpenIdea   = (p: BasePost) => p.kind === 'open_idea';
 
-export const isInsight    = (p: BasePost) => p.kind === 'business_insight';
+export const isInsight    = (p: BasePost) =>
+  p.kind === 'business_insight' || p.kind === 'insight';
 
