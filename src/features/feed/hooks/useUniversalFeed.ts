@@ -4,7 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { BasePost, PostKind } from '@/types/post';
 
 export function useUniversalFeed(params: {
-  mode: 'public' | 'business' | 'brainstorm_main' | 'brainstorm_open_ideas' | 'brainstorm_cross_links';
+  mode:
+    | 'public'
+    | 'business'
+    | 'brainstorm_main'
+    | 'brainstorm_open_ideas'
+    | 'brainstorm_cross_links'
+    | 'brainstorm_last_seen';
   kinds?: PostKind[];
   sort?: 'new' | 'hot' | 'score';
   search?: string | null;
@@ -18,13 +24,20 @@ export function useUniversalFeed(params: {
   const [eof, setEof] = useState(false);
   const loadingRef = useRef(false);
 
-    const load = useCallback(async (reset = false) => {
+  const load = useCallback(async (reset = false) => {
     if (loadingRef.current) return;
 
     loadingRef.current = true;
     setLoading(true);
     
     try {
+        if (params.mode === 'brainstorm_last_seen') {
+          setItems([]);
+          setCursor(null);
+          setEof(true);
+          return;
+        }
+
         if (params.mode === 'brainstorm_cross_links') {
           const crossLinked = await fetchCrossLinkedPosts(supabase, {
             postId: params.activePostId,
@@ -50,16 +63,16 @@ export function useUniversalFeed(params: {
           limit: params.pageSize ?? 20,
         });
 
-      setItems(prev => reset ? chunk : [...prev, ...chunk]);
-      setCursor(nextCursor);
-      setEof(!nextCursor);
-    } catch (error) {
-      console.error('Failed to load feed:', error);
-      setEof(true);
-    } finally {
-      setLoading(false);
-      loadingRef.current = false;
-    }
+        setItems((prev) => (reset ? chunk : [...prev, ...chunk]));
+        setCursor(nextCursor);
+        setEof(!nextCursor);
+      } catch (error) {
+        console.error('Failed to load feed:', error);
+        setEof(true);
+      } finally {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }, [params.mode, params.kinds, params.sort, params.search, params.org_id, params.pageSize, params.activePostId, cursor]);
 
   useEffect(() => {
@@ -67,7 +80,7 @@ export function useUniversalFeed(params: {
     setEof(false);
     load(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [params.mode, JSON.stringify(params.kinds), params.sort, params.search, params.org_id, params.activePostId]);
+  }, [params.mode, JSON.stringify(params.kinds), params.sort, params.search, params.org_id, params.activePostId]);
 
   return { items, loadMore: () => !eof && load(false), loading, eof, refresh: () => load(true) };
 }

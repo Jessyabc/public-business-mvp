@@ -38,7 +38,6 @@ export function FeedContainer({
   renderFeed,
 }: Props) {
   const lastSeen = useBrainstormExperienceStore((state) => state.lastSeen);
-
   const resolvedKinds =
     initialKinds ??
     (mode === 'brainstorm_open_ideas'
@@ -47,7 +46,25 @@ export function FeedContainer({
 
   const filters = useFeedFilters({ kinds: resolvedKinds });
 
-  // Special-case last seen feed: sourced from local store
+  React.useEffect(() => {
+    if (mode !== 'brainstorm_last_seen') return;
+    onItemsChange?.(lastSeen);
+  }, [mode, lastSeen, onItemsChange]);
+
+  const feed = useUniversalFeed({
+    mode,
+    kinds: mode === 'brainstorm_main' ? filters.kinds : resolvedKinds,
+    sort: mode === 'brainstorm_main' ? filters.sort : undefined,
+    search: mode === 'brainstorm_main' ? filters.search : undefined,
+    activePostId,
+    pageSize: 20,
+  });
+
+  React.useEffect(() => {
+    if (mode === 'brainstorm_last_seen') return;
+    onItemsChange?.(feed.items);
+  }, [mode, feed.items, onItemsChange]);
+
   if (mode === 'brainstorm_last_seen') {
     const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
       items: lastSeen,
@@ -56,10 +73,6 @@ export function FeedContainer({
       eof: true,
       refresh: () => {},
     };
-
-    React.useEffect(() => {
-      onItemsChange?.(lastSeen);
-    }, [lastSeen, onItemsChange]);
 
     if (renderFeed) {
       return <>{renderFeed(lastSeen, syntheticFeed)}</>;
@@ -75,19 +88,6 @@ export function FeedContainer({
       </div>
     );
   }
-
-  const feed = useUniversalFeed({
-    mode,
-    kinds: mode === 'brainstorm_main' ? filters.kinds : resolvedKinds,
-    sort: mode === 'brainstorm_main' ? filters.sort : undefined,
-    search: mode === 'brainstorm_main' ? filters.search : undefined,
-    activePostId,
-    pageSize: 20,
-  });
-
-  React.useEffect(() => {
-    onItemsChange?.(feed.items);
-  }, [feed.items, onItemsChange]);
 
   if (renderFeed) {
     return <>{renderFeed(feed.items, feed)}</>;

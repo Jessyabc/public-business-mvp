@@ -13,6 +13,39 @@ type FeedQueryOpts = {
 
 const DEFAULT_FEED_KINDS: PostKind[] = ['brainstorm','spark','business_insight'];
 
+type OpenIdeaRow = {
+  id: string;
+  content: string;
+  created_at: string;
+};
+
+type RelationRow = {
+  id: string;
+  parent_post_id: string;
+  child_post_id: string;
+  relation_type: 'hard' | 'soft' | 'biz_in' | 'biz_out';
+  created_at: string;
+};
+
+export type PostRecordRow = {
+  id: string;
+  user_id?: string | null;
+  title?: string | null;
+  content?: string | null;
+  summary?: string | null;
+  type?: string | null;
+  kind?: string | null;
+  visibility?: string | null;
+  mode?: string | null;
+  t_score?: number | null;
+  u_score?: number | null;
+  involvement?: number | null;
+  created_at: string;
+  updated_at?: string | null;
+  org_id?: string | null;
+  author_id?: string | null;
+};
+
 const normaliseVisibility = (visibility?: string | null): BasePost['privacy'] => {
   if (visibility === 'private') return 'private';
   if (visibility === 'org') return 'org';
@@ -28,7 +61,7 @@ const normaliseKind = (kind?: string | null, fallback?: string | null): PostKind
   return 'brainstorm';
 };
 
-export function mapPostRecordToBasePost(post: any): BasePost {
+export function mapPostRecordToBasePost(post: PostRecordRow): BasePost {
   return {
     id: post.id,
     kind: normaliseKind(post.kind, post.type),
@@ -59,131 +92,118 @@ export async function fetchUniversalFeed(
   const limit = opts.limit ?? 20;
 
   // Query open_ideas from open_ideas_public_view
-  if (kinds.includes('open_idea')) {
-    let q = sb
-      .from('open_ideas_public_view')
-      .select('id, content, created_at')
-      .lt('created_at', before)
-      .limit(limit);
-    
-    if (opts.search) {
-      // Note: open_ideas_public_view may not have search_vector, so we'll filter client-side if needed
-      const { data } = await q;
+    if (kinds.includes('open_idea')) {
+      let query = sb
+        .from<OpenIdeaRow>('open_ideas_public_view')
+        .select('id, content, created_at')
+        .lt('created_at', before)
+        .limit(limit);
+      
+      const { data } = await query;
       if (data) {
-        const filtered = opts.search 
-          ? data.filter((item: any) => 
+        const filtered = opts.search
+          ? data.filter((item) =>
               item.content?.toLowerCase().includes(opts.search!.toLowerCase())
             )
           : data;
-        chunks.push(...filtered.map((item: any): BasePost => ({
-          id: item.id,
-          kind: 'open_idea',
-          author_id: '', // open_ideas_public_view doesn't expose author_id
-          title: null,
-          summary: item.content?.substring(0, 200) || null,
-          created_at: item.created_at,
-          updated_at: item.created_at,
-          privacy: 'public',
-          metrics: undefined,
-        })));
-      }
-    } else {
-      const { data } = await q;
-      if (data) {
-        chunks.push(...data.map((item: any): BasePost => ({
-          id: item.id,
-          kind: 'open_idea',
-          author_id: '',
-          title: null,
-          summary: item.content?.substring(0, 200) || null,
-          created_at: item.created_at,
-          updated_at: item.created_at,
-          privacy: 'public',
-          metrics: undefined,
-        })));
+
+        chunks.push(
+          ...filtered.map(
+            (item): BasePost => ({
+              id: item.id,
+              kind: 'open_idea',
+              author_id: '',
+              title: null,
+              summary: item.content?.substring(0, 200) || null,
+              created_at: item.created_at,
+              updated_at: item.created_at,
+              privacy: 'public',
+              metrics: undefined,
+            })
+          )
+        );
       }
     }
-  }
 
   const includeBrainstorm = kinds.includes('brainstorm');
   const includeSpark = kinds.includes('spark');
 
   // Query brainstorm + spark posts from posts table (type='brainstorm')
-  if (includeBrainstorm || includeSpark) {
-    let q = sb
-      .from('posts')
-      .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
-      .eq('type', 'brainstorm')
-      .eq('status', 'active')
-      .lt('created_at', before)
-      .limit(limit);
+    if (includeBrainstorm || includeSpark) {
+      let q = sb
+        .from<PostRecordRow>('posts')
+        .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
+        .eq('type', 'brainstorm')
+        .eq('status', 'active')
+        .lt('created_at', before)
+        .limit(limit);
 
-    if (opts.mode === 'public') {
-      q = q.eq('visibility', 'public');
-    }
+      if (opts.mode === 'public') {
+        q = q.eq('visibility', 'public');
+      }
 
-    const { data } = await q;
+      const { data } = await q;
 
-    if (data) {
-      const mapped = data
-        .filter((item: any) => {
-          const normalizedKind = normaliseKind(item.kind, item.type);
-          if (normalizedKind === 'spark') {
-            return includeSpark;
-          }
-          return includeBrainstorm;
-        })
-        .map(mapPostRecordToBasePost);
-
-      const searched = opts.search
-        ? mapped.filter((item) => {
-            const term = opts.search!.toLowerCase();
-            return (
-              item.summary?.toLowerCase().includes(term) ||
-              item.title?.toLowerCase().includes(term)
-            );
+      if (data) {
+        const mapped = data
+          .filter((item) => {
+            const normalizedKind = normaliseKind(item.kind, item.type);
+            if (normalizedKind === 'spark') {
+              return includeSpark;
+            }
+            return includeBrainstorm;
           })
-        : mapped;
+          .map(mapPostRecordToBasePost);
 
-      chunks.push(...searched);
+        const searched = opts.search
+          ? mapped.filter((item) => {
+              const term = opts.search!.toLowerCase();
+              return (
+                item.summary?.toLowerCase().includes(term) ||
+                item.title?.toLowerCase().includes(term)
+              );
+            })
+          : mapped;
+
+        chunks.push(...searched);
+      }
     }
-  }
 
   const includeInsights = kinds.some(k => k === 'business_insight' || k === 'insight');
 
   // Query business insights from posts table
-  if (includeInsights) {
-    let q = sb
-      .from('posts')
-      .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
-      .in('type', ['insight', 'report', 'whitepaper', 'webinar'])
-      .eq('status', 'active')
-      .lt('created_at', before)
-      .limit(limit);
-    
-    if (opts.mode === 'public') {
-      q = q.eq('visibility', 'public');
-    } else if (opts.mode === 'business' && opts.org_id) {
-      q = q.or('visibility.eq.public,visibility.eq.other_businesses');
-    }
-    
-    const { data } = await q;
-    if (data) {
-      const mapped = data.map(mapPostRecordToBasePost);
+    if (includeInsights) {
+      let q = sb
+        .from<PostRecordRow>('posts')
+        .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
+        .in('type', ['insight', 'report', 'whitepaper', 'webinar'])
+        .eq('status', 'active')
+        .lt('created_at', before)
+        .limit(limit);
+      
+      if (opts.mode === 'public') {
+        q = q.eq('visibility', 'public');
+      } else if (opts.mode === 'business' && opts.org_id) {
+        q = q.or('visibility.eq.public,visibility.eq.other_businesses');
+      }
+      
+      const { data } = await q;
+      if (data) {
+        const mapped = data.map(mapPostRecordToBasePost);
 
-      const searched = opts.search
-        ? mapped.filter((item) => {
-            const term = opts.search!.toLowerCase();
-            return (
-              item.summary?.toLowerCase().includes(term) ||
-              item.title?.toLowerCase().includes(term)
-            );
-          })
-        : mapped;
+        const searched = opts.search
+          ? mapped.filter((item) => {
+              const term = opts.search!.toLowerCase();
+              return (
+                item.summary?.toLowerCase().includes(term) ||
+                item.title?.toLowerCase().includes(term)
+              );
+            })
+          : mapped;
 
-      chunks.push(...searched);
+        chunks.push(...searched);
+      }
     }
-  }
 
   // Sort the merged chunks
   const sort = opts.sort ?? 'new';
@@ -218,7 +238,7 @@ export async function fetchCrossLinkedPosts(
 
   try {
     const { data: relations, error } = await sb
-      .from('post_relations')
+      .from<RelationRow>('post_relations')
       .select('id, parent_post_id, child_post_id, relation_type, created_at')
       .or(`parent_post_id.eq.${opts.postId},child_post_id.eq.${opts.postId}`)
       .in('relation_type', relationTypes)
@@ -230,7 +250,7 @@ export async function fetchCrossLinkedPosts(
     }
 
     const relatedIds = new Set<string>();
-    (relations ?? []).forEach((relation: any) => {
+    (relations ?? []).forEach((relation) => {
       if (relation.parent_post_id === opts.postId) {
         relatedIds.add(relation.child_post_id);
       } else if (relation.child_post_id === opts.postId) {
@@ -244,7 +264,7 @@ export async function fetchCrossLinkedPosts(
     }
 
     const { data: posts, error: postsError } = await sb
-      .from('posts')
+      .from<PostRecordRow>('posts')
       .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
       .in('id', Array.from(relatedIds));
 

@@ -24,17 +24,22 @@ export default function BrainstormFeed() {
   const [linkSourceId, setLinkSourceId] = useState<string | null>(null);
 
   // Listen for Continue and Link events (for future use)
+  type ContinueDetail = { parentId?: string };
+  type LinkDetail = { sourceId?: string };
+
   useEffect(() => {
-    const handleContinue = (e: any) => {
-      const parentId = e.detail.parentId;
+    const handleContinue = (event: Event) => {
+      const { detail } = event as CustomEvent<ContinueDetail>;
+      if (!detail?.parentId) return;
       setComposerMode('continue');
-      setComposerParentId(parentId);
+      setComposerParentId(detail.parentId);
       setComposerOpen(true);
     };
 
-    const handleLink = (e: any) => {
-      const sourceId = e.detail.sourceId;
-      setLinkSourceId(sourceId);
+    const handleLink = (event: Event) => {
+      const { detail } = event as CustomEvent<LinkDetail>;
+      if (!detail?.sourceId) return;
+      setLinkSourceId(detail.sourceId);
       setLinkPickerOpen(true);
     };
 
