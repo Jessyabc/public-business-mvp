@@ -6,6 +6,7 @@ import { BrainstormForm } from '@/components/brainstorms/BrainstormForm';
 import { useBrainstorms } from '@/hooks/useBrainstorms';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function BrainstormNew() {
   const navigate = useNavigate();
@@ -24,7 +25,12 @@ export default function BrainstormNew() {
     setIsSubmitting(true);
     try {
       await createBrainstorm(data);
+      toast.success('Brainstorm created successfully');
       navigate('/brainstorms');
+    } catch (error) {
+      console.error('Failed to create brainstorm:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create brainstorm. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

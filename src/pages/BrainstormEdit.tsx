@@ -6,6 +6,7 @@ import { BrainstormForm } from '@/components/brainstorms/BrainstormForm';
 import { useBrainstorms, type Brainstorm } from '@/hooks/useBrainstorms';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export default function BrainstormEdit() {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +47,16 @@ export default function BrainstormEdit() {
     if (!id) return;
     
     setIsSubmitting(true);
+    setError(null);
     try {
       await updateBrainstorm(id, data);
+      toast.success('Brainstorm updated successfully');
       navigate(`/brainstorms/${id}`);
+    } catch (error) {
+      console.error('Failed to update brainstorm:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update brainstorm. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
