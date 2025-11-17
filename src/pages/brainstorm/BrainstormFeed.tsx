@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
 import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { RightSidebar } from '@/components/layout/RightSidebar';
-import { FeedContainer, type FeedRenderState } from '@/components/feeds/FeedContainer';
+import { FeedContainer } from '@/features/feed/FeedContainer';
 import { Loader2, RefreshCcw } from 'lucide-react';
 import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
-import { CrossLinksFeed } from '@/features/brainstorm/components/CrossLinksFeed';
+import { BrainstormFeedRenderer } from '@/features/brainstorm/components/BrainstormFeedRenderer';
 import { BrainstormLayoutShell } from '@/features/brainstorm/components/BrainstormLayoutShell';
 import type { Post } from '@/types/post';
+import type { useUniversalFeed } from '@/features/feed/hooks/useUniversalFeed';
 
 const UNKNOWN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 
 interface BrainstormFeedContentProps {
   posts: Post[];
-  feedState: FeedRenderState<Post & { kind?: string; [key: string]: unknown }>;
+  feed: ReturnType<typeof useUniversalFeed>;
 }
 
-function BrainstormFeedContent({ posts, feedState }: BrainstormFeedContentProps) {
-  const { loading: postsLoading, error: postsError, refresh: refreshFeed } = feedState;
+function BrainstormFeedContent({ posts, feed }: BrainstormFeedContentProps) {
+  const { loading: postsLoading, refresh: refreshFeed, loadMore } = feed;
+  const postsError = null; // feed doesn't expose error directly
   const [activePostId, setActivePostId] = useState<string | null>(null);
   const [lastSeenIds, setLastSeenIds] = useState<string[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -26,17 +28,6 @@ function BrainstormFeedContent({ posts, feedState }: BrainstormFeedContentProps)
   const [composerParentId, setComposerParentId] = useState<string | null>(null);
   const [linkPickerOpen, setLinkPickerOpen] = useState(false);
   const [linkSourceId, setLinkSourceId] = useState<string | null>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  // Auto-select first post when items appear
-  useEffect(() => {
-    if (!activePostId && posts.length > 0) {
-      const firstPost = posts.find((p) => p.type === 'brainstorm');
-      if (firstPost) {
-        setActivePostId(firstPost.id);
-      }
-    }
-  }, [posts, activePostId]);
 
   // Track last seen posts
   useEffect(() => {
@@ -46,28 +37,6 @@ function BrainstormFeedContent({ posts, feedState }: BrainstormFeedContentProps)
       return next.slice(0, 25);
     });
   }, [activePostId]);
-
-  // Infinite scroll setup
-  useEffect(() => {
-    if (!sentinelRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !postsLoading) {
-          // Trigger load more by refreshing (in a real implementation, you'd have a loadMore function)
-          // For now, we'll just refresh to get more items
-          void refreshFeed();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(sentinelRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [postsLoading, refreshFeed]);
 
   useEffect(() => {
     const handleContinue = (event: Event) => {
@@ -200,88 +169,13 @@ function BrainstormFeedContent({ posts, feedState }: BrainstormFeedContentProps)
             }
             main={
               <section className="min-h-0 rounded-3xl border border-white/10 bg-black/10 backdrop-blur">
-                <div className="border-b border-white/10 px-6 py-4">
-                  <p className="text-sm uppercase tracking-[0.3em] text-slate-300">Brainstorm Feed</p>
-                </div>
-                <div className="flex h-full flex-col">
-                  <div className="grid h-full min-h-0 gap-4 overflow-y-auto px-6 py-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-                    {/* Feed List */}
-                    <div className="space-y-4">
-                      {postsLoading && brainstormPosts.length === 0 ? (
-                        <div className="flex h-full items-center justify-center text-slate-300">
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                        </div>
-                      ) : brainstormPosts.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-slate-300">
-                          No brainstorms yet.
-                        </div>
-                      ) : (
-                        <>
-                          {brainstormPosts.map((post) => (
-                            <article
-                              key={post.id}
-                              className={`rounded-3xl border px-5 py-4 transition ${
-                                activePostId === post.id
-                                  ? 'border-white/40 bg-white/10 shadow-lg'
-                                  : 'border-white/10 bg-black/20 hover:border-white/30'
-                              }`}
-                            >
-                              <div className="flex flex-col gap-3">
-                                <div className="flex items-start justify-between gap-4">
-                                  <div>
-                                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                                      {post.created_at
-                                        ? new Date(post.created_at).toLocaleString()
-                                        : ''}
-                                    </p>
-                                    <h3 className="text-xl font-semibold text-white">
-                                      {post.title ?? 'Untitled'}
-                                    </h3>
-                                  </div>
-                                </div>
-                                <p className="text-base text-slate-100">{post.content}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  <button
-                                    type="button"
-                                    className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20"
-                                    onClick={() => handleContinueFromPost(post.id)}
-                                  >
-                                    Continue
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="rounded-full bg-white/10 px-3 py-1 text-xs text-white hover:bg-white/20"
-                                    onClick={() => handleLinkFromPost(post.id)}
-                                  >
-                                    Link
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-200 hover:bg-white/10"
-                                    onClick={() => handleSelectPost(post.id)}
-                                  >
-                                    Set active
-                                  </button>
-                                </div>
-                              </div>
-                            </article>
-                          ))}
-                          {/* Sentinel for infinite scroll */}
-                          <div ref={sentinelRef} style={{ height: '1px' }} />
-                          {postsLoading && (
-                            <div className="flex items-center justify-center py-4 text-slate-300">
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Cross-links Panel */}
-                    <div className="space-y-4">
-                      <CrossLinksFeed postId={activePostId} />
-                    </div>
-                  </div>
+                <div className="flex h-full flex-col p-6">
+                  <BrainstormFeedRenderer
+                    items={brainstormPosts}
+                    loading={postsLoading}
+                    onRefresh={refreshFeed}
+                    onLoadMore={loadMore}
+                  />
                 </div>
               </section>
             }
@@ -319,10 +213,9 @@ function BrainstormFeedContent({ posts, feedState }: BrainstormFeedContentProps)
 export default function BrainstormFeed() {
   return (
     <FeedContainer
-      mode="public"
-      initialKinds={['Spark', 'Thread', 'Insight']}
-      renderFeed={(items, feedState) => (
-        <BrainstormFeedContent posts={items as Post[]} feedState={feedState} />
+      mode="brainstorm_main"
+      renderFeed={(items, feed) => (
+        <BrainstormFeedContent posts={items as Post[]} feed={feed} />
       )}
     />
   );
