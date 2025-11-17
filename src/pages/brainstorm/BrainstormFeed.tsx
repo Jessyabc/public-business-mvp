@@ -11,8 +11,6 @@ import { BrainstormLayoutShell } from '@/features/brainstorm/components/Brainsto
 import type { Post } from '@/types/post';
 import type { useUniversalFeed } from '@/features/feed/hooks/useUniversalFeed';
 
-const UNKNOWN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
-
 interface BrainstormFeedContentProps {
   posts: Post[];
   feed: ReturnType<typeof useUniversalFeed>;
