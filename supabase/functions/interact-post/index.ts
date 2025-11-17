@@ -82,27 +82,25 @@ serve(async (req) => {
     console.log('Interaction created successfully:', interaction.id);
 
     // Update post engagement counters based on interaction type
-    let updateData: any = {};
-    
     switch (type) {
-      case 'like':
-        // Increment likes_count
-        const { data: likeUpdate, error: likeError } = await supabaseClient.rpc('increment_post_likes', { post_id });
+      case 'like': {
+        const { error: likeError } = await supabaseClient.rpc('increment_post_likes', { post_id });
         if (likeError) console.error('Error updating likes:', likeError);
         break;
-        
-      case 'view':
-        // Increment views_count
-        const { data: viewUpdate, error: viewError } = await supabaseClient.rpc('increment_post_views', { post_id });
+      }
+
+      case 'view': {
+        const { error: viewError } = await supabaseClient.rpc('increment_post_views', { post_id });
         if (viewError) console.error('Error updating views:', viewError);
         break;
-        
+      }
+
       case 'reply':
-      case 'branch':
-        // Increment comments_count
-        const { data: commentUpdate, error: commentError } = await supabaseClient.rpc('increment_post_comments', { post_id });
+      case 'branch': {
+        const { error: commentError } = await supabaseClient.rpc('increment_post_comments', { post_id });
         if (commentError) console.error('Error updating comments:', commentError);
         break;
+      }
     }
 
     // TODO: Trigger notification emails for subscribed users

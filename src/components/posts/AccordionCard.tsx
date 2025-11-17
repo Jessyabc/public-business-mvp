@@ -5,20 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import type { Post as CanonicalPost } from '@/types/post';
 
-interface Post {
-  id: string;
-  title?: string;
-  content: string;
-  t_score?: number;
-  views_count?: number;
-  likes_count?: number;
-  created_at: string;
-  mode?: 'public' | 'business';
-}
+type AccordionPost = Pick<
+  CanonicalPost,
+  'id' | 'title' | 'content' | 't_score' | 'views_count' | 'likes_count' | 'created_at' | 'mode'
+>;
 
 interface AccordionCardProps {
-  post: Post;
+  post: AccordionPost;
   onView?: (postId: string) => void;
   onSave?: (postId: string) => void;
   onShare?: (postId: string) => void;
@@ -145,10 +140,10 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
               ease: [0.4, 0, 0.2, 1]
             }}
             className="overflow-hidden"
-            style={{
-              // @ts-ignore - CSS custom property
-              '--animation-reduce': window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '0.5' : '1'
-            }}
+              style={{
+                // @ts-expect-error - CSS custom property
+                '--animation-reduce': window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '0.5' : '1'
+              }}
           >
             <div className="px-6 pb-6 border-t border-[var(--card-border)]/40">
               <div className="pt-4">

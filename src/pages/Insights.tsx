@@ -1,6 +1,6 @@
 import { PostComposer } from '@/components/posts/PostComposer';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import type { Post } from '@/lib/types/post';
+import type { Post } from '@/types/post';
 import { useState } from 'react';
 import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 

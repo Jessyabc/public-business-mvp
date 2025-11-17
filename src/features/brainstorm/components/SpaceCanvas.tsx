@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GlassCard } from '@/ui/components/GlassCard';
-import { SpaceAdapter, type BrainstormPost } from '../adapters/spaceAdapter';
+import { SpaceAdapter } from '../adapters/spaceAdapter';
+import type { Post } from '@/types/post';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { NodeForm } from './NodeForm';
@@ -21,9 +22,9 @@ type Props = {
 export default function SpaceCanvas({ startId, className }: Props) {
   const adapter = useMemo(() => new SpaceAdapter(), []);
   const { isLoadingGraph, graphError, setLoading, setError } = useBrainstormStore();
-  const [current, setCurrent] = useState<BrainstormPost | null>(null);
-  const [forwardNext, setForwardNext] = useState<BrainstormPost | null>(null);
-  const [softNeighbors, setSoftNeighbors] = useState<BrainstormPost[]>([]);
+  const [current, setCurrent] = useState<Post | null>(null);
+  const [forwardNext, setForwardNext] = useState<Post | null>(null);
+  const [softNeighbors, setSoftNeighbors] = useState<Post[]>([]);
   const [showNewForm, setShowNewForm] = useState(false);
   const [showContinueForm, setShowContinueForm] = useState(false);
   const [hasLiked, setHasLiked] = useState(false);
@@ -32,7 +33,7 @@ export default function SpaceCanvas({ startId, className }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // ----- helpers
-  const pickNext = (list: BrainstormPost[], excludeId?: string) =>
+  const pickNext = (list: Post[], excludeId?: string) =>
     list.find(p => p.id !== excludeId) ?? null;
 
   const loadInitial = useCallback(async () => {
@@ -135,7 +136,7 @@ export default function SpaceCanvas({ startId, className }: Props) {
   };
 
   // ----- rendering helpers
-  const CurrentCard = ({ post }: { post: BrainstormPost }) => (
+  const CurrentCard = ({ post }: { post: Post }) => (
     <GlassCard 
       className="w-full max-w-2xl backdrop-blur-xl border-foreground/20 shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
       padding="lg"
@@ -204,7 +205,7 @@ export default function SpaceCanvas({ startId, className }: Props) {
     </GlassCard>
   );
 
-  const SoftCard = ({ post, onOpen }: { post: BrainstormPost; onOpen: (id: string) => void }) => (
+  const SoftCard = ({ post, onOpen }: { post: Post; onOpen: (id: string) => void }) => (
     <GlassCard
       interactive
       padding="sm"

@@ -37,23 +37,17 @@ export interface UserRole {
   created_at: string;
 }
 
-export interface Post {
-  id: string;
-  user_id: string;
-  title?: string;
-  content: string;
-  type: 'brainstorm' | 'insight' | 'report' | 'whitepaper' | 'webinar' | 'video';
-  visibility: 'public' | 'my_business' | 'other_businesses' | 'draft';
-  mode: 'public' | 'business';
-  industry_id?: string;
-  department_id?: string;
-  metadata: any;
-  likes_count: number;
-  comments_count: number;
-  views_count: number;
-  t_score?: number;
-  u_score?: number;
-  status: 'active' | 'archived' | 'deleted';
-  created_at: string;
-  updated_at: string;
-}
+export type {
+  BasePost,
+  Post,
+  PostKind,
+  PostMode,
+  PostStatus,
+  PostType,
+  PostVisibility,
+  PostRelation,
+  PostRelationType,
+  PostMetadata,
+  PostInsertPayload,
+  PostUpdatePayload,
+} from '@/types/post';

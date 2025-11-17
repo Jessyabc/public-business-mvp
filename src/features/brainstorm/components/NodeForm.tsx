@@ -9,12 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBrainstormStore } from '../store';
 import { toast } from 'sonner';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 import { supabase } from '@/integrations/supabase/client';
 import { GlassCard } from '@/ui/components/GlassCard';
-import { fetchRecentPublicPosts, createSoftLinks } from '../adapters/supabaseAdapter';
 import { Search, X, Plus } from 'lucide-react';
 
 const nodeSchema = z.object({
@@ -44,7 +42,6 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   const [selectedSoftLinks, setSelectedSoftLinks] = useState<string[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const { addNodeOptimistic, addEdgeOptimistic, setLastCreatedId } = useBrainstormStore();
 
   const form = useForm<NodeFormData>({
     resolver: zodResolver(nodeSchema),
@@ -73,12 +70,43 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
   const loadRecentPosts = async () => {
     setIsLoadingHistory(true);
     try {
-      const posts = await fetchRecentPublicPosts(searchQuery || undefined, 15);
-      // Filter out parent if in continue mode
-      const filtered = mode === 'continue' && parentId
-        ? posts.filter(p => p.post_id !== parentId)
-        : posts;
-      setRecentPosts(filtered);
+      // Fetch recent brainstorm posts from posts table
+      let query = supabase
+        .from('posts')
+        .select('id, title, content, created_at, type')
+        .eq('type', 'brainstorm')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(15);
+
+      // Add search filter if provided
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      // Map to RecentPost format
+      const posts: RecentPost[] = (data || [])
+        .filter((post: any) => {
+          // Filter out parent if in continue mode
+          if (mode === 'continue' && parentId && post.id === parentId) {
+            return false;
+          }
+          return true;
+        })
+        .map((post: any) => ({
+          post_id: post.id,
+          post_type: post.type || 'brainstorm',
+          title: post.title || 'Untitled',
+          created_at: post.created_at,
+        }));
+
+      setRecentPosts(posts);
     } catch (err) {
       console.error('Failed to load recent posts:', err);
     } finally {
@@ -160,37 +188,20 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
       // Create soft links if any selected
       if (selectedSoftLinks.length > 0 && newPost) {
-        await createSoftLinks(newPost.id, selectedSoftLinks);
-      }
+        const relations = selectedSoftLinks.map((childId) => ({
+          parent_post_id: newPost.id,
+          child_post_id: childId,
+          relation_type: 'soft' as const,
+        }));
 
-      // Optimistic update to store
-      if (newPost) {
-        addNodeOptimistic({
-          id: newPost.id,
-          title: newPost.title || '',
-          content: newPost.content,
-          created_at: newPost.created_at,
-          user_id: newPost.user_id,
-        });
+        const { error: softLinksError } = await supabase
+          .from('post_relations')
+          .insert(relations);
 
-        if (mode === 'continue' && parentId) {
-          addEdgeOptimistic({
-            parent_post_id: parentId,
-            child_post_id: newPost.id,
-            relation_type: 'hard',
-          });
+        if (softLinksError) {
+          console.error('Error creating soft links:', softLinksError);
+          // Don't fail the whole operation, just log
         }
-
-        // Add soft link edges
-        selectedSoftLinks.forEach(targetId => {
-          addEdgeOptimistic({
-            parent_post_id: newPost.id,
-            child_post_id: targetId,
-            relation_type: 'soft',
-          });
-        });
-
-        setLastCreatedId(newPost.id);
       }
 
       toast.success(mode === 'root' ? 'New brainstorm created' : 'Brainstorm continued');
@@ -200,8 +211,8 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       setSearchQuery('');
       onOpenChange(false);
       
-      // Trigger a graph reload event
-      window.dispatchEvent(new CustomEvent('pb:brainstorm:reload'));
+      // Trigger feed refresh event
+      window.dispatchEvent(new CustomEvent('pb:brainstorm:refresh'));
     } catch (error) {
       console.error('Unexpected error:', error);
       toast.error('An unexpected error occurred');
