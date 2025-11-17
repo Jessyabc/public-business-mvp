@@ -14,6 +14,8 @@ import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 import { supabase } from '@/integrations/supabase/client';
 import { GlassCard } from '@/ui/components/GlassCard';
 import { Search, X, Plus } from 'lucide-react';
+import { useBrainstormExperienceStore } from '../stores/experience';
+import type { BasePost } from '@/types/post';
 
 const nodeSchema = z.object({
   title: z.string().max(100, 'Title must be less than 100 characters').optional(),
@@ -42,6 +44,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   const [selectedSoftLinks, setSelectedSoftLinks] = useState<string[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
 
   const form = useForm<NodeFormData>({
     resolver: zodResolver(nodeSchema),
@@ -205,6 +208,35 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       }
 
       toast.success(mode === 'root' ? 'New brainstorm created' : 'Brainstorm continued');
+
+      // Convert new post to BasePost format and set as active
+      if (newPost) {
+        const basePost: BasePost = {
+          id: newPost.id,
+          user_id: newPost.user_id || user.id,
+          title: newPost.title || null,
+          content: newPost.content || '',
+          body: newPost.body || newPost.content || null,
+          type: (newPost.type as BasePost['type']) || 'brainstorm',
+          kind: (newPost.kind as BasePost['kind']) || 'Spark',
+          visibility: (newPost.visibility as BasePost['visibility']) || 'public',
+          mode: (newPost.mode as BasePost['mode']) || 'public',
+          status: (newPost.status as BasePost['status']) || 'active',
+          org_id: newPost.org_id || null,
+          industry_id: newPost.industry_id || null,
+          department_id: newPost.department_id || null,
+          metadata: (newPost.metadata as BasePost['metadata']) || null,
+          likes_count: 0,
+          comments_count: 0,
+          views_count: 0,
+          t_score: newPost.t_score || null,
+          u_score: newPost.u_score || null,
+          published_at: newPost.published_at || null,
+          created_at: newPost.created_at,
+          updated_at: newPost.updated_at || newPost.created_at,
+        };
+        setActivePost(basePost);
+      }
 
       form.reset();
       setSelectedSoftLinks([]);
