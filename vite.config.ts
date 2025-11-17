@@ -39,8 +39,7 @@ export default defineConfig(({ mode }) => ({
       '@supabase/supabase-js',
       '@supabase/postgrest-js',
       '@supabase/realtime-js',
-      '@supabase/storage-js',
-      '@supabase/gotrue-js'
+      '@supabase/storage-js'
     ]
   },
   ssr: {

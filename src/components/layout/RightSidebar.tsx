@@ -1,5 +1,4 @@
-import { Clock, Lightbulb } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlassCard } from '@/ui/components/GlassCard';
 
@@ -21,13 +20,9 @@ interface SidebarIdea {
 }
 
 /**
- * RightSidebar - Activity feed for brainstorm page
- * 
- * Displays:
- * - History: Recent brainstorm activity
- * - Open Ideas: Public idea submissions
- * 
- * Designed to fit within the glass-styled layout
+ * Brainstorm sidebar companion:
+ * - Breadcrumbs tab reflects active canvas history
+ * - Open Ideas tab hosts the spark-only FeedContainer
  */
 export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
   const [openIdeasFeed, setOpenIdeasFeed] = useState<SidebarIdea[]>([]);
@@ -174,61 +169,7 @@ export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
     );
   }
 
-  return (
-    <div className="h-full w-full flex flex-col">
-      {/* History Section */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-5 border-b border-white/10 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-white/70" />
-          <h2 className="text-lg font-semibold text-white/90">History</h2>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-5 space-y-2.5" style={{ scrollbarGutter: 'stable' }}>
-          <style>{`
-            .no-scrollbar::-webkit-scrollbar {
-              width: 6px;
-            }
-            .no-scrollbar::-webkit-scrollbar-track {
-              background: rgba(255, 255, 255, 0.05);
-              border-radius: 3px;
-            }
-            .no-scrollbar::-webkit-scrollbar-thumb {
-              background: rgba(255, 255, 255, 0.2);
-              border-radius: 3px;
-            }
-            .no-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: rgba(255, 255, 255, 0.3);
-            }
-          `}</style>
-          <GlassCard 
-            interactive 
-            padding="sm" 
-            className="backdrop-blur-md border-white/15 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01]"
-          >
-            <p className="text-sm text-white/75">No recent brainstorms yet.</p>
-          </GlassCard>
-        </div>
-      </div>
-
-      {/* Open Ideas Section */}
-      <div className="flex-1 flex flex-col border-t border-white/10">
-        <div className="p-5 border-b border-white/10 flex items-center gap-2">
-          <Lightbulb className="w-5 h-5 text-white/70" />
-          <h2 className="text-lg font-semibold text-white/90">Open Ideas</h2>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-2.5">
-          <GlassCard 
-            interactive 
-            padding="sm" 
-            className="backdrop-blur-md border-white/15 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01]"
-          >
-            <p className="text-sm text-white/75">No open ideas yet.</p>
-          </GlassCard>
-        </div>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 export default RightSidebar;
