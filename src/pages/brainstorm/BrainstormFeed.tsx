@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
 import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { RefreshCcw } from 'lucide-react';
@@ -11,6 +11,10 @@ import {
   type PostSummary,
   type OpenIdeaSummary,
 } from '@/components/brainstorm/BrainstormLayout';
+
+// Constant fallback timestamp for items without a created_at field
+// Using epoch time (1970-01-01) to indicate unknown timestamp
+const UNKNOWN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 
 export default function BrainstormFeed() {
   const [activeSparkId, setActiveSparkId] = useState<string | null>(null);
@@ -47,30 +51,6 @@ export default function BrainstormFeed() {
     console.debug('Thought given on spark', sparkId);
   };
 
-  // Listen for Continue and Link events from ThreadScroller
-  useEffect(() => {
-    const handleContinue = (e: any) => {
-      const parentId = e.detail.parentId;
-      setComposerMode('continue');
-      setComposerParentId(parentId);
-      setComposerOpen(true);
-    };
-
-    const handleLink = (e: any) => {
-      const sourceId = e.detail.sourceId;
-      setLinkSourceId(sourceId);
-      setLinkPickerOpen(true);
-    };
-
-    window.addEventListener('pb:brainstorm:continue', handleContinue);
-    window.addEventListener('pb:brainstorm:link', handleLink);
-
-    return () => {
-      window.removeEventListener('pb:brainstorm:continue', handleContinue);
-      window.removeEventListener('pb:brainstorm:link', handleLink);
-    };
-  }, []);
-
   return (
     <main className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       <GlobalBackground />
@@ -84,39 +64,47 @@ export default function BrainstormFeed() {
             // Map feed items into the Spark shape expected by BrainstormLayout.
             // Look at the item structure used elsewhere in the feed (for example in BrainstormFeedRenderer
             // or convertFeedPostToUniversal) and pick reasonable fields for id, title/body, etc.
-            const sparks: Spark[] = items.map((item: any) => {
-              // Adjust this mapping based on the actual fields on "item".
-              // Prefer the post id and text content that best represents the Spark.
-              const id = item.id ?? item.post_id ?? item.post?.id;
-              const title =
-                item.title ??
-                item.post?.title ??
-                (item.kind === 'brainstorm' ? item.post?.headline : null);
-              const body =
-                item.body ??
-                item.post?.body ??
-                item.summary ??
-                item.post?.summary ??
-                '';
+            const sparks: Spark[] = items
+              .map((item: any) => {
+                // Adjust this mapping based on the actual fields on "item".
+                // Prefer the post id and text content that best represents the Spark.
+                const id = item.id ?? item.post_id ?? item.post?.id;
+                
+                // Filter out items with undefined/null IDs to prevent "undefined" string conversion
+                if (id === undefined || id === null) {
+                  return null;
+                }
 
-              return {
-                id: String(id),
-                title: title ?? null,
-                body,
-                created_at: item.created_at ?? item.post?.created_at ?? new Date().toISOString(),
-                author_display_name:
-                  item.author_display_name ??
-                  item.author_name ??
-                  item.post?.author_display_name ??
-                  null,
-                author_avatar_url:
-                  item.author_avatar_url ?? item.post?.author_avatar_url ?? null,
-                is_anonymous: !!item.is_anonymous,
-                t_score: item.t_score ?? 0,
-                view_count: item.view_count ?? 0,
-                has_given_thought: item.has_given_thought ?? false,
-              };
-            });
+                const title =
+                  item.title ??
+                  item.post?.title ??
+                  (item.kind === 'brainstorm' ? item.post?.headline : null);
+                const body =
+                  item.body ??
+                  item.post?.body ??
+                  item.summary ??
+                  item.post?.summary ??
+                  '';
+
+                return {
+                  id: String(id),
+                  title: title ?? null,
+                  body,
+                  created_at: item.created_at ?? item.post?.created_at ?? UNKNOWN_TIMESTAMP,
+                  author_display_name:
+                    item.author_display_name ??
+                    item.author_name ??
+                    item.post?.author_display_name ??
+                    null,
+                  author_avatar_url:
+                    item.author_avatar_url ?? item.post?.author_avatar_url ?? null,
+                  is_anonymous: !!item.is_anonymous,
+                  t_score: item.t_score ?? 0,
+                  view_count: item.view_count ?? 0,
+                  has_given_thought: item.has_given_thought ?? false,
+                };
+              })
+              .filter((spark): spark is Spark => spark !== null);
 
             // Determine currentSpark from the activeSparkId or default to the first spark.
             const currentSpark =
