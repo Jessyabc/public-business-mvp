@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { fetchRelatedPosts, type RelatedPosts } from '@/lib/brainstormRelations';
+import { getPostRelations } from '@/lib/getPostRelations';
 import type { Post } from '@/types/post';
 
 interface CrossLinkEntry {
@@ -20,7 +20,12 @@ interface CrossLinksFeedProps {
 }
 
 export function CrossLinksFeed({ postId, className }: CrossLinksFeedProps) {
-  const [relatedPosts, setRelatedPosts] = useState<RelatedPosts>({
+  const [relatedPosts, setRelatedPosts] = useState<{
+    hardChildren: Post[];
+    hardParents: Post[];
+    softChildren: Post[];
+    softParents: Post[];
+  }>({
     hardChildren: [],
     hardParents: [],
     softChildren: [],
@@ -42,8 +47,13 @@ export function CrossLinksFeed({ postId, className }: CrossLinksFeedProps) {
     const loadRelatedPosts = async () => {
       setLoading(true);
       try {
-        const related = await fetchRelatedPosts(postId);
-        setRelatedPosts(related);
+        const relationsResult = await getPostRelations(postId);
+        setRelatedPosts({
+          hardChildren: relationsResult.hardChildren,
+          hardParents: relationsResult.parentHard,
+          softChildren: relationsResult.softChildren,
+          softParents: relationsResult.parentSoft,
+        });
       } catch (error) {
         console.error('Failed to load related posts:', error);
       } finally {

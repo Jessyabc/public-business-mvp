@@ -30,20 +30,6 @@ export interface BrainstormEdge {
   created_at: string;
 }
 
-/**
- * BrainstormState - state interface for brainstorm graph
- * Used by legacy store (to be removed in future)
- */
-export interface BrainstormState {
-  nodes: BrainstormNode[];
-  edges: BrainstormEdge[];
-  selectedNode: string | null;
-  selectedEdge: string | null;
-  isCreatingLink: boolean;
-  searchTerm: string;
-  showHardEdges: boolean;
-  showSoftEdges: boolean;
-}
 
 /**
  * NodeFormData - form data structure for creating/editing nodes

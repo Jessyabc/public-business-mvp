@@ -3,20 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { mapPostRecordToBasePost, PostRecordRow } from '@/lib/feedQueries';
 import { convertFeedPostToUniversal } from '../utils/postConverter';
 import { BasePost as UniversalBasePost, PostLink } from '../types';
+import { getPostRelations } from '@/lib/getPostRelations';
 
 type GraphResult = {
   nodes: UniversalBasePost[];
   links: PostLink[];
   loading: boolean;
   error: string | null;
-};
-
-type RelationRow = {
-  id: string;
-  parent_post_id: string;
-  child_post_id: string;
-  relation_type: 'hard' | 'soft' | 'biz_in' | 'biz_out';
-  created_at: string;
 };
 
 const relationWeight = (type: string): number => (type === 'hard' ? 3 : 2);
@@ -49,25 +42,24 @@ export function useBrainstormGraph(activePostId: string | null): GraphResult {
       setLoading(true);
 
       try {
-        const { data: relations, error: relationsError } = await supabase
-          .from<RelationRow>('post_relations')
-          .select('id, parent_post_id, child_post_id, relation_type, created_at')
-          .or(`parent_post_id.eq.${activePostId},child_post_id.eq.${activePostId}`);
+        // Use getPostRelations helper to fetch all relations
+        const relationsResult = await getPostRelations(activePostId);
 
-        if (relationsError) {
-          throw relationsError;
-        }
+        if (cancelled) return;
 
-        const relatedIds = new Set<string>([activePostId]);
-        (relations ?? []).forEach((relation) => {
-          relatedIds.add(relation.parent_post_id);
-          relatedIds.add(relation.child_post_id);
-        });
+        // Collect all related post IDs
+        const allRelatedPostIds = new Set<string>();
+        relationsResult.hardChildren.forEach(p => allRelatedPostIds.add(p.id));
+        relationsResult.softChildren.forEach(p => allRelatedPostIds.add(p.id));
+        relationsResult.parentHard.forEach(p => allRelatedPostIds.add(p.id));
+        relationsResult.parentSoft.forEach(p => allRelatedPostIds.add(p.id));
+        allRelatedPostIds.add(activePostId);
 
-        const { data: posts, error: postsError } = await supabase
+        // Fetch all posts (including active post) in PostRecordRow format for conversion
+        const { data: postsData, error: postsError } = await supabase
           .from<PostRecordRow>('posts')
           .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
-          .in('id', Array.from(relatedIds));
+          .in('id', Array.from(allRelatedPostIds));
 
         if (postsError) {
           throw postsError;
@@ -75,9 +67,11 @@ export function useBrainstormGraph(activePostId: string | null): GraphResult {
 
         if (cancelled) return;
 
-        const mappedPosts = (posts ?? []).map(mapPostRecordToBasePost);
+        const mappedPosts = (postsData ?? []).map(mapPostRecordToBasePost);
         const universalPosts = mappedPosts.map(convertFeedPostToUniversal);
-        const graphLinks: PostLink[] = (relations ?? []).map((relation) => ({
+        
+        // Convert relations to PostLink format
+        const graphLinks: PostLink[] = relationsResult.allRelations.map((relation) => ({
           id: relation.id,
           source_post_id: relation.parent_post_id,
           target_post_id: relation.child_post_id,

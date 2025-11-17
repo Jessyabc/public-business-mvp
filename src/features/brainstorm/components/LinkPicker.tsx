@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { GlassCard } from '@/ui/components/GlassCard';
-import { fetchRecentPublicPosts, createSoftLinks } from '../adapters/supabaseAdapter';
 import { Search, X, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useBrainstormExperienceStore } from '../stores/experience';
 
 type LinkPickerProps = {
   open: boolean;
@@ -28,6 +29,7 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
   const [selectedLinks, setSelectedLinks] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const setActivePostById = useBrainstormExperienceStore((state) => state.setActivePostById);
 
   // Load recent posts when dialog opens
   useEffect(() => {
@@ -48,10 +50,37 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
   const loadRecentPosts = async () => {
     setIsLoading(true);
     try {
-      const posts = await fetchRecentPublicPosts(searchQuery || undefined, 20);
-      // Filter out the source post itself
-      const filtered = posts.filter(p => p.post_id !== sourceId);
-      setRecentPosts(filtered);
+      // Fetch recent brainstorm posts from posts table
+      let query = supabase
+        .from('posts')
+        .select('id, title, content, created_at, type')
+        .eq('type', 'brainstorm')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      // Add search filter if provided
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      // Map to RecentPost format and filter out source post
+      const posts: RecentPost[] = (data || [])
+        .filter((post: any) => post.id !== sourceId)
+        .map((post: any) => ({
+          post_id: post.id,
+          post_type: post.type || 'brainstorm',
+          title: post.title || 'Untitled',
+          created_at: post.created_at,
+        }));
+
+      setRecentPosts(posts);
     } catch (err) {
       console.error('Failed to load recent posts:', err);
       toast.error('Failed to load posts');
@@ -82,16 +111,35 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
 
     setIsSubmitting(true);
     try {
-      await createSoftLinks(sourceId, selectedLinks);
+      // Insert soft link relations directly into post_relations
+      const relations = selectedLinks.map((childId) => ({
+        parent_post_id: sourceId,
+        child_post_id: childId,
+        relation_type: 'soft' as const,
+      }));
+
+      const { error } = await supabase
+        .from('post_relations')
+        .insert(relations);
+
+      if (error) {
+        throw error;
+      }
+
       toast.success(`Created ${selectedLinks.length} soft link${selectedLinks.length > 1 ? 's' : ''}`);
+      
+      // Update active post to trigger refresh of cross-links and graph
+      if (sourceId) {
+        setActivePostById(sourceId);
+      }
       
       // Clear and close
       setSelectedLinks([]);
       setSearchQuery('');
       onOpenChange(false);
       
-      // Trigger graph reload
-      window.dispatchEvent(new CustomEvent('pb:brainstorm:reload'));
+      // Trigger feed refresh
+      window.dispatchEvent(new CustomEvent('pb:brainstorm:refresh'));
     } catch (err) {
       console.error('Failed to create links:', err);
       toast.error('Failed to create soft links');
