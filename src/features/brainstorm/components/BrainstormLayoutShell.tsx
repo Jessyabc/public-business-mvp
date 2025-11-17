@@ -24,7 +24,7 @@ export function BrainstormLayoutShell({
           <div className="grid grid-cols-3 gap-1">
             {[
               { id: 'lastSeen' as const, label: 'Last Seen' },
-              { id: 'main' as const, label: 'Main' },
+              { id: 'main' as const, label: 'Main Feed' },
               { id: 'sidebar' as const, label: 'Sidebar' },
             ].map((tab) => (
               <button
