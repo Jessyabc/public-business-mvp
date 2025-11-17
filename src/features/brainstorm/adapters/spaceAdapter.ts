@@ -1,6 +1,59 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { BrainstormPost } from '../postTypes';
 
+const BASE_POST_FIELDS = [
+  'id',
+  'user_id',
+  'title',
+  'content',
+  'body',
+  'type',
+  'kind',
+  'visibility',
+  'mode',
+  'status',
+  'org_id',
+  'industry_id',
+  'department_id',
+  'metadata',
+  'likes_count',
+  'comments_count',
+  'views_count',
+  't_score',
+  'u_score',
+  'published_at',
+  'created_at',
+  'updated_at',
+].join(', ');
+
+type BrainstormPostRow = Partial<BrainstormPost> &
+  Pick<BrainstormPost, 'id' | 'user_id' | 'content' | 'created_at' | 'updated_at'>;
+
+const mapRowToBrainstormPost = (post: BrainstormPostRow): BrainstormPost => ({
+  id: post.id,
+  user_id: post.user_id,
+  title: post.title ?? null,
+  content: post.content ?? '',
+  body: post.body ?? null,
+  type: 'brainstorm',
+  kind: post.kind ?? 'Spark',
+  visibility: 'public',
+  mode: 'public',
+  status: post.status ?? 'active',
+  org_id: post.org_id ?? null,
+  industry_id: post.industry_id ?? null,
+  department_id: post.department_id ?? null,
+  metadata: post.metadata ?? null,
+  likes_count: post.likes_count ?? 0,
+  comments_count: post.comments_count ?? 0,
+  views_count: post.views_count ?? 0,
+  t_score: post.t_score ?? null,
+  u_score: post.u_score ?? null,
+  published_at: post.published_at ?? null,
+  created_at: post.created_at,
+  updated_at: post.updated_at,
+});
+
 export type LinkCount = { id: string; link_count: number };
 
 export class SpaceAdapter {
@@ -9,20 +62,15 @@ export class SpaceAdapter {
     // Use direct query for now since RPC functions aren't available
     const { data, error } = await supabase
       .from('posts')
-      .select('id, title, content, user_id, created_at, likes_count, views_count')
+      .select(BASE_POST_FIELDS)
+      .eq('type', 'brainstorm')
+      .eq('visibility', 'public')
+      .eq('mode', 'public')
       .limit(limit)
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
-    return (data ?? []).map((post) => ({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      user_id: post.user_id,
-      created_at: post.created_at,
-      likes_count: post.likes_count ?? 0,
-      views_count: post.views_count ?? 0,
-    }));
+    return (data ?? []).map((post) => mapRowToBrainstormPost(post as BrainstormPostRow));
   }
 
   /** Follow HARD chain forward/backward from a given node */
@@ -45,20 +93,15 @@ export class SpaceAdapter {
   async latestHard(startId: string): Promise<BrainstormPost | null> {
     const { data, error } = await supabase
       .from('posts')
-      .select('id, title, content, user_id, created_at, likes_count, views_count')
+      .select(BASE_POST_FIELDS)
+      .eq('type', 'brainstorm')
+      .eq('visibility', 'public')
+      .eq('mode', 'public')
       .eq('id', startId)
       .single();
-      
-    if (error) return null;
-    return {
-      id: data.id,
-      title: data.title,
-      content: data.content,
-      user_id: data.user_id,
-      created_at: data.created_at,
-      likes_count: data.likes_count ?? 0,
-      views_count: data.views_count ?? 0,
-    };
+
+    if (error || !data) return null;
+    return mapRowToBrainstormPost(data as BrainstormPostRow);
   }
 
   /** Link counts for a set of post ids (for UI badges) */

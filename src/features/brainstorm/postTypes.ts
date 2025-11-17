@@ -1,8 +1,10 @@
-import type { BasePost, PostRelationType } from '@/types/post';
+import type { BasePost, PostKind, PostRelationType, PostVisibility } from '@/types/post';
 
-export type BrainstormPost = Pick<
-  BasePost,
-  'id' | 'title' | 'content' | 'user_id' | 'created_at' | 'likes_count' | 'views_count'
->;
+export interface BrainstormPost extends BasePost {
+  type: 'brainstorm';
+  mode: 'public';
+  visibility: Extract<PostVisibility, 'public'>;
+  kind: Extract<PostKind, 'Spark' | 'Insight'>;
+}
 
 export type BrainstormRelationType = Extract<PostRelationType, 'hard' | 'soft'>;

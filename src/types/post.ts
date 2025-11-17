@@ -25,7 +25,7 @@ export interface BasePost {
   content: string;
   body?: string | null;
   type: PostType;
-  kind?: PostKind;
+  kind: PostKind;
   visibility: PostVisibility;
   mode: PostMode;
   status: PostStatus;
