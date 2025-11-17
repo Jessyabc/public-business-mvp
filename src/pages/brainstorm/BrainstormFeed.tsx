@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
-import ThreadScroller from '@/features/brainstorm/components/ThreadScroller';
-import { RightSidebar } from '@/components/layout/RightSidebar';
-import { useBrainstormStore } from '@/features/brainstorm/store';
-import { getBrainstormGraph } from '@/features/brainstorm/adapters/supabaseAdapter';
 import { GlowDefs } from '@/components/graphics/GlowDefs';
-import { Loader2, RefreshCcw } from 'lucide-react';
+import { RefreshCcw } from 'lucide-react';
 import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
+import { FeedContainer } from '@/components/feeds/FeedContainer';
+import {
+  BrainstormLayout,
+  type Spark,
+  type PostSummary,
+  type OpenIdeaSummary,
+} from '@/components/brainstorm/BrainstormLayout';
 
 export default function BrainstormFeed() {
-  const { setNodes, setEdges, nodes, selectById, clearThread } = useBrainstormStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const [activeSparkId, setActiveSparkId] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerMode, setComposerMode] = useState<'root' | 'continue'>('root');
   const [composerParentId, setComposerParentId] = useState<string | null>(null);
@@ -19,22 +21,31 @@ export default function BrainstormFeed() {
   const [linkSourceId, setLinkSourceId] = useState<string | null>(null);
 
 
-  const loadGraph = async () => {
-    setIsLoading(true);
-    try {
-      const payload = await getBrainstormGraph();
-      setNodes(payload.nodes);
-      setEdges(payload.edges);
-      // Show ALL posts in unified feed
-      await useBrainstormStore.getState().rebuildFeed();
-    } catch (e) {
-      console.error('Failed to load brainstorm graph:', e);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSelectSpark = (sparkId: string) => {
+    setActiveSparkId(sparkId);
   };
 
-  useEffect(() => { loadGraph(); }, []);
+  const handleContinueFromSpark = (sparkId: string) => {
+    setComposerMode('continue');
+    setComposerParentId(sparkId);
+    setComposerOpen(true);
+  };
+
+  const handleSaveReferenceFromSpark = (sparkId: string) => {
+    setLinkSourceId(sparkId);
+    setLinkPickerOpen(true);
+  };
+
+  const handleViewSpark = async (sparkId: string) => {
+    // Placeholder for now – later we can call an API to increment view counts.
+    // Leave this as a no-op or console.log so it doesn't break anything.
+    console.debug('Viewed spark', sparkId);
+  };
+
+  const handleGiveThought = async (sparkId: string, _alreadyGiven: boolean) => {
+    // Placeholder for now – later we will wire this to Supabase to increment T-score.
+    console.debug('Thought given on spark', sparkId);
+  };
 
   // Listen for Continue and Link events from ThreadScroller
   useEffect(() => {
@@ -51,61 +62,100 @@ export default function BrainstormFeed() {
       setLinkPickerOpen(true);
     };
 
-    const handleReload = () => {
-      loadGraph();
-    };
-
     window.addEventListener('pb:brainstorm:continue', handleContinue);
     window.addEventListener('pb:brainstorm:link', handleLink);
-    window.addEventListener('pb:brainstorm:reload', handleReload);
 
     return () => {
       window.removeEventListener('pb:brainstorm:continue', handleContinue);
       window.removeEventListener('pb:brainstorm:link', handleLink);
-      window.removeEventListener('pb:brainstorm:reload', handleReload);
     };
   }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <main className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       <GlobalBackground />
       <GlowDefs />
 
-      {/* Refresh */}
-      <div className="absolute z-20 left-4 top-3 flex items-center gap-2">
-        <button
-          onClick={async () => { clearThread(); await loadGraph(); }}
-          className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10"
-        >
-          <RefreshCcw size={16}/> Refresh
-        </button>
-      </div>
+      <section className="relative h-screen overflow-hidden p-4 md:p-6">
+        <FeedContainer
+          mode="public"
+          initialKinds={['brainstorm']}
+          renderFeed={(items, feed) => {
+            // Map feed items into the Spark shape expected by BrainstormLayout.
+            // Look at the item structure used elsewhere in the feed (for example in BrainstormFeedRenderer
+            // or convertFeedPostToUniversal) and pick reasonable fields for id, title/body, etc.
+            const sparks: Spark[] = items.map((item: any) => {
+              // Adjust this mapping based on the actual fields on "item".
+              // Prefer the post id and text content that best represents the Spark.
+              const id = item.id ?? item.post_id ?? item.post?.id;
+              const title =
+                item.title ??
+                item.post?.title ??
+                (item.kind === 'brainstorm' ? item.post?.headline : null);
+              const body =
+                item.body ??
+                item.post?.body ??
+                item.summary ??
+                item.post?.summary ??
+                '';
 
-      <div className="grid grid-cols-[70%_30%] gap-0 h-screen">
-        <section className="relative overflow-hidden p-4 md:p-6">
-          {nodes.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-foreground/70">
-              <div className="text-center">
-                <p className="text-lg mb-2">No brainstorms yet</p>
-                <p className="text-sm text-foreground/50">Create your first brainstorm to get started</p>
-              </div>
-            </div>
-          ) : (
-            <ThreadScroller />
-          )}
-        </section>
-        <aside className="border-l border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden">
-          <RightSidebar variant="feed" />
-        </aside>
-      </div>
+              return {
+                id: String(id),
+                title: title ?? null,
+                body,
+                created_at: item.created_at ?? item.post?.created_at ?? new Date().toISOString(),
+                author_display_name:
+                  item.author_display_name ??
+                  item.author_name ??
+                  item.post?.author_display_name ??
+                  null,
+                author_avatar_url:
+                  item.author_avatar_url ?? item.post?.author_avatar_url ?? null,
+                is_anonymous: !!item.is_anonymous,
+                t_score: item.t_score ?? 0,
+                view_count: item.view_count ?? 0,
+                has_given_thought: item.has_given_thought ?? false,
+              };
+            });
+
+            // Determine currentSpark from the activeSparkId or default to the first spark.
+            const currentSpark =
+              sparks.find((s) => s.id === activeSparkId) ?? sparks[0] ?? null;
+
+            // For now, Last Seen is just the full list of sparks in reverse chronological order.
+            const lastSeenSparks = sparks;
+
+            // Referenced posts and open ideas are empty placeholders for now.
+            const referencedPosts: PostSummary[] = [];
+            const openIdeas: OpenIdeaSummary[] = [];
+
+            return (
+              <>
+                <div className="mb-4 flex items-center gap-2">
+                  <button
+                    onClick={feed.refresh}
+                    className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10"
+                  >
+                    <RefreshCcw size={16} /> Refresh
+                  </button>
+                </div>
+
+                <BrainstormLayout
+                  lastSeenSparks={lastSeenSparks}
+                  currentSpark={currentSpark}
+                  referencedPosts={referencedPosts}
+                  openIdeas={openIdeas}
+                  onSelectSpark={handleSelectSpark}
+                  onGiveThought={handleGiveThought}
+                  onContinueBrainstorm={handleContinueFromSpark}
+                  onSaveReference={handleSaveReferenceFromSpark}
+                  onViewSpark={handleViewSpark}
+                />
+              </>
+            );
+          }}
+        />
+      </section>
 
       {/* NodeForm Modal */}
       <NodeForm
