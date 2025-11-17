@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Sparkles, GitBranch, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { BasePost } from '@/types/post';
+import type { Post } from '@/types/post';
 
 interface BrainstormWithLineage
-  extends Pick<BasePost, 'id' | 'likes_count' | 'comments_count' | 'created_at' | 'updated_at'> {
-  title: BasePost['title'];
-  content: BasePost['content'] | null;
-  user_id: BasePost['user_id'] | null;
+  extends Pick<Post, 'id' | 'likes_count' | 'comments_count' | 'created_at' | 'updated_at'> {
+  title: Post['title'];
+  content: Post['content'] | null;
+  user_id: Post['user_id'] | null;
   parent_id: string | null;
   parent_type: string | null;
 }

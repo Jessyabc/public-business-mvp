@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import type { BasePost } from '@/types/post';
+import type { Post } from '@/types/post';
 
 export interface Brainstorm
   extends Pick<
-    BasePost,
+    Post,
     'id' | 'title' | 'content' | 'user_id' | 'visibility' | 'created_at' | 'likes_count' | 'comments_count'
   > {
   author_user_id?: string; // alias for compatibility
