@@ -1,14 +1,7 @@
-import type { Post, PostRelationType } from '@/types/post';
+import type { Post, PostRelationType, PostRelation } from '@/types/post';
 
-// Re-export types from root types.ts for brainstorm feature
-export type { 
-  BasePost, 
-  PostLink, 
-  LinkType, 
-  PostType, 
-  PostMode, 
-  BaseMetrics 
-} from '@/../../types';
+// Use actual Supabase types
+export type { Post as BasePost, PostRelation as PostLink } from '@/types/post';
 
 /**
  * BrainstormRelationType - helper type for brainstorm-specific relations
