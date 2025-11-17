@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GlassSurface } from "@/components/ui/GlassSurface";
 import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, User, Reply } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
-import type { Post } from "@/types/post";
+import { Post } from "@/hooks/usePosts";
 import { useComposerStore } from "@/hooks/useComposerStore";
 
 interface PostReaderModalProps {
