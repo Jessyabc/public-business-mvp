@@ -1,5 +1,15 @@
 import type { Post, PostRelationType } from '@/types/post';
 
+// Re-export types from root types.ts for brainstorm feature
+export type { 
+  BasePost, 
+  PostLink, 
+  LinkType, 
+  PostType, 
+  PostMode, 
+  BaseMetrics 
+} from '@/../../types';
+
 /**
  * BrainstormRelationType - helper type for brainstorm-specific relations
  * Extracts only 'hard' and 'soft' relation types (excludes 'biz_in' and 'biz_out')
