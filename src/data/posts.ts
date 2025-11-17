@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-import type { Post } from '@/lib/types/post';
+import type { Post } from '@/types/post';
 
 type SupabaseClientType = SupabaseClient<Database>;
 

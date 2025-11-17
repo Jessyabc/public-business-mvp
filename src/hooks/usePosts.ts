@@ -1,39 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import type {
+  Post,
+  PostInsertPayload,
+  PostMode,
+  PostRelationType,
+} from '@/types/post';
 
-export interface Post {
-  id: string;
-  user_id: string;
-  title?: string;
-  content: string;
-  type: 'brainstorm' | 'insight' | 'report' | 'whitepaper' | 'webinar' | 'video';
-  visibility: 'public' | 'my_business' | 'other_businesses' | 'draft';
-  mode: 'public' | 'business';
-  industry_id?: string;
-  department_id?: string;
-  metadata: any;
-  likes_count: number;
-  comments_count: number;
-  views_count: number;
-  t_score?: number;
-  u_score?: number;
-  status: 'active' | 'archived' | 'deleted';
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreatePostData {
-  title?: string;
-  content: string;
-  type: 'brainstorm' | 'insight' | 'report' | 'whitepaper' | 'webinar' | 'video';
-  visibility?: 'public' | 'my_business' | 'other_businesses' | 'draft';
-  mode: 'public' | 'business';
-  industry_id?: string;
-  department_id?: string;
-  metadata?: any;
-}
+export type CreatePostData = Omit<PostInsertPayload, 'user_id'>;
 
 export function usePosts() {
   const { user } = useAuth();
@@ -42,7 +18,7 @@ export function usePosts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPosts = async (mode?: 'public' | 'business') => {
+  const fetchPosts = useCallback(async (mode?: PostMode) => {
     setLoading(true);
     setError(null);
     try {
@@ -77,9 +53,9 @@ export function usePosts() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const createPost = async (postData: CreatePostData) => {
+  const createPost = async (postData: CreatePostData): Promise<Post | null> => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -108,16 +84,28 @@ export function usePosts() {
     try {
       console.log('Creating post with data:', { user_id: user.id, ...postData });
       
+      const insertPayload: PostInsertPayload = {
+        user_id: user.id,
+        content: postData.content,
+        type: postData.type,
+        mode: postData.mode,
+        title: postData.title ?? null,
+        body: postData.body ?? postData.content,
+        kind: postData.kind ?? (postData.mode === 'business' ? 'BusinessInsight' : 'Spark'),
+        visibility: postData.visibility ?? 'public',
+        status: postData.status ?? 'active',
+        org_id: postData.org_id,
+        industry_id: postData.industry_id,
+        department_id: postData.department_id,
+        metadata: postData.metadata ?? {},
+        t_score: postData.t_score,
+        u_score: postData.u_score,
+        published_at: postData.published_at,
+      };
+
       const { data, error } = await supabase
         .from('posts')
-        .insert({
-          user_id: user.id,
-          ...postData,
-          body: postData.content,
-          kind: postData.mode === 'business' ? 'BusinessInsight' : 'Spark',
-          visibility: postData.visibility || 'public',
-          metadata: postData.metadata || {},
-        } as any)
+        .insert(insertPayload)
         .select()
         .single();
 
@@ -136,7 +124,7 @@ export function usePosts() {
         description: `${postData.type === 'brainstorm' ? 'Brainstorm' : 'Post'} created successfully`,
       });
       
-      return data;
+      return data as Post;
     } catch (error: unknown) {
       console.error('Error creating post:', error);
       let description = 'Failed to create post';
@@ -159,7 +147,7 @@ export function usePosts() {
   // Create a post and optionally link it to a parent via post_relations
   const createPostWithRelation = async (
     postData: CreatePostData,
-    relation?: { parent_post_id: string; relation_type: 'continuation' | 'linking' }
+    relation?: { parent_post_id: string; relation_type: Extract<PostRelationType, 'hard' | 'soft'> }
   ) => {
     const newPost = await createPost(postData);
     if (!newPost || !relation) return newPost;
@@ -169,7 +157,7 @@ export function usePosts() {
         .from('post_relations')
         .insert({
           parent_post_id: relation.parent_post_id,
-          child_post_id: (newPost as any).id,
+          child_post_id: newPost.id,
           relation_type: relation.relation_type,
         });
       if (error) throw error;
@@ -355,7 +343,7 @@ export function usePosts() {
     if (user) {
       fetchPosts();
     }
-  }, [user]);
+  }, [user, fetchPosts]);
 
   return {
     posts,

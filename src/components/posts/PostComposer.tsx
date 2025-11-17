@@ -3,7 +3,7 @@ import { GlassSurface } from '@/components/ui/GlassSurface';
 import { GlassInput } from '@/components/ui/GlassInput';
 import { supabase } from '@/integrations/supabase/client';
 import { insertBrainstormPublic, insertInsightForOrg } from '@/data/posts';
-import type { Post } from '@/lib/types/post';
+import type { Post } from '@/types/post';
 import { toast } from 'sonner';
 
 const MAX_CONTENT_LENGTH = 5000;
