@@ -37,4 +37,17 @@ export interface UserRole {
   created_at: string;
 }
 
-export type { Post, PostKind, PostMode, PostStatus, PostType, PostVisibility } from '@/types/post';
+export type {
+  BasePost,
+  Post,
+  PostKind,
+  PostMode,
+  PostStatus,
+  PostType,
+  PostVisibility,
+  PostRelation,
+  PostRelationType,
+  PostMetadata,
+  PostInsertPayload,
+  PostUpdatePayload,
+} from '@/types/post';

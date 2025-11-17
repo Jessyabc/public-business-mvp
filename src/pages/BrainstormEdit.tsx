@@ -49,8 +49,6 @@ export default function BrainstormEdit() {
     try {
       await updateBrainstorm(id, data);
       navigate(`/brainstorms/${id}`);
-    } catch (error) {
-      throw error; // Let the form handle the error
     } finally {
       setIsSubmitting(false);
     }
@@ -121,7 +119,7 @@ export default function BrainstormEdit() {
 
       <BrainstormForm
         initialData={{
-          title: brainstorm.title,
+          title: brainstorm.title ?? '',
           content: brainstorm.content,
           is_public: brainstorm.is_public,
         }}

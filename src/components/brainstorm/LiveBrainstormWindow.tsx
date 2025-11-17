@@ -49,6 +49,7 @@ const BrainstormBubble = memo(({ brainstorm, stats, dense = false, onNavigate }:
 
   const participantsCount = (stats?.comments_count || 0) + 1; // Author + commenters
   const isActive = stats && (stats.likes_count > 0 || stats.comments_count > 0);
+  const title = brainstorm.title ?? 'Untitled brainstorm';
 
   return (
     <div className="relative">
@@ -65,14 +66,15 @@ const BrainstormBubble = memo(({ brainstorm, stats, dense = false, onNavigate }:
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
       >
-        <Card className={cn(
-          'glass-low p-4 border border-border/40 transition-all duration-300 snap-center',
-          'hover:border-primary/40 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          dense ? 'h-24' : 'h-32'
-        )}
-        tabIndex={0}
-        role="button"
-        aria-label={`View brainstorm: ${brainstorm.title}`}
+        <Card
+          className={cn(
+            'glass-low p-4 border border-border/40 transition-all duration-300 snap-center',
+            'hover:border-primary/40 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+            dense ? 'h-24' : 'h-32'
+          )}
+          tabIndex={0}
+          role="button"
+          aria-label={`View brainstorm: ${title}`}
         >
           {/* Active Indicator */}
           {isActive && (
@@ -98,7 +100,7 @@ const BrainstormBubble = memo(({ brainstorm, stats, dense = false, onNavigate }:
               'font-semibold text-foreground group-hover:text-primary transition-colors',
               dense ? 'text-xs line-clamp-2' : 'text-sm line-clamp-2'
             )}>
-              {brainstorm.title}
+              {title}
             </h4>
 
             <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
@@ -145,7 +147,7 @@ const BrainstormBubble = memo(({ brainstorm, stats, dense = false, onNavigate }:
             >
               <div className="space-y-3">
                 <div>
-                  <h4 className="font-semibold text-foreground mb-2">{brainstorm.title}</h4>
+                    <h4 className="font-semibold text-foreground mb-2">{title}</h4>
                   <p className="text-sm text-muted-foreground line-clamp-3">
                     {brainstorm.content}
                   </p>
@@ -279,11 +281,11 @@ export function LiveBrainstormWindow({ dense = false, className }: LiveBrainstor
   }
 
   return (
-    <div 
+    <div
       className={cn('glass-med rounded-xl p-6', className)}
-      style={{ 
-        // @ts-ignore - CSS custom property
-        '--reduced-motion-scale': '0.99'
+      style={{
+        // @ts-expect-error - CSS custom property
+        '--reduced-motion-scale': '0.99',
       }}
     >
       <div className="flex items-center justify-between mb-4">

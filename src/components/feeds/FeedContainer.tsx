@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { Post } from '@/hooks/usePosts';
+import type { Post } from '@/types/post';
 import { usePosts } from '@/hooks/usePosts';
 
 type FeedItem = Post & {
@@ -8,7 +8,7 @@ type FeedItem = Post & {
   [key: string]: unknown;
 };
 
-interface FeedRenderState<T extends FeedItem> {
+export interface FeedRenderState<T extends FeedItem> {
   items: T[];
   loading: boolean;
   error: string | null;

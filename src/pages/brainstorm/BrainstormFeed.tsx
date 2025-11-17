@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
 import { GlowDefs } from '@/components/graphics/GlowDefs';
 import { RightSidebar } from '@/components/layout/RightSidebar';
+import { FeedContainer, type FeedRenderState } from '@/components/feeds/FeedContainer';
 
 import { Loader2, RefreshCcw } from 'lucide-react';
 
@@ -10,7 +11,7 @@ import { NodeForm } from '@/features/brainstorm/components/NodeForm';
 import { LinkPicker } from '@/features/brainstorm/components/LinkPicker';
 import { useBrainstormStore } from '@/features/brainstorm/store';
 import { getBrainstormGraph } from '@/features/brainstorm/adapters/supabaseAdapter';
-import { usePosts } from '@/hooks/usePosts';
+import type { Post } from '@/types/post';
 
 interface Spark {
   id: string;
@@ -38,8 +39,15 @@ interface CrossLinkEntry {
 
 const UNKNOWN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 
-export default function BrainstormFeed() {
-  const { posts, loading: postsLoading, error: postsError, fetchPosts } = usePosts();
+type BrainstormFeedItem = Post;
+
+interface BrainstormFeedContentProps {
+  posts: BrainstormFeedItem[];
+  feedState: FeedRenderState<BrainstormFeedItem>;
+}
+
+function BrainstormFeedContent({ posts, feedState }: BrainstormFeedContentProps) {
+  const { loading: postsLoading, error: postsError, refresh: refreshFeed } = feedState;
   const { setNodes, setEdges, nodes, clearThread } = useBrainstormStore((state) => ({
     setNodes: state.setNodes,
     setEdges: state.setEdges,
@@ -71,10 +79,6 @@ export default function BrainstormFeed() {
       setIsGraphLoading(false);
     }
   }, [setEdges, setNodes]);
-
-  useEffect(() => {
-    void fetchPosts('public');
-  }, [fetchPosts]);
 
   useEffect(() => {
     const handleContinue = (event: Event) => {
@@ -111,9 +115,10 @@ export default function BrainstormFeed() {
     void loadGraph();
   }, [loadGraph]);
 
+  const brainstormPosts = useMemo(() => posts.filter((item) => item.type === 'brainstorm'), [posts]);
+
   const sparks = useMemo(() => {
-    return posts
-      .filter((item) => item.type === 'brainstorm')
+    return brainstormPosts
       .map((item) => {
         const body = item.body ?? item.content ?? '';
         return {
@@ -130,7 +135,7 @@ export default function BrainstormFeed() {
         } satisfies Spark;
       })
       .filter((spark) => spark.body.trim().length > 0 || spark.title);
-  }, [posts]);
+  }, [brainstormPosts]);
 
   useEffect(() => {
     if (!sparks.length) {
@@ -238,7 +243,9 @@ export default function BrainstormFeed() {
         <div className="flex h-full flex-col gap-6">
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => fetchPosts('public')}
+              onClick={() => {
+                void refreshFeed();
+              }}
               className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm text-slate-200 ring-1 ring-white/10 transition hover:bg-white/10"
             >
               <RefreshCcw size={16} /> Refresh feed
@@ -445,5 +452,17 @@ export default function BrainstormFeed() {
         sourceId={linkSourceId}
       />
     </main>
+  );
+}
+
+export default function BrainstormFeed() {
+  return (
+    <FeedContainer<Post>
+      mode="public"
+      initialKinds={['Spark', 'Thread', 'Insight']}
+      renderFeed={(items, feedState) => (
+        <BrainstormFeedContent posts={items} feedState={feedState} />
+      )}
+    />
   );
 }
