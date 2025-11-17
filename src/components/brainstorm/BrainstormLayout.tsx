@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SparkCard } from './SparkCard';
 
 export type Spark = {
   id: string;
@@ -6,9 +7,11 @@ export type Spark = {
   body: string;
   created_at: string;
   author_display_name?: string | null;
+  author_avatar_url?: string | null;
   is_anonymous: boolean;
-  t_score: number;
-  view_count: number;
+  t_score: number;       // number of Thought reactions
+  view_count: number;    // total views
+  has_given_thought?: boolean; // optional: whether current user already reacted
 };
 
 export type PostSummary = {
@@ -30,6 +33,12 @@ export type BrainstormLayoutProps = {
   referencedPosts: PostSummary[];
   openIdeas: OpenIdeaSummary[];
   onSelectSpark?: (sparkId: string) => void;
+
+  // new optional callbacks for the current Spark
+  onGiveThought?: (sparkId: string, alreadyGiven: boolean) => Promise<void> | void;
+  onContinueBrainstorm?: (sparkId: string) => void;
+  onSaveReference?: (sparkId: string) => void;
+  onViewSpark?: (sparkId: string) => Promise<void> | void;
 };
 
 type SidebarTab = 'breadcrumbs' | 'openIdeas';
@@ -40,6 +49,10 @@ export const BrainstormLayout = ({
   referencedPosts,
   openIdeas,
   onSelectSpark,
+  onGiveThought,
+  onContinueBrainstorm,
+  onSaveReference,
+  onViewSpark,
 }: BrainstormLayoutProps) => {
   const [activeTab, setActiveTab] = useState<SidebarTab>('breadcrumbs');
 
@@ -81,22 +94,17 @@ export const BrainstormLayout = ({
 
       <div className="pb-brainstorm-layout__column pb-brainstorm-layout__current">
         {currentSpark ? (
-          <div className="pb-brainstorm-layout__current-card">
-            <h2 className="pb-brainstorm-layout__current-title">
-              {currentSpark.title || 'Untitled spark'}
-            </h2>
-            <p className="pb-brainstorm-layout__current-body">{currentSpark.body}</p>
-            <div className="pb-brainstorm-layout__current-meta">
-              <span className="pb-brainstorm-layout__current-score">
-                T-score: {currentSpark.t_score}
-              </span>
-              <span className="pb-brainstorm-layout__current-views">
-                Views: {currentSpark.view_count}
-              </span>
-            </div>
-          </div>
+          <SparkCard
+            spark={currentSpark}
+            onGiveThought={onGiveThought}
+            onContinueBrainstorm={onContinueBrainstorm}
+            onSaveReference={onSaveReference}
+            onView={onViewSpark}
+          />
         ) : (
-          <div className="pb-brainstorm-layout__current-placeholder">No spark selected</div>
+          <div className="pb-brainstorm-layout__current-empty">
+            Select a Spark to open the brainstorm.
+          </div>
         )}
       </div>
 
