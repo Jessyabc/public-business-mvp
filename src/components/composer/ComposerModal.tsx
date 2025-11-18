@@ -87,18 +87,21 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         user_id: user?.id,
         content: content.trim(),
         published_at: new Date().toISOString(),
+        status: 'active',
       };
 
       if (isPublicMode) {
         // Public brainstorm
         insertData.type = 'brainstorm';
+        insertData.kind = 'Spark';
         insertData.visibility = 'public';
         insertData.mode = 'public';
         insertData.org_id = null;
       } else {
         // Business insight - org_id will be determined by RLS/backend
-        insertData.type = 'business_insight';
-        insertData.visibility = 'org_public';
+        insertData.type = 'insight';
+        insertData.kind = 'BusinessInsight';
+        insertData.visibility = 'my_business';
         insertData.mode = 'business';
         // Get the user's org_id from their membership
         const { data: orgId, error: orgError } = await supabase.rpc('get_user_org_id');
