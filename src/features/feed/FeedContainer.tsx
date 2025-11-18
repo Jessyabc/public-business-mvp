@@ -20,7 +20,7 @@ type Props = {
   renderFeed?: (items: BasePost[], feed: ReturnType<typeof useUniversalFeed>) => React.ReactNode;
 };
 
-const DEFAULT_MAIN_KINDS: PostKind[] = ['brainstorm','spark','business_insight'];
+const DEFAULT_MAIN_KINDS: PostKind[] = ['Spark'];
 
 /**
  * FeedContainer now powers the Brainstorm layout columns via specialized modes:
@@ -41,7 +41,7 @@ export function FeedContainer({
   const resolvedKinds =
     initialKinds ??
     (mode === 'brainstorm_open_ideas'
-      ? ['open_idea']
+      ? ['Spark']
       : DEFAULT_MAIN_KINDS);
 
   const filters = useFeedFilters({ kinds: resolvedKinds });
@@ -68,10 +68,10 @@ export function FeedContainer({
   if (mode === 'brainstorm_last_seen') {
     const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
       items: lastSeen,
-      loadMore: () => {},
+      loadMore: async () => {},
       loading: false,
       eof: true,
-      refresh: () => {},
+      refresh: async () => {},
     };
 
     if (renderFeed) {

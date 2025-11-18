@@ -84,7 +84,7 @@ export function usePosts() {
     try {
       console.log('Creating post with data:', { user_id: user.id, ...postData });
       
-      const insertPayload: PostInsertPayload = {
+      const insertPayload = {
         user_id: user.id,
         content: postData.content,
         type: postData.type,
@@ -97,11 +97,11 @@ export function usePosts() {
         org_id: postData.org_id,
         industry_id: postData.industry_id,
         department_id: postData.department_id,
-        metadata: postData.metadata ?? {},
+        metadata: postData.metadata ? JSON.parse(JSON.stringify(postData.metadata)) : {},
         t_score: postData.t_score,
         u_score: postData.u_score,
         published_at: postData.published_at,
-      };
+      } as const;
 
       const { data, error } = await supabase
         .from('posts')
@@ -178,9 +178,14 @@ export function usePosts() {
 
     setLoading(true);
     try {
+      const updatePayload = {
+        ...postData,
+        metadata: postData.metadata ? JSON.parse(JSON.stringify(postData.metadata)) : {}
+      };
+      
       const { data, error } = await supabase
         .from('posts')
-        .update(postData)
+        .update(updatePayload)
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
