@@ -1,4 +1,4 @@
-r45-=^# Phase 3: Store Cleanup + Composer Refactor - Completion Report
+# Phase 3: Store Cleanup + Composer Refactor - Completion Report
 
 ## Overview
 Phase 3 successfully consolidated the Brainstorm experience to use a single canonical store (`useBrainstormExperienceStore`) and removed all references to the legacy brainstorm store pipeline.
