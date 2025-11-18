@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { Link2 } from 'lucide-react';
+
 
 type Props = {
   post: BasePost;
@@ -29,14 +29,6 @@ export function BrainstormPostCard({
     );
   };
 
-  const handleLink = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.dispatchEvent(
-      new CustomEvent('pb:brainstorm:link', {
-        detail: { sourceId: post.id },
-      })
-    );
-  };
 
   return (
     <Card 
@@ -94,25 +86,14 @@ export function BrainstormPostCard({
         )}
 
         {showActions && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleContinue}
-              className="flex-1"
-            >
-              Continue
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLink}
-              className="flex-1"
-            >
-              <Link2 className="w-4 h-4 mr-1" />
-              Link
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleContinue}
+            className="w-full"
+          >
+            Continue
+          </Button>
         )}
       </CardContent>
     </Card>
