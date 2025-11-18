@@ -3,13 +3,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassSurface } from "@/components/ui/GlassSurface";
 import { Label } from "@/components/ui/label";
-import { Brain, FileText, AlertCircle } from "lucide-react";
+import { Brain, FileText, AlertCircle, Link2, X, Search } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { toast } from 'sonner';
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 
 
@@ -30,6 +33,13 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [composerMode, setComposerMode] = useState<'post' | 'open-idea'>('post');
+  
+  // Link selector state
+  const [showLinkSelector, setShowLinkSelector] = useState(false);
+  const [linkSearch, setLinkSearch] = useState("");
+  const [availablePosts, setAvailablePosts] = useState<any[]>([]);
+  const [selectedLinks, setSelectedLinks] = useState<string[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
 
   const isPublicMode = mode === 'public';
   const maxChars = isPublicMode ? PUBLIC_MAX_CHARS : BUSINESS_MAX_CHARS;
@@ -65,6 +75,10 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     setContent("");
     setTitle("");
     setComposerMode('post');
+    setShowLinkSelector(false);
+    setLinkSearch("");
+    setSelectedLinks([]);
+    setAvailablePosts([]);
     setContext(null);
     onClose();
   };
@@ -72,6 +86,50 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const clearDraft = () => {
     const draftKey = isPublicMode ? 'composer:brainstorm' : 'composer:insight';
     localStorage.removeItem(draftKey);
+  };
+
+  // Load recent posts for linking
+  const loadRecentPosts = async () => {
+    setLoadingPosts(true);
+    try {
+      let query = supabase
+        .from('posts')
+        .select('id, title, content, created_at')
+        .eq('kind', 'Spark')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (linkSearch.trim()) {
+        query = query.or(`title.ilike.%${linkSearch}%,content.ilike.%${linkSearch}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setAvailablePosts(data || []);
+    } catch (err) {
+      console.error('Failed to load posts:', err);
+      toast.error('Failed to load posts');
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  // Load posts when link selector opens or search changes
+  useEffect(() => {
+    if (showLinkSelector) {
+      const timer = setTimeout(() => loadRecentPosts(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showLinkSelector, linkSearch]);
+
+  const toggleLink = (postId: string) => {
+    setSelectedLinks(prev => 
+      prev.includes(postId)
+        ? prev.filter(id => id !== postId)
+        : [...prev, postId]
+    );
   };
 
   const handleCreate = async () => {
@@ -135,6 +193,19 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           toast.error(error.message || 'Failed to create post');
         }
         return;
+      }
+
+      // Create soft links if any posts were selected
+      if (selectedLinks.length > 0 && newPost?.id) {
+        try {
+          await supabase.rpc('api_create_soft_links', {
+            p_parent: newPost.id,
+            p_children: selectedLinks,
+          });
+        } catch (linkError) {
+          console.error('Error creating links:', linkError);
+          toast.warning('Post created but some links failed');
+        }
       }
 
       toast.success(`${isPublicMode ? 'Brainstorm' : 'Insight'} created successfully`);
@@ -254,6 +325,90 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
             {content.length} / {PUBLIC_MAX_CHARS}
           </span>
         </div>
+      </div>
+
+      {/* Link Selector Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-[var(--text-primary)]">Link to existing Sparks (optional)</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowLinkSelector(!showLinkSelector)}
+            className="text-xs"
+          >
+            <Link2 className="w-3 h-3 mr-1" />
+            {showLinkSelector ? 'Hide' : 'Show'} ({selectedLinks.length})
+          </Button>
+        </div>
+
+        {showLinkSelector && (
+          <GlassSurface inset className="p-3 space-y-2">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/50" />
+              <input
+                type="text"
+                value={linkSearch}
+                onChange={(e) => setLinkSearch(e.target.value)}
+                placeholder="Search Sparks..."
+                className="w-full pl-8 pr-3 py-1.5 text-sm bg-white/10 border border-white/20 rounded text-white placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+              />
+            </div>
+
+            {/* Selected Links */}
+            {selectedLinks.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {selectedLinks.map(id => {
+                  const post = availablePosts.find(p => p.id === id);
+                  return (
+                    <Badge key={id} variant="secondary" className="text-xs gap-1">
+                      {post?.title || 'Untitled'}
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-destructive"
+                        onClick={() => toggleLink(id)}
+                      />
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Available Posts */}
+            <ScrollArea className="h-[200px] rounded border border-white/10 bg-white/5">
+              {loadingPosts ? (
+                <div className="p-3 text-center text-sm text-white/60">Loading...</div>
+              ) : availablePosts.length === 0 ? (
+                <div className="p-3 text-center text-sm text-white/60">
+                  {linkSearch ? 'No posts found' : 'No recent Sparks'}
+                </div>
+              ) : (
+                <div className="p-2 space-y-1">
+                  {availablePosts.map((post) => (
+                    <button
+                      key={post.id}
+                      type="button"
+                      onClick={() => toggleLink(post.id)}
+                      className={`w-full text-left p-2 rounded text-sm transition-colors ${
+                        selectedLinks.includes(post.id)
+                          ? 'bg-[var(--accent)]/20 border border-[var(--accent)]/40'
+                          : 'hover:bg-white/10 border border-transparent'
+                      }`}
+                    >
+                      <div className="font-medium text-white line-clamp-1">
+                        {post.title || 'Untitled'}
+                      </div>
+                      <div className="text-xs text-white/60 line-clamp-1 mt-0.5">
+                        {post.content}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </GlassSurface>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 pt-2">
