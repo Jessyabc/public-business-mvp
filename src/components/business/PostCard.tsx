@@ -198,6 +198,7 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
           title: post.title,
           content: post.summary,
           type: post.type,
+          kind: 'BusinessInsight',
           visibility: 'public',
           mode: 'business',
           metadata: {},
@@ -209,8 +210,11 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
           views_count: post.uScore.breakdown.views,
           t_score: null,
           u_score: post.uScore.total,
+          published_at: null,
+          body: null,
+          org_id: null,
           industry_id: null,
-          department_id: null
+          department_id: null,
         }}
       />
     </div>
