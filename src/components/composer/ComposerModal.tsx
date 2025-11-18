@@ -11,6 +11,8 @@ import { useComposerStore } from "@/hooks/useComposerStore";
 import { toast } from 'sonner';
 import { useAuth } from "@/contexts/AuthContext";
 
+
+
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -119,9 +121,11 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         }
       }
 
-      const { error } = await supabase
+      const { data: newPost, error } = await supabase
         .from('posts')
-        .insert(insertData);
+        .insert(insertData)
+        .select('id')
+        .single();
 
       if (error) {
         console.error('Error creating post:', error);
