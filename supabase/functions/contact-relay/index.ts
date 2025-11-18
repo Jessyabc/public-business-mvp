@@ -32,13 +32,13 @@ interface ContactRequest {
 }
 
 // Hash IP for privacy-compliant rate limiting
-function hashIP(ip: string): string {
+async function hashIP(ip: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(ip + new Date().toDateString());
-  return crypto.subtle.digest('SHA-256', data)
-    .then(hash => Array.from(new Uint8Array(hash))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join(''));
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 serve(async (req) => {

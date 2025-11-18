@@ -24,7 +24,7 @@ export function useUniversalFeed(params: {
   const [eof, setEof] = useState(false);
   const loadingRef = useRef(false);
 
-  const load = useCallback(async (reset = false) => {
+  const load = useCallback(async (reset = false): Promise<void> => {
     if (loadingRef.current) return;
 
     loadingRef.current = true;

@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useRef } from 'react';
 import { BasePost } from '@/types/post';
-import { FeedItemAdapter } from './FeedItemAdapter';
+import { BrainstormPostCard } from '@/features/brainstorm/components/BrainstormPostCard';
+import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
 
 type Props = {
   items: BasePost[];
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export const FeedList = memo(function FeedList({ items, onEndReached, loading }: Props) {
+  const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,7 +39,7 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading }:
     <>
       <div className="space-y-4">
         {items.map((item) => (
-          <FeedItemAdapter key={item.id} post={item} />
+          <BrainstormPostCard key={item.id} post={item} onSelect={setActivePost} />
         ))}
       </div>
       {loading ? (

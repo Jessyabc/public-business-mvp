@@ -5,280 +5,102 @@ type FeedQueryOpts = {
   mode: 'public' | 'business';
   kinds?: PostKind[];
   limit?: number;
-  cursor?: string | null;      // ISO created_at for simple pagination
+  cursor?: string | null;
   search?: string | null;
   org_id?: string | null;
   sort?: 'new' | 'hot' | 'score';
 };
 
-const DEFAULT_FEED_KINDS: PostKind[] = ['brainstorm','spark','business_insight'];
-
-type OpenIdeaRow = {
-  id: string;
-  content: string;
-  created_at: string;
-};
-
-type RelationRow = {
-  id: string;
-  parent_post_id: string;
-  child_post_id: string;
-  relation_type: 'hard' | 'soft' | 'biz_in' | 'biz_out';
-  created_at: string;
-};
-
-export type PostRecordRow = {
-  id: string;
-  user_id?: string | null;
-  title?: string | null;
-  content?: string | null;
-  summary?: string | null;
-  type?: string | null;
-  kind?: string | null;
-  visibility?: string | null;
-  mode?: string | null;
-  t_score?: number | null;
-  u_score?: number | null;
-  involvement?: number | null;
-  created_at: string;
-  updated_at?: string | null;
-  org_id?: string | null;
-  author_id?: string | null;
-};
-
-const normaliseVisibility = (visibility?: string | null): BasePost['privacy'] => {
-  if (visibility === 'private') return 'private';
-  if (visibility === 'org') return 'org';
-  return 'public';
-};
-
-const normaliseKind = (kind?: string | null, fallback?: string | null): PostKind => {
-  const value = (kind ?? fallback ?? 'brainstorm').toString().toLowerCase();
-  if (value === 'spark') return 'spark';
-  if (value === 'open_idea') return 'open_idea';
-  if (value === 'insight') return 'insight';
-  if (value === 'business_insight') return 'business_insight';
-  return 'brainstorm';
-};
-
-export function mapPostRecordToBasePost(post: PostRecordRow): BasePost {
-  return {
-    id: post.id,
-    kind: normaliseKind(post.kind, post.type),
-    org_id: post.org_id ?? null,
-    author_id: post.user_id || post.author_id || '',
-    title: post.title || null,
-    summary: post.summary ?? post.content?.substring(0, 200) ?? null,
-    created_at: post.created_at,
-    updated_at: post.updated_at || post.created_at,
-    privacy: normaliseVisibility(post.visibility),
-    metrics: {
-      t_score: post.t_score ?? null,
-      u_score: post.u_score ?? null,
-      involvement: post.involvement ?? null,
-    },
-  };
-}
-
-// Strategy B (safe now): query existing tables/views, merge, sort.
-// Adapts to existing schema: posts table (type field), open_ideas_public_view
+/**
+ * Minimal feed query - fetches from posts table using DB fields directly
+ */
 export async function fetchUniversalFeed(
   sb: SupabaseClient,
   opts: FeedQueryOpts
 ): Promise<{ items: BasePost[]; nextCursor: string | null }> {
-  const kinds = opts.kinds ?? DEFAULT_FEED_KINDS;
-  const chunks: BasePost[] = [];
-  const before = opts.cursor ?? new Date().toISOString();
   const limit = opts.limit ?? 20;
+  const before = opts.cursor ?? new Date().toISOString();
+  
+  let query = sb
+    .from('posts')
+    .select('*')
+    .eq('status', 'active')
+    .lt('created_at', before)
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
-  // Query open_ideas from open_ideas_public_view
-    if (kinds.includes('open_idea')) {
-      let query = sb
-        .from<OpenIdeaRow>('open_ideas_public_view')
-        .select('id, content, created_at')
-        .lt('created_at', before)
-        .limit(limit);
-      
-      const { data } = await query;
-      if (data) {
-        const filtered = opts.search
-          ? data.filter((item) =>
-              item.content?.toLowerCase().includes(opts.search!.toLowerCase())
-            )
-          : data;
-
-        chunks.push(
-          ...filtered.map(
-            (item): BasePost => ({
-              id: item.id,
-              kind: 'open_idea',
-              author_id: '',
-              title: null,
-              summary: item.content?.substring(0, 200) || null,
-              created_at: item.created_at,
-              updated_at: item.created_at,
-              privacy: 'public',
-              metrics: undefined,
-            })
-          )
-        );
-      }
+  // Filter by mode
+  if (opts.mode === 'public') {
+    query = query.eq('mode', 'public');
+  } else if (opts.mode === 'business') {
+    query = query.eq('mode', 'business');
+    if (opts.org_id) {
+      query = query.eq('org_id', opts.org_id);
     }
+  }
 
-  const includeBrainstorm = kinds.includes('brainstorm');
-  const includeSpark = kinds.includes('spark');
+  // Filter by kinds if specified
+  if (opts.kinds && opts.kinds.length > 0) {
+    query = query.in('kind', opts.kinds);
+  }
 
-  // Query brainstorm + spark posts from posts table (type='brainstorm')
-    if (includeBrainstorm || includeSpark) {
-      let q = sb
-        .from<PostRecordRow>('posts')
-        .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
-        .eq('type', 'brainstorm')
-        .eq('status', 'active')
-        .lt('created_at', before)
-        .limit(limit);
+  // Search filter
+  if (opts.search) {
+    query = query.or(`title.ilike.%${opts.search}%,content.ilike.%${opts.search}%`);
+  }
 
-      if (opts.mode === 'public') {
-        q = q.eq('visibility', 'public');
-      }
+  const { data, error } = await query;
 
-      const { data } = await q;
+  if (error) {
+    console.error('Feed query error:', error);
+    return { items: [], nextCursor: null };
+  }
 
-      if (data) {
-        const mapped = data
-          .filter((item) => {
-            const normalizedKind = normaliseKind(item.kind, item.type);
-            if (normalizedKind === 'spark') {
-              return includeSpark;
-            }
-            return includeBrainstorm;
-          })
-          .map(mapPostRecordToBasePost);
+  const items = (data || []) as BasePost[];
+  const nextCursor = items.length === limit ? items[items.length - 1].created_at : null;
 
-        const searched = opts.search
-          ? mapped.filter((item) => {
-              const term = opts.search!.toLowerCase();
-              return (
-                item.summary?.toLowerCase().includes(term) ||
-                item.title?.toLowerCase().includes(term)
-              );
-            })
-          : mapped;
-
-        chunks.push(...searched);
-      }
-    }
-
-  const includeInsights = kinds.some(k => k === 'business_insight' || k === 'insight');
-
-  // Query business insights from posts table
-    if (includeInsights) {
-      let q = sb
-        .from<PostRecordRow>('posts')
-        .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
-        .in('type', ['insight', 'report', 'whitepaper', 'webinar'])
-        .eq('status', 'active')
-        .lt('created_at', before)
-        .limit(limit);
-      
-      if (opts.mode === 'public') {
-        q = q.eq('visibility', 'public');
-      } else if (opts.mode === 'business' && opts.org_id) {
-        q = q.or('visibility.eq.public,visibility.eq.other_businesses');
-      }
-      
-      const { data } = await q;
-      if (data) {
-        const mapped = data.map(mapPostRecordToBasePost);
-
-        const searched = opts.search
-          ? mapped.filter((item) => {
-              const term = opts.search!.toLowerCase();
-              return (
-                item.summary?.toLowerCase().includes(term) ||
-                item.title?.toLowerCase().includes(term)
-              );
-            })
-          : mapped;
-
-        chunks.push(...searched);
-      }
-    }
-
-  // Sort the merged chunks
-  const sort = opts.sort ?? 'new';
-  const sorted = chunks.sort((a, b) => {
-    if (sort === 'new') return b.created_at.localeCompare(a.created_at);
-    if (sort === 'hot') {
-      const aHot = (a.metrics?.involvement ?? 0) + (a.metrics?.t_score ?? 0) + (a.metrics?.u_score ?? 0);
-      const bHot = (b.metrics?.involvement ?? 0) + (b.metrics?.t_score ?? 0) + (b.metrics?.u_score ?? 0);
-      return bHot - aHot;
-    }
-    const aScore = (a.metrics?.t_score ?? 0) + (a.metrics?.u_score ?? 0);
-    const bScore = (b.metrics?.t_score ?? 0) + (b.metrics?.u_score ?? 0);
-    return bScore - aScore;
-  });
-
-  // Limit to requested size
-  const limited = sorted.slice(0, limit);
-  const nextCursor = limited.length ? limited[limited.length - 1].created_at : null;
-
-  return { items: limited, nextCursor };
+  return { items, nextCursor };
 }
 
+/**
+ * Fetch cross-linked posts for a given post
+ */
 export async function fetchCrossLinkedPosts(
   sb: SupabaseClient,
-  opts: { postId?: string | null; relationTypes?: string[]; limit?: number }
+  opts: { postId?: string | null }
 ): Promise<BasePost[]> {
-  if (!opts.postId) {
+  if (!opts.postId) return [];
+
+  // Get relations where this post is involved
+  const { data: relations, error: relError } = await sb
+    .from('post_relations')
+    .select('parent_post_id, child_post_id')
+    .or(`parent_post_id.eq.${opts.postId},child_post_id.eq.${opts.postId}`);
+
+  if (relError || !relations || relations.length === 0) {
     return [];
   }
 
-  const relationTypes = opts.relationTypes ?? ['hard','soft','biz_in','biz_out'];
+  // Collect related post IDs
+  const relatedIds = new Set<string>();
+  relations.forEach((rel) => {
+    if (rel.parent_post_id !== opts.postId) relatedIds.add(rel.parent_post_id);
+    if (rel.child_post_id !== opts.postId) relatedIds.add(rel.child_post_id);
+  });
 
-  try {
-    const { data: relations, error } = await sb
-      .from<RelationRow>('post_relations')
-      .select('id, parent_post_id, child_post_id, relation_type, created_at')
-      .or(`parent_post_id.eq.${opts.postId},child_post_id.eq.${opts.postId}`)
-      .in('relation_type', relationTypes)
-      .limit(opts.limit ?? 40);
+  if (relatedIds.size === 0) return [];
 
-    if (error) {
-      console.warn('Failed to load cross links:', error.message);
-      return [];
-    }
+  // Fetch related posts
+  const { data: posts, error: postsError } = await sb
+    .from('posts')
+    .select('*')
+    .in('id', Array.from(relatedIds))
+    .eq('status', 'active');
 
-    const relatedIds = new Set<string>();
-    (relations ?? []).forEach((relation) => {
-      if (relation.parent_post_id === opts.postId) {
-        relatedIds.add(relation.child_post_id);
-      } else if (relation.child_post_id === opts.postId) {
-        relatedIds.add(relation.parent_post_id);
-      }
-    });
-
-    relatedIds.delete(opts.postId);
-    if (!relatedIds.size) {
-      return [];
-    }
-
-    const { data: posts, error: postsError } = await sb
-      .from<PostRecordRow>('posts')
-      .select('id, user_id, title, content, summary, type, kind, visibility, mode, t_score, u_score, involvement, created_at, updated_at')
-      .in('id', Array.from(relatedIds));
-
-    if (postsError) {
-      console.warn('Failed to load posts for cross links:', postsError.message);
-      return [];
-    }
-
-    return (posts ?? [])
-      .map(mapPostRecordToBasePost)
-      .sort((a, b) => b.created_at.localeCompare(a.created_at));
-  } catch (err) {
-    console.warn('Unexpected cross link fetch error:', err);
+  if (postsError) {
+    console.error('Cross-links query error:', postsError);
     return [];
   }
+
+  return (posts || []) as BasePost[];
 }
-

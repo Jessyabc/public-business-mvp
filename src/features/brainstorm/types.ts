@@ -1,4 +1,7 @@
-import type { Post, PostRelationType } from '@/types/post';
+import type { Post, PostRelationType, PostRelation } from '@/types/post';
+
+// Use actual Supabase types
+export type { Post as BasePost, PostRelation as PostLink } from '@/types/post';
 
 /**
  * BrainstormRelationType - helper type for brainstorm-specific relations
