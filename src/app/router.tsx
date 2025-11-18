@@ -18,6 +18,9 @@ const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
 const Insights = lazy(() => import('@/pages/Insights'));
 const CreateOrganization = lazy(() => import('@/features/orgs/pages/CreateOrganization'));
+const BecomeBusinessMember = lazy(() => import('@/pages/BecomeBusinessMember'));
+const AdminRequests = lazy(() => import('@/pages/AdminRequests'));
+const BusinessDashboard = lazy(() => import('@/pages/BusinessDashboard'));
 
 // Public/landing
 import { Landing } from '@/pages/Landing';
@@ -71,6 +74,32 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     element: (
       <MainLayout>
         <LazyWrapper><CreateOrganization /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+
+  // Business membership routes
+  {
+    path: '/become-business-member',
+    element: (
+      <MainLayout>
+        <LazyWrapper><BecomeBusinessMember /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+  {
+    path: '/admin/requests',
+    element: (
+      <MainLayout>
+        <LazyWrapper><AdminRequests /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+  {
+    path: '/business/dashboard',
+    element: (
+      <MainLayout>
+        <LazyWrapper><BusinessDashboard /></LazyWrapper>
       </MainLayout>
     ),
   },
