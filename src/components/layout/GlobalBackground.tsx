@@ -13,10 +13,8 @@ export function GlobalBackground() {
   const { user } = useAuth();
   const { mode } = useAppMode();
 
-  // Determine the background mode
-  // If not logged in, always use public (dark) mode
-  // If logged in, respect the user's mode selection
-  const backgroundMode = !user ? 'public' : mode;
+  // Logged-out users always see public (dark) theme
+  const backgroundMode = 'public';
 
   return <OrbitalBackground mode={backgroundMode} />;
 }

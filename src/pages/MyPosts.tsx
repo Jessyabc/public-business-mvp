@@ -1,19 +1,22 @@
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { GlassCard } from '@/ui/components/GlassCard';
-import { Brain, Building2, Plus, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle } from 'lucide-react';
+import { Brain, Building2, Plus, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { usePosts } from '@/hooks/usePosts';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FeedContainer } from '@/features/feed/FeedContainer';
 
 const MyPosts = () => {
   const { mode } = useAppMode();
   const { user } = useAuth();
   const { openComposer } = useComposerStore();
   const { posts, loading, error, fetchUserPosts } = usePosts();
+  const [activeTab, setActiveTab] = useState('posts');
 
   useEffect(() => {
     if (user) {
@@ -75,186 +78,204 @@ const MyPosts = () => {
           </GlassCard>
         </header>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="space-y-6">
-            {[1, 2, 3].map((i) => (
-              <GlassCard key={i} className={`glass-ios-triple transition-all duration-700 ${
-                mode === 'public'
-                  ? 'border-white/20'
-                  : 'border-blue-200/30'
-              }`}>
-                <Skeleton className="h-6 w-3/4 mb-4" />
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </GlassCard>
-            ))}
-          </div>
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 glass-ios-triple mb-6">
+            <TabsTrigger value="posts">My Posts</TabsTrigger>
+            <TabsTrigger value="lastSeen">
+              <Clock className="w-4 h-4 mr-2" />
+              Last Seen
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Error State */}
-        {error && !loading && (
-          <GlassCard className={`glass-ios-triple glass-corner-distort transition-all duration-700 ${
-            mode === 'public'
-              ? 'border-red-500/20'
-              : 'border-red-200/30'
-          }`}>
-            <div className="text-center">
-              <AlertCircle className={`w-12 h-12 mx-auto mb-4 ${
-                mode === 'public' ? 'text-red-400' : 'text-red-600'
-              }`} />
-              <h3 className={`text-lg font-medium mb-2 ${
-                mode === 'public' ? 'text-white' : 'text-red-600'
-              }`}>
-                Failed to Load Posts
-              </h3>
-              <p className={`mb-4 ${
-                mode === 'public' ? 'text-white/70' : 'text-red-600/80'
-              }`}>
-                {error}
-              </p>
-              <Button 
-                onClick={() => fetchUserPosts()}
-                variant="outline"
-                className={`glass-ios-triple ${
-                  mode === 'public'
-                    ? 'border-red-400/50 text-red-400 hover:bg-red-400/10'
-                    : 'border-red-600 text-red-600 hover:bg-red-50'
-                }`}
-              >
-                Try Again
-              </Button>
-            </div>
-          </GlassCard>
-        )}
-
-        {/* Content Area */}
-        {!loading && !error && (
-          <div className="space-y-6">
-            {posts.length === 0 ? (
-              /* Empty State */
-              <GlassCard className={`text-center glass-ios-triple glass-corner-distort transition-all duration-700 ${
-                mode === 'public'
-                  ? 'border-white/20'
-                  : 'border-blue-200/30'
-              }`} padding="lg">
-                <div className="space-y-4">
-                  <FileText className={`w-16 h-16 mx-auto ${
-                    mode === 'public' ? 'text-white/40' : 'text-slate-400'
-                  }`} />
-                  <h3 className={`text-xl font-medium ${
-                    mode === 'public' ? 'text-white' : 'text-slate-800'
-                  }`}>
-                    No Posts Yet
-                  </h3>
-                  <p className={`text-lg ${
-                    mode === 'public' ? 'text-white/70' : 'text-slate-600'
-                  }`}>
-                    {mode === 'public' 
-                      ? "You haven't created any posts yet. Share your ideas!"
-                      : "You haven't published any business content yet."
-                    }
-                  </p>
-                  <Button 
-                    onClick={() => openComposer()}
-                    className={`glass-ios-triple transition-all duration-300 ${
-                      mode === 'public'
-                        ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
-                        : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
-                    }`}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Your First Post
-                  </Button>
-                </div>
-              </GlassCard>
-            ) : (
-              /* Posts List */
-              <>
-                <div className="flex justify-between items-center">
-                  <p className={`text-sm ${
-                    mode === 'public' ? 'text-white/70' : 'text-slate-600'
-                  }`}>
-                    {posts.length} {posts.length === 1 ? 'post' : 'posts'}
-                  </p>
-                  <Button 
-                    onClick={() => openComposer()}
-                    size="sm"
-                    className={`glass-ios-triple transition-all duration-300 ${
-                      mode === 'public'
-                        ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
-                        : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
-                    }`}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Post
-                  </Button>
-                </div>
-
-                {posts.map((post) => (
-                  <GlassCard key={post.id} className={`glass-ios-triple glass-corner-distort transition-all duration-700 hover:scale-[1.02] ${
+          <TabsContent value="posts">
+            {/* Loading State */}
+            {loading && (
+              <div className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <GlassCard key={i} className={`glass-ios-triple transition-all duration-700 ${
                     mode === 'public'
-                      ? 'border-white/20 hover:border-white/30'
-                      : 'border-blue-200/30 hover:border-blue-300/40'
+                      ? 'border-white/20'
+                      : 'border-blue-200/30'
                   }`}>
-                    <div className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant={post.mode === 'public' ? 'default' : 'secondary'}>
-                              {post.mode}
-                            </Badge>
-                            <Badge variant="outline">
-                              {post.type}
-                            </Badge>
-                            <Badge variant="outline">
-                              {post.visibility}
-                            </Badge>
-                          </div>
-                          {post.title && (
-                            <h3 className={`text-lg font-semibold mb-2 ${
-                              mode === 'public' ? 'text-white' : 'text-slate-800'
-                            }`}>
-                              {post.title}
-                            </h3>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(post.created_at)}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="pt-0">
-                      <p className={`mb-4 line-clamp-3 ${
-                        mode === 'public' ? 'text-white/80' : 'text-slate-700'
-                      }`}>
-                        {post.content}
-                      </p>
-                      
-                      {/* Engagement Stats */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          {post.views_count || 0}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          {post.likes_count || 0}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageCircle className="w-4 h-4" />
-                          {post.comments_count || 0}
-                        </div>
-                      </div>
-                    </div>
+                    <Skeleton className="h-6 w-3/4 mb-4" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-2/3" />
                   </GlassCard>
                 ))}
-              </>
+              </div>
             )}
-          </div>
-        )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <GlassCard className={`glass-ios-triple glass-corner-distort transition-all duration-700 ${
+                mode === 'public'
+                  ? 'border-red-500/20'
+                  : 'border-red-200/30'
+              }`}>
+                <div className="text-center">
+                  <AlertCircle className={`w-12 h-12 mx-auto mb-4 ${
+                    mode === 'public' ? 'text-red-400' : 'text-red-600'
+                  }`} />
+                  <h3 className={`text-lg font-medium mb-2 ${
+                    mode === 'public' ? 'text-white' : 'text-red-600'
+                  }`}>
+                    Failed to Load Posts
+                  </h3>
+                  <p className={`mb-4 ${
+                    mode === 'public' ? 'text-white/70' : 'text-red-600/80'
+                  }`}>
+                    {error}
+                  </p>
+                  <Button 
+                    onClick={() => fetchUserPosts()}
+                    variant="outline"
+                    className={`glass-ios-triple ${
+                      mode === 'public'
+                        ? 'border-red-400/50 text-red-400 hover:bg-red-400/10'
+                        : 'border-red-600 text-red-600 hover:bg-red-50'
+                    }`}
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              </GlassCard>
+            )}
+
+            {/* Content Area */}
+            {!loading && !error && (
+              <div className="space-y-6">
+                {posts.length === 0 ? (
+                  /* Empty State */
+                  <GlassCard className={`text-center glass-ios-triple glass-corner-distort transition-all duration-700 ${
+                    mode === 'public'
+                      ? 'border-white/20'
+                      : 'border-blue-200/30'
+                  }`} padding="lg">
+                    <div className="space-y-4">
+                      <FileText className={`w-16 h-16 mx-auto ${
+                        mode === 'public' ? 'text-white/40' : 'text-slate-400'
+                      }`} />
+                      <h3 className={`text-xl font-medium ${
+                        mode === 'public' ? 'text-white' : 'text-slate-800'
+                      }`}>
+                        No Posts Yet
+                      </h3>
+                      <p className={`text-lg ${
+                        mode === 'public' ? 'text-white/70' : 'text-slate-600'
+                      }`}>
+                        {mode === 'public' 
+                          ? "You haven't created any posts yet. Share your ideas!"
+                          : "You haven't published any business content yet."
+                        }
+                      </p>
+                      <Button 
+                        onClick={() => openComposer()}
+                        className={`glass-ios-triple transition-all duration-300 ${
+                          mode === 'public'
+                            ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
+                            : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
+                        }`}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Your First Post
+                      </Button>
+                    </div>
+                  </GlassCard>
+                ) : (
+                  /* Posts List */
+                  <>
+                    <div className="flex justify-between items-center">
+                      <p className={`text-sm ${
+                        mode === 'public' ? 'text-white/70' : 'text-slate-600'
+                      }`}>
+                        {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+                      </p>
+                      <Button 
+                        onClick={() => openComposer()}
+                        size="sm"
+                        className={`glass-ios-triple transition-all duration-300 ${
+                          mode === 'public'
+                            ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
+                            : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
+                        }`}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Post
+                      </Button>
+                    </div>
+
+                    {posts.map((post) => (
+                      <GlassCard key={post.id} className={`glass-ios-triple glass-corner-distort transition-all duration-700 hover:scale-[1.02] ${
+                        mode === 'public'
+                          ? 'border-white/20 hover:border-white/30'
+                          : 'border-blue-200/30 hover:border-blue-300/40'
+                      }`}>
+                        <div className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant={post.mode === 'public' ? 'default' : 'secondary'}>
+                                  {post.mode}
+                                </Badge>
+                                <Badge variant="outline">
+                                  {post.type}
+                                </Badge>
+                                <Badge variant="outline">
+                                  {post.visibility}
+                                </Badge>
+                              </div>
+                              {post.title && (
+                                <h3 className={`text-lg font-semibold mb-2 ${
+                                  mode === 'public' ? 'text-white' : 'text-slate-800'
+                                }`}>
+                                  {post.title}
+                                </h3>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(post.created_at)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="pt-0">
+                          <p className={`mb-4 line-clamp-3 ${
+                            mode === 'public' ? 'text-white/80' : 'text-slate-700'
+                          }`}>
+                            {post.content}
+                          </p>
+                          
+                          {/* Engagement Stats */}
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              {post.views_count || 0}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Heart className="w-4 h-4" />
+                              {post.likes_count || 0}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MessageCircle className="w-4 h-4" />
+                              {post.comments_count || 0}
+                            </div>
+                          </div>
+                        </div>
+                      </GlassCard>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="lastSeen">
+            <div className="h-[calc(100vh-300px)]">
+              <FeedContainer mode="brainstorm_last_seen" />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
