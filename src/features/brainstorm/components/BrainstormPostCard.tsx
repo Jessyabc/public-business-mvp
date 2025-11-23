@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import { BasePost } from '@/types/post';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
+import { Link2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 
 type Props = {
@@ -20,6 +23,21 @@ export function BrainstormPostCard({
   metaLabel,
   onSelect 
 }: Props) {
+  const [linkCount, setLinkCount] = useState(0);
+
+  useEffect(() => {
+    const fetchLinkCount = async () => {
+      const { count } = await supabase
+        .from('post_relations')
+        .select('*', { count: 'exact', head: true })
+        .eq('parent_post_id', post.id);
+      
+      setLinkCount(count || 0);
+    };
+
+    fetchLinkCount();
+  }, [post.id]);
+
   const handleContinue = (e: React.MouseEvent) => {
     e.stopPropagation();
     window.dispatchEvent(
@@ -29,11 +47,21 @@ export function BrainstormPostCard({
     );
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (onSelect) {
+      onSelect(post);
+    } else {
+      // Default behavior: show lineage
+      window.dispatchEvent(
+        new CustomEvent('pb:brainstorm:show-lineage', { detail: { postId: post.id } })
+      );
+    }
+  };
 
   return (
     <Card 
       className="cursor-pointer hover:border-primary/50 transition-colors"
-      onClick={() => onSelect?.(post)}
+      onClick={handleCardClick}
     >
       <CardHeader className={variant === 'compact' ? 'pb-2' : 'pb-3'}>
         <div className="flex items-start justify-between gap-2">
@@ -62,28 +90,30 @@ export function BrainstormPostCard({
           {post.content}
         </p>
         
-        {(post.likes_count > 0 || post.views_count > 0 || post.t_score) && (
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-            {post.t_score && (
-              <div className="flex items-center gap-1">
-                <span className="font-semibold">T:</span>
-                <span>{post.t_score}</span>
-              </div>
-            )}
-            {post.likes_count > 0 && (
-              <div className="flex items-center gap-1">
-                <span className="font-semibold">Likes:</span>
-                <span>{post.likes_count}</span>
-              </div>
-            )}
-            {post.views_count > 0 && (
-              <div className="flex items-center gap-1">
-                <span className="font-semibold">Views:</span>
-                <span>{post.views_count}</span>
-              </div>
-            )}
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+          {post.t_score && (
+            <div className="flex items-center gap-1">
+              <span className="font-semibold">T:</span>
+              <span>{post.t_score}</span>
+            </div>
+          )}
+          {post.likes_count > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="font-semibold">Likes:</span>
+              <span>{post.likes_count}</span>
+            </div>
+          )}
+          {post.views_count > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="font-semibold">Views:</span>
+              <span>{post.views_count}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1">
+            <Link2 className="w-3.5 h-3.5" />
+            <span>{linkCount}</span>
           </div>
-        )}
+        </div>
 
         {showActions && (
           <Button

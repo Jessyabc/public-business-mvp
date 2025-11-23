@@ -112,7 +112,12 @@ export function useProfile() {
 
         if (error) throw error;
 
-        setProfile((data as Profile) ?? merged);
+        const profileData = data ? {
+          ...data,
+          linkedin_url: data['Social Media'] || null
+        } as Profile : merged;
+        
+        setProfile(profileData);
         return { error: null };
       } catch (err: any) {
         console.error("Error updating profile:", err);

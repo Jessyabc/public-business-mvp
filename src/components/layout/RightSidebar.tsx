@@ -13,10 +13,11 @@ interface SidebarBrainstorm {
   created_at: string;
 }
 
-interface SidebarIdea {
+interface OpenIdeaIntake {
   id: string;
-  content: string;
+  text: string;
   created_at: string;
+  status: string;
 }
 
 /**
@@ -25,7 +26,7 @@ interface SidebarIdea {
  * - Open Ideas tab hosts the spark-only FeedContainer
  */
 export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
-  const [openIdeasFeed, setOpenIdeasFeed] = useState<SidebarIdea[]>([]);
+  const [openIdeas, setOpenIdeas] = useState<OpenIdeaIntake[]>([]);
   const [recentBrainstorms, setRecentBrainstorms] = useState<SidebarBrainstorm[]>([]);
   const [activeTab, setActiveTab] = useState<'breadcrumbs' | 'openIdeas'>('breadcrumbs');
 
@@ -69,14 +70,14 @@ export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
 
       setRecentBrainstorms((brainstorms || []) as SidebarBrainstorm[]);
 
-      // Fetch open ideas from open_ideas_public_view
-      const { data: openIdeas } = await supabase
-        .from('open_ideas_public_view')
-        .select('*')
+      // Fetch open ideas from open_ideas_intake
+      const { data: ideas } = await supabase
+        .from('open_ideas_intake')
+        .select('id, text, created_at, status')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      setOpenIdeasFeed((openIdeas || []) as SidebarIdea[]);
+      setOpenIdeas((ideas || []) as OpenIdeaIntake[]);
     } catch (error) {
       console.error('Error fetching sidebar feeds:', error);
     }
@@ -114,22 +115,29 @@ export function RightSidebar({ variant = 'default' }: RightSidebarProps) {
     };
 
     const renderOpenIdeas = () => {
-      if (openIdeasFeed.length === 0) {
+      if (openIdeas.length === 0) {
         return <p className="text-sm text-white/70">No open ideas yet.</p>;
       }
 
       return (
         <div className="space-y-3">
-          {openIdeasFeed.map((idea) => (
+          {openIdeas.map((idea) => (
             <GlassCard
               key={idea.id}
               padding="sm"
               className="border-white/15 bg-white/5 backdrop-blur"
             >
-              <p className="text-sm text-white/85">{idea.content}</p>
-              <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-white/50">
-                {new Date(idea.created_at).toLocaleDateString()}
-              </p>
+              <p className="text-sm text-white/85">{idea.text}</p>
+              <div className="flex justify-between items-center mt-2">
+                <p className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+                  {new Date(idea.created_at).toLocaleDateString()}
+                </p>
+                <span className={`text-xs px-2 py-0.5 rounded ${
+                  idea.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+                }`}>
+                  {idea.status}
+                </span>
+              </div>
             </GlassCard>
           ))}
         </div>

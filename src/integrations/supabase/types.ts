@@ -242,8 +242,8 @@ export type Database = {
           industry_id: string | null
           invited_at: string | null
           invited_by: string | null
-          linkedin_url: string | null
           phone: string | null
+          "Social Media": string | null
           status: string
           updated_at: string
           user_id: string
@@ -261,8 +261,8 @@ export type Database = {
           industry_id?: string | null
           invited_at?: string | null
           invited_by?: string | null
-          linkedin_url?: string | null
           phone?: string | null
+          "Social Media"?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -280,8 +280,8 @@ export type Database = {
           industry_id?: string | null
           invited_at?: string | null
           invited_by?: string | null
-          linkedin_url?: string | null
           phone?: string | null
+          "Social Media"?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -997,9 +997,9 @@ export type Database = {
           display_name: string | null
           id: string
           is_completed: boolean | null
-          linkedin_url: string | null
           location: string | null
           role: Database["public"]["Enums"]["app_role"] | null
+          "Social Media": string | null
           theme_settings: Json | null
           updated_at: string
           website: string | null
@@ -1012,9 +1012,9 @@ export type Database = {
           display_name?: string | null
           id: string
           is_completed?: boolean | null
-          linkedin_url?: string | null
           location?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
+          "Social Media"?: string | null
           theme_settings?: Json | null
           updated_at?: string
           website?: string | null
@@ -1027,9 +1027,9 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_completed?: boolean | null
-          linkedin_url?: string | null
           location?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
+          "Social Media"?: string | null
           theme_settings?: Json | null
           updated_at?: string
           website?: string | null
