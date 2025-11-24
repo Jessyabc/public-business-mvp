@@ -95,7 +95,7 @@ export function BottomNavigation() {
           })}
 
             <Button onClick={() => openComposer()} className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border-pb-blue/30 interactive-glass ml-1 sm:ml-2`} size="icon">
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#e6f0ff]" />
             </Button>
           </div>
         </div>
