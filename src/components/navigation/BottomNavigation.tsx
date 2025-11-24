@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Building2, Plus, Menu, X } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Building2, Plus, Menu, X, ToggleRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -69,7 +69,7 @@ export function BottomNavigation() {
             {/* Mode Toggle */}
             <button onClick={toggleMode} className={`${styles.glassButton} glass-nav-item px-2 sm:px-3 flex items-center gap-1 sm:gap-2`}>
               {mode === 'public' ? <>
-                  <Home className="w-4 h-4 text-pb-blue transition-all duration-med" />
+                  <ToggleRight className="text-pb-blue transition-all duration-med w-[20px] h-[20px] text-[#e6f0ff]" />
                   <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline text-slate-50">
                     Public
                   </span>
