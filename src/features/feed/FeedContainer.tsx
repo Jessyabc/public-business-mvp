@@ -4,13 +4,7 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { useUniversalFeed } from './hooks/useUniversalFeed';
 import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
-
-type BrainstormFeedMode =
-  | 'brainstorm_main'
-  | 'brainstorm_open_ideas'
-  | 'brainstorm_cross_links'
-  | 'brainstorm_last_seen';
-
+type BrainstormFeedMode = 'brainstorm_main' | 'brainstorm_open_ideas' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
 type Props = {
   mode: BrainstormFeedMode;
   activePostId?: string | null;
@@ -19,7 +13,6 @@ type Props = {
   /** Optional: render function to customize the feed display */
   renderFeed?: (items: BasePost[], feed: ReturnType<typeof useUniversalFeed>) => React.ReactNode;
 };
-
 const DEFAULT_MAIN_KINDS: PostKind[] = ['Spark'];
 
 /**
@@ -35,72 +28,52 @@ export function FeedContainer({
   activePostId = null,
   initialKinds,
   onItemsChange,
-  renderFeed,
+  renderFeed
 }: Props) {
-  const lastSeen = useBrainstormExperienceStore((state) => state.lastSeen);
-  const resolvedKinds =
-    initialKinds ??
-    (mode === 'brainstorm_open_ideas'
-      ? ['Spark']
-      : DEFAULT_MAIN_KINDS);
-
-  const filters = useFeedFilters({ kinds: resolvedKinds });
-
+  const lastSeen = useBrainstormExperienceStore(state => state.lastSeen);
+  const resolvedKinds = initialKinds ?? (mode === 'brainstorm_open_ideas' ? ['Spark'] : DEFAULT_MAIN_KINDS);
+  const filters = useFeedFilters({
+    kinds: resolvedKinds
+  });
   React.useEffect(() => {
     if (mode !== 'brainstorm_last_seen') return;
     onItemsChange?.(lastSeen);
   }, [mode, lastSeen, onItemsChange]);
-
   const feed = useUniversalFeed({
     mode,
     kinds: mode === 'brainstorm_main' ? filters.kinds : resolvedKinds,
     sort: mode === 'brainstorm_main' ? filters.sort : undefined,
     search: mode === 'brainstorm_main' ? filters.search : undefined,
     activePostId,
-    pageSize: 20,
+    pageSize: 20
   });
-
   React.useEffect(() => {
     if (mode === 'brainstorm_last_seen') return;
     onItemsChange?.(feed.items);
   }, [mode, feed.items, onItemsChange]);
-
   if (mode === 'brainstorm_last_seen') {
     const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
       items: lastSeen,
       loadMore: async () => {},
       loading: false,
       eof: true,
-      refresh: async () => {},
+      refresh: async () => {}
     };
-
     if (renderFeed) {
       return <>{renderFeed(lastSeen, syntheticFeed)}</>;
     }
-
-    return (
-      <div style={{ flex: 1 }}>
-        <FeedList
-          items={syntheticFeed.items}
-          onEndReached={syntheticFeed.loadMore}
-          loading={syntheticFeed.loading}
-        />
-      </div>
-    );
+    return <div style={{
+      flex: 1
+    }}>
+        <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} />
+      </div>;
   }
-
   if (renderFeed) {
     return <>{renderFeed(feed.items, feed)}</>;
   }
-
-  return (
-    <div style={{ flex: 1 }}>
-      <FeedList
-        items={feed.items}
-        onEndReached={feed.loadMore}
-        loading={feed.loading}
-      />
-    </div>
-  );
+  return <div style={{
+    flex: 1
+  }}>
+      <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} className="pl-[10px] px-px pr-[10px] py-[10px]" />
+    </div>;
 }
-

@@ -5,11 +5,9 @@ import { CrossLinksFeed } from '@/features/brainstorm/components/CrossLinksFeed'
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { PostLineageOverlay } from '@/components/brainstorm/PostLineageOverlay';
 import { RightSidebar } from '@/components/layout/RightSidebar';
-
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
-
 export default function BrainstormFeed() {
-  const activePostId = useBrainstormExperienceStore((state) => state.activePostId);
+  const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const [composerOpen, setComposerOpen] = useState(false);
   const [lineagePostId, setLineagePostId] = useState<string | null>(null);
 
@@ -22,7 +20,6 @@ export default function BrainstormFeed() {
         setComposerOpen(true);
       }
     };
-
     const handleShowLineage = (e: Event) => {
       const customEvent = e as CustomEvent;
       const postId = customEvent.detail?.postId;
@@ -30,25 +27,16 @@ export default function BrainstormFeed() {
         setLineagePostId(postId);
       }
     };
-
     window.addEventListener('pb:brainstorm:continue', handleContinue);
     window.addEventListener('pb:brainstorm:show-lineage', handleShowLineage);
-
     return () => {
       window.removeEventListener('pb:brainstorm:continue', handleContinue);
       window.removeEventListener('pb:brainstorm:show-lineage', handleShowLineage);
     };
   }, []);
-
-  return (
-    <>
-      <BrainstormLayoutShell
-        main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} />}
-        crossLinks={<CrossLinksFeed postId={activePostId} />}
-        sidebar={<RightSidebar variant="feed" />}
-      />
+  return <>
+      <BrainstormLayoutShell main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} />} crossLinks={<CrossLinksFeed postId={activePostId} />} sidebar={<RightSidebar variant="feed" className="px-[10px]" />} />
       <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
       <PostLineageOverlay postId={lineagePostId} onClose={() => setLineagePostId(null)} />
-    </>
-  );
+    </>;
 }
