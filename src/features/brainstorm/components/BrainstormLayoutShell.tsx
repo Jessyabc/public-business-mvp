@@ -35,7 +35,7 @@ export function BrainstormLayoutShell({
       </div>
 
       {/* Desktop: 3-column layout */}
-      <div className="hidden h-full min-h-0 gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(200px,240px)_minmax(200px,240px)]">
+      <div className="hidden h-full min-h-0 gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(200px,240px)_minmax(200px,240px)] px-[10px] py-[10px]">
         <div className="min-h-0">{main}</div>
         <div className="min-h-0 px-[10px]">{crossLinks}</div>
         <div className="min-h-0">{sidebar}</div>
