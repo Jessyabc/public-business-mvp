@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Building2, Plus, Menu, X, ToggleRight } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Building2, Plus, Menu, X, ToggleRight, ToggleLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -74,8 +74,8 @@ export function BottomNavigation() {
                     Public
                   </span>
                 </> : <>
-                  <Building2 className="w-4 h-4 text-pb-blue transition-all duration-med" />
-                  <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline">
+                  <ToggleLeft className="w-4 h-4 text-pb-blue transition-all duration-med text-[#fefefe]" />
+                  <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline text-[#fefefe]">
                     Business
                   </span>
                 </>}
