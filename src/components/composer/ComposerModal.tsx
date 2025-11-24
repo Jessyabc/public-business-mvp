@@ -332,7 +332,7 @@ export function ComposerModal({
           </GlassSurface>}
       </div>
 
-      <div className="flex flex-col gap-2 pt-2">
+      <div className="flex-row py-[5px] gap-0 flex items-center justify-center rounded-none">
         <div className="flex justify-end space-x-2">
           <button className="glassButton glassButton--muted" onClick={handleClose}>
             Cancel
@@ -342,9 +342,7 @@ export function ComposerModal({
           </button>
         </div>
         <div className="flex justify-center">
-          <button type="button" className="glassButton glassButton--muted text-xs py-1 px-3" onClick={() => setComposerMode('open-idea')}>
-            Or create an Open Idea instead
-          </button>
+          
         </div>
       </div>
     </div>;
