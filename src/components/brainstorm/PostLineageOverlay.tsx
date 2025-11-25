@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { BasePost } from '@/types/post';
 import { PostToSparkCard } from '@/components/brainstorm/PostToSparkCard';
 import { CrossLinksFeed } from '@/features/brainstorm/components/CrossLinksFeed';
 import { getPostRelations } from '@/lib/getPostRelations';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface PostLineageOverlayProps {
@@ -13,11 +14,18 @@ interface PostLineageOverlayProps {
 }
 
 export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayProps) {
+  const [currentPost, setCurrentPost] = useState<BasePost | null>(activePost);
   const [continuations, setContinuations] = useState<BasePost[]>([]);
   const [loading, setLoading] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Sync currentPost with activePost prop
+  useEffect(() => {
+    setCurrentPost(activePost);
+  }, [activePost]);
 
   useEffect(() => {
-    if (!activePost) {
+    if (!currentPost) {
       setContinuations([]);
       return;
     }
@@ -26,7 +34,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
       setLoading(true);
       try {
         // Fetch continuations using getPostRelations (hard children)
-        const relations = await getPostRelations(activePost.id);
+        const relations = await getPostRelations(currentPost.id);
         const hardChildren = relations.hardChildren || [];
         
         // Sort by created_at, newest first
@@ -43,7 +51,39 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
     };
 
     fetchLineage();
-  }, [activePost]);
+  }, [currentPost]);
+
+  // Handle cross-link selection - switch to that post
+  const handleSelectPost = async (postId: string) => {
+    try {
+      // Fetch the post by ID
+      const { data: post, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', postId)
+        .eq('type', 'brainstorm')
+        .eq('mode', 'public')
+        .eq('status', 'active')
+        .single();
+
+      if (error) {
+        console.error('Error fetching post:', error);
+        return;
+      }
+
+      if (post) {
+        // Update current post
+        setCurrentPost(post as BasePost);
+        
+        // Scroll to top of the lineage column
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    } catch (error) {
+      console.error('Error selecting post:', error);
+    }
+  };
 
   // ESC key handler
   useEffect(() => {
@@ -61,6 +101,20 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
     };
   }, [activePost, onClose]);
 
+  // Close overlay when continue event is dispatched (composer will open)
+  useEffect(() => {
+    if (!activePost) return;
+
+    const handleContinue = () => {
+      onClose();
+    };
+
+    window.addEventListener('pb:brainstorm:continue', handleContinue);
+    return () => {
+      window.removeEventListener('pb:brainstorm:continue', handleContinue);
+    };
+  }, [activePost, onClose]);
+
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -68,7 +122,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
   };
 
   // If no active post, render nothing
-  if (!activePost) {
+  if (!activePost || !currentPost) {
     return null;
   }
 
@@ -80,7 +134,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         onClick={handleBackdropClick}
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
       >
         {/* Bottom Sheet Container */}
         <motion.div
@@ -88,14 +142,14 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed inset-0 z-40 flex items-end justify-center pointer-events-none"
+          className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none pb-20 sm:pb-24"
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-label="Spark lineage"
         >
           {/* Sheet Wrapper */}
-          <div className="w-full max-w-5xl mx-auto px-4 pb-6 sm:pb-8 pointer-events-auto max-h-[90vh] flex flex-col">
+          <div className="w-full max-w-5xl mx-auto px-4 pointer-events-auto max-h-[85vh] flex flex-col">
             {/* Glass Panel */}
             <div
               className={cn(
@@ -134,7 +188,10 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
                 {/* Main Content Area - Side by side on desktop, stacked on mobile */}
                 <div className="flex flex-col gap-4 px-4 pb-4 sm:flex-row sm:gap-6 sm:px-5 sm:pb-5 flex-1 min-h-0">
                   {/* Left: lineage column */}
-                  <div className="flex-1 min-w-0 max-h-[70vh] overflow-y-auto pr-1 sm:pr-2 space-y-4">
+                  <div 
+                    ref={scrollContainerRef}
+                    className="flex-1 min-w-0 max-h-[70vh] overflow-y-auto pr-1 sm:pr-2 space-y-4"
+                  >
                     {loading ? (
                       <div className="text-white/70 text-center py-12">
                         <div className="inline-block w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -142,11 +199,14 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
                       </div>
                     ) : (
                       <>
-                        {/* Show activePost using PostToSparkCard */}
+                        {/* Show currentPost using PostToSparkCard */}
                         <PostToSparkCard 
-                          post={activePost} 
-                          onSelect={() => {
-                            // TODO: When we add more lineage posts, clicking any card should re-focus the overlay on that post
+                          post={currentPost} 
+                          onSelect={(post) => {
+                            // Allow clicking the main post to switch (for consistency)
+                            if (post.id !== currentPost.id) {
+                              handleSelectPost(post.id);
+                            }
                           }} 
                         />
 
@@ -157,8 +217,9 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
                               <PostToSparkCard
                                 key={post.id}
                                 post={post}
-                                onSelect={() => {
-                                  // TODO: When we add more lineage posts, clicking any card should re-focus the overlay on that post
+                                onSelect={(selectedPost) => {
+                                  // Clicking a continuation switches the overlay to that post
+                                  handleSelectPost(selectedPost.id);
                                 }}
                               />
                             ))}
@@ -170,7 +231,10 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
 
                   {/* Right: cross-links */}
                   <div className="w-full sm:w-80 max-w-full">
-                    <CrossLinksFeed postId={activePost.id} />
+                    <CrossLinksFeed 
+                      postId={currentPost.id} 
+                      onSelectPost={handleSelectPost}
+                    />
                   </div>
                 </div>
               </div>

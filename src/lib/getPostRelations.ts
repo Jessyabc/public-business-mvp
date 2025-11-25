@@ -59,12 +59,14 @@ export async function getPostRelations(postId: string): Promise<PostRelationsRes
       };
     }
 
-    // Fetch all related posts
+    // Fetch all related posts - filter for public brainstorm posts only
     const { data: posts, error: postsError } = await supabase
       .from('posts')
       .select('*')
       .in('id', Array.from(postIds))
-      .eq('status', 'active');
+      .eq('status', 'active')
+      .eq('type', 'brainstorm')
+      .eq('mode', 'public');
 
     if (postsError) {
       console.error('Error fetching related posts:', postsError);
@@ -86,21 +88,34 @@ export async function getPostRelations(postId: string): Promise<PostRelationsRes
     const parentSoft: Post[] = [];
 
     relations.forEach((rel: PostRelation) => {
+      // Only process 'hard' and 'soft' relations (ignore biz_in, biz_out)
       if (rel.relation_type === 'hard') {
         if (rel.parent_post_id === postId) {
           const child = postsMap.get(rel.child_post_id);
-          if (child) hardChildren.push(child);
+          // Only include if it's a public brainstorm post
+          if (child && child.type === 'brainstorm' && child.mode === 'public' && child.status === 'active') {
+            hardChildren.push(child);
+          }
         } else if (rel.child_post_id === postId) {
           const parent = postsMap.get(rel.parent_post_id);
-          if (parent) parentHard.push(parent);
+          // Only include if it's a public brainstorm post
+          if (parent && parent.type === 'brainstorm' && parent.mode === 'public' && parent.status === 'active') {
+            parentHard.push(parent);
+          }
         }
       } else if (rel.relation_type === 'soft') {
         if (rel.parent_post_id === postId) {
           const child = postsMap.get(rel.child_post_id);
-          if (child) softChildren.push(child);
+          // Only include if it's a public brainstorm post
+          if (child && child.type === 'brainstorm' && child.mode === 'public' && child.status === 'active') {
+            softChildren.push(child);
+          }
         } else if (rel.child_post_id === postId) {
           const parent = postsMap.get(rel.parent_post_id);
-          if (parent) parentSoft.push(parent);
+          // Only include if it's a public brainstorm post
+          if (parent && parent.type === 'brainstorm' && parent.mode === 'public' && parent.status === 'active') {
+            parentSoft.push(parent);
+          }
         }
       }
     });

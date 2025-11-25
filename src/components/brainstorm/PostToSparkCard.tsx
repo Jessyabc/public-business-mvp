@@ -69,16 +69,14 @@ export function PostToSparkCard({
   const spark = convertPostToSpark(post, authorDisplayName, authorAvatarUrl);
 
   const handleContinueBrainstorm = () => {
-    if (onSelect) {
-      onSelect(post);
-    } else {
-      setActivePost(post);
-      window.dispatchEvent(
-        new CustomEvent('pb:brainstorm:continue', {
-          detail: { parentId: post.id },
-        })
-      );
-    }
+    // Always dispatch the continue event to open composer
+    // This should not be overridden by onSelect (which is for view/click behavior)
+    setActivePost(post);
+    window.dispatchEvent(
+      new CustomEvent('pb:brainstorm:continue', {
+        detail: { parentId: post.id },
+      })
+    );
   };
 
   const handleView = () => {
