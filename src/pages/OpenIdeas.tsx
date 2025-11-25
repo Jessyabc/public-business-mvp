@@ -1,53 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Plus, Lightbulb, ArrowRight } from 'lucide-react';
+import { Plus, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useOpenIdeas, type UnifiedOpenIdea } from '@/hooks/useOpenIdeas';
+import { useOpenIdeas, type OpenIdea } from '@/hooks/useOpenIdeas';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
-import { sanitizeText } from '@/lib/sanitize';
-import { useState, useCallback } from 'react';
-import { PostModal } from '@/components/post/PostModal';
+import { PostCardModal } from '@/components/post/PostCardModal';
+import { useState } from 'react';
 
 // Environment variable for gating (could be set in production)
 const REQUIRE_AUTH = true; // Set this based on your preference
 
-function OpenIdeaCard({ idea, onClick }: { idea: UnifiedOpenIdea; onClick: () => void }) {
-  const snippet = sanitizeText(idea.text).slice(0, 200) + (idea.text.length > 200 ? '...' : '');
-  const timeAgo = formatDistanceToNow(new Date(idea.created_at), { addSuffix: true });
-
-  return (
-    <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <Lightbulb className="w-6 h-6 text-primary" />
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-4">
-          {snippet}
-        </p>
-        <Link to={`/brainstorms/new?idea_id=${idea.id}`} onClick={(e) => e.stopPropagation()}>
-          <Button variant="outline" className="w-full">
-            Get inspired → Start a brainstorm
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </Link>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function OpenIdeas() {
   const { user } = useAuth();
-  const { ideas = [], loading: isLoading } = useOpenIdeas();
-  const [selectedIdea, setSelectedIdea] = useState<UnifiedOpenIdea | null>(null);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedIdea(null);
-  }, []);
+  const { ideas, loading, error } = useOpenIdeas();
+  const [selectedIdea, setSelectedIdea] = useState<OpenIdea | null>(null);
 
   // If authentication is required and user is not logged in
   if (REQUIRE_AUTH && !user) {
@@ -92,54 +58,47 @@ export default function OpenIdeas() {
         </Link>
       </div>
 
-      {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="p-6">
-              <Skeleton className="h-6 w-6 mb-4" />
-              <Skeleton className="h-20 w-full mb-4" />
-              <Skeleton className="h-10 w-full" />
-            </Card>
-          ))}
-        </div>
-      ) : ideas.length === 0 ? (
-        <div className="text-center py-12">
-          <Lightbulb className="w-16 h-16 mx-auto mb-4 text-primary opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">No ideas available yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Be the first to contribute an idea to our community bank!
-          </p>
-          <Link to="/open-ideas/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Submit Your First Idea
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {ideas.map((idea) => (
-            <OpenIdeaCard 
-              key={idea.id} 
-              idea={idea} 
-              onClick={() => setSelectedIdea(idea)}
-            />
-          ))}
-        </div>
-      )}
+      <div className="mt-8 grid gap-6 md:grid-cols-3">
+        {loading && (
+          <div className="col-span-3 text-sm text-white/60">
+            Loading open ideas…
+          </div>
+        )}
+        {error && !loading && (
+          <div className="col-span-3 text-sm text-red-400 space-y-2">
+            <div className="font-semibold">Error loading ideas:</div>
+            <div>{error}</div>
+            <div className="text-xs text-red-300/70 mt-2">
+              If you see a permission error, ensure the migration <code className="bg-red-900/30 px-1 rounded">20250106000000_add_open_ideas_select_policies.sql</code> has been applied.
+            </div>
+          </div>
+        )}
+        {!loading && !error && ideas.map((idea) => (
+          <div
+            key={idea.id}
+            onClick={() => setSelectedIdea(idea)}
+            className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-3 flex flex-col justify-between min-h-[140px] cursor-pointer hover:bg-white/10 transition-colors"
+          >
+            <p className="text-sm text-white/90 line-clamp-4">
+              {idea.text}
+            </p>
+            <div className="mt-3 flex items-center justify-between text-[11px] text-white/55">
+              <span>{idea.source === 'user' ? 'From a member' : 'From the community'}</span>
+              <span>
+                {idea.created_at
+                  ? new Date(idea.created_at).toLocaleDateString()
+                  : ''}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* Modal for viewing full idea */}
-      {selectedIdea && (
-        <PostModal
-          isOpen={true}
-          onClose={handleCloseModal}
-          id={selectedIdea.id}
-          type="open_idea"
-          content={selectedIdea.text}
-          created_at={selectedIdea.created_at}
-          author={selectedIdea.source === 'user' ? 'User' : 'Anonymous'}
-        />
-      )}
+      <PostCardModal
+        openIdea={selectedIdea}
+        isOpen={!!selectedIdea}
+        onClose={() => setSelectedIdea(null)}
+      />
     </div>
   );
 }

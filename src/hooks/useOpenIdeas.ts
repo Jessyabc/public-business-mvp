@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
-export interface OpenIdea {
+export interface CuratedOpenIdea {
   id: string;
   content: string;
   created_at: string;
@@ -16,6 +16,15 @@ export interface UnifiedOpenIdea {
   created_at: string;
   source: 'user' | 'anon';
 }
+
+export type OpenIdea = {
+  id: string;
+  text: string;
+  source: 'user' | 'anon';
+  status: string;
+  created_at: string | null;
+  user_id?: string | null;
+};
 
 export interface IdeaBrainstorm {
   id: string;
@@ -40,7 +49,7 @@ export function useCuratedIdeas() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as OpenIdea[];
+      return data as CuratedOpenIdea[];
     },
   });
 }
@@ -81,7 +90,7 @@ export function useOpenIdea(id: string) {
         .single();
 
       if (error) throw error;
-      return data as OpenIdea;
+      return data as CuratedOpenIdea;
     },
     enabled: !!id,
   });
@@ -143,64 +152,75 @@ export function useIdeaBrainstorm(id: string) {
  * Returns unified array with source indicator
  */
 export function useOpenIdeas() {
-  const [ideas, setIdeas] = useState<UnifiedOpenIdea[]>([]);
+  const [ideas, setIdeas] = useState<OpenIdea[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchIdeas = async () => {
+    let cancelled = false;
+
+    async function load() {
       setLoading(true);
       setError(null);
       try {
-        // Fetch from both tables in parallel
-        const [userIdeasResult, intakeIdeasResult] = await Promise.all([
+        const [userRes, anonRes] = await Promise.all([
           supabase
             .from('open_ideas_user')
-            .select('id, text, status, created_at')
+            .select('id, text, status, created_at, user_id')
             .order('created_at', { ascending: false }),
           supabase
             .from('open_ideas_intake')
             .select('id, text, status, created_at')
-            .order('created_at', { ascending: false })
+            .order('created_at', { ascending: false }),
         ]);
 
-        if (userIdeasResult.error) throw userIdeasResult.error;
-        if (intakeIdeasResult.error) throw intakeIdeasResult.error;
+        if (userRes.error) throw userRes.error;
+        if (anonRes.error) throw anonRes.error;
 
-        // Map and combine results
-        const userIdeas: UnifiedOpenIdea[] = (userIdeasResult.data || []).map(idea => ({
-          id: idea.id,
-          text: idea.text,
-          status: idea.status,
-          created_at: idea.created_at || new Date().toISOString(),
-          source: 'user' as const,
-        }));
+        if (cancelled) return;
 
-        const intakeIdeas: UnifiedOpenIdea[] = (intakeIdeasResult.data || []).map(idea => ({
-          id: idea.id,
-          text: idea.text,
-          status: idea.status,
-          created_at: idea.created_at || new Date().toISOString(),
-          source: 'anon' as const,
-        }));
+        const userIdeas = userRes.data;
+        const anonIdeas = anonRes.data;
 
-        // Combine and sort by created_at descending
-        const allIdeas = [...userIdeas, ...intakeIdeas].sort((a, b) => {
-          const dateA = new Date(a.created_at).getTime();
-          const dateB = new Date(b.created_at).getTime();
-          return dateB - dateA;
+        const merged: OpenIdea[] = [
+          ...(userIdeas ?? []).map((row) => ({
+            id: row.id,
+            text: row.text,
+            status: row.status,
+            created_at: row.created_at,
+            user_id: row.user_id,
+            source: 'user' as const,
+          })),
+          ...(anonIdeas ?? []).map((row) => ({
+            id: row.id,
+            text: row.text,
+            status: row.status,
+            created_at: row.created_at,
+            user_id: null,
+            source: 'anon' as const,
+          })),
+        ].sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA; // Descending (newest first)
         });
 
-        setIdeas(allIdeas);
-      } catch (err) {
-        console.error('Error fetching open ideas:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch open ideas');
+        setIdeas(merged);
+      } catch (e: any) {
+        console.error('Failed to load open ideas', e);
+        if (!cancelled) {
+          const errorMessage = e?.message || e?.error?.message || 'Failed to load open ideas';
+          setError(errorMessage);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
+    }
 
-    fetchIdeas();
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { ideas, loading, error };
