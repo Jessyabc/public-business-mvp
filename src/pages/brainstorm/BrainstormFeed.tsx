@@ -6,11 +6,12 @@ import { ComposerModal } from '@/components/composer/ComposerModal';
 import { PostLineageOverlay } from '@/components/brainstorm/PostLineageOverlay';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
+import { supabase } from '@/integrations/supabase/client';
+import { BasePost } from '@/types/post';
 
 export default function BrainstormFeed() {
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const [composerOpen, setComposerOpen] = useState(false);
-  const [lineagePostId, setLineagePostId] = useState<string | null>(null);
   const [activePostForLineage, setActivePostForLineage] = useState<BasePost | null>(null);
 
   // Listen for continue and lineage events
@@ -22,11 +23,11 @@ export default function BrainstormFeed() {
         setComposerOpen(true);
       }
     };
-    const handleShowLineage = (e: Event) => {
+    const handleShowLineage = async (e: Event) => {
       const customEvent = e as CustomEvent;
-      const postId = customEvent.detail?.postId;
-      if (postId) {
-        setLineagePostId(postId);
+      const post = customEvent.detail?.post;
+      if (post) {
+        setActivePostForLineage(post);
       }
     };
     window.addEventListener('pb:brainstorm:continue', handleContinue);
@@ -37,18 +38,8 @@ export default function BrainstormFeed() {
     };
   }, []);
 
-  // Sync overlay with activePostId when it changes (e.g., from clicking a continuation)
-  useEffect(() => {
-    if (activePostId && lineagePostId !== activePostId) {
-      // Only update if overlay is already open (to avoid opening on initial load)
-      if (lineagePostId !== null) {
-        setLineagePostId(activePostId);
-      }
-    }
-  }, [activePostId, lineagePostId]);
-
   const handleCloseOverlay = () => {
-    setLineagePostId(null);
+    setActivePostForLineage(null);
   };
 
   return (
@@ -59,7 +50,7 @@ export default function BrainstormFeed() {
         sidebar={<RightSidebar variant="feed" />}
       />
       <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
-      <PostLineageOverlay postId={lineagePostId} onClose={handleCloseOverlay} />
+      <PostLineageOverlay activePost={activePostForLineage} onClose={handleCloseOverlay} />
     </>
   );
 }
