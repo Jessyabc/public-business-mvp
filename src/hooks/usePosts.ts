@@ -128,11 +128,9 @@ export function usePosts() {
         }
       }
       
-      const finalPayload = insertPayload as const;
-
       const { data, error } = await supabase
         .from('posts')
-        .insert(finalPayload)
+        .insert(insertPayload)
         .select()
         .single();
 
