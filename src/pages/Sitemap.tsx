@@ -40,41 +40,56 @@ export default function Sitemap() {
     return true;
   };
 
+  // Normalize route objects to have consistent structure
+  const normalizeRoute = (route: any) => ({
+    path: route.path || route.to,
+    title: route.title,
+    icon: route.icon,
+    description: route.description,
+    requiresAuth: route.requiresAuth,
+    requiresAdmin: route.requiresAdmin,
+    requiresOrg: route.requiresOrg,
+    dynamic: route.dynamic,
+    devOnly: route.devOnly,
+  });
+
   // Group routes by category
   const categorizedRoutes = {
     'Main Pages': [
-      { path: '/', title: 'Home', icon: Home, description: 'Main dashboard' },
-      ...additionalRoutes.filter(r => ['/brainstorm', '/brainstorm/feed'].includes(r.path)),
+      normalizeRoute({ path: '/', title: 'Home', icon: Home, description: 'Main dashboard' }),
+      ...additionalRoutes.filter(r => ['/brainstorm', '/brainstorm/feed'].includes(r.path)).map(normalizeRoute),
     ],
-    'User Pages': navItems.filter(item => 
-      ['/profile', '/settings', '/my-posts', '/notifications'].includes(item.to)
-    ).concat(
-      additionalRoutes.filter(r => ['/customize'].includes(r.path))
-    ),
-    'Business Pages': navItems.filter(item => 
-      item.to.includes('business') || item.to.includes('org')
-    ).concat(
-      additionalRoutes.filter(r => r.path.includes('insights') || r.path.includes('org'))
-    ),
+    'User Pages': [
+      ...navItems.filter(item => 
+        ['/profile', '/settings', '/my-posts', '/notifications'].includes(item.to)
+      ).map(normalizeRoute),
+      ...additionalRoutes.filter(r => ['/customize'].includes(r.path)).map(normalizeRoute),
+    ],
+    'Business Pages': [
+      ...navItems.filter(item => 
+        item.to.includes('business') || item.to.includes('org')
+      ).map(normalizeRoute),
+      ...additionalRoutes.filter(r => r.path.includes('insights') || r.path.includes('org')).map(normalizeRoute),
+    ],
     'Ideas & Brainstorms': [
-      ...additionalRoutes.filter(r => r.path.includes('idea') || r.path.includes('open-ideas')),
-      ...navItems.filter(item => item.to.includes('research') || item.to.includes('explore')),
+      ...additionalRoutes.filter(r => r.path.includes('idea') || r.path.includes('open-ideas')).map(normalizeRoute),
+      ...navItems.filter(item => item.to.includes('research') || item.to.includes('explore')).map(normalizeRoute),
     ],
     'Community': navItems.filter(item => 
       item.to.includes('community') || item.to.includes('members')
-    ),
+    ).map(normalizeRoute),
     'Support & Help': navItems.filter(item => 
       item.to.includes('support') || item.to.includes('help') || item.to.includes('faq')
-    ),
+    ).map(normalizeRoute),
     'Legal': navItems.filter(item => 
       item.to.includes('legal') || item.to.includes('privacy') || item.to.includes('terms') || item.to.includes('cookie')
-    ),
+    ).map(normalizeRoute),
     'Public Pages': navItems.filter(item => 
       ['/about', '/contact', '/features', '/how-it-works', '/careers', '/industries'].includes(item.to)
-    ),
+    ).map(normalizeRoute),
     'Admin & Dev': [
-      ...additionalRoutes.filter(r => r.path.includes('admin') || r.path.includes('dev') || r.path.includes('demo')),
-      ...navItems.filter(item => item.to.includes('dev')),
+      ...additionalRoutes.filter(r => r.path.includes('admin') || r.path.includes('dev') || r.path.includes('demo')).map(normalizeRoute),
+      ...navItems.filter(item => item.to.includes('dev')).map(normalizeRoute),
     ],
   };
 
@@ -103,8 +118,8 @@ export default function Sitemap() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {filteredRoutes.map((route) => {
                     const Icon = getIcon(route.icon);
-                    const routePath = route.path || route.to;
-                    const routeTitle = route.title || routePath;
+                    const routePath = route.path;
+                    const routeTitle = route.title;
                     return (
                       <Link
                         key={routePath}

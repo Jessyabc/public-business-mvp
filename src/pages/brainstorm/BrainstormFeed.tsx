@@ -11,6 +11,7 @@ export default function BrainstormFeed() {
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const [composerOpen, setComposerOpen] = useState(false);
   const [lineagePostId, setLineagePostId] = useState<string | null>(null);
+  const [activePostForLineage, setActivePostForLineage] = useState<BasePost | null>(null);
 
   // Listen for continue and lineage events
   useEffect(() => {

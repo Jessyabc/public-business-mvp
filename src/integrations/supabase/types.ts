@@ -581,6 +581,82 @@ export type Database = {
         }
         Relationships: []
       }
+      nods_page: {
+        Row: {
+          checksum: string | null
+          id: number
+          meta: Json | null
+          parent_page_id: number | null
+          path: string
+          source: string | null
+          type: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          id?: number
+          meta?: Json | null
+          parent_page_id?: number | null
+          path: string
+          source?: string | null
+          type?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          id?: number
+          meta?: Json | null
+          parent_page_id?: number | null
+          path?: string
+          source?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nods_page_parent_page_id_fkey"
+            columns: ["parent_page_id"]
+            isOneToOne: false
+            referencedRelation: "nods_page"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nods_page_section: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          heading: string | null
+          id: number
+          page_id: number
+          slug: string | null
+          token_count: number | null
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          heading?: string | null
+          id?: number
+          page_id: number
+          slug?: string | null
+          token_count?: number | null
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          heading?: string | null
+          id?: number
+          page_id?: number
+          slug?: string | null
+          token_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nods_page_section_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "nods_page"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       open_ideas_intake: {
         Row: {
           created_at: string | null
@@ -1679,6 +1755,15 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      get_page_parents: {
+        Args: { page_id: number }
+        Returns: {
+          id: number
+          meta: Json
+          parent_page_id: number
+          path: string
+        }[]
+      }
       get_user_org_id: { Args: never; Returns: string }
       get_user_role: { Args: never; Returns: string }
       get_user_roles: {
@@ -1715,6 +1800,22 @@ export type Database = {
       is_business_member: { Args: never; Returns: boolean }
       is_business_user: { Args: { p_user_id?: string }; Returns: boolean }
       is_org_member: { Args: { p_org_id: string }; Returns: boolean }
+      match_page_sections: {
+        Args: {
+          embedding: string
+          match_count: number
+          match_threshold: number
+          min_content_length: number
+        }
+        Returns: {
+          content: string
+          heading: string
+          id: number
+          page_id: number
+          similarity: number
+          slug: string
+        }[]
+      }
       obfuscate_email: { Args: { email: string }; Returns: string }
     }
     Enums: {
