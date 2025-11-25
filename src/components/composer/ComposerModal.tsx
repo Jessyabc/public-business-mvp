@@ -407,8 +407,8 @@ export function ComposerModal({
       </div>;
   };
   return <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
-        <GlassSurface inset className="bg-[#212a3a]">
+      <DialogContent className="max-w-lg border-0 bg-transparent backdrop-blur-none p-0 overflow-hidden shadow-none">
+        <GlassSurface inset className="liquid-glass-composer p-6 border-0">
           <DialogHeader>
             <DialogTitle className="sr-only">
               {isPublicMode ? 'Create New Brainstorm' : 'Create New Business Insight'}

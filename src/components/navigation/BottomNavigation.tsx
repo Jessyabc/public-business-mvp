@@ -63,19 +63,23 @@ export function BottomNavigation() {
   }
   return <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:block fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-slow ease-pb max-w-[95vw] sm:max-w-none">
-        <div className={`glass-card rounded-full px-2 sm:px-4 py-2 sm:py-3 glass-content glass-high overflow-x-auto border-2 border-white/20 backdrop-blur-xl bg-white/10 ${isAdmin() ? 'admin-glow' : ''}`}>
-          <div className="flex items-center space-x-1 sm:space-x-3 min-w-max">
+      <nav className="hidden md:block fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-slow ease-pb w-auto">
+        <div className={`liquid-glass-dock px-3 sm:px-4 py-2 sm:py-2.5 ${isAdmin() ? 'admin-glow' : ''}`}>
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-nowrap">
             {/* Mode Toggle */}
-            <button onClick={toggleMode} className={`${styles.glassButton} glass-nav-item px-2 sm:px-3 flex items-center gap-1 sm:gap-2`}>
+            <button onClick={toggleMode} className={`nav-item-bubble glass-nav-item px-2 sm:px-3 py-1.5 sm:py-2 flex items-center gap-1 sm:gap-2 rounded-xl transition-all duration-med ${
+              mode === 'business'
+                ? 'bg-black/8 hover:bg-black/12 text-[hsl(212,84%,20%)] hover:text-[hsl(212,84%,7%)]'
+                : 'bg-white/10 hover:bg-white/15 text-white/90 hover:text-white'
+            }`}>
               {mode === 'public' ? <>
-                  <ToggleRight className="text-pb-blue transition-all duration-med w-[20px] h-[20px] text-[#e6f0ff]" />
-                  <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline text-slate-50">
+                  <ToggleRight className="transition-all duration-med w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                  <span className="text-[10px] sm:text-[11px] md:text-xs font-medium transition-all duration-med hidden xs:inline">
                     Public
                   </span>
                 </> : <>
-                  <ToggleLeft className="w-4 h-4 text-pb-blue transition-all duration-med text-[#fefefe]" />
-                  <span className="text-xs font-medium text-pb-blue transition-all duration-med hidden xs:inline text-[#fefefe]">
+                  <ToggleLeft className="w-[18px] h-[18px] sm:w-5 sm:h-5 transition-all duration-med" />
+                  <span className="text-[10px] sm:text-[11px] md:text-xs font-medium transition-all duration-med hidden xs:inline">
                     Business
                   </span>
                 </>}
@@ -85,17 +89,29 @@ export function BottomNavigation() {
             {navItems.map(item => {
             const isActive = location.pathname === item.to;
             const IconComponent = item.icon;
-            return <NavLink key={item.to} to={item.to} className={`relative flex flex-col items-center space-y-0.5 sm:space-y-1 px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-xl transition-all duration-med glass-nav-item ${isActive ? 'bg-pb-blue/20 text-white' : 'text-pb-text2 hover:text-pb-text0 hover:bg-white/10'}`}>
-                  <IconComponent className="w-4 h-4 transition-all duration-med" />
-                  <span className="text-[10px] sm:text-xs font-medium transition-all duration-med whitespace-nowrap">{item.label}</span>
-                  {item.badge && <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs transition-all duration-med">
+            return <NavLink key={item.to} to={item.to} className={`nav-item-bubble flex flex-col items-center justify-center space-y-0.5 sm:space-y-1 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 rounded-xl transition-all duration-med glass-nav-item ${isActive ? 'active' : ''} ${
+              mode === 'business' 
+                ? isActive 
+                  ? 'bg-black/10 text-[hsl(212,84%,7%)]' 
+                  : 'text-[hsl(212,84%,30%)] hover:text-[hsl(212,84%,7%)] hover:bg-black/8'
+                : isActive 
+                  ? 'bg-white/15 text-white' 
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+            }`}>
+                  <IconComponent className="w-4 h-4 sm:w-[18px] sm:h-[18px] transition-all duration-med relative z-10" />
+                  <span className="text-[10px] sm:text-[11px] md:text-xs font-medium transition-all duration-med whitespace-nowrap relative z-10">{item.label}</span>
+                  {item.badge && <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs transition-all duration-med z-20">
                       {item.badge}
                     </Badge>}
                 </NavLink>;
           })}
 
-            <Button onClick={() => openComposer()} className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${styles.glassButton} bg-pb-blue/20 hover:bg-pb-blue/30 text-pb-blue border-pb-blue/30 interactive-glass ml-1 sm:ml-2`} size="icon">
-              <Plus className="w-4 h-4 text-[#e6f0ff]" />
+            <Button onClick={() => openComposer()} className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full interactive-glass ml-1 sm:ml-2 transition-all duration-med ${
+              mode === 'business'
+                ? 'bg-black/10 hover:bg-black/15 text-[hsl(212,84%,7%)] border border-black/15'
+                : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+            }`} size="icon">
+              <Plus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
             </Button>
           </div>
         </div>
@@ -103,25 +119,35 @@ export function BottomNavigation() {
 
       {/* Mobile Navigation with Hamburger */}
       <nav className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-auto">
-        <div className={`glass-card rounded-full px-4 py-3 flex items-center gap-2 border-2 border-white/20 backdrop-blur-xl bg-white/10`}>
+        <div className={`liquid-glass-dock px-3 py-2.5 flex items-center gap-2`}>
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full">
+              <Button variant="ghost" size="icon" className={`rounded-full transition-all duration-med ${
+                mode === 'business'
+                  ? 'text-[hsl(212,84%,30%)] hover:bg-black/10 hover:text-[hsl(212,84%,7%)]'
+                  : 'text-white/90 hover:bg-white/15 hover:text-white'
+              }`}>
                 {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="glass-card border-t-2 border-white/20 backdrop-blur-xl bg-white/10 h-auto rounded-t-3xl">
-              <div className="py-6 space-y-2">
+            <SheetContent side="bottom" className={`liquid-glass-dock border-t h-auto rounded-t-3xl p-0 ${
+              mode === 'business' ? 'border-black/15' : 'border-white/15'
+            }`}>
+              <div className="py-6 px-4 space-y-1">
                 {/* Mode Toggle in Menu */}
                 <button onClick={() => {
                 toggleMode();
                 setMenuOpen(false);
-              }} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl glass-nav-item text-white hover:bg-white/10 transition-all">
+              }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl glass-nav-item transition-all ${
+                mode === 'business'
+                  ? 'text-[hsl(212,84%,20%)] hover:bg-black/10 hover:text-[hsl(212,84%,7%)]'
+                  : 'text-white/90 hover:bg-white/15 hover:text-white'
+              }`}>
                   {mode === 'public' ? <>
-                      <Home className="w-5 h-5 text-pb-blue" />
+                      <Home className="w-5 h-5" />
                       <span className="font-medium">Public Mode</span>
                     </> : <>
-                      <Building2 className="w-5 h-5 text-pb-blue" />
+                      <Building2 className="w-5 h-5" />
                       <span className="font-medium">Business Mode</span>
                     </>}
                 </button>
@@ -130,9 +156,17 @@ export function BottomNavigation() {
                 {navItems.map(item => {
                 const isActive = location.pathname === item.to;
                 const IconComponent = item.icon;
-                return <NavLink key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                      <IconComponent className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
+                return <NavLink key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className={`nav-item-bubble flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'active' : ''} ${
+                  mode === 'business'
+                    ? isActive
+                      ? 'text-[hsl(212,84%,7%)] bg-black/10'
+                      : 'text-[hsl(212,84%,30%)] hover:text-[hsl(212,84%,7%)] hover:bg-black/8'
+                    : isActive
+                      ? 'text-white bg-white/15'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}>
+                      <IconComponent className="w-5 h-5 relative z-10" />
+                      <span className="font-medium relative z-10">{item.label}</span>
                     </NavLink>;
               })}
               </div>
@@ -140,7 +174,11 @@ export function BottomNavigation() {
           </Sheet>
 
           {/* Composer Button */}
-          <Button onClick={() => openComposer()} className={`w-10 h-10 rounded-full bg-pb-blue/20 hover:bg-pb-blue/30 text-white border border-pb-blue/30`} size="icon">
+          <Button onClick={() => openComposer()} className={`w-10 h-10 rounded-full transition-all duration-med ${
+            mode === 'business'
+              ? 'bg-black/10 hover:bg-black/15 text-[hsl(212,84%,7%)] border border-black/15'
+              : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+          }`} size="icon">
             <Plus className="w-5 h-5" />
           </Button>
         </div>

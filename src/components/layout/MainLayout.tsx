@@ -35,8 +35,8 @@ export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) 
       {/* Header - only show when user is not logged in */}
       {!user && <Header />}
       
-      {/* Main Content with smooth transitions */}
-      <main className={user ? "min-h-screen pt-16" : noTopPadding ? "min-h-screen" : "min-h-screen pt-24"}>
+      {/* Main Content with smooth transitions - ensure it's above background */}
+      <main className={`relative z-10 ${user ? "min-h-screen pt-16" : noTopPadding ? "min-h-screen" : "min-h-screen pt-24"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

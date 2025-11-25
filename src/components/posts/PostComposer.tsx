@@ -81,7 +81,7 @@ export const PostComposer: React.FC<PostComposerProps> = ({
   const isOverLimit = remainingChars < 0;
 
   return (
-    <GlassSurface className="space-y-4">
+    <GlassSurface className="space-y-4 liquid-glass-composer">
       <div>
         <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
           {context === 'public' ? 'Share a Brainstorm' : 'Share an Insight'}
