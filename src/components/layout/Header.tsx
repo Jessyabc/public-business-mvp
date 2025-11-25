@@ -71,7 +71,7 @@ export function Header() {
               <img 
                 src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
                 alt="Public Business - Creating Collaboration" 
-                className="h-16 object-contain"
+                className="h-10 sm:h-12 md:h-14 lg:h-16 object-contain"
               />
             </NavLink>
 
