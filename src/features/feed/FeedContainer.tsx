@@ -4,6 +4,7 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { useUniversalFeed } from './hooks/useUniversalFeed';
 import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
+import { PostLineageOverlay } from '@/components/brainstorm/PostLineageOverlay';
 type BrainstormFeedMode = 'brainstorm_main' | 'brainstorm_open_ideas' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
 type Props = {
   mode: BrainstormFeedMode;
@@ -30,6 +31,7 @@ export function FeedContainer({
   onItemsChange,
   renderFeed
 }: Props) {
+  const [activePost, setActivePost] = React.useState<BasePost | null>(null);
   const lastSeen = useBrainstormExperienceStore(state => state.lastSeen);
   const resolvedKinds = initialKinds ?? (mode === 'brainstorm_open_ideas' ? ['Spark'] : DEFAULT_MAIN_KINDS);
   const filters = useFeedFilters({
@@ -51,6 +53,10 @@ export function FeedContainer({
     if (mode === 'brainstorm_last_seen') return;
     onItemsChange?.(feed.items);
   }, [mode, feed.items, onItemsChange]);
+  
+  // Only show overlay for main brainstorm feed
+  const showOverlay = mode === 'brainstorm_main';
+  
   if (mode === 'brainstorm_last_seen') {
     const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
       items: lastSeen,
@@ -65,15 +71,35 @@ export function FeedContainer({
     return <div style={{
       flex: 1
     }}>
-        <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} />
+        <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} onSelect={setActivePost} />
       </div>;
   }
   if (renderFeed) {
-    return <>{renderFeed(feed.items, feed)}</>;
+    return (
+      <>
+        {renderFeed(feed.items, feed)}
+        {showOverlay && (
+          <PostLineageOverlay
+            activePost={activePost}
+            onClose={() => setActivePost(null)}
+          />
+        )}
+      </>
+    );
   }
-  return <div style={{
-    flex: 1
-  }}>
-      <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} className="pl-[10px] px-px pr-[10px] py-[10px]" />
-    </div>;
+  return (
+    <>
+      <div style={{
+        flex: 1
+      }}>
+        <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} onSelect={setActivePost} />
+      </div>
+      {showOverlay && (
+        <PostLineageOverlay
+          activePost={activePost}
+          onClose={() => setActivePost(null)}
+        />
+      )}
+    </>
+  );
 }

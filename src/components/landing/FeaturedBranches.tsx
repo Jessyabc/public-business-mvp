@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFreeBrainstorms, IdeaBrainstorm } from '@/hooks/useOpenIdeas';
-import { BrainstormCard } from '@/components/BrainstormCard';
+// NOTE: BrainstormCard removed - using custom card UI instead
 import { BrainstormModal } from '@/components/BrainstormModal';
 import { MessageSquare, TrendingUp, Lightbulb } from 'lucide-react';
 

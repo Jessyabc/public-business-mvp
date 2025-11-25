@@ -1,15 +1,30 @@
 import React, { memo, useEffect, useRef } from 'react';
 import { BasePost } from '@/types/post';
-import { BrainstormPostCard } from '@/features/brainstorm/components/BrainstormPostCard';
+import { PostToSparkCard } from '@/components/brainstorm/PostToSparkCard';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
 
 type Props = {
   items: BasePost[];
   onEndReached: () => void;
   loading: boolean;
+  onSelect?: (post: BasePost) => void;
 };
 
-export const FeedList = memo(function FeedList({ items, onEndReached, loading }: Props) {
+const GlassCardWrapper = ({ children }: { children: React.ReactNode }) => (
+  <li className="
+    w-full rounded-3xl overflow-hidden
+    backdrop-blur-xl
+    bg-white/5 dark:bg-white/10
+    border border-white/10
+    shadow-[0_0_20px_rgba(0,0,0,0.25)]
+    transition-all duration-300
+    hover:bg-white/8 hover:shadow-[0_0_25px_rgba(0,0,0,0.35)]
+  ">
+    {children}
+  </li>
+);
+
+export const FeedList = memo(function FeedList({ items, onEndReached, loading, onSelect }: Props) {
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -35,13 +50,40 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading }:
     };
   }, [onEndReached, loading]);
 
+  const handlePostSelect = (post: BasePost) => {
+    // Use onSelect prop if provided, otherwise fall back to store + event
+    if (onSelect) {
+      onSelect(post);
+    } else {
+      // Set active post in store
+      setActivePost(post);
+      // Dispatch event to open lineage overlay (for backward compatibility)
+      window.dispatchEvent(
+        new CustomEvent('pb:brainstorm:show-lineage', {
+          detail: { postId: post.id },
+        })
+      );
+    }
+  };
+
   return (
     <>
-      <div className="space-y-4">
+      <ul
+        className="
+          mx-auto
+          w-full
+          max-w-3xl
+          px-4
+          space-y-6
+          pb-20
+        "
+      >
         {items.map((item) => (
-          <BrainstormPostCard key={item.id} post={item} onSelect={setActivePost} />
+          <GlassCardWrapper key={item.id}>
+            <PostToSparkCard post={item} onSelect={handlePostSelect} />
+          </GlassCardWrapper>
         ))}
-      </div>
+      </ul>
       {loading ? (
         <div className="py-4 text-center text-muted-foreground">Loading...</div>
       ) : null}

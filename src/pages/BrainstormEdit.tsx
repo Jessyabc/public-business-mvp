@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BrainstormForm } from '@/components/brainstorms/BrainstormForm';
+// LEGACY: BrainstormForm uses old brainstorms table - needs migration to ComposerModal/posts system
+// import { BrainstormForm } from '@/components/brainstorms/BrainstormForm';
 import { useBrainstorms, type Brainstorm } from '@/hooks/useBrainstorms';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -125,6 +126,17 @@ export default function BrainstormEdit() {
         </Button>
       </Link>
 
+      {/* LEGACY: BrainstormForm removed - this page needs migration to use ComposerModal with posts system */}
+      <div className="text-center py-12">
+        <p className="text-muted-foreground mb-4">
+          This page is being migrated to the new posts-based system.
+          Post editing will be available through the posts system.
+        </p>
+        <Button onClick={() => navigate(`/brainstorms/${id}`)}>
+          View Brainstorm
+        </Button>
+      </div>
+      {/* 
       <BrainstormForm
         initialData={{
           title: brainstorm.title ?? '',
@@ -135,6 +147,7 @@ export default function BrainstormEdit() {
         isEditing={true}
         isSubmitting={isSubmitting}
       />
+      */}
     </div>
   );
 }

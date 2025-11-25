@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { BrainstormCard } from "@/components/BrainstormCard";
+import { PostToSparkCard } from "@/components/brainstorm/PostToSparkCard";
 import { BrainstormModal } from "@/components/BrainstormModal";
 import { useFreeBrainstorms, IdeaBrainstorm } from "@/hooks/useOpenIdeas";
+import { ideaBrainstormToBasePost } from "@/utils/postConverters";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { Lightbulb } from "lucide-react";
 
@@ -40,14 +41,16 @@ export function BrainstormPreviewList() {
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {limitedBrainstorms.map((brainstorm) => (
-          <BrainstormCard
-            key={brainstorm.id}
-            brainstorm={brainstorm}
-            showFreeBadge={true}
-            onClick={() => handleCardClick(brainstorm)}
-          />
-        ))}
+        {limitedBrainstorms.map((brainstorm) => {
+          const basePost = ideaBrainstormToBasePost(brainstorm);
+          return (
+            <PostToSparkCard
+              key={brainstorm.id}
+              post={basePost}
+              onSelect={() => handleCardClick(brainstorm)}
+            />
+          );
+        })}
       </div>
       
       <BrainstormModal

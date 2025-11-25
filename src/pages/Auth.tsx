@@ -21,7 +21,6 @@ export default function Auth() {
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
   
   // Note: All users start as public_user, business membership is invite-only
 
@@ -174,11 +173,6 @@ export default function Auth() {
                     <Label htmlFor="website">Website</Label>
                     <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourwebsite.com" />
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="linkedin">LinkedIn Profile</Label>
-                  <Input id="linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                 </div>
                 
                 <div className="bg-blue-50/50 p-4 rounded-lg border">

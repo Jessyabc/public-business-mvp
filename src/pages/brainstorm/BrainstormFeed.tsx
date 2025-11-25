@@ -6,6 +6,7 @@ import { ComposerModal } from '@/components/composer/ComposerModal';
 import { PostLineageOverlay } from '@/components/brainstorm/PostLineageOverlay';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
+
 export default function BrainstormFeed() {
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -34,9 +35,30 @@ export default function BrainstormFeed() {
       window.removeEventListener('pb:brainstorm:show-lineage', handleShowLineage);
     };
   }, []);
-  return <>
-      <BrainstormLayoutShell main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} />} crossLinks={<CrossLinksFeed postId={activePostId} />} sidebar={<RightSidebar variant="feed" className="px-[10px]" />} />
+
+  // Sync overlay with activePostId when it changes (e.g., from clicking a continuation)
+  useEffect(() => {
+    if (activePostId && lineagePostId !== activePostId) {
+      // Only update if overlay is already open (to avoid opening on initial load)
+      if (lineagePostId !== null) {
+        setLineagePostId(activePostId);
+      }
+    }
+  }, [activePostId, lineagePostId]);
+
+  const handleCloseOverlay = () => {
+    setLineagePostId(null);
+  };
+
+  return (
+    <>
+      <BrainstormLayoutShell
+        main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} />}
+        crossLinks={<CrossLinksFeed postId={activePostId} />}
+        sidebar={<RightSidebar variant="feed" />}
+      />
       <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
-      <PostLineageOverlay postId={lineagePostId} onClose={() => setLineagePostId(null)} />
-    </>;
+      <PostLineageOverlay postId={lineagePostId} onClose={handleCloseOverlay} />
+    </>
+  );
 }

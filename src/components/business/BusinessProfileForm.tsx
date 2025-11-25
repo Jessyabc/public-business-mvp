@@ -21,7 +21,6 @@ const businessProfileSchema = z.object({
   company_size: z.string().optional(),
   phone: z.string().optional(),
   website: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  linkedin_url: z.string().url('Please enter a valid LinkedIn URL').optional().or(z.literal('')),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
 });
 
@@ -46,7 +45,6 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
       company_size: profile?.company_size || undefined,
       phone: profile?.phone || '',
       website: profile?.website || '',
-      linkedin_url: profile?.linkedin_url || '',
       bio: profile?.bio || '',
     },
   });
@@ -55,7 +53,6 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
     setIsSubmitting(true);
     try {
       data.website = safeUrlOrEmpty(data.website);
-      data.linkedin_url = safeUrlOrEmpty(data.linkedin_url);
       if (profile) {
         await updateProfile(data);
       } else {
@@ -272,25 +269,6 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="linkedin_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
-                        LinkedIn Profile
-                      </FormLabel>
-                      <FormControl>
-                         <GlassInput 
-                           placeholder="https://linkedin.com/in/yourprofile" 
-                           {...field} 
-                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}

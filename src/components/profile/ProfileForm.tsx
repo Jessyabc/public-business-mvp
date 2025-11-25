@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useToast } from "@/hooks/use-toast";
-import { User, Building, MapPin, Globe, Linkedin, Save, Users, Mail } from "lucide-react";
+import { User, Building, MapPin, Globe, Save, Users, Mail } from "lucide-react";
 import { DisconnectButton } from "./DisconnectButton";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { BusinessMemberBadge } from "@/components/business/BusinessMemberBadge";
@@ -52,9 +52,7 @@ export function ProfileForm() {
       avatar_url: form.avatar_url,
       bio: form.bio,
       website: form.website,
-      linkedin_url: form.linkedin_url,
       company: form.company,
-      
       location: form.location,
       is_completed: true,
     });
@@ -206,19 +204,6 @@ export function ProfileForm() {
               value={form.website ?? ""}
               onChange={(e) => updateField("website", e.target.value)}
               placeholder="https://yourwebsite.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="linkedin_url" className="flex items-center gap-2 text-[var(--text-primary)]">
-              <Linkedin className="w-4 h-4 text-[var(--text-secondary)]" />
-              LinkedIn
-            </Label>
-            <GlassInput
-              id="linkedin_url"
-              value={form.linkedin_url ?? ""}
-              onChange={(e) => updateField("linkedin_url", e.target.value)}
-              placeholder="https://linkedin.com/in/yourprofile"
             />
           </div>
         </div>

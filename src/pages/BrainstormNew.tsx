@@ -2,7 +2,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { BrainstormForm } from '@/components/brainstorms/BrainstormForm';
+// LEGACY: BrainstormForm uses old brainstorms table - needs migration to ComposerModal/posts system
+// import { BrainstormForm } from '@/components/brainstorms/BrainstormForm';
 import { useBrainstorms } from '@/hooks/useBrainstorms';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
@@ -75,11 +76,23 @@ export default function BrainstormNew() {
         </div>
       )}
 
+      {/* LEGACY: BrainstormForm removed - this page needs migration to use ComposerModal with posts system */}
+      <div className="text-center py-12">
+        <p className="text-muted-foreground mb-4">
+          This page is being migrated to the new posts-based system.
+          Please use the composer modal to create brainstorms.
+        </p>
+        <Button onClick={() => navigate('/brainstorms')}>
+          Go to Brainstorms Feed
+        </Button>
+      </div>
+      {/* 
       <BrainstormForm
         openIdeaId={openIdeaId || undefined}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
       />
+      */}
     </div>
   );
 }

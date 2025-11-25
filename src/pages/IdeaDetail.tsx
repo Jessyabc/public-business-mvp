@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useOpenIdea, useIdeaBrainstorms } from "@/hooks/useOpenIdeas";
-import { BrainstormCard } from "@/components/BrainstormCard";
+import { PostToSparkCard } from "@/components/brainstorm/PostToSparkCard";
+import { ideaBrainstormToBasePost } from "@/utils/postConverters";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { Lightbulb, Plus, MessageSquare } from "lucide-react";
@@ -86,13 +87,16 @@ export default function IdeaDetail() {
             </div>
           ) : brainstorms.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2">
-              {brainstorms.map((brainstorm) => (
-                <BrainstormCard
-                  key={brainstorm.id}
-                  brainstorm={brainstorm}
-                  onClick={() => navigate(`/brainstorm/${brainstorm.id}`)}
-                />
-              ))}
+              {brainstorms.map((brainstorm) => {
+                const basePost = ideaBrainstormToBasePost(brainstorm);
+                return (
+                  <PostToSparkCard
+                    key={brainstorm.id}
+                    post={basePost}
+                    onSelect={() => navigate(`/brainstorm/${brainstorm.id}`)}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">

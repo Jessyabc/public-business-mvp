@@ -15,6 +15,7 @@ const OpenIdeaNew = lazy(() => import('@/pages/OpenIdeaNew'));
 const Admin = lazy(() => import('@/pages/Admin'));
 const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
+const Sitemap = lazy(() => import('@/pages/Sitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
 const Insights = lazy(() => import('@/pages/Insights'));
 const CreateOrganization = lazy(() => import('@/features/orgs/pages/CreateOrganization'));
@@ -131,6 +132,14 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
     element: (
       <MainLayout>
         <LazyWrapper><Customize /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
+  {
+    path: '/sitemap',
+    element: (
+      <MainLayout>
+        <LazyWrapper><Sitemap /></LazyWrapper>
       </MainLayout>
     ),
   },

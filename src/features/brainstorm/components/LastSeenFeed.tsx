@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { FeedContainer } from '@/features/feed/FeedContainer';
-import { BrainstormPostCard } from './BrainstormPostCard';
+import { PostToSparkCard } from '@/components/brainstorm/PostToSparkCard';
 import { useBrainstormExperienceStore } from '../stores/experience';
 import { BasePost } from '@/types/post';
 
@@ -26,7 +26,7 @@ export function LastSeenFeed() {
                 : undefined;
 
               return (
-                <BrainstormPostCard
+                <PostToSparkCard
                   key={item.id}
                   post={item}
                   variant="compact"

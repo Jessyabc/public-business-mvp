@@ -182,12 +182,12 @@ export default function Careers() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="portfolio">Portfolio/LinkedIn URL</Label>
+                <Label htmlFor="portfolio">Portfolio URL</Label>
                 <Input 
                   id="portfolio" 
                   name="portfolio" 
                   type="url" 
-                  placeholder="https://linkedin.com/in/yourname or portfolio link" 
+                  placeholder="https://yourportfolio.com" 
                 />
               </div>
               

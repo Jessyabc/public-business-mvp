@@ -82,6 +82,10 @@ export default {
         "pb-blue": "#0a1f3a",
         "pb-blue-2": "#091931",
         
+        // PB Brand Colors
+        "pb-aqua": "#67FFD8",
+        "pb-gold": "#FFC85B",
+        
         // Semantic color system
         pb: pbColors,
         
@@ -96,6 +100,10 @@ export default {
         // Glass shadow for dark theme
         glass: "0 0 12px rgba(0,0,0,0.35)",
         'glass-dark': '0 4px 12px rgba(0,0,0,0.4), 0 0 1px rgba(255,255,255,0.1)',
+        // Ambient glass shadows for navigation
+        'glass-ambient': '0 0 25px rgba(0, 0, 0, 0.12)',
+        'glass-ambient-sm': '0 0 20px rgba(0, 0, 0, 0.10)',
+        'glass-ambient-lg': '0 0 35px rgba(0, 0, 0, 0.15)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
@@ -103,6 +111,10 @@ export default {
       borderRadius: {
         // PB-specific radii
         ...pbRadii,
+        // Glass pill navigation
+        'glass-pill': '35px',
+        'glass-pill-sm': '30px',
+        'glass-pill-lg': '40px',
       },
       spacing: {
         // Tighter steps for mobile-first layouts
@@ -110,7 +122,16 @@ export default {
         '1.5': '0.375rem',  // 6px
       },
       backdropBlur: {
-        xs: "2px"
+        xs: "2px",
+        // Glass navigation blur
+        'glass-nav': '35px',
+        'glass-nav-sm': '30px',
+        'glass-nav-lg': '40px',
+      },
+      transitionTimingFunction: {
+        // Spring-like transitions
+        'spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'spring-smooth': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
       }
     }
   },

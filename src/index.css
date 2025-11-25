@@ -312,26 +312,33 @@ body {
 
 /* ========================================
    Liquid Glass Dock Navigation
+   VisionOS/iOS26 Style - Mode-Aware
    ======================================== */
 @layer components {
   .liquid-glass-dock {
     position: relative;
-    /* More transparent background like the image */
-    background: rgba(255, 255, 255, 0.05);
+    /* Public mode: dark semi-transparent fill */
+    background: rgba(0, 0, 0, 0.22);
+    /* Inner highlight border (1px white @ 15-20% opacity) */
     border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 9999px;
+    /* Rounded pill shape (30-40px) */
+    border-radius: 35px;
+    /* Outer ambient shadow (blur 20-35px, opacity 10-15%) */
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.15),
+      0 0 25px rgba(0, 0, 0, 0.12),
       inset 0 1px 1px rgba(255, 255, 255, 0.2),
       inset 0 -1px 1px rgba(255, 255, 255, 0.1);
-    /* Enhanced blur for better frosted effect */
-    backdrop-filter: blur(24px) saturate(180%) brightness(120%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(120%);
+    /* Large background blur (30-40px) */
+    backdrop-filter: blur(35px) saturate(180%) brightness(120%);
+    -webkit-backdrop-filter: blur(35px) saturate(180%) brightness(120%);
     overflow: hidden;
     isolation: isolate;
+    /* Floating container with 20-30px horizontal margin */
+    margin-left: 20px;
+    margin-right: 20px;
     /* Responsive sizing */
     width: auto;
-    max-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 40px);
     min-width: fit-content;
   }
 
@@ -377,41 +384,55 @@ body {
   }
 
   .liquid-glass-dock:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.25);
     box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.2),
+      0 0 30px rgba(0, 0, 0, 0.15),
       inset 0 1px 1px rgba(255, 255, 255, 0.25),
       inset 0 -1px 1px rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
-    transition: all 0.3s ease;
+    border-color: rgba(255, 255, 255, 0.22);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .liquid-glass-dock {
-      max-width: calc(100vw - 1rem);
+      margin-left: 20px;
+      margin-right: 20px;
+      max-width: calc(100vw - 40px);
       padding: 0.75rem 1rem;
     }
   }
 
   @media (max-width: 640px) {
     .liquid-glass-dock {
-      max-width: calc(100vw - 0.5rem);
+      margin-left: 20px;
+      margin-right: 20px;
+      max-width: calc(100vw - 40px);
       padding: 0.625rem 0.875rem;
     }
   }
 
-  /* Business mode adjustments - more transparent liquid glass effect */
+  @media (min-width: 1024px) {
+    .liquid-glass-dock {
+      margin-left: 30px;
+      margin-right: 30px;
+      max-width: calc(100vw - 60px);
+    }
+  }
+
+  /* Business mode adjustments - light semi-transparent fill */
   [data-theme="business"] .liquid-glass-dock {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.08);
+    /* Business mode: light semi-transparent fill (rgba(255,255,255,0.14-0.22)) */
+    background: rgba(255, 255, 255, 0.18);
+    /* Inner highlight border for business mode */
+    border-color: rgba(0, 0, 0, 0.15);
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 0 25px rgba(0, 0, 0, 0.12),
       inset 0 1px 1px rgba(255, 255, 255, 0.4),
       inset 0 -1px 1px rgba(0, 0, 0, 0.05);
-    /* More transparent backdrop filter for true liquid glass */
-    backdrop-filter: blur(20px) saturate(160%) brightness(105%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(105%);
+    /* Large background blur (30-40px) */
+    backdrop-filter: blur(35px) saturate(180%) brightness(105%);
+    -webkit-backdrop-filter: blur(35px) saturate(180%) brightness(105%);
     color: hsl(212, 84%, 7%); /* Dark text for business mode */
   }
 
@@ -436,8 +457,13 @@ body {
   }
 
   [data-theme="business"] .liquid-glass-dock:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(0, 0, 0, 0.18);
+    box-shadow: 
+      0 0 30px rgba(0, 0, 0, 0.15),
+      inset 0 1px 1px rgba(255, 255, 255, 0.5),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Dark mode adjustments - more transparent */
@@ -471,7 +497,8 @@ body {
   /* Bubble effect for active/hovered navigation items - floating liquid glass */
   .nav-item-bubble {
     position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Spring transition for smooth tab switching */
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform: translateY(0);
   }
 
@@ -521,6 +548,23 @@ body {
       inset 0 -1px 1px rgba(255, 255, 255, 0.15);
   }
 
+  /* Accent glow capsule for selected tab - Public mode (PB Aqua) */
+  .nav-item-bubble.active::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: rgba(103, 255, 216, 0.2); /* PB Aqua #67FFD8 at 20% */
+    border-radius: inherit;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 
+      0 0 12px rgba(103, 255, 216, 0.4), /* PB Aqua glow */
+      inset 0 0 8px rgba(103, 255, 216, 0.15);
+    pointer-events: none;
+    z-index: -1;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   /* Business mode bubble adjustments - more subtle gray bubble */
   [data-theme="business"] .nav-item-bubble::before {
     background: rgba(0, 0, 0, 0.04);
@@ -540,37 +584,21 @@ body {
       inset 0 -1px 1px rgba(0, 0, 0, 0.08);
   }
 
-  /* Subtle top highlight for active state */
-  .nav-item-bubble.active::after {
+  /* Accent glow capsule for selected tab - Business mode (PB Blue or Gold) */
+  [data-theme="business"] .nav-item-bubble.active::after {
     content: "";
     position: absolute;
-    top: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50%;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4) 20%,
-      rgba(255, 255, 255, 0.5) 50%,
-      rgba(255, 255, 255, 0.4) 80%,
-      transparent
-    );
-    border-radius: 0 0 1px 1px;
+    inset: -2px;
+    background: rgba(72, 159, 227, 0.2); /* PB Blue #489FE3 at 20% */
+    border-radius: inherit;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 
+      0 0 12px rgba(72, 159, 227, 0.4), /* PB Blue glow */
+      inset 0 0 8px rgba(72, 159, 227, 0.15);
     pointer-events: none;
-    z-index: 1;
-  }
-
-  [data-theme="business"] .nav-item-bubble.active::after {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.3) 20%,
-      rgba(255, 255, 255, 0.4) 50%,
-      rgba(255, 255, 255, 0.3) 80%,
-      transparent
-    );
+    z-index: -1;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Liquid Glass Composer Modal */

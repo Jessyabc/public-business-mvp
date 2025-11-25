@@ -29,7 +29,6 @@ export function CreateBusiness() {
     company_size: '',
     phone: '',
     website: '',
-    linkedin_url: '',
     bio: ''
   });
 
@@ -211,17 +210,6 @@ export function CreateBusiness() {
                   placeholder="https://yourcompany.com"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="linkedin_url">LinkedIn Company Page</Label>
-              <Input
-                id="linkedin_url"
-                type="url"
-                value={formData.linkedin_url}
-                onChange={(e) => updateField('linkedin_url', e.target.value)}
-                placeholder="https://linkedin.com/company/yourcompany"
-              />
             </div>
 
             <div className="space-y-2">
