@@ -18,7 +18,7 @@ export function NewLanding() {
     }} className="relative overflow-hidden pt-0 my-0 py-px pb-[75px] items-center justify-center gap-0 flex flex-col px-[12px]">
         {/* Logo */}
         <div className="mb-14 z-10">
-          <img src={pbLogoHero} alt="Public Business" className="h-[26rem] sm:h-[32rem] lg:h-[40rem] xl:h-[48rem] mx-auto drop-shadow-brand object-fill" />
+          <img src={pbLogoHero} alt="Public Business" className="h-64 sm:h-80 md:h-96 lg:h-[28rem] xl:h-[32rem] mx-auto drop-shadow-brand object-contain" />
         </div>
 
         {/* Main Headline */}
