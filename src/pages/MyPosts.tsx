@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FeedContainer } from '@/features/feed/FeedContainer';
+import { PostReaderModal } from '@/components/posts/PostReaderModal';
+import type { Post } from '@/types/post';
 
 const MyPosts = () => {
   const { mode } = useAppMode();
@@ -17,6 +19,8 @@ const MyPosts = () => {
   const { openComposer } = useComposerStore();
   const { posts, loading, error, fetchUserPosts } = usePosts();
   const [activeTab, setActiveTab] = useState('posts');
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -49,23 +53,23 @@ const MyPosts = () => {
         <header className="mb-8">
           <GlassCard className={`rounded-3xl glass-ios-triple glass-corner-distort transition-all duration-700 ${
             mode === 'public'
-              ? 'border-white/20'
-              : 'border-blue-200/30'
+              ? 'border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-[#489FE3]/20'
+              : 'border-blue-300/50 bg-blue-50/30 backdrop-blur-xl shadow-lg shadow-blue-500/20'
           }`} padding="lg">
             <div className="flex items-center justify-center space-x-3 mb-4">
               {mode === 'public' ? (
-                <Brain className="w-8 h-8 text-[#489FE3]" />
+                <Brain className="w-8 h-8 text-[#489FE3] drop-shadow-lg" />
               ) : (
-                <Building2 className="w-8 h-8 text-blue-600" />
+                <Building2 className="w-8 h-8 text-blue-600 drop-shadow-lg" />
               )}
               <h1 className={`text-4xl font-light tracking-wide ${
-                mode === 'public' ? 'text-white' : 'text-slate-800'
+                mode === 'public' ? 'text-white drop-shadow-md' : 'text-slate-800'
               }`}>
                 My Posts
               </h1>
             </div>
             <p className={`mt-2 font-light max-w-2xl mx-auto text-center ${
-              mode === 'public' ? 'text-white/80' : 'text-slate-600'
+              mode === 'public' ? 'text-white/90' : 'text-slate-700'
             }`}>
               {mode === 'public' 
                 ? 'Your brainstorms, insights, and contributions to the community'
@@ -76,9 +80,21 @@ const MyPosts = () => {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass-ios-triple mb-6">
-            <TabsTrigger value="posts">My Posts</TabsTrigger>
-            <TabsTrigger value="lastSeen">
+          <TabsList className={`grid w-full grid-cols-2 glass-ios-triple mb-6 ${
+            mode === 'public'
+              ? 'border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-[#489FE3]/20'
+              : 'border-blue-300/50 bg-blue-50/30 backdrop-blur-xl shadow-lg shadow-blue-500/20'
+          }`}>
+            <TabsTrigger value="posts" className={
+              mode === 'public'
+                ? 'data-[state=active]:bg-[#489FE3]/30 data-[state=active]:text-white'
+                : 'data-[state=active]:bg-blue-200/60 data-[state=active]:text-blue-700'
+            }>My Posts</TabsTrigger>
+            <TabsTrigger value="lastSeen" className={
+              mode === 'public'
+                ? 'data-[state=active]:bg-[#489FE3]/30 data-[state=active]:text-white'
+                : 'data-[state=active]:bg-blue-200/60 data-[state=active]:text-blue-700'
+            }>
               <Clock className="w-4 h-4 mr-2" />
               Last Seen
             </TabsTrigger>
@@ -91,8 +107,8 @@ const MyPosts = () => {
                 {[1, 2, 3].map((i) => (
                   <GlassCard key={i} className={`glass-ios-triple transition-all duration-700 ${
                     mode === 'public'
-                      ? 'border-white/20'
-                      : 'border-blue-200/30'
+                      ? 'border-white/40 bg-white/10 backdrop-blur-xl'
+                      : 'border-blue-300/50 bg-blue-50/30 backdrop-blur-xl'
                   }`}>
                     <Skeleton className="h-6 w-3/4 mb-4" />
                     <Skeleton className="h-4 w-full mb-2" />
@@ -106,20 +122,20 @@ const MyPosts = () => {
             {error && !loading && (
               <GlassCard className={`glass-ios-triple glass-corner-distort transition-all duration-700 ${
                 mode === 'public'
-                  ? 'border-red-500/20'
-                  : 'border-red-200/30'
+                  ? 'border-red-400/40 bg-red-500/10 backdrop-blur-xl shadow-lg shadow-red-500/20'
+                  : 'border-red-300/50 bg-red-50/30 backdrop-blur-xl shadow-lg shadow-red-500/20'
               }`}>
                 <div className="text-center">
                   <AlertCircle className={`w-12 h-12 mx-auto mb-4 ${
-                    mode === 'public' ? 'text-red-400' : 'text-red-600'
+                    mode === 'public' ? 'text-red-400 drop-shadow-md' : 'text-red-600'
                   }`} />
                   <h3 className={`text-lg font-medium mb-2 ${
-                    mode === 'public' ? 'text-white' : 'text-red-600'
+                    mode === 'public' ? 'text-white drop-shadow-sm' : 'text-red-600'
                   }`}>
                     Failed to Load Posts
                   </h3>
                   <p className={`mb-4 ${
-                    mode === 'public' ? 'text-white/70' : 'text-red-600/80'
+                    mode === 'public' ? 'text-white/90' : 'text-red-700'
                   }`}>
                     {error}
                   </p>
@@ -128,8 +144,8 @@ const MyPosts = () => {
                     variant="outline"
                     className={`glass-ios-triple ${
                       mode === 'public'
-                        ? 'border-red-400/50 text-red-400 hover:bg-red-400/10'
-                        : 'border-red-600 text-red-600 hover:bg-red-50'
+                        ? 'border-red-400/60 text-red-300 hover:bg-red-400/20 shadow-lg shadow-red-500/30'
+                        : 'border-red-500/60 text-red-600 hover:bg-red-100 shadow-lg shadow-red-500/30'
                     }`}
                   >
                     Try Again
@@ -145,20 +161,20 @@ const MyPosts = () => {
                   /* Empty State */
                   <GlassCard className={`text-center glass-ios-triple glass-corner-distort transition-all duration-700 ${
                     mode === 'public'
-                      ? 'border-white/20'
-                      : 'border-blue-200/30'
+                      ? 'border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-[#489FE3]/20'
+                      : 'border-blue-300/50 bg-blue-50/30 backdrop-blur-xl shadow-lg shadow-blue-500/20'
                   }`} padding="lg">
                     <div className="space-y-4">
                       <FileText className={`w-16 h-16 mx-auto ${
-                        mode === 'public' ? 'text-white/40' : 'text-slate-400'
+                        mode === 'public' ? 'text-white/60 drop-shadow-md' : 'text-blue-500'
                       }`} />
                       <h3 className={`text-xl font-medium ${
-                        mode === 'public' ? 'text-white' : 'text-slate-800'
+                        mode === 'public' ? 'text-white drop-shadow-sm' : 'text-slate-800'
                       }`}>
                         No Posts Yet
                       </h3>
                       <p className={`text-lg ${
-                        mode === 'public' ? 'text-white/70' : 'text-slate-600'
+                        mode === 'public' ? 'text-white/90' : 'text-slate-700'
                       }`}>
                         {mode === 'public' 
                           ? "You haven't created any posts yet. Share your ideas!"
@@ -169,8 +185,8 @@ const MyPosts = () => {
                         onClick={() => openComposer()}
                         className={`glass-ios-triple transition-all duration-300 ${
                           mode === 'public'
-                            ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
-                            : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
+                            ? 'bg-[#489FE3]/30 hover:bg-[#489FE3]/40 text-white border-[#489FE3]/60 shadow-lg shadow-[#489FE3]/30'
+                            : 'bg-blue-200/60 hover:bg-blue-200/70 text-blue-700 border-blue-400/60 shadow-lg shadow-blue-500/30'
                         }`}
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -192,8 +208,8 @@ const MyPosts = () => {
                         size="sm"
                         className={`glass-ios-triple transition-all duration-300 ${
                           mode === 'public'
-                            ? 'bg-[#489FE3]/20 hover:bg-[#489FE3]/30 text-white border-[#489FE3]/50'
-                            : 'bg-blue-100/40 hover:bg-blue-100/60 text-blue-600 border-blue-300/40'
+                            ? 'bg-[#489FE3]/30 hover:bg-[#489FE3]/40 text-white border-[#489FE3]/60 shadow-lg shadow-[#489FE3]/30 hover:shadow-[#489FE3]/40'
+                            : 'bg-blue-200/60 hover:bg-blue-200/70 text-blue-700 border-blue-400/60 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40'
                         }`}
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -202,34 +218,55 @@ const MyPosts = () => {
                     </div>
 
                     {posts.map((post) => (
-                      <GlassCard key={post.id} className={`glass-ios-triple glass-corner-distort transition-all duration-700 hover:scale-[1.02] ${
-                        mode === 'public'
-                          ? 'border-white/20 hover:border-white/30'
-                          : 'border-blue-200/30 hover:border-blue-300/40'
-                      }`}>
+                      <GlassCard 
+                        key={post.id} 
+                        className={`glass-ios-triple glass-corner-distort transition-all duration-300 cursor-pointer ${
+                          mode === 'public'
+                            ? 'border-white/40 bg-white/10 hover:bg-white/15 hover:border-white/50 hover:shadow-lg hover:shadow-[#489FE3]/30 hover:scale-[1.02]'
+                            : 'border-blue-300/50 bg-blue-50/30 hover:bg-blue-50/40 hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/30 hover:scale-[1.02]'
+                        }`}
+                        onClick={() => {
+                          setSelectedPost(post);
+                          setIsModalOpen(true);
+                        }}
+                      >
                         <div className="pb-3">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
-                                <Badge variant={post.mode === 'public' ? 'default' : 'secondary'}>
+                                <Badge variant={post.mode === 'public' ? 'default' : 'secondary'} className={
+                                  mode === 'public' 
+                                    ? 'bg-[#489FE3]/30 text-white border-[#489FE3]/50' 
+                                    : 'bg-blue-200/50 text-blue-700 border-blue-300/60'
+                                }>
                                   {post.mode}
                                 </Badge>
-                                <Badge variant="outline">
+                                <Badge variant="outline" className={
+                                  mode === 'public'
+                                    ? 'border-white/40 text-white/90 bg-white/10'
+                                    : 'border-blue-300/50 text-blue-700 bg-blue-50/40'
+                                }>
                                   {post.type}
                                 </Badge>
-                                <Badge variant="outline">
+                                <Badge variant="outline" className={
+                                  mode === 'public'
+                                    ? 'border-white/40 text-white/90 bg-white/10'
+                                    : 'border-blue-300/50 text-blue-700 bg-blue-50/40'
+                                }>
                                   {post.visibility}
                                 </Badge>
                               </div>
                               {post.title && (
                                 <h3 className={`text-lg font-semibold mb-2 ${
-                                  mode === 'public' ? 'text-white' : 'text-slate-800'
+                                  mode === 'public' ? 'text-white drop-shadow-sm' : 'text-slate-800'
                                 }`}>
                                   {post.title}
                                 </h3>
                               )}
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <div className={`flex items-center gap-1 text-xs ${
+                              mode === 'public' ? 'text-white/80' : 'text-slate-600'
+                            }`}>
                               <Calendar className="w-3 h-3" />
                               {formatDate(post.created_at)}
                             </div>
@@ -238,13 +275,15 @@ const MyPosts = () => {
                         
                         <div className="pt-0">
                           <p className={`mb-4 line-clamp-3 ${
-                            mode === 'public' ? 'text-white/80' : 'text-slate-700'
+                            mode === 'public' ? 'text-white/90' : 'text-slate-700'
                           }`}>
                             {post.content}
                           </p>
                           
                           {/* Engagement Stats */}
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className={`flex items-center gap-4 text-sm ${
+                            mode === 'public' ? 'text-white/80' : 'text-slate-600'
+                          }`}>
                             <div className="flex items-center gap-1">
                               <Eye className="w-4 h-4" />
                               {post.views_count || 0}
@@ -274,6 +313,16 @@ const MyPosts = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Post Reader Modal */}
+      <PostReaderModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPost(null);
+        }}
+        post={selectedPost}
+      />
     </div>
   );
 };

@@ -3,20 +3,22 @@ import { Plus, Lightbulb, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCuratedIdeas, type OpenIdea } from '@/hooks/useOpenIdeas';
+import { useOpenIdeas, type UnifiedOpenIdea } from '@/hooks/useOpenIdeas';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { sanitizeText } from '@/lib/sanitize';
+import { useState, useCallback } from 'react';
+import { PostModal } from '@/components/post/PostModal';
 
 // Environment variable for gating (could be set in production)
 const REQUIRE_AUTH = true; // Set this based on your preference
 
-function OpenIdeaCard({ idea }: { idea: OpenIdea }) {
-  const snippet = sanitizeText(idea.content).slice(0, 200) + (idea.content.length > 200 ? '...' : '');
+function OpenIdeaCard({ idea, onClick }: { idea: UnifiedOpenIdea; onClick: () => void }) {
+  const snippet = sanitizeText(idea.text).slice(0, 200) + (idea.text.length > 200 ? '...' : '');
   const timeAgo = formatDistanceToNow(new Date(idea.created_at), { addSuffix: true });
 
   return (
-    <Card className="h-full">
+    <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <Lightbulb className="w-6 h-6 text-primary" />
@@ -27,7 +29,7 @@ function OpenIdeaCard({ idea }: { idea: OpenIdea }) {
         <p className="text-sm text-muted-foreground mb-4 line-clamp-4">
           {snippet}
         </p>
-        <Link to={`/brainstorms/new?idea_id=${idea.id}`}>
+        <Link to={`/brainstorms/new?idea_id=${idea.id}`} onClick={(e) => e.stopPropagation()}>
           <Button variant="outline" className="w-full">
             Get inspired → Start a brainstorm
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -40,7 +42,12 @@ function OpenIdeaCard({ idea }: { idea: OpenIdea }) {
 
 export default function OpenIdeas() {
   const { user } = useAuth();
-  const { data: ideas = [], isLoading } = useCuratedIdeas();
+  const { ideas = [], loading: isLoading } = useOpenIdeas();
+  const [selectedIdea, setSelectedIdea] = useState<UnifiedOpenIdea | null>(null);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedIdea(null);
+  }, []);
 
   // If authentication is required and user is not logged in
   if (REQUIRE_AUTH && !user) {
@@ -112,9 +119,26 @@ export default function OpenIdeas() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {ideas.map((idea) => (
-            <OpenIdeaCard key={idea.id} idea={idea} />
+            <OpenIdeaCard 
+              key={idea.id} 
+              idea={idea} 
+              onClick={() => setSelectedIdea(idea)}
+            />
           ))}
         </div>
+      )}
+
+      {/* Modal for viewing full idea */}
+      {selectedIdea && (
+        <PostModal
+          isOpen={true}
+          onClose={handleCloseModal}
+          id={selectedIdea.id}
+          type="open_idea"
+          content={selectedIdea.text}
+          created_at={selectedIdea.created_at}
+          author={selectedIdea.source === 'user' ? 'User' : 'Anonymous'}
+        />
       )}
     </div>
   );

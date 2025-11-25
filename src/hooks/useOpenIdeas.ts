@@ -1,11 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 export interface OpenIdea {
   id: string;
   content: string;
   created_at: string;
   source: 'intake' | 'user';
+}
+
+export interface UnifiedOpenIdea {
+  id: string;
+  text: string;
+  status: string;
+  created_at: string;
+  source: 'user' | 'anon';
 }
 
 export interface IdeaBrainstorm {
@@ -127,4 +136,72 @@ export function useIdeaBrainstorm(id: string) {
     },
     enabled: !!id,
   });
+}
+
+/**
+ * Hook to fetch open ideas from both open_ideas_user and open_ideas_intake tables
+ * Returns unified array with source indicator
+ */
+export function useOpenIdeas() {
+  const [ideas, setIdeas] = useState<UnifiedOpenIdea[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch from both tables in parallel
+        const [userIdeasResult, intakeIdeasResult] = await Promise.all([
+          supabase
+            .from('open_ideas_user')
+            .select('id, text, status, created_at')
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('open_ideas_intake')
+            .select('id, text, status, created_at')
+            .order('created_at', { ascending: false })
+        ]);
+
+        if (userIdeasResult.error) throw userIdeasResult.error;
+        if (intakeIdeasResult.error) throw intakeIdeasResult.error;
+
+        // Map and combine results
+        const userIdeas: UnifiedOpenIdea[] = (userIdeasResult.data || []).map(idea => ({
+          id: idea.id,
+          text: idea.text,
+          status: idea.status,
+          created_at: idea.created_at || new Date().toISOString(),
+          source: 'user' as const,
+        }));
+
+        const intakeIdeas: UnifiedOpenIdea[] = (intakeIdeasResult.data || []).map(idea => ({
+          id: idea.id,
+          text: idea.text,
+          status: idea.status,
+          created_at: idea.created_at || new Date().toISOString(),
+          source: 'anon' as const,
+        }));
+
+        // Combine and sort by created_at descending
+        const allIdeas = [...userIdeas, ...intakeIdeas].sort((a, b) => {
+          const dateA = new Date(a.created_at).getTime();
+          const dateB = new Date(b.created_at).getTime();
+          return dateB - dateA;
+        });
+
+        setIdeas(allIdeas);
+      } catch (err) {
+        console.error('Error fetching open ideas:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch open ideas');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeas();
+  }, []);
+
+  return { ideas, loading, error };
 }

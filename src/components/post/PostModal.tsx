@@ -87,8 +87,8 @@ export function PostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
-        <GlassSurface className="space-y-4">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto border-0 bg-transparent backdrop-blur-none p-0 shadow-none">
+        <GlassSurface className="space-y-4 bg-white/15 border border-white/25 backdrop-blur-xl">
           {/* Header */}
           <DialogHeader className="space-y-4">
           <div className="flex items-start justify-between">

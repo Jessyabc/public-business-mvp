@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { buildPublicSparkPayload, buildBusinessInsightPayload } from "@/lib/postPayloads";
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -94,11 +95,11 @@ export function ComposerModal({
     localStorage.removeItem(draftKey);
   };
 
-  // Load recent posts for linking
+  // Load recent posts for linking (public Sparks only)
   const loadRecentPosts = async () => {
     setLoadingPosts(true);
     try {
-      let query = supabase.from('posts').select('id, title, content, created_at').eq('kind', 'Spark').eq('status', 'active').order('created_at', {
+      let query = supabase.from('posts').select('id, title, content, created_at').eq('type', 'brainstorm').eq('kind', 'Spark').eq('mode', 'public').eq('visibility', 'public').eq('status', 'active').order('created_at', {
         ascending: false
       }).limit(20);
       if (linkSearch.trim()) {
@@ -131,6 +132,12 @@ export function ComposerModal({
   const handleCreate = async () => {
     if (!canSubmit || isSubmitting) return;
 
+    // Enforce auth - no anonymous posts
+    if (!user) {
+      toast.error('You need an account to post.');
+      return;
+    }
+
     // Business mode validation
     if (!isPublicMode && !isBusinessMember()) {
       toast.error('Business membership required');
@@ -138,25 +145,17 @@ export function ComposerModal({
     }
     setIsSubmitting(true);
     try {
-      const insertData: any = {
-        user_id: user?.id,
-        content: content.trim(),
-        published_at: new Date().toISOString(),
-        status: 'active'
-      };
+      let payload;
+      
       if (isPublicMode) {
-        // Public brainstorm
-        insertData.type = 'brainstorm';
-        insertData.kind = 'Spark';
-        insertData.visibility = 'public';
-        insertData.mode = 'public';
-        insertData.org_id = null;
+        // Public Spark (brainstorm)
+        payload = buildPublicSparkPayload({
+          userId: user.id,
+          content,
+          title: undefined,
+        });
       } else {
-        // Business insight - org_id will be determined by RLS/backend
-        insertData.type = 'insight';
-        insertData.kind = 'BusinessInsight';
-        insertData.visibility = 'my_business';
-        insertData.mode = 'business';
+        // Business Insight
         // Get the user's org_id from their membership
         const {
           data: orgId,
@@ -167,15 +166,28 @@ export function ComposerModal({
           setIsSubmitting(false);
           return;
         }
-        insertData.org_id = orgId;
-        if (title.trim()) {
-          insertData.title = title.trim();
+        
+        if (!title.trim()) {
+          toast.error('Business insights require a title');
+          setIsSubmitting(false);
+          return;
         }
+        
+        payload = buildBusinessInsightPayload({
+          userId: user.id,
+          orgId,
+          content,
+          title,
+        });
       }
+      
+      // Add published_at timestamp
+      payload.published_at = new Date().toISOString();
+      
       const {
         data: newPost,
         error
-      } = await supabase.from('posts').insert(insertData).select('id').single();
+      } = await supabase.from('posts').insert(payload).select('id').single();
       if (error) {
         console.error('Error creating post:', error);
         if (error.message.includes('org_id')) {
@@ -187,6 +199,7 @@ export function ComposerModal({
       }
 
       // Create soft links if any posts were selected
+      // Note: api_create_soft_links RPC should ensure relation_type='soft' on the server side
       if (selectedLinks.length > 0 && newPost?.id) {
         try {
           await supabase.rpc('api_create_soft_links', {

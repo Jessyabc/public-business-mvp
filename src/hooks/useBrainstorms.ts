@@ -31,6 +31,11 @@ export interface BrainstormInteraction {
 
 type FilterType = 'newest' | 'most_interacted' | 'mine';
 
+/**
+ * LEGACY: This hook is maintained for backward compatibility.
+ * New code should use the posts system (ComposerModal, NodeForm, usePosts).
+ * This hook has been updated to use 'draft' instead of 'private' for visibility.
+ */
 export function useBrainstorms() {
   const [brainstorms, setBrainstorms] = useState<Brainstorm[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,12 +51,16 @@ export function useBrainstorms() {
         .from('posts')
         .select('*')
         .eq('type', 'brainstorm')
+        .eq('kind', 'Spark')
+        .eq('mode', 'public')
         .eq('status', 'active');
 
       // Apply filters
       if (filter === 'mine' && user) {
         query = query.eq('user_id', user.id);
+        // For 'mine' filter, include both public and draft posts
       } else if (filter !== 'mine') {
+        // For public feeds, only show public visibility
         query = query.eq('visibility', 'public');
       }
 
@@ -126,7 +135,7 @@ export function useBrainstorms() {
         body: data.content,
         type: 'brainstorm',
         mode: 'public',
-        visibility: data.is_public ? 'public' : 'private',
+        visibility: data.is_public ? 'public' : 'draft', // Changed from 'private' to 'draft'
         status: 'active',
         user_id: user.id,
         kind: 'Spark',
@@ -149,7 +158,7 @@ export function useBrainstorms() {
         title: data.title,
         content: data.content,
         body: data.content,
-        visibility: data.is_public ? 'public' : 'private',
+        visibility: data.is_public ? 'public' : 'draft', // Changed from 'private' to 'draft'
       })
       .eq('id', id)
       .eq('user_id', user.id)

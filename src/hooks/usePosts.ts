@@ -56,6 +56,7 @@ export function usePosts() {
   }, [toast]);
 
   const createPost = async (postData: CreatePostData): Promise<Post | null> => {
+    // Enforce auth - no anonymous posts
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -84,15 +85,16 @@ export function usePosts() {
     try {
       console.log('Creating post with data:', { user_id: user.id, ...postData });
       
-      const insertPayload = {
+      // Apply canonical rules for post creation
+      let insertPayload: any = {
         user_id: user.id,
         content: postData.content,
         type: postData.type,
         mode: postData.mode,
         title: postData.title ?? null,
         body: postData.body ?? postData.content,
-        kind: postData.kind ?? (postData.mode === 'business' ? 'BusinessInsight' : 'Spark'),
-        visibility: postData.visibility ?? 'public',
+        kind: postData.kind,
+        visibility: postData.visibility,
         status: postData.status ?? 'active',
         org_id: postData.org_id,
         industry_id: postData.industry_id,
@@ -101,11 +103,36 @@ export function usePosts() {
         t_score: postData.t_score,
         u_score: postData.u_score,
         published_at: postData.published_at,
-      } as const;
+      };
+
+      // Canonical rules: enforce correct values based on type
+      if (postData.type === 'brainstorm') {
+        // Force canonical values for brainstorms
+        insertPayload.mode = 'public';
+        insertPayload.visibility = 'public';
+        insertPayload.kind = 'Spark';
+        insertPayload.org_id = null;
+      } else if (postData.type === 'insight' && postData.mode === 'business') {
+        // Ensure kind is BusinessInsight for business insights
+        insertPayload.kind = insertPayload.kind || 'BusinessInsight';
+        
+        // Require org_id for business insights
+        if (!insertPayload.org_id) {
+          toast({
+            title: "Organization Required",
+            description: "Business insights require an organization ID",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return null;
+        }
+      }
+      
+      const finalPayload = insertPayload as const;
 
       const { data, error } = await supabase
         .from('posts')
-        .insert(insertPayload)
+        .insert(finalPayload)
         .select()
         .single();
 
@@ -295,13 +322,15 @@ export function usePosts() {
   const fetchPostRelations = async (postId: string) => {
     try {
       // Fetch child posts (continuations/links)
+      // Only include 'hard' and 'soft' relation types (exclude biz_in, biz_out)
       const { data: relations, error } = await supabase
         .from('post_relations')
         .select(`
           *,
           child_post:posts!post_relations_child_post_id_fkey(*)
         `)
-        .eq('parent_post_id', postId);
+        .eq('parent_post_id', postId)
+        .in('relation_type', ['hard', 'soft']);
 
       if (error) throw error;
       return relations || [];

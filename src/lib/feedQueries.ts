@@ -29,13 +29,18 @@ export async function fetchUniversalFeed(
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  // Filter by mode
+  // Filter by mode and visibility
   if (opts.mode === 'public') {
-    query = query.eq('mode', 'public');
+    query = query.eq('mode', 'public').eq('visibility', 'public');
   } else if (opts.mode === 'business') {
     query = query.eq('mode', 'business');
+    // For business mode, include my_business and other_businesses visibility
+    // (draft posts are excluded by default since they're not published)
     if (opts.org_id) {
-      query = query.eq('org_id', opts.org_id);
+      query = query.eq('org_id', opts.org_id).in('visibility', ['my_business', 'other_businesses', 'public']);
+    } else {
+      // If no org_id, only show public business insights
+      query = query.eq('visibility', 'public');
     }
   }
 
@@ -90,7 +95,9 @@ export async function fetchCrossLinkedPosts(
 
   if (relatedIds.size === 0) return [];
 
-  // Fetch related posts
+  // Fetch related posts - filter for active posts only
+  // Note: This doesn't filter by type/mode/visibility to allow cross-type linking
+  // Individual consumers should filter further if needed
   const { data: posts, error: postsError } = await sb
     .from('posts')
     .select('*')

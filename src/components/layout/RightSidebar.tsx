@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { GlassCard } from '@/ui/components/GlassCard';
 interface RightSidebarProps {
   variant?: 'default' | 'feed';
+  onSelectPost?: (postId: string) => void;
 }
 interface SidebarBrainstorm {
   id: string;
@@ -23,7 +24,8 @@ interface OpenIdeaIntake {
  * - Open Ideas tab hosts the spark-only FeedContainer
  */
 export function RightSidebar({
-  variant = 'default'
+  variant = 'default',
+  onSelectPost
 }: RightSidebarProps) {
   const [openIdeas, setOpenIdeas] = useState<OpenIdeaIntake[]>([]);
   const [recentBrainstorms, setRecentBrainstorms] = useState<SidebarBrainstorm[]>([]);
@@ -37,7 +39,7 @@ export function RightSidebar({
         event: '*',
         schema: 'public',
         table: 'posts',
-        filter: 'type=eq.brainstorm'
+        filter: 'type=eq.brainstorm&mode=eq.public&visibility=eq.public'
       }, () => {
         fetchFeeds();
       }).subscribe();
@@ -48,10 +50,10 @@ export function RightSidebar({
   }, [variant]);
   const fetchFeeds = async () => {
     try {
-      // Fetch recent brainstorms from posts table
+      // Fetch recent brainstorms from posts table (public Sparks only)
       const {
         data: brainstorms
-      } = await supabase.from('posts').select('id, title, content, created_at').eq('type', 'brainstorm').eq('status', 'active').order('created_at', {
+      } = await supabase.from('posts').select('id, title, content, created_at').eq('type', 'brainstorm').eq('kind', 'Spark').eq('mode', 'public').eq('visibility', 'public').eq('status', 'active').order('created_at', {
         ascending: false
       }).limit(5);
       setRecentBrainstorms((brainstorms || []) as SidebarBrainstorm[]);
@@ -73,18 +75,25 @@ export function RightSidebar({
         return <p className="text-sm text-white/70">No breadcrumbs yet.</p>;
       }
       return <ol className="space-y-3">
-          {recentBrainstorms.map((item, index) => <li key={item.id} className="flex items-start gap-3 text-left">
+          {recentBrainstorms.map((item, index) => (
+            <li key={item.id} className="flex items-start gap-3 text-left">
               <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/10 font-semibold text-white/80 text-center text-xs">
                 {index + 1}
               </span>
-              <GlassCard padding="sm" className="flex-1 border-white/15 bg-white/5 backdrop-blur">
-                {item.title && <p className="text-sm font-semibold text-white/90">{item.title}</p>}
-                <p className="text-xs text-white/70 line-clamp-2">{item.content}</p>
-                <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-white/50">
-                  {new Date(item.created_at).toLocaleString()}
-                </p>
-              </GlassCard>
-            </li>)}
+              <button
+                onClick={() => onSelectPost?.(item.id)}
+                className="flex-1 text-left"
+              >
+                <GlassCard padding="sm" className="border-white/15 bg-white/5 backdrop-blur hover:bg-white/10 transition-colors cursor-pointer">
+                  {item.title && <p className="text-sm font-semibold text-white/90">{item.title}</p>}
+                  <p className="text-xs text-white/70 line-clamp-2">{item.content}</p>
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-white/50">
+                    {new Date(item.created_at).toLocaleString()}
+                  </p>
+                </GlassCard>
+              </button>
+            </li>
+          ))}
         </ol>;
     };
     const renderOpenIdeas = () => {

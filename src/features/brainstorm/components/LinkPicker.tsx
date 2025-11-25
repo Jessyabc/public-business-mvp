@@ -50,11 +50,14 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
   const loadRecentPosts = async () => {
     setIsLoading(true);
     try {
-      // Fetch recent spark posts from posts table
+      // Fetch recent spark posts from posts table (public Sparks only)
       let query = supabase
         .from('posts')
         .select('id, title, content, created_at, kind')
+        .eq('type', 'brainstorm')
         .eq('kind', 'Spark')
+        .eq('mode', 'public')
+        .eq('visibility', 'public')
         .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(20);

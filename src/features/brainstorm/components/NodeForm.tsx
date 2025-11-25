@@ -16,6 +16,7 @@ import { GlassCard } from '@/ui/components/GlassCard';
 import { Search, X, Plus } from 'lucide-react';
 import { useBrainstormExperienceStore } from '../stores/experience';
 import type { BasePost } from '@/types/post';
+import { buildPublicSparkPayload } from '@/lib/postPayloads';
 
 const nodeSchema = z.object({
   title: z.string().max(100, 'Title must be less than 100 characters').optional(),
@@ -73,11 +74,14 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
   const loadRecentPosts = async () => {
     setIsLoadingHistory(true);
     try {
-      // Fetch recent brainstorm posts from posts table
+      // Fetch recent brainstorm posts from posts table (public Sparks only)
       let query = supabase
         .from('posts')
         .select('id, title, content, created_at, type')
         .eq('type', 'brainstorm')
+        .eq('kind', 'Spark')
+        .eq('mode', 'public')
+        .eq('visibility', 'public')
         .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(15);
@@ -139,31 +143,25 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
     setIsSubmitting(true);
     try {
-      // Determine kind based on mode
-      const kind = mode === 'root' ? 'Spark' : 'Spark';
-      const parent_post_id = mode === 'continue' ? parentId : null;
-
-      // Get current user
+      // Get current user - enforce auth
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error('You must be logged in to create brainstorms');
+        setIsSubmitting(false);
         return;
       }
+
+      // Build canonical Spark payload
+      const payload = buildPublicSparkPayload({
+        userId: user.id,
+        content: data.content,
+        title: data.title || null,
+      });
 
       // Insert into posts table
       const { data: newPost, error } = await supabase
         .from('posts')
-        .insert([{
-          kind,
-          title: data.title || null,
-          content: data.content,
-          body: data.content,
-          type: 'brainstorm',
-          mode: 'public',
-          visibility: 'public',
-          status: 'active', // Auto-approve in dev
-          user_id: user.id,
-        }])
+        .insert(payload)
         .select('*')
         .single();
 
@@ -173,14 +171,14 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
         return;
       }
 
-      // If continue mode, create the relation
+      // If continue mode, create the hard relation (continuation)
       if (mode === 'continue' && parentId && newPost) {
         const { error: relationError } = await supabase
           .from('post_relations')
           .insert([{
             parent_post_id: parentId,
             child_post_id: newPost.id,
-            relation_type: 'hard',
+            relation_type: 'hard', // Continuation uses 'hard' relation
           }]);
 
         if (relationError) {
@@ -189,12 +187,12 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
         }
       }
 
-      // Create soft links if any selected
+      // Create soft links if any selected (inspiration links)
       if (selectedSoftLinks.length > 0 && newPost) {
         const relations = selectedSoftLinks.map((childId) => ({
           parent_post_id: newPost.id,
           child_post_id: childId,
-          relation_type: 'soft' as const,
+          relation_type: 'soft' as const, // Soft links use 'soft' relation
         }));
 
         const { error: softLinksError } = await supabase
