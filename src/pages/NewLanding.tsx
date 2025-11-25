@@ -15,7 +15,7 @@ export function NewLanding() {
       <section style={{
       height: "120vh",
       minHeight: "-webkit-fill-available"
-    }} className="relative overflow-hidden pt-0 my-0 py-px pb-[75px] items-center justify-center gap-0 flex flex-col px-[12px]">
+    }} className="relative overflow-hidden pt-0 my-0 py-px pb-[75px] gap-0 flex-col px-[12px] flex items-center justify-start">
         {/* Logo */}
         <div className="mb-14 z-10">
           <img src={pbLogoHero} alt="Public Business" className="h-64 sm:h-80 md:h-96 lg:h-[28rem] xl:h-[32rem] mx-auto drop-shadow-brand object-contain" />
