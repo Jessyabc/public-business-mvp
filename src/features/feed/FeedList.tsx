@@ -51,18 +51,20 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
   }, [onEndReached, loading]);
 
   const handlePostSelect = (post: BasePost) => {
-    // Use onSelect prop if provided, otherwise fall back to store + event
+    // Always dispatch thread event for main feed clicks (primary behavior)
+    // This allows BrainstormFeed to handle the thread view
+    window.dispatchEvent(
+      new CustomEvent('pb:brainstorm:show-thread', {
+        detail: { post, postId: post.id },
+      })
+    );
+    
+    // Also call onSelect if provided (for backward compatibility with FeedContainer)
     if (onSelect) {
       onSelect(post);
     } else {
-      // Set active post in store
+      // Set active post in store as fallback
       setActivePost(post);
-      // Dispatch event to open lineage overlay (for backward compatibility)
-      window.dispatchEvent(
-        new CustomEvent('pb:brainstorm:show-lineage', {
-          detail: { postId: post.id },
-        })
-      );
     }
   };
 

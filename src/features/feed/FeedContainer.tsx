@@ -4,7 +4,6 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { useUniversalFeed } from './hooks/useUniversalFeed';
 import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
-import { PostLineageOverlay } from '@/components/brainstorm/PostLineageOverlay';
 type BrainstormFeedMode = 'brainstorm_main' | 'brainstorm_open_ideas' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
 type Props = {
   mode: BrainstormFeedMode;
@@ -54,9 +53,6 @@ export function FeedContainer({
     onItemsChange?.(feed.items);
   }, [mode, feed.items, onItemsChange]);
   
-  // Only show overlay for main brainstorm feed
-  const showOverlay = mode === 'brainstorm_main';
-  
   if (mode === 'brainstorm_last_seen') {
     const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
       items: lastSeen,
@@ -75,31 +71,13 @@ export function FeedContainer({
       </div>;
   }
   if (renderFeed) {
-    return (
-      <>
-        {renderFeed(feed.items, feed)}
-        {showOverlay && (
-          <PostLineageOverlay
-            activePost={activePost}
-            onClose={() => setActivePost(null)}
-          />
-        )}
-      </>
-    );
+    return <>{renderFeed(feed.items, feed)}</>;
   }
   return (
-    <>
-      <div style={{
-        flex: 1
-      }}>
-        <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} onSelect={setActivePost} />
-      </div>
-      {showOverlay && (
-        <PostLineageOverlay
-          activePost={activePost}
-          onClose={() => setActivePost(null)}
-        />
-      )}
-    </>
+    <div style={{
+      flex: 1
+    }}>
+      <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} onSelect={setActivePost} />
+    </div>
   );
 }

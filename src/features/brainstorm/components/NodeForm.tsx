@@ -17,6 +17,7 @@ import { Search, X, Plus } from 'lucide-react';
 import { useBrainstormExperienceStore } from '../stores/experience';
 import type { BasePost } from '@/types/post';
 import { buildPublicSparkPayload } from '@/lib/postPayloads';
+import { canLink, type LineageNode } from '@/lib/lineageRules';
 
 const nodeSchema = z.object({
   title: z.string().max(100, 'Title must be less than 100 characters').optional(),
@@ -173,35 +174,119 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
       // If continue mode, create the hard relation (continuation)
       if (mode === 'continue' && parentId && newPost) {
-        const { error: relationError } = await supabase
-          .from('post_relations')
-          .insert([{
-            parent_post_id: parentId,
-            child_post_id: newPost.id,
-            relation_type: 'hard', // Continuation uses 'hard' relation
-          }]);
+        // Fetch parent post to check lineage rules
+        const { data: parentPost, error: parentError } = await supabase
+          .from('posts')
+          .select('id, type, kind')
+          .eq('id', parentId)
+          .single();
 
-        if (relationError) {
-          console.error('Relation error:', relationError);
-          // Don't fail the whole operation, just log
+        if (parentError) {
+          console.error('Error fetching parent post:', parentError);
+          toast.error('Failed to verify parent post');
+        } else if (parentPost) {
+          // Build LineageNode objects
+          const parentNode: LineageNode = {
+            id: parentPost.id,
+            type: parentPost.type,
+            kind: parentPost.kind || undefined,
+          };
+          const childNode: LineageNode = {
+            id: newPost.id,
+            type: newPost.type,
+            kind: newPost.kind || undefined,
+          };
+
+          // Check if linking is allowed
+          if (!canLink(parentNode, childNode, 'hard')) {
+            console.warn('Lineage rule violation: Cannot link', {
+              parent: { type: parentPost.type, kind: parentPost.kind },
+              child: { type: newPost.type, kind: newPost.kind },
+              relationType: 'hard',
+            });
+            toast.error('This type of post cannot be linked to that type of post yet.');
+          } else {
+            // Proceed with relation creation
+            const { error: relationError } = await supabase
+              .from('post_relations')
+              .insert([{
+                parent_post_id: parentId,
+                child_post_id: newPost.id,
+                relation_type: 'hard', // Continuation uses 'hard' relation
+              }]);
+
+            if (relationError) {
+              console.error('Relation error:', relationError);
+              // Don't fail the whole operation, just log
+            }
+          }
         }
       }
 
       // Create soft links if any selected (inspiration links)
       if (selectedSoftLinks.length > 0 && newPost) {
-        const relations = selectedSoftLinks.map((childId) => ({
-          parent_post_id: newPost.id,
-          child_post_id: childId,
-          relation_type: 'soft' as const, // Soft links use 'soft' relation
-        }));
+        // Fetch all child posts to check lineage rules
+        const { data: childPosts, error: fetchError } = await supabase
+          .from('posts')
+          .select('id, type, kind')
+          .in('id', selectedSoftLinks);
 
-        const { error: softLinksError } = await supabase
-          .from('post_relations')
-          .insert(relations);
+        if (fetchError) {
+          console.error('Error fetching child posts:', fetchError);
+          toast.error('Failed to verify linked posts');
+        } else if (childPosts) {
+          // Build parent node
+          const parentNode: LineageNode = {
+            id: newPost.id,
+            type: newPost.type,
+            kind: newPost.kind || undefined,
+          };
 
-        if (softLinksError) {
-          console.error('Error creating soft links:', softLinksError);
-          // Don't fail the whole operation, just log
+          // Filter out disallowed relations
+          const allowedRelations: Array<{ parent_post_id: string; child_post_id: string; relation_type: 'soft' }> = [];
+          const disallowedPosts: string[] = [];
+
+          for (const childPost of childPosts) {
+            const childNode: LineageNode = {
+              id: childPost.id,
+              type: childPost.type,
+              kind: childPost.kind || undefined,
+            };
+
+            if (canLink(parentNode, childNode, 'soft')) {
+              allowedRelations.push({
+                parent_post_id: newPost.id,
+                child_post_id: childPost.id,
+                relation_type: 'soft',
+              });
+            } else {
+              disallowedPosts.push(childPost.id);
+              console.warn('Lineage rule violation: Cannot link', {
+                parent: { type: newPost.type, kind: newPost.kind },
+                child: { type: childPost.type, kind: childPost.kind },
+                relationType: 'soft',
+              });
+            }
+          }
+
+          // Show error if any relations were disallowed
+          if (disallowedPosts.length > 0) {
+            toast.error(
+              `${disallowedPosts.length} of ${selectedSoftLinks.length} link${selectedSoftLinks.length > 1 ? 's' : ''} cannot be created. This type of post cannot be linked to that type of post yet.`
+            );
+          }
+
+          // Insert only allowed relations
+          if (allowedRelations.length > 0) {
+            const { error: softLinksError } = await supabase
+              .from('post_relations')
+              .insert(allowedRelations);
+
+            if (softLinksError) {
+              console.error('Error creating soft links:', softLinksError);
+              // Don't fail the whole operation, just log
+            }
+          }
         }
       }
 

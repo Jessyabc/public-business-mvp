@@ -53,28 +53,17 @@ export function Header() {
       });
     }
   };
-  const navItems = [{
-    to: '/',
-    label: 'Home'
-  }, {
-    to: '/about',
-    label: 'About'
-  }, {
-    to: '/features',
-    label: 'Features'
-  }, {
-    to: '/industries',
-    label: 'Industries'
-  }, {
-    to: '/members/business-members',
-    label: 'Business Members'
-  }, {
-    to: '/members/public-members',
-    label: 'Public Members'
-  }, {
-    to: '/contact',
-    label: 'Contact'
-  }];
+
+  const navItems = [
+    { to: '/', label: 'Home' },
+    { to: '/open-ideas', label: 'Open Ideas' },
+    { to: '/about', label: 'About' },
+    { to: '/features', label: 'Features' },
+    { to: '/industries', label: 'Industries' },
+    { to: '/members/business-members', label: 'Business Members' },
+    { to: '/members/public-members', label: 'Public Members' },
+    { to: '/contact', label: 'Contact' },
+  ];
   if (user) return null; // Don't show header when user is logged in (they have connected interface navigation)
 
   return <>

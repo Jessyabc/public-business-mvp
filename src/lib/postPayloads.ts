@@ -20,8 +20,15 @@ export function buildPublicSparkPayload(params: {
   userId: string;
   content: string;
   title?: string | null;
+  originOpenIdeaId?: string;
 }): PostInsert {
   const trimmed = params.content.trim();
+  
+  // Build metadata if originOpenIdeaId is provided
+  const metadata = params.originOpenIdeaId
+    ? { origin_open_idea_id: params.originOpenIdeaId }
+    : undefined;
+  
   return {
     user_id: params.userId,
     title: params.title?.trim() || null,
@@ -33,6 +40,7 @@ export function buildPublicSparkPayload(params: {
     visibility: 'public',
     status: 'active',
     org_id: null,
+    metadata: metadata as any, // Type assertion needed for JSONB
   };
 }
 

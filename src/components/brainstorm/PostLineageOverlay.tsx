@@ -11,9 +11,18 @@ import { cn } from '@/lib/utils';
 interface PostLineageOverlayProps {
   activePost: BasePost | null;
   onClose: () => void;
+  onOpenPostCard?: (post: BasePost) => void;
+  mode?: 'lineage' | 'thread'; // 'lineage' = switch view on click, 'thread' = open post card
+  title?: string; // Custom title (defaults to "Brainstorm Lineage")
 }
 
-export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayProps) {
+export function PostLineageOverlay({ 
+  activePost, 
+  onClose,
+  onOpenPostCard,
+  mode = 'lineage',
+  title
+}: PostLineageOverlayProps) {
   const [currentPost, setCurrentPost] = useState<BasePost | null>(activePost);
   const [continuations, setContinuations] = useState<BasePost[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,7 +62,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
     fetchLineage();
   }, [currentPost]);
 
-  // Handle cross-link selection - switch to that post
+  // Handle cross-link selection - switch to that post or open post card
   const handleSelectPost = async (postId: string) => {
     try {
       // Fetch the post by ID
@@ -72,8 +81,16 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
       }
 
       if (post) {
-        // Update current post
-        setCurrentPost(post as BasePost);
+        const basePost = post as BasePost;
+        
+        // In thread mode, open post card instead of switching view
+        if (mode === 'thread' && onOpenPostCard) {
+          onOpenPostCard(basePost);
+          return;
+        }
+        
+        // In lineage mode, switch the view
+        setCurrentPost(basePost);
         
         // Scroll to top of the lineage column
         if (scrollContainerRef.current) {
@@ -82,6 +99,15 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
       }
     } catch (error) {
       console.error('Error selecting post:', error);
+    }
+  };
+  
+  // Handle post card click - open post card in thread mode, switch in lineage mode
+  const handlePostClick = (post: BasePost) => {
+    if (mode === 'thread' && onOpenPostCard) {
+      onOpenPostCard(post);
+    } else if (mode === 'lineage' && post.id !== currentPost?.id) {
+      handleSelectPost(post.id);
     }
   };
 
@@ -174,7 +200,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
                 {/* Header: title + close button */}
                 <header className="flex items-center justify-between px-4 pb-2">
                   <div className="text-xs uppercase tracking-[0.25em] text-white/60">
-                    Brainstorm Lineage
+                    {title || (mode === 'thread' ? 'Brainstorm Thread' : 'Brainstorm Lineage')}
                   </div>
                   <button
                     onClick={onClose}
@@ -202,12 +228,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
                         {/* Show currentPost using PostToSparkCard */}
                         <PostToSparkCard 
                           post={currentPost} 
-                          onSelect={(post) => {
-                            // Allow clicking the main post to switch (for consistency)
-                            if (post.id !== currentPost.id) {
-                              handleSelectPost(post.id);
-                            }
-                          }} 
+                          onSelect={handlePostClick}
                         />
 
                         {/* Continuations */}
@@ -217,10 +238,7 @@ export function PostLineageOverlay({ activePost, onClose }: PostLineageOverlayPr
                               <PostToSparkCard
                                 key={post.id}
                                 post={post}
-                                onSelect={(selectedPost) => {
-                                  // Clicking a continuation switches the overlay to that post
-                                  handleSelectPost(selectedPost.id);
-                                }}
+                                onSelect={handlePostClick}
                               />
                             ))}
                           </div>

@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { type OpenIdea } from '@/hooks/useOpenIdeas';
-import { X } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useComposerStore } from '@/hooks/useComposerStore';
 
 interface PostCardModalProps {
   openIdea: OpenIdea | null;
@@ -10,7 +11,29 @@ interface PostCardModalProps {
 }
 
 export function PostCardModal({ openIdea, isOpen, onClose }: PostCardModalProps) {
+  const { openComposer } = useComposerStore();
+
   if (!openIdea) return null;
+
+  const handleContinueAsSpark = () => {
+    // Ensure we're in public mode (the composer will handle mode, but we want to set the draft correctly)
+    const draftKey = 'composer:brainstorm';
+    const draft = {
+      content: openIdea.text || '',
+      title: ''
+    };
+    
+    // Save draft to localStorage
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+    
+    // Open the composer with origin open idea ID
+    openComposer({
+      originOpenIdeaId: openIdea.id,
+    });
+    
+    // Close the idea modal
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -57,6 +80,18 @@ export function PostCardModal({ openIdea, isOpen, onClose }: PostCardModalProps)
                 <span>{new Date(openIdea.created_at).toLocaleDateString()}</span>
               </div>
             )}
+          </div>
+
+          {/* Continue as Spark Button */}
+          <div className="mt-6 flex justify-end">
+            <Button
+              type="button"
+              onClick={handleContinueAsSpark}
+              className="rounded-full px-4 py-2 text-sm font-medium bg-white text-slate-900 hover:bg-slate-100 transition"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Continue as Spark
+            </Button>
           </div>
         </div>
       </DialogContent>

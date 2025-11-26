@@ -34,7 +34,8 @@ export function ComposerModal({
     isBusinessMember
   } = useUserRoles();
   const {
-    setContext
+    setContext,
+    context
   } = useComposerStore();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
@@ -149,10 +150,12 @@ export function ComposerModal({
       
       if (isPublicMode) {
         // Public Spark (brainstorm)
+        // Get originOpenIdeaId from context if available
         payload = buildPublicSparkPayload({
           userId: user.id,
           content,
           title: undefined,
+          originOpenIdeaId: context?.originOpenIdeaId,
         });
       } else {
         // Business Insight

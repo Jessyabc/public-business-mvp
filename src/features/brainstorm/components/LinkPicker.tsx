@@ -9,6 +9,7 @@ import { GlassCard } from '@/ui/components/GlassCard';
 import { Search, X, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useBrainstormExperienceStore } from '../stores/experience';
+import { canLink, type LineageNode } from '@/lib/lineageRules';
 
 type LinkPickerProps = {
   open: boolean;
@@ -114,22 +115,90 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
 
     setIsSubmitting(true);
     try {
-      // Insert soft link relations directly into post_relations
-      const relations = selectedLinks.map((childId) => ({
-        parent_post_id: sourceId,
-        child_post_id: childId,
-        relation_type: 'soft' as const,
-      }));
+      // Fetch parent and child posts to check lineage rules
+      const [parentResult, childrenResult] = await Promise.all([
+        supabase
+          .from('posts')
+          .select('id, type, kind')
+          .eq('id', sourceId)
+          .single(),
+        supabase
+          .from('posts')
+          .select('id, type, kind')
+          .in('id', selectedLinks),
+      ]);
+
+      if (parentResult.error) {
+        throw new Error('Failed to fetch parent post');
+      }
+      if (childrenResult.error) {
+        throw new Error('Failed to fetch child posts');
+      }
+
+      const parentPost = parentResult.data;
+      const childPosts = childrenResult.data || [];
+
+      if (!parentPost) {
+        throw new Error('Parent post not found');
+      }
+
+      // Build parent node
+      const parentNode: LineageNode = {
+        id: parentPost.id,
+        type: parentPost.type,
+        kind: parentPost.kind || undefined,
+      };
+
+      // Filter out disallowed relations
+      const allowedRelations: Array<{ parent_post_id: string; child_post_id: string; relation_type: 'soft' }> = [];
+      const disallowedPosts: string[] = [];
+
+      for (const childPost of childPosts) {
+        const childNode: LineageNode = {
+          id: childPost.id,
+          type: childPost.type,
+          kind: childPost.kind || undefined,
+        };
+
+        if (canLink(parentNode, childNode, 'soft')) {
+          allowedRelations.push({
+            parent_post_id: sourceId,
+            child_post_id: childPost.id,
+            relation_type: 'soft',
+          });
+        } else {
+          disallowedPosts.push(childPost.id);
+          console.warn('Lineage rule violation: Cannot link', {
+            parent: { type: parentPost.type, kind: parentPost.kind },
+            child: { type: childPost.type, kind: childPost.kind },
+            relationType: 'soft',
+          });
+        }
+      }
+
+      // Show error if any relations were disallowed
+      if (disallowedPosts.length > 0) {
+        toast.error(
+          `${disallowedPosts.length} of ${selectedLinks.length} link${selectedLinks.length > 1 ? 's' : ''} cannot be created. This type of post cannot be linked to that type of post yet.`
+        );
+      }
+
+      // Insert only allowed relations
+      if (allowedRelations.length === 0) {
+        toast.error('No links could be created. This type of post cannot be linked to that type of post yet.');
+        setIsSubmitting(false);
+        return;
+      }
 
       const { error } = await supabase
         .from('post_relations')
-        .insert(relations);
+        .insert(allowedRelations);
 
       if (error) {
         throw error;
       }
 
-      toast.success(`Created ${selectedLinks.length} soft link${selectedLinks.length > 1 ? 's' : ''}`);
+      toast.success(`Created ${allowedRelations.length} soft link${allowedRelations.length > 1 ? 's' : ''}`);
       
       // Update active post to trigger refresh of cross-links and graph
       if (sourceId) {

@@ -10,7 +10,6 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 const additionalRoutes = [
   { path: '/', title: 'Home', icon: Home, description: 'Main dashboard and feed' },
   { path: '/brainstorm', title: 'Brainstorm Feed', icon: Brain, description: 'Canonical brainstorm canvas', requiresAuth: true },
-  { path: '/brainstorm/feed', title: 'Brainstorm Feed (Alt)', icon: Brain, description: 'Alternative brainstorm route', requiresAuth: true },
   { path: '/app/insights', title: 'Business Insights', icon: Building2, description: 'Business insights feed', requiresOrg: true },
   { path: '/org/new', title: 'Create Organization', icon: Building2, description: 'Create a new organization' },
   { path: '/idea/:id', title: 'Idea Detail', icon: Brain, description: 'View open idea details', dynamic: true },
@@ -57,7 +56,7 @@ export default function Sitemap() {
   const categorizedRoutes = {
     'Main Pages': [
       normalizeRoute({ path: '/', title: 'Home', icon: Home, description: 'Main dashboard' }),
-      ...additionalRoutes.filter(r => ['/brainstorm', '/brainstorm/feed'].includes(r.path)).map(normalizeRoute),
+      ...additionalRoutes.filter(r => ['/brainstorm'].includes(r.path)).map(normalizeRoute),
     ],
     'User Pages': [
       ...navItems.filter(item => 

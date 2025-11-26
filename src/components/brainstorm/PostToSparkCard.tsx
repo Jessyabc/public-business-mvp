@@ -4,6 +4,9 @@ import { SparkCard } from './SparkCard';
 import type { Spark } from './BrainstormLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
+import { Badge } from '@/components/ui/badge';
+import { Lightbulb } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Converts a BasePost to a Spark for use with SparkCard
@@ -45,6 +48,12 @@ export function PostToSparkCard({
   const [authorDisplayName, setAuthorDisplayName] = useState<string | null>(null);
   const [authorAvatarUrl, setAuthorAvatarUrl] = useState<string | null>(null);
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
+  const navigate = useNavigate();
+  
+  // Check if this Spark originated from an Open Idea
+  const originOpenIdeaId = post.metadata && typeof post.metadata === 'object' && 'origin_open_idea_id' in post.metadata
+    ? (post.metadata as any).origin_open_idea_id as string
+    : null;
 
   // Fetch author profile
   useEffect(() => {
@@ -92,15 +101,39 @@ export function PostToSparkCard({
     }
   };
 
+  const handleOpenIdeaClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the card's onClick
+    if (originOpenIdeaId) {
+      // Navigate to open ideas page
+      // Note: We can't easily focus a specific item, but we can navigate there
+      navigate('/open-ideas');
+      // Optionally, we could dispatch an event to open the specific idea modal
+      // For now, just navigate to the page
+    }
+  };
+
   // For compact variant, we might want to adjust styling
   // SparkCard doesn't have a variant prop, so we'll handle it via CSS if needed
   return (
-    <div onClick={handleView} className={variant === 'compact' ? 'compact-spark-card' : ''}>
+    <div className={variant === 'compact' ? 'compact-spark-card' : ''}>
       <SparkCard
         spark={spark}
         onContinueBrainstorm={handleContinueBrainstorm}
         onView={handleView}
       />
+      {/* Origin badge */}
+      {originOpenIdeaId && (
+        <div className="mt-2 flex items-center">
+          <Badge
+            variant="outline"
+            className="text-xs bg-white/5 border-white/20 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+            onClick={handleOpenIdeaClick}
+          >
+            <Lightbulb className="w-3 h-3 mr-1" />
+            Origin: Open Idea
+          </Badge>
+        </div>
+      )}
       {metaLabel && (
         <div className="text-xs text-muted-foreground mt-1">{metaLabel}</div>
       )}

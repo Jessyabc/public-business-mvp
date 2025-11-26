@@ -92,13 +92,15 @@ export const SparkCard: React.FC<SparkCardProps> = ({
 
   return (
     <article
+      onClick={() => onView?.(spark.id)}
       className={cn(
         "relative w-full rounded-3xl px-6 py-5",
         "bg-transparent",
         "backdrop-blur-xl border border-white/10",
         "shadow-[0_18px_60px_rgba(0,0,0,0.45)]",
         "transition-all duration-300",
-        "hover:scale-[1.01] hover:shadow-[0_20px_70px_rgba(0,0,0,0.5)]"
+        "hover:scale-[1.01] hover:shadow-[0_20px_70px_rgba(0,0,0,0.5)]",
+        onView ? "cursor-pointer" : ""
       )}
     >
       {/* Gradient overlay */}
@@ -166,7 +168,10 @@ export const SparkCard: React.FC<SparkCardProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              onClick={handleGiveThought}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGiveThought();
+              }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
                 "transition-all duration-200",
@@ -182,7 +187,10 @@ export const SparkCard: React.FC<SparkCardProps> = ({
 
             <button
               type="button"
-              onClick={handleContinueBrainstorm}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleContinueBrainstorm();
+              }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
                 "bg-white/5 text-white/80 border border-white/10",
@@ -195,7 +203,10 @@ export const SparkCard: React.FC<SparkCardProps> = ({
 
             <button
               type="button"
-              onClick={handleSaveReference}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSaveReference();
+              }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
                 "bg-white/5 text-white/80 border border-white/10",

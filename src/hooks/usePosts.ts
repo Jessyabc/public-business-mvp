@@ -8,6 +8,7 @@ import type {
   PostMode,
   PostRelationType,
 } from '@/types/post';
+import { canLink, type LineageNode } from '@/lib/lineageRules';
 
 export type CreatePostData = Omit<PostInsertPayload, 'user_id'>;
 
@@ -178,6 +179,61 @@ export function usePosts() {
     if (!newPost || !relation) return newPost;
 
     try {
+      // Fetch parent post to check lineage rules
+      const { data: parentPost, error: parentError } = await supabase
+        .from('posts')
+        .select('id, type, kind')
+        .eq('id', relation.parent_post_id)
+        .single();
+
+      if (parentError) {
+        console.error('Error fetching parent post:', parentError);
+        toast({
+          title: 'Relation not linked',
+          description: 'Your post was created but linking failed.',
+          variant: 'destructive',
+        });
+        return newPost;
+      }
+
+      if (!parentPost) {
+        console.error('Parent post not found');
+        toast({
+          title: 'Relation not linked',
+          description: 'Your post was created but linking failed.',
+          variant: 'destructive',
+        });
+        return newPost;
+      }
+
+      // Build LineageNode objects
+      const parentNode: LineageNode = {
+        id: parentPost.id,
+        type: parentPost.type,
+        kind: parentPost.kind || undefined,
+      };
+      const childNode: LineageNode = {
+        id: newPost.id,
+        type: newPost.type,
+        kind: newPost.kind || undefined,
+      };
+
+      // Check if linking is allowed
+      if (!canLink(parentNode, childNode, relation.relation_type)) {
+        console.warn('Lineage rule violation: Cannot link', {
+          parent: { type: parentPost.type, kind: parentPost.kind },
+          child: { type: newPost.type, kind: newPost.kind },
+          relationType: relation.relation_type,
+        });
+        toast({
+          title: 'Relation not linked',
+          description: 'This type of post cannot be linked to that type of post yet.',
+          variant: 'destructive',
+        });
+        return newPost;
+      }
+
+      // Proceed with relation creation
       const { error } = await supabase
         .from('post_relations')
         .insert({

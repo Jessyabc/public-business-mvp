@@ -49,14 +49,6 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
       </MainLayout>
     ),
   },
-  {
-    path: '/brainstorm/feed',
-    element: (
-      <ProtectedRoute requireAuth={true}>
-        <LazyWrapper><BrainstormFeed /></LazyWrapper>
-      </ProtectedRoute>
-    ),
-  },
 
   // Business insights feed (requires org)
   {
@@ -81,6 +73,7 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   },
 
   // Legacy brainstorm redirects (no need to lazy-import those old pages)
+  { path: '/brainstorm/feed', element: <Navigate to="/brainstorm" replace /> },
   { path: '/brainstorm-v2', element: <Navigate to="/brainstorm" replace /> },
   { path: '/brainstorms', element: <Navigate to="/" replace /> },
   { path: '/brainstorms/:id', element: <Navigate to="/" replace /> },

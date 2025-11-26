@@ -5,6 +5,7 @@ export type RelationType = 'continuation' | 'linking';
 export interface ComposerContext {
   parentPostId?: string;
   relationType?: RelationType | null;
+  originOpenIdeaId?: string;
 }
 
 interface ComposerStore {

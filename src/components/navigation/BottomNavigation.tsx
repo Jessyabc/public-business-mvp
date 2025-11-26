@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, Bell, Search, MessageSquare, Building2, Plus, Menu, X, ToggleRight, ToggleLeft } from 'lucide-react';
+import { Home, History, Bell, Search, MessageSquare, Building2, Plus, Menu, X, ToggleRight, ToggleLeft, Lightbulb } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -34,6 +34,11 @@ export function BottomNavigation() {
     to: '/',
     icon: Home,
     label: 'Feed',
+    badge: null
+  }, {
+    to: '/open-ideas',
+    icon: Lightbulb,
+    label: 'Open Ideas',
     badge: null
   }, {
     to: '/my-posts',

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
 import { GlobalNavigationMenu } from '@/components/navigation/GlobalNavigationMenu';
@@ -16,11 +16,25 @@ interface MainLayoutProps {
 export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) {
   const { user } = useAuth();
   const location = useLocation();
+  const prevPathnameRef = useRef<string>(location.pathname);
 
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Determine if we're navigating to/from open-ideas for horizontal slide
+  const isOpenIdeasRoute = location.pathname.startsWith('/open-ideas');
+  const wasOpenIdeasRoute = prevPathnameRef.current.startsWith('/open-ideas');
+  const useHorizontalSlide = isOpenIdeasRoute || wasOpenIdeasRoute;
+
+  // Update previous pathname
+  useEffect(() => {
+    prevPathnameRef.current = location.pathname;
+  }, [location.pathname]);
+
+  // Determine slide direction (simplified: slide from right when entering, left when leaving)
+  const slideDirection = isOpenIdeasRoute ? 100 : -100;
 
   return (
     <div 
@@ -40,11 +54,24 @@ export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) 
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ 
+              opacity: 0, 
+              ...(useHorizontalSlide 
+                ? { x: slideDirection } 
+                : { y: 20 })
+            }}
+            animate={{ 
+              opacity: 1, 
+              ...(useHorizontalSlide ? { x: 0 } : { y: 0 })
+            }}
+            exit={{ 
+              opacity: 0, 
+              ...(useHorizontalSlide 
+                ? { x: -slideDirection } 
+                : { y: -20 })
+            }}
             transition={{ 
-              duration: 0.3, 
+              duration: 0.35, 
               ease: [0.4, 0, 0.2, 1]
             }}
           >
