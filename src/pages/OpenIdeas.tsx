@@ -77,12 +77,12 @@ export default function OpenIdeas() {
           <div
             key={idea.id}
             onClick={() => setSelectedIdea(idea)}
-            className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent transition-all duration-200 theme-business:rounded-xl theme-business:shadow-[var(--neuro-card-shadow-light),var(--neuro-card-shadow-dark)] theme-business:border-0 theme-business:hover:shadow-[var(--neuro-shadow-inset-light),var(--neuro-shadow-inset-dark)]"
+            className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent transition-all duration-200 theme-business:rounded-xl theme-business:shadow-[var(--neuro-card-shadow-light),var(--neuro-card-shadow-dark)] theme-business:border-0 theme-business:hover:shadow-[var(--neuro-shadow-inset-light),var(--neuro-shadow-inset-dark)] theme-business:relative theme-business:overflow-hidden theme-business:before:absolute theme-business:before:inset-0 theme-business:before:bg-[var(--neuro-gradient-subtle)] theme-business:before:pointer-events-none theme-business:after:absolute theme-business:after:inset-0 theme-business:after:bg-[var(--neuro-shine)] theme-business:after:opacity-0 theme-business:hover:after:opacity-100 theme-business:after:transition-opacity theme-business:after:duration-300 theme-business:after:pointer-events-none"
           >
-            <p className="text-sm text-foreground line-clamp-4 leading-relaxed">
+            <p className="text-sm text-foreground line-clamp-4 leading-relaxed theme-business:relative theme-business:z-10">
               {idea.text}
             </p>
-            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground theme-business:border-t-0">
+            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground theme-business:border-t-0 theme-business:relative theme-business:z-10">
               <span>{idea.source === 'user' ? 'From a member' : 'From the community'}</span>
               <span>
                 {idea.created_at
