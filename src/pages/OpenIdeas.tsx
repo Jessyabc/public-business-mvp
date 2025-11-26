@@ -45,7 +45,7 @@ export default function OpenIdeas() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Open Ideas Bank</h1>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Open Ideas Bank</h1>
           <p className="text-muted-foreground">
             Curated ideas from the community, waiting for your creative spark
           </p>
@@ -58,18 +58,18 @@ export default function OpenIdeas() {
         </Link>
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
+      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading && (
-          <div className="col-span-3 text-sm text-white/60">
+          <div className="col-span-full text-sm text-muted-foreground">
             Loading open ideas…
           </div>
         )}
         {error && !loading && (
-          <div className="col-span-3 text-sm text-red-400 space-y-2">
-            <div className="font-semibold">Error loading ideas:</div>
-            <div>{error}</div>
-            <div className="text-xs text-red-300/70 mt-2">
-              If you see a permission error, ensure the migration <code className="bg-red-900/30 px-1 rounded">20250106000000_add_open_ideas_select_policies.sql</code> has been applied.
+          <div className="col-span-full p-6 rounded-2xl bg-destructive/10 border border-destructive/20 space-y-2">
+            <div className="font-semibold text-destructive">Error loading ideas:</div>
+            <div className="text-destructive/80">{error}</div>
+            <div className="text-xs text-muted-foreground mt-2">
+              If you see a permission error, ensure the migration <code className="bg-muted px-1 rounded">20250106000000_add_open_ideas_select_policies.sql</code> has been applied.
             </div>
           </div>
         )}
@@ -77,12 +77,12 @@ export default function OpenIdeas() {
           <div
             key={idea.id}
             onClick={() => setSelectedIdea(idea)}
-            className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-3 flex flex-col justify-between min-h-[140px] cursor-pointer hover:bg-white/10 transition-colors"
+            className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent transition-all duration-200 theme-business:rounded-xl theme-business:shadow-[var(--neuro-card-shadow-light),var(--neuro-card-shadow-dark)] theme-business:border-0 theme-business:hover:shadow-[var(--neuro-shadow-inset-light),var(--neuro-shadow-inset-dark)]"
           >
-            <p className="text-sm text-white/90 line-clamp-4">
+            <p className="text-sm text-foreground line-clamp-4 leading-relaxed">
               {idea.text}
             </p>
-            <div className="mt-3 flex items-center justify-between text-[11px] text-white/55">
+            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground theme-business:border-t-0">
               <span>{idea.source === 'user' ? 'From a member' : 'From the community'}</span>
               <span>
                 {idea.created_at

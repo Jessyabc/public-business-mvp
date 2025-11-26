@@ -151,15 +151,15 @@
 
 /* Business mode – light theme override */
 [data-theme="business"] {
-  --background: hsl(0, 0%, 98%);
-  --surface: hsl(0, 0%, 100%);
-  --surface-raised: hsl(0, 0%, 100%);
+  --background: hsl(210, 12%, 92%);
+  --surface: hsl(210, 12%, 92%);
+  --surface-raised: hsl(210, 12%, 94%);
   --text-primary: hsl(212, 84%, 7%);
   --text-secondary: hsl(215, 16%, 47%);
   --text-tertiary: hsl(215, 20%, 65%);
   --accent: hsl(221, 83%, 53%);
   --accent-on: hsl(0, 0%, 100%);
-  --border: hsl(210, 20%, 88%);
+  --border: hsl(210, 12%, 85%);
   --focus: hsl(221, 83%, 53%);
 
   /* Elevation tokens – lighter shadows for light theme */
@@ -177,20 +177,22 @@
   --glass-bg: rgba(255, 255, 255, 0.48);
 
   /* Card tokens – light surfaces for business mode */
-  --card-bg: hsl(210, 40%, 98%);
+  --card-bg: hsl(210, 12%, 92%);
   --card-fg: hsl(212, 84%, 7%);
   --card-fg-muted: hsl(215, 16%, 47%);
-  --card-border: hsl(206, 30%, 85%);
+  --card-border: hsl(210, 12%, 85%);
   --card-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
-  --card-bg-hover: hsl(210, 40%, 96%);
+  --card-bg-hover: hsl(210, 12%, 90%);
   --card-ring: hsl(206, 74%, 59%);
   
-  /* Neumorphism tokens – soft 3D effect for business mode */
-  --neuro-bg: hsl(210, 40%, 94%);
-  --neuro-shadow-light: -6px -6px 12px rgba(255, 255, 255, 0.8);
-  --neuro-shadow-dark: 6px 6px 12px rgba(163, 177, 198, 0.6);
-  --neuro-shadow-inset-light: inset -4px -4px 8px rgba(255, 255, 255, 0.5);
-  --neuro-shadow-inset-dark: inset 4px 4px 8px rgba(163, 177, 198, 0.4);
+  /* Enhanced Neumorphism tokens – dramatic 3D effect for business mode */
+  --neuro-bg: hsl(210, 12%, 92%);
+  --neuro-shadow-light: -10px -10px 20px rgba(255, 255, 255, 0.9);
+  --neuro-shadow-dark: 10px 10px 20px rgba(163, 177, 198, 0.7);
+  --neuro-shadow-inset-light: inset -6px -6px 12px rgba(255, 255, 255, 0.6);
+  --neuro-shadow-inset-dark: inset 6px 6px 12px rgba(163, 177, 198, 0.5);
+  --neuro-card-shadow-light: -8px -8px 16px rgba(255, 255, 255, 0.8);
+  --neuro-card-shadow-dark: 8px 8px 16px rgba(163, 177, 198, 0.6);
 }
 
 /* ========================================
