@@ -60,7 +60,42 @@ serve(async (req) => {
 
     console.log('Creating interaction for user:', actor_user_id || 'anonymous');
 
-    // Create the interaction record
+    // For 'like' type, check if it already exists and toggle it
+    if (type === 'like' && actor_user_id) {
+      const { data: existing } = await supabaseClient
+        .from('post_interactions')
+        .select('id')
+        .eq('post_id', post_id)
+        .eq('user_id', actor_user_id)
+        .eq('kind', 'like')
+        .maybeSingle();
+
+      if (existing) {
+        // Unlike: delete the interaction
+        const { error: deleteError } = await supabaseClient
+          .from('post_interactions')
+          .delete()
+          .eq('id', existing.id);
+
+        if (deleteError) {
+          console.error('Error removing like:', deleteError);
+          return new Response(
+            JSON.stringify({ error: 'Failed to remove like' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Decrement likes count
+        await supabaseClient.rpc('increment_post_likes', { p_post_id: post_id });
+
+        return new Response(
+          JSON.stringify({ action: 'unliked', message: 'Like removed successfully' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Create the interaction record (or do nothing if duplicate)
     const { data: interaction, error: interactionError } = await supabaseClient
       .from('post_interactions')
       .insert({
@@ -69,9 +104,21 @@ serve(async (req) => {
         user_id: actor_user_id,
       })
       .select()
-      .single();
+      .maybeSingle();
 
+    // If duplicate key error, treat as success (idempotent operation)
     if (interactionError) {
+      if (interactionError.code === '23505') {
+        console.log('Interaction already exists, treating as success');
+        return new Response(
+          JSON.stringify({ 
+            message: 'Interaction already recorded',
+            action: 'duplicate'
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       console.error('Error creating interaction:', interactionError);
       return new Response(
         JSON.stringify({ error: 'Failed to create interaction', details: interactionError.message }),
@@ -79,7 +126,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Interaction created successfully:', interaction.id);
+    console.log('Interaction created successfully:', interaction?.id);
 
     // Update post engagement counters based on interaction type
     switch (type) {
