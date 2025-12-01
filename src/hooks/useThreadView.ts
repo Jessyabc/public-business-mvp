@@ -50,12 +50,31 @@ export function useThreadView(postId?: string) {
         throw new Error('Failed to fetch root post');
       }
 
-      // 2. Fetch all hard relations (reply type) where this post is involved
-      // We need to traverse both directions to build the full thread
+      const typedRootPost = rootPost as unknown as Post;
+
+      // 2. Find the true root of the thread by traversing up
+      let currentRootId = postId;
+      let foundRoot = false;
+      
+      while (!foundRoot) {
+        const { data: parentRelation } = await supabase
+          .from('post_relations')
+          .select('parent_post_id')
+          .eq('child_post_id', currentRootId)
+          .eq('relation_type', 'reply')
+          .maybeSingle();
+        
+        if (parentRelation) {
+          currentRootId = parentRelation.parent_post_id;
+        } else {
+          foundRoot = true;
+        }
+      }
+
+      // 3. Fetch all descendants from the true root
       const { data: relations, error: relationsError } = await supabase
         .from('post_relations')
         .select('*')
-        .or(`parent_post_id.eq.${postId},child_post_id.eq.${postId}`)
         .eq('relation_type', 'reply')
         .order('created_at', { ascending: true });
 
@@ -63,24 +82,58 @@ export function useThreadView(postId?: string) {
         throw new Error('Failed to fetch thread relations');
       }
 
-      // 3. If no relations, return single-node thread
-      if (!relations || relations.length === 0) {
+      // 4. Filter relations to only include those in the thread containing our post
+      const threadRelations = relations?.filter(rel => {
+        // Use a set to track all posts in the thread
+        const threadPostIds = new Set<string>([currentRootId]);
+        const queue = [currentRootId];
+        
+        while (queue.length > 0) {
+          const current = queue.shift()!;
+          relations?.forEach(r => {
+            if (r.parent_post_id === current && !threadPostIds.has(r.child_post_id)) {
+              threadPostIds.add(r.child_post_id);
+              queue.push(r.child_post_id);
+            }
+          });
+        }
+        
+        return threadPostIds.has(rel.parent_post_id) && threadPostIds.has(rel.child_post_id);
+      }) || [];
+
+      // 5. If no relations in this thread, return single-node thread
+      if (threadRelations.length === 0) {
         return {
-          rootPost: rootPost as Post,
+          rootPost: typedRootPost,
           threadTree: {
-            post: rootPost as Post,
+            post: typedRootPost,
             children: [],
             depth: 0,
             parentId: null,
           },
-          allPosts: [rootPost as Post],
+          allPosts: [typedRootPost],
           relations: [],
         };
       }
 
-      // 4. Fetch all related posts
-      const postIds = new Set<string>([postId]);
-      relations.forEach((rel) => {
+      // 6. Fetch the true root post if different from clicked post
+      let actualRootPost = typedRootPost;
+      if (currentRootId !== postId) {
+        const { data: rootData } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('id', currentRootId)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (rootData) {
+          actualRootPost = rootData as unknown as Post;
+        }
+      }
+
+      // 7. Fetch all related posts
+      const postIds = new Set<string>([currentRootId, postId]);
+      threadRelations.forEach((rel) => {
         postIds.add(rel.parent_post_id);
         postIds.add(rel.child_post_id);
       });
@@ -95,14 +148,14 @@ export function useThreadView(postId?: string) {
         throw new Error('Failed to fetch thread posts');
       }
 
-      // 5. Build thread tree
+      // 8. Build thread tree
       const postsMap = new Map<string, Post>();
       allPosts.forEach((post) => {
-        postsMap.set(post.id, post as Post);
+        postsMap.set(post.id, post as unknown as Post);
       });
 
       const childrenMap = new Map<string, string[]>();
-      relations.forEach((rel) => {
+      threadRelations.forEach((rel) => {
         if (!childrenMap.has(rel.parent_post_id)) {
           childrenMap.set(rel.parent_post_id, []);
         }
@@ -126,17 +179,17 @@ export function useThreadView(postId?: string) {
         };
       }
 
-      const threadTree = buildTree(postId, 0, null);
+      const threadTree = buildTree(currentRootId, 0, null);
 
       if (!threadTree) {
         throw new Error('Failed to build thread tree');
       }
 
       return {
-        rootPost: rootPost as Post,
+        rootPost: actualRootPost,
         threadTree,
-        allPosts: allPosts as Post[],
-        relations,
+        allPosts: allPosts as unknown as Post[],
+        relations: threadRelations,
       };
     },
     enabled: !!postId,

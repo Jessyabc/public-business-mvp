@@ -157,10 +157,13 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
                   <Button
                     variant="outline"
                     size="sm"
-                    className="glass-low focus-visible:ring-2 focus-visible:ring-primary"
+                    className="glass-low focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent/20"
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onView?.(post.id);
+                      if (onView) {
+                        onView(post.id);
+                      }
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
@@ -170,10 +173,13 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
                   <Button
                     variant="outline"
                     size="sm"
-                    className="glass-low focus-visible:ring-2 focus-visible:ring-primary"
+                    className="glass-low focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent/20"
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSave?.(post.id);
+                      if (onSave) {
+                        onSave(post.id);
+                      }
                     }}
                   >
                     <Bookmark className="w-4 h-4 mr-2" />
@@ -183,10 +189,13 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
                   <Button
                     variant="outline"
                     size="sm"
-                    className="glass-low ml-auto focus-visible:ring-2 focus-visible:ring-primary"
+                    className="glass-low ml-auto focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent/20"
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onShare?.(post.id);
+                      if (onShare) {
+                        onShare(post.id);
+                      }
                     }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />

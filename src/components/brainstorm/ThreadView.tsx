@@ -68,21 +68,11 @@ export function ThreadView({ postId, onClose }: ThreadViewProps) {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4 p-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-white">Thread</h2>
-          <div className="text-sm text-white/60">
-            {flatThread.length} {flatThread.length === 1 ? 'post' : 'posts'}
-          </div>
+      <div className="flex items-center gap-2 mb-6">
+        <h2 className="text-xl font-semibold text-white">Thread</h2>
+        <div className="text-sm text-white/60">
+          {flatThread.length} {flatThread.length === 1 ? 'post' : 'posts'}
         </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="text-white/60 hover:text-white text-sm transition-colors"
-          >
-            Close
-          </button>
-        )}
       </div>
 
       {/* Lineage Card */}
