@@ -9,7 +9,6 @@ import { RequireOrg } from '@/features/orgs/components/RequireOrg';
 const BrainstormFeed = lazy(() => import('@/pages/brainstorm/BrainstormFeed'));
 
 // Pages we actually render
-const IdeaDetail = lazy(() => import('@/pages/IdeaDetail'));
 const OpenIdeas = lazy(() => import('@/pages/OpenIdeas'));
 const OpenIdeaNew = lazy(() => import('@/pages/OpenIdeaNew'));
 const Admin = lazy(() => import('@/pages/Admin'));
@@ -90,14 +89,6 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   },
 
   // Other pages we actually render
-  {
-    path: '/idea/:id',
-    element: (
-      <MainLayout>
-        <LazyWrapper><IdeaDetail /></LazyWrapper>
-      </MainLayout>
-    ),
-  },
   {
     path: '/open-ideas',
     element: (
