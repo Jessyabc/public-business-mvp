@@ -45,7 +45,7 @@ export function useUserRoles() {
     hasRole,
     hasAnyRole,
     isAdmin: () => hasRole('admin'),
-    isBusinessMember: () => hasRole('business_member') || hasRole('business_user'),
+    isBusinessMember: () => hasRole('business_member') || hasRole('business_user') || hasRole('admin'),
     isBusinessUser: () => hasRole('business_user'),
     isPublicUser: () => hasRole('public_user'),
     canCreateBusinessPosts: hasAnyRole(['admin', 'business_member', 'business_user']),
