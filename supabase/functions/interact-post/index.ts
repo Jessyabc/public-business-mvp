@@ -142,6 +142,12 @@ serve(async (req) => {
         break;
       }
 
+      case 'share': {
+        const { error: shareError } = await supabaseClient.rpc('increment_post_shares', { p_post_id: post_id });
+        if (shareError) console.error('Error updating shares:', shareError);
+        break;
+      }
+
       case 'reply':
       case 'branch': {
         const { error: commentError } = await supabaseClient.rpc('increment_post_comments', { post_id });
