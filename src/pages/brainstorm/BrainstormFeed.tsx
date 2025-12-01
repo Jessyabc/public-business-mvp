@@ -5,6 +5,7 @@ import { ComposerModal } from '@/components/composer/ComposerModal';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
 import { PostModal } from '@/components/post/PostModal';
+import { PullToRefresh } from '@/components/layout/PullToRefresh';
 import { supabase } from '@/integrations/supabase/client';
 import type { Post, BasePost } from '@/types/post';
 
@@ -14,7 +15,12 @@ export default function BrainstormFeed() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isInitialMount, setIsInitialMount] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   const loadingRef = useRef(false);
+
+  const handleRefresh = async () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   // Clear all state on mount to ensure clean start - no overlays on page load
   useEffect(() => {
@@ -95,11 +101,13 @@ export default function BrainstormFeed() {
 
   return (
     <>
-      <BrainstormLayoutShell
-        main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} />}
-        crossLinks={null}
-        sidebar={<RightSidebar variant="feed" onSelectPost={handleSelectPost} />}
-      />
+      <PullToRefresh onRefresh={handleRefresh}>
+        <BrainstormLayoutShell
+          main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} key={refreshKey} />}
+          crossLinks={null}
+          sidebar={<RightSidebar variant="feed" onSelectPost={handleSelectPost} />}
+        />
+      </PullToRefresh>
       <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
       
       {/* Post Modal for sidebar breadcrumb clicks */}
