@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { buildSparkPayload, buildBusinessInsightPayload } from "@/lib/posts";
+import { BusinessInsightComposer } from "./BusinessInsightComposer";
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -388,40 +389,8 @@ export function ComposerModal({
         </div>
       </div>;
     }
-    return <div className="space-y-4">
-        <div className="flex items-center space-x-2 mb-4">
-          <FileText className="w-5 h-5 text-[var(--accent)]" />
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Business Insight</h3>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="insight-title" className="text-[var(--text-primary)]">Title (optional)</Label>
-          <GlassInput id="insight-title" placeholder="Give your insight a title..." value={title} onChange={e => setTitle(e.target.value)} maxLength={200} />
-          <div className="text-xs text-[var(--text-secondary)] text-right">
-            {title.length} / 200
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="insight-content" className="text-[var(--text-primary)]">Content</Label>
-          <GlassInput as="textarea" id="insight-content" placeholder="Share your professional insight, analysis, or findings..." value={content} onChange={e => setContent(e.target.value)} rows={6} maxLength={BUSINESS_MAX_CHARS} />
-          <div className="flex justify-between text-xs text-[var(--text-secondary)]">
-            <span>Required</span>
-            <span className={content.length > BUSINESS_MAX_CHARS * 0.9 ? 'text-red-400' : ''}>
-              {content.length} / {BUSINESS_MAX_CHARS}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-2">
-          <button className="glassButton glassButton--muted" onClick={handleClose}>
-            Cancel
-          </button>
-          <button className="glassButton glassButton--accent" onClick={handleCreate} disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Insight'}
-          </button>
-        </div>
-      </div>;
+    
+    return <BusinessInsightComposer onClose={handleClose} />;
   };
   return <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg border-0 bg-transparent backdrop-blur-none p-0 overflow-hidden shadow-none">
