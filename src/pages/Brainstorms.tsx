@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// New canonical brainstorm feed is at: src/pages/brainstorm/BrainstormFeed.tsx
+// This page uses the legacy useBrainstorms hook wrapper.
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';

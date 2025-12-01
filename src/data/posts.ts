@@ -1,3 +1,7 @@
+// CANONICAL helper functions for post operations.
+// These functions write to the posts table correctly and can be used.
+// However, prefer using src/lib/postPayloads.ts builders + direct supabase calls for consistency.
+
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import type { Post } from '@/types/post';

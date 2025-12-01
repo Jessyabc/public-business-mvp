@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// New code should use usePostRelations from src/hooks/usePostRelations.ts
+// This uses the deprecated idea_links table instead of canonical post_relations.
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";

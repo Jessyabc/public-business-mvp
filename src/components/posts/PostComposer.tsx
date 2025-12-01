@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// The canonical composer is: src/components/composer/ComposerModal.tsx
+// This component is redundant and should not be extended.
+
 import React, { useState } from 'react';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 import { GlassInput } from '@/components/ui/GlassInput';
