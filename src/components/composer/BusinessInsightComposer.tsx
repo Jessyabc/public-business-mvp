@@ -2,19 +2,20 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, X, Link2, Target, HelpCircle, TrendingUp } from 'lucide-react';
+import { FileText, Plus, X, Link2, Target, HelpCircle, TrendingUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
+import { GlassField, GlassButton, GlassPanel, GlassChip } from '@/components/ui/glass';
 import { GlassInput } from '@/components/ui/GlassInput';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { 
   businessInsightSchema, 
@@ -190,16 +191,21 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[85vh]">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[85vh] text-white">
         {/* Header */}
-        <div className="flex items-center space-x-2 px-1 pb-4 border-b border-white/10">
-          <FileText className="w-5 h-5 text-[var(--accent)]" />
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Business Insight</h3>
+        <div className="flex items-center gap-3 px-1 pb-6 border-b border-white/[0.08]">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#00A3CC] shadow-[0_0_20px_rgba(0,217,255,0.3)]">
+            <FileText className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-white/95">New Business Insight</h3>
+            <p className="text-xs text-white/50">Share professional knowledge</p>
+          </div>
         </div>
 
         {/* Scrollable Content */}
         <ScrollArea className="flex-1 px-1">
-          <div className="space-y-6 py-6">
+          <div className="space-y-5 py-6">
 
         {/* Focus Area */}
         <FormField
