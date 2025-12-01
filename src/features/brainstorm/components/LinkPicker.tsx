@@ -150,7 +150,7 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
       };
 
       // Filter out disallowed relations
-      const allowedRelations: Array<{ parent_post_id: string; child_post_id: string; relation_type: 'soft' }> = [];
+      const allowedRelations: Array<{ parent_post_id: string; child_post_id: string; relation_type: 'cross_link' }> = [];
       const disallowedPosts: string[] = [];
 
       for (const childPost of childPosts) {
@@ -160,18 +160,18 @@ export function LinkPicker({ open, onOpenChange, sourceId }: LinkPickerProps) {
           kind: childPost.kind || undefined,
         };
 
-        if (canLink(parentNode, childNode, 'soft')) {
+        if (canLink(parentNode, childNode, 'cross_link')) {
           allowedRelations.push({
             parent_post_id: sourceId,
             child_post_id: childPost.id,
-            relation_type: 'soft',
+            relation_type: 'cross_link',
           });
         } else {
           disallowedPosts.push(childPost.id);
           console.warn('Lineage rule violation: Cannot link', {
             parent: { type: parentPost.type, kind: parentPost.kind },
             child: { type: childPost.type, kind: childPost.kind },
-            relationType: 'soft',
+            relationType: 'cross_link',
           });
         }
       }

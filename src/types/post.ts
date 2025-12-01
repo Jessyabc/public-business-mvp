@@ -13,8 +13,12 @@ export type PostMode = (typeof POST_MODES)[number];
 export const POST_STATUSES = ['active', 'archived', 'deleted'] as const;
 export type PostStatus = (typeof POST_STATUSES)[number];
 
-export const POST_RELATION_TYPES = ['hard', 'soft', 'biz_in', 'biz_out'] as const;
+// Standardized relation types (migrated from 'hard'/'soft' to semantic types)
+export const POST_RELATION_TYPES = ['origin', 'reply', 'quote', 'cross_link'] as const;
 export type PostRelationType = (typeof POST_RELATION_TYPES)[number];
+
+// Legacy types (migrated to new standard):
+// 'hard' → 'origin', 'soft' → 'cross_link', 'biz_in'/'biz_out' → 'cross_link'
 
 export type PostMetadata = Record<string, unknown> | null;
 

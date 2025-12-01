@@ -173,7 +173,7 @@ export function usePosts() {
   // Create a post and optionally link it to a parent via post_relations
   const createPostWithRelation = async (
     postData: CreatePostData,
-    relation?: { parent_post_id: string; relation_type: Extract<PostRelationType, 'hard' | 'soft'> }
+    relation?: { parent_post_id: string; relation_type: PostRelationType }
   ) => {
     const newPost = await createPost(postData);
     if (!newPost || !relation) return newPost;
@@ -376,7 +376,7 @@ export function usePosts() {
   const fetchPostRelations = async (postId: string) => {
     try {
       // Fetch child posts (continuations/links)
-      // Only include 'hard' and 'soft' relation types (exclude biz_in, biz_out)
+      // Support both legacy ('hard', 'soft') and new ('origin', 'cross_link', 'reply', 'quote') types
       const { data: relations, error } = await supabase
         .from('post_relations')
         .select(`
@@ -384,7 +384,7 @@ export function usePosts() {
           child_post:posts!post_relations_child_post_id_fkey(*)
         `)
         .eq('parent_post_id', postId)
-        .in('relation_type', ['hard', 'soft']);
+        .in('relation_type', ['origin', 'reply', 'quote', 'cross_link']);
 
       if (error) throw error;
       return relations || [];

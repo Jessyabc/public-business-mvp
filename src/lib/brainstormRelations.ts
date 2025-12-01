@@ -84,8 +84,8 @@ export async function fetchRelatedPosts(postId: string): Promise<RelatedPosts> {
     const softParents: Post[] = [];
 
     relations.forEach((rel: PostRelation) => {
-      // Only process 'hard' and 'soft' relations (ignore biz_in, biz_out)
-      if (rel.relation_type === 'hard') {
+      // Process 'origin' (migrated from 'hard') and 'cross_link' (migrated from 'soft')
+      if (rel.relation_type === 'origin') {
         if (rel.parent_post_id === postId) {
           const child = postsMap.get(rel.child_post_id);
           // Only include if it's a public brainstorm post
@@ -99,7 +99,7 @@ export async function fetchRelatedPosts(postId: string): Promise<RelatedPosts> {
             hardParents.push(parent);
           }
         }
-      } else if (rel.relation_type === 'soft') {
+      } else if (rel.relation_type === 'cross_link') {
         if (rel.parent_post_id === postId) {
           const child = postsMap.get(rel.child_post_id);
           // Only include if it's a public brainstorm post

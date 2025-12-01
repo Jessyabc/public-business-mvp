@@ -210,41 +210,116 @@ All policies should:
 
 ## Migration Strategy
 
-### Phase 1: Documentation & Function Cleanup
-1. ✅ Create this document
-2. Consolidate org helper functions
-3. Create `public.create_post_relation()` function
+### ✅ Phase 1: Documentation & Function Cleanup (COMPLETED)
+1. ✅ Created this document
+2. ✅ Consolidated org helper functions (get_user_org_id is canonical, others are aliases)
+3. ✅ Created `public.create_post_relation()` function with permission validation
 
-### Phase 2: Relation Type Standardization
-1. Add CHECK constraint for relation_type
-2. Migrate existing 'hard'/'soft' to semantic types
-3. Update `lineageRules.ts` to validate new types
+### ✅ Phase 2: Relation Type Standardization (COMPLETED)
+1. ✅ Added CHECK constraint for relation_type ('origin', 'reply', 'quote', 'cross_link')
+2. ✅ Migrated existing 'hard'/'soft'/'biz_*' to semantic types
+3. ✅ Updated `lineageRules.ts` to validate new types
 
-### Phase 3: Legacy Table Handling
-1. Rename `idea_links` to `idea_links_legacy`
-2. Add deprecation warnings to `useIdeaLinks`
-3. Update code to use `post_relations`
+### ✅ Phase 3: Legacy Table Handling (COMPLETED)
+1. ✅ Marked `idea_links` as LEGACY in database (table comment)
+2. ✅ Renamed hook to `useIdeaLinks.LEGACY.ts` with deprecation warnings
+3. ✅ Created new `usePostRelations` hook using post_relations
 
-### Phase 4: RLS Consolidation
-1. Audit all policies on posts and post_relations
-2. Remove contradictory policies
-3. Ensure consistent permission model
+### ✅ Phase 4: RLS Consolidation (COMPLETED)
+1. ✅ Dropped all conflicting post_relations policies
+2. ✅ Created clean, consistent policies:
+   - `select_post_relations` - See if can see either parent or child
+   - `insert_post_relations` - Own post or business_admin
+   - `delete_post_relations` - Own post or business_admin  
+   - `admin_all_post_relations` - Admin override
 
-## Files Requiring Updates
+## ✅ Completed Updates
 
 ### TypeScript/React
-- [ ] `src/hooks/useIdeaLinks.ts` - Deprecate or refactor to use post_relations
-- [ ] `src/hooks/usePosts.ts` - Update to use standardized relation types
-- [ ] `src/lib/lineageRules.ts` - Add validation for new types
-- [ ] `src/features/feed/hooks/useFeedLinks.ts` - Implement using post_relations
-- [ ] `supabaseAdapter.ts` - Update to use semantic types
+- ✅ `src/types/post.ts` - Updated PostRelationType to new standard
+- ✅ `src/hooks/useIdeaLinks.ts` - Renamed to `.LEGACY.ts` with warnings
+- ✅ `src/hooks/usePosts.ts` - Updated to support new relation types
+- ✅ `src/hooks/usePostRelations.ts` - NEW canonical hook for relations
+- ✅ `src/lib/lineageRules.ts` - Updated validation for new types
+- ✅ `src/features/brainstorm/components/LinkPicker.tsx` - Uses 'cross_link'
+- ✅ `src/features/brainstorm/components/NodeForm.tsx` - Uses 'origin' and 'cross_link'
+- ✅ `supabaseAdapter.ts` - Maps between legacy and new types
+- ✅ `src/lib/brainstormRelations.ts` - Updated to check 'origin' and 'cross_link'
+- ✅ `src/lib/getPostRelations.ts` - Updated to check 'origin' and 'cross_link'
 
 ### SQL/Migrations
-- [ ] New migration: Standardize relation types
-- [ ] New migration: Create create_post_relation() function
-- [ ] New migration: Consolidate org helpers
-- [ ] New migration: Update RLS policies
-- [ ] New migration: Rename idea_links to idea_links_legacy
+- ✅ Migration: Standardized relation types with CHECK constraint
+- ✅ Migration: Created create_post_relation() function with permission checks
+- ✅ Migration: Consolidated org helpers (get_user_org_id is canonical)
+- ✅ Migration: Updated RLS policies for consistency
+- ✅ Migration: Marked idea_links as LEGACY
+
+## New Canonical API
+
+### Creating Relations
+
+```typescript
+// Using the database function (recommended)
+const { data, error } = await supabase.rpc('create_post_relation', {
+  p_parent_post_id: parentId,
+  p_child_post_id: childId,
+  p_relation_type: 'origin' // or 'reply', 'quote', 'cross_link'
+});
+
+// Using the hook
+import { usePostRelations } from '@/hooks/usePostRelations';
+
+const { createRelation } = usePostRelations();
+createRelation({
+  parentPostId,
+  childPostId,
+  relationType: 'origin'
+});
+
+// Using usePosts (for creating post + relation in one go)
+import { usePosts } from '@/hooks/usePosts';
+
+const { createPostWithRelation } = usePosts();
+await createPostWithRelation(postData, {
+  parent_post_id: parentId,
+  relation_type: 'origin'
+});
+```
+
+### Querying Relations
+
+```typescript
+// Get all relations for a post
+const { relations, children, parents, byType } = usePostRelations(postId);
+
+// byType gives you:
+// - byType.origin - Origin relations
+// - byType.reply - Reply relations
+// - byType.quote - Quote relations
+// - byType.cross_link - Cross-link relations
+```
+
+## Security Model
+
+### Org Membership (Source of Truth: `org_members`)
+- **Primary org function**: `get_user_org_id()` returns user's primary organization
+- **Aliases**: `get_primary_org()` and `get_user_org()` redirect to `get_user_org_id()`
+- **Membership check**: `is_org_member(org_id)` checks if user is in specific org
+- **Business member check**: `is_business_member()` checks if user is in any org
+
+### Post Relations Permissions
+- **SELECT**: Can see if can see either parent OR child post
+- **INSERT/DELETE**: Must own parent OR child, OR be business_admin in org
+- **Admin**: Full override via `is_admin()`
+
+## Relation Type Semantics
+
+| Type | Meaning | Use Case | Direction |
+|------|---------|----------|-----------|
+| `origin` | Parent is source of child | Open idea → Business insight<br/>Brainstorm → Continuation | Parent → Child |
+| `reply` | Child responds to parent | Comment, response | Child → Parent |
+| `quote` | Child quotes parent | Reference, citation | Child → Parent |
+| `cross_link` | Bidirectional association | Related ideas, inspiration | Bidirectional |
 
 ## Current Metrics
 
