@@ -8,6 +8,8 @@ import { PostModal } from '@/components/post/PostModal';
 import { PullToRefresh } from '@/components/layout/PullToRefresh';
 import { supabase } from '@/integrations/supabase/client';
 import type { Post, BasePost } from '@/types/post';
+import { ThreadView } from '@/components/brainstorm/ThreadView';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export default function BrainstormFeed() {
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
@@ -17,6 +19,7 @@ export default function BrainstormFeed() {
   const [isInitialMount, setIsInitialMount] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const loadingRef = useRef(false);
+  const [threadViewPostId, setThreadViewPostId] = useState<string | null>(null);
 
   const handleRefresh = async () => {
     setRefreshKey(prev => prev + 1);
@@ -66,6 +69,16 @@ export default function BrainstormFeed() {
     };
     window.addEventListener('pb:brainstorm:continue', handleContinue);
     return () => window.removeEventListener('pb:brainstorm:continue', handleContinue);
+  }, []);
+
+  // Listen for thread view events
+  useEffect(() => {
+    const handleShowThread = (event: CustomEvent) => {
+      const { postId } = event.detail;
+      setThreadViewPostId(postId);
+    };
+    window.addEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
+    return () => window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
   }, []);
 
   // Load post when selectedPostId changes (but only if it's explicitly set by user action)
@@ -128,6 +141,18 @@ export default function BrainstormFeed() {
           }}
         />
       )}
+
+      {/* Thread View Modal */}
+      <Dialog open={!!threadViewPostId} onOpenChange={(open) => !open && setThreadViewPostId(null)}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border border-white/10">
+          {threadViewPostId && (
+            <ThreadView
+              postId={threadViewPostId}
+              onClose={() => setThreadViewPostId(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

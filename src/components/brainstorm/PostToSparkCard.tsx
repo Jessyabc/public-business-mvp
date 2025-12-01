@@ -7,6 +7,10 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { buildSparkPayload } from '@/lib/posts';
+import { createHardLink } from '@/lib/posts';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Converts a BasePost to a Spark for use with SparkCard
@@ -49,6 +53,7 @@ export function PostToSparkCard({
   const [authorAvatarUrl, setAuthorAvatarUrl] = useState<string | null>(null);
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Check if this Spark originated from an Open Idea
   const originOpenIdeaId = post.metadata && typeof post.metadata === 'object' && 'origin_open_idea_id' in post.metadata
@@ -77,15 +82,62 @@ export function PostToSparkCard({
 
   const spark = convertPostToSpark(post, authorDisplayName, authorAvatarUrl);
 
-  const handleContinueBrainstorm = () => {
-    // Always dispatch the continue event to open composer
-    // This should not be overridden by onSelect (which is for view/click behavior)
-    setActivePost(post);
-    window.dispatchEvent(
-      new CustomEvent('pb:brainstorm:continue', {
-        detail: { parentId: post.id },
-      })
-    );
+  const handleContinueBrainstorm = async () => {
+    if (!user) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please sign in to continue this Spark',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Create new Spark using canonical builder
+      const newSparkPayload = buildSparkPayload({
+        userId: user.id,
+        content: '', // Will be filled by user in composer/modal
+        title: `Re: ${post.title || post.content.slice(0, 50)}`,
+        metadata: {
+          parent_spark_id: post.id,
+        },
+      });
+
+      // Insert the new Spark
+      const { data: newSpark, error: insertError } = await supabase
+        .from('posts')
+        .insert(newSparkPayload)
+        .select()
+        .single();
+
+      if (insertError || !newSpark) {
+        throw new Error('Failed to create continuation Spark');
+      }
+
+      // Create hard relation (reply type)
+      await createHardLink(post.id, newSpark.id);
+
+      toast({
+        title: 'Continuation created',
+        description: 'Your Spark continuation was created successfully',
+      });
+
+      // Navigate to thread view
+      setActivePost(post);
+      window.dispatchEvent(
+        new CustomEvent('pb:brainstorm:show-thread', {
+          detail: { postId: post.id },
+        })
+      );
+
+    } catch (error) {
+      console.error('Error continuing Spark:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to continue Spark. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleView = () => {
