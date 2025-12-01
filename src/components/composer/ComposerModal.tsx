@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { buildPublicSparkPayload, buildBusinessInsightPayload } from "@/lib/postPayloads";
+import { buildSparkPayload, buildBusinessInsightPayload } from "@/lib/posts";
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -150,12 +150,13 @@ export function ComposerModal({
       
       if (isPublicMode) {
         // Public Spark (brainstorm)
-        // Get originOpenIdeaId from context if available
-        payload = buildPublicSparkPayload({
+        payload = buildSparkPayload({
           userId: user.id,
           content,
           title: undefined,
-          originOpenIdeaId: context?.originOpenIdeaId,
+          metadata: context?.originOpenIdeaId 
+            ? { origin_open_idea_id: context.originOpenIdeaId }
+            : undefined,
         });
       } else {
         // Business Insight
