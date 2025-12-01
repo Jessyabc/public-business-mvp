@@ -65,8 +65,8 @@ serve(async (req) => {
       .from('post_interactions')
       .insert({
         post_id,
-        type,
-        actor_user_id,
+        kind: type,
+        user_id: actor_user_id,
       })
       .select()
       .single();
@@ -84,13 +84,13 @@ serve(async (req) => {
     // Update post engagement counters based on interaction type
     switch (type) {
       case 'like': {
-        const { error: likeError } = await supabaseClient.rpc('increment_post_likes', { post_id });
+        const { error: likeError } = await supabaseClient.rpc('increment_post_likes', { p_post_id: post_id });
         if (likeError) console.error('Error updating likes:', likeError);
         break;
       }
 
       case 'view': {
-        const { error: viewError } = await supabaseClient.rpc('increment_post_views', { post_id });
+        const { error: viewError } = await supabaseClient.rpc('increment_post_views', { p_post_id: post_id });
         if (viewError) console.error('Error updating views:', viewError);
         break;
       }

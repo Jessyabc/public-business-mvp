@@ -80,6 +80,41 @@ export function PostToSparkCard({
     fetchAuthor();
   }, [post.user_id]);
 
+  // Listen for spark interaction events from SparkCard
+  useEffect(() => {
+    const handleThought = async (event: CustomEvent) => {
+      if (event.detail.sparkId !== post.id) return;
+      
+      // Record interaction
+      await supabase.functions.invoke('interact-post', {
+        body: {
+          post_id: post.id,
+          type: 'like'
+        }
+      });
+    };
+
+    const handleView = async (event: CustomEvent) => {
+      if (event.detail.sparkId !== post.id) return;
+      
+      // Record view interaction
+      await supabase.functions.invoke('interact-post', {
+        body: {
+          post_id: post.id,
+          type: 'view'
+        }
+      });
+    };
+
+    window.addEventListener('pb:spark:thought', handleThought as EventListener);
+    window.addEventListener('pb:spark:view', handleView as EventListener);
+
+    return () => {
+      window.removeEventListener('pb:spark:thought', handleThought as EventListener);
+      window.removeEventListener('pb:spark:view', handleView as EventListener);
+    };
+  }, [post.id]);
+
   const spark = convertPostToSpark(post, authorDisplayName, authorAvatarUrl);
 
   const handleContinueBrainstorm = async () => {
@@ -92,52 +127,15 @@ export function PostToSparkCard({
       return;
     }
 
-    try {
-      // Create new Spark using canonical builder
-      const newSparkPayload = buildSparkPayload({
-        userId: user.id,
-        content: '', // Will be filled by user in composer/modal
-        title: `Re: ${post.title || post.content.slice(0, 50)}`,
-        metadata: {
-          parent_spark_id: post.id,
-        },
-      });
-
-      // Insert the new Spark
-      const { data: newSpark, error: insertError } = await supabase
-        .from('posts')
-        .insert(newSparkPayload)
-        .select()
-        .single();
-
-      if (insertError || !newSpark) {
-        throw new Error('Failed to create continuation Spark');
-      }
-
-      // Create hard relation (reply type)
-      await createHardLink(post.id, newSpark.id);
-
-      toast({
-        title: 'Continuation created',
-        description: 'Your Spark continuation was created successfully',
-      });
-
-      // Navigate to thread view
-      setActivePost(post);
-      window.dispatchEvent(
-        new CustomEvent('pb:brainstorm:show-thread', {
-          detail: { postId: post.id },
-        })
-      );
-
-    } catch (error) {
-      console.error('Error continuing Spark:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to continue Spark. Please try again.',
-        variant: 'destructive',
-      });
-    }
+    // Open composer with parent context
+    window.dispatchEvent(
+      new CustomEvent('pb:brainstorm:continue', {
+        detail: { 
+          parentId: post.id,
+          parentContent: post.content,
+        }
+      })
+    );
   };
 
   const handleView = () => {

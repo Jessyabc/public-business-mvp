@@ -80,18 +80,22 @@ export function BusinessFeed() {
   });
 
   const handleViewPost = (postId: string) => {
-    console.log("View post:", postId);
-    // Navigate to full post view
+    // Open post in new modal or navigate
+    window.dispatchEvent(
+      new CustomEvent('pb:post:view', {
+        detail: { postId, mode: 'business' }
+      })
+    );
   };
 
   const handleSavePost = (postId: string) => {
+    // TODO: Implement save to user's saved posts
     console.log("Save post:", postId);
-    // Save to history
   };
 
   const handleLinkToBrainstorm = (postId: string) => {
+    // TODO: Open brainstorm linking modal
     console.log("Link to brainstorm:", postId);
-    // Open brainstorm linking modal
   };
 
   const getSortLabel = (value: string) => {
