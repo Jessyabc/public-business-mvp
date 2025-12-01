@@ -560,27 +560,6 @@ export type Database = {
         }
         Relationships: []
       }
-      leads: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          source: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          source?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          source?: string
-        }
-        Relationships: []
-      }
       nods_page: {
         Row: {
           checksum: string | null
@@ -980,6 +959,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      post_relations_backup_for_relation_type_fix: {
+        Row: {
+          child_post_id: string | null
+          created_at: string | null
+          id: string | null
+          parent_post_id: string | null
+          relation_type: string | null
+        }
+        Insert: {
+          child_post_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          parent_post_id?: string | null
+          relation_type?: string | null
+        }
+        Update: {
+          child_post_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          parent_post_id?: string | null
+          relation_type?: string | null
+        }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -1734,6 +1737,26 @@ export type Database = {
         }
         Returns: string
       }
+      create_post_relation: {
+        Args: {
+          p_child_post_id: string
+          p_parent_post_id: string
+          p_relation_type: string
+        }
+        Returns: {
+          child_post_id: string
+          created_at: string
+          id: string
+          parent_post_id: string
+          relation_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "post_relations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_user_email: { Args: never; Returns: string }
       enforce_rate_limit: {
         Args: { limit_count: number; window_seconds: number }
@@ -1764,6 +1787,8 @@ export type Database = {
           path: string
         }[]
       }
+      get_primary_org: { Args: never; Returns: string }
+      get_user_org: { Args: never; Returns: string }
       get_user_org_id: { Args: never; Returns: string }
       get_user_role: { Args: never; Returns: string }
       get_user_roles: {
