@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { ComposerModal } from '@/components/composer/ComposerModal';
+import { PullToRefresh } from '@/components/layout/PullToRefresh';
 
 const REQUIRE_AUTH = true;
 
@@ -45,7 +46,8 @@ export default function OpenIdeas() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
+      <PullToRefresh onRefresh={() => fetchPosts()}>
+        <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Open Ideas Bank</h1>
@@ -85,6 +87,7 @@ export default function OpenIdeas() {
           ))}
         </div>
       </div>
+      </PullToRefresh>
 
       <ComposerModal isOpen={isOpen} onClose={closeComposer} />
     </>

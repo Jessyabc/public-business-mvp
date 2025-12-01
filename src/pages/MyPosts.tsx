@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FeedContainer } from '@/features/feed/FeedContainer';
 import { PostReaderModal } from '@/components/posts/PostReaderModal';
+import { PullToRefresh } from '@/components/layout/PullToRefresh';
 import type { Post } from '@/types/post';
 
 const MyPosts = () => {
@@ -47,9 +48,10 @@ const MyPosts = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 pb-32 relative">
+    <PullToRefresh onRefresh={() => fetchUserPosts()}>
+      <div className="min-h-screen p-6 pb-32 relative">
 
-      <div className="relative z-10 max-w-4xl mx-auto">
+        <div className="relative z-10 max-w-4xl mx-auto">
         <header className="mb-8">
           <GlassCard className={`rounded-3xl glass-ios-triple glass-corner-distort transition-all duration-700 ${
             mode === 'public'
@@ -324,6 +326,7 @@ const MyPosts = () => {
         post={selectedPost}
       />
     </div>
+    </PullToRefresh>
   );
 };
 

@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from './use-mobile';
+import { useHaptic } from './useHaptic';
 
 interface SwipeSection {
   path: string;
@@ -16,6 +17,7 @@ export function useSwipeNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { triggerHaptic } = useHaptic();
 
   const getCurrentIndex = () => {
     const current = MAIN_SECTIONS.find(s => s.path === location.pathname);
@@ -37,6 +39,7 @@ export function useSwipeNavigation() {
     }
 
     if (targetIndex !== currentIndex) {
+      triggerHaptic('light');
       navigate(MAIN_SECTIONS[targetIndex].path);
     }
   };
