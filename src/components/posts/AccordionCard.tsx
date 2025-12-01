@@ -9,7 +9,7 @@ import type { Post as CanonicalPost } from '@/types/post';
 
 type AccordionPost = Pick<
   CanonicalPost,
-  'id' | 'title' | 'content' | 't_score' | 'views_count' | 'likes_count' | 'created_at' | 'mode'
+  'id' | 'title' | 'content' | 't_score' | 'u_score' | 'views_count' | 'created_at' | 'mode'
 >;
 
 interface AccordionCardProps {
@@ -111,16 +111,18 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
           className="flex items-center gap-4 mt-4 text-sm text-muted-foreground"
           layout
         >
+          {post.u_score !== undefined && post.u_score !== null && (
+            <span className="font-semibold text-green-600">
+              U: {post.u_score}
+            </span>
+          )}
           {post.t_score && (
-            <span className="font-semibold text-primary">
+            <span className="font-semibold text-purple-600">
               T: {post.t_score}
             </span>
           )}
           {post.views_count !== undefined && (
             <span>👁️ {post.views_count}</span>
-          )}
-          {post.likes_count !== undefined && (
-            <span>❤️ {post.likes_count}</span>
           )}
           <span className="ml-auto">
             {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
