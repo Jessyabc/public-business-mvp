@@ -9,6 +9,12 @@ import type {
   PostRelationType,
 } from '@/types/post';
 import { canLink, type LineageNode } from '@/lib/lineageRules';
+import { 
+  buildSparkPayload, 
+  buildBusinessInsightPayload,
+  buildPostUpdatePayload,
+  validatePostPayload 
+} from '@/lib/posts';
 
 export type CreatePostData = Omit<PostInsertPayload, 'user_id'>;
 
@@ -86,39 +92,20 @@ export function usePosts() {
     try {
       console.log('Creating post with data:', { user_id: user.id, ...postData });
       
-      // Apply canonical rules for post creation
-      let insertPayload: any = {
-        user_id: user.id,
-        content: postData.content,
-        type: postData.type,
-        mode: postData.mode,
-        title: postData.title ?? null,
-        body: postData.body ?? postData.content,
-        kind: postData.kind,
-        visibility: postData.visibility,
-        status: postData.status ?? 'active',
-        org_id: postData.org_id,
-        industry_id: postData.industry_id,
-        department_id: postData.department_id,
-        metadata: postData.metadata ? JSON.parse(JSON.stringify(postData.metadata)) : {},
-        t_score: postData.t_score,
-        u_score: postData.u_score,
-        published_at: postData.published_at,
-      };
-
-      // Canonical rules: enforce correct values based on type
+      // Use canonical builders based on post type
+      let insertPayload: any;
+      
       if (postData.type === 'brainstorm') {
-        // Force canonical values for brainstorms
-        insertPayload.mode = 'public';
-        insertPayload.visibility = 'public';
-        insertPayload.kind = 'Spark';
-        insertPayload.org_id = null;
+        // Build Spark using canonical builder
+        insertPayload = buildSparkPayload({
+          userId: user.id,
+          content: postData.content,
+          title: postData.title,
+          metadata: postData.metadata,
+        });
       } else if (postData.type === 'insight' && postData.mode === 'business') {
-        // Ensure kind is BusinessInsight for business insights
-        insertPayload.kind = insertPayload.kind || 'BusinessInsight';
-        
-        // Require org_id for business insights
-        if (!insertPayload.org_id) {
+        // Build Business Insight using canonical builder
+        if (!postData.org_id) {
           toast({
             title: "Organization Required",
             description: "Business insights require an organization ID",
@@ -127,7 +114,43 @@ export function usePosts() {
           setLoading(false);
           return null;
         }
+        
+        if (!postData.title) {
+          toast({
+            title: "Title Required",
+            description: "Business insights require a title",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return null;
+        }
+        
+        insertPayload = buildBusinessInsightPayload({
+          userId: user.id,
+          orgId: postData.org_id,
+          content: postData.content,
+          title: postData.title,
+          metadata: postData.metadata,
+        });
+      } else {
+        // Fallback for other post types (should not happen with canonical model)
+        insertPayload = {
+          user_id: user.id,
+          content: postData.content,
+          type: postData.type,
+          mode: postData.mode,
+          title: postData.title ?? null,
+          body: postData.body ?? postData.content,
+          kind: postData.kind,
+          visibility: postData.visibility,
+          status: postData.status ?? 'active',
+          org_id: postData.org_id,
+          metadata: postData.metadata ? JSON.parse(JSON.stringify(postData.metadata)) : {},
+        };
       }
+      
+      // Validate payload follows canonical rules
+      validatePostPayload(insertPayload);
       
       const { data, error } = await supabase
         .from('posts')
@@ -259,10 +282,11 @@ export function usePosts() {
 
     setLoading(true);
     try {
-      const updatePayload = {
-        ...postData,
-        metadata: postData.metadata ? JSON.parse(JSON.stringify(postData.metadata)) : {}
-      };
+      // Use canonical update builder (only allows content and title updates)
+      const updatePayload = buildPostUpdatePayload({
+        content: postData.content,
+        title: postData.title,
+      });
       
       const { data, error } = await supabase
         .from('posts')

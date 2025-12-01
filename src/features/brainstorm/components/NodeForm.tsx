@@ -16,7 +16,7 @@ import { GlassCard } from '@/ui/components/GlassCard';
 import { Search, X, Plus } from 'lucide-react';
 import { useBrainstormExperienceStore } from '../stores/experience';
 import type { BasePost } from '@/types/post';
-import { buildPublicSparkPayload } from '@/lib/postPayloads';
+import { buildSparkPayload } from '@/lib/posts';
 import { canLink, type LineageNode } from '@/lib/lineageRules';
 
 const nodeSchema = z.object({
@@ -153,7 +153,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
       }
 
       // Build canonical Spark payload
-      const payload = buildPublicSparkPayload({
+      const payload = buildSparkPayload({
         userId: user.id,
         content: data.content,
         title: data.title || null,
