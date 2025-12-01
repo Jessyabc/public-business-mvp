@@ -187,12 +187,16 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 px-1 pb-4 border-b border-white/10">
           <FileText className="w-5 h-5 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Business Insight</h3>
         </div>
+
+        {/* Scrollable Content */}
+        <ScrollArea className="flex-1 px-1">
+          <div className="space-y-6 py-6">
 
         {/* Focus Area */}
         <FormField
@@ -613,8 +617,11 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
           )}
         />
 
-        {/* Actions */}
-        <div className="flex justify-end space-x-2 pt-4">
+          </div>
+        </ScrollArea>
+
+        {/* Actions - Fixed at bottom */}
+        <div className="flex justify-end space-x-2 pt-4 px-1 border-t border-white/10 mt-auto">
           <button 
             type="button"
             className="glassButton glassButton--muted" 
