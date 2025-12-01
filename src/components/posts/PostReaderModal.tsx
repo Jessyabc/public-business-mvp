@@ -7,6 +7,8 @@ import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, User, Reply } fr
 import { useAppMode } from "@/contexts/AppModeContext";
 import type { Post } from "@/types/post";
 import { useComposerStore } from "@/hooks/useComposerStore";
+import { LineageCard } from "@/components/brainstorm/LineageCard";
+import { CrossLinksSection } from "@/components/brainstorm/CrossLinksSection";
 
 interface PostReaderModalProps {
   isOpen: boolean;
@@ -54,13 +56,16 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0 z-50">
         <GlassSurface>
           <DialogHeader>
             <DialogTitle className="sr-only">Post Details</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
+          {/* Lineage Card */}
+          <LineageCard postId={post.id} currentPost={post} />
+
           {/* Post Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
@@ -167,6 +172,9 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                 </Button>
               </div>
             </div>
+
+            {/* Cross-links Section */}
+            <CrossLinksSection postId={post.id} />
           </div>
         </GlassSurface>
       </DialogContent>

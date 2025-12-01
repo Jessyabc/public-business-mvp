@@ -146,7 +146,7 @@ export function BusinessFeed() {
               <SelectTrigger className="w-full lg:w-48 glass-business-card">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50">
                 <SelectItem value="most_useful">Most Useful</SelectItem>
                 <SelectItem value="most_recent">Most Recent</SelectItem>
                 <SelectItem value="most_shared">Most Shared</SelectItem>
