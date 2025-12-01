@@ -170,13 +170,13 @@ export function BottomNavigation() {
             onClick={() => openComposer()}
             size="icon"
             className={cn(
-              "w-12 h-12 rounded-full transition-all shadow-lg -mt-8",
+              "w-14 h-14 rounded-full transition-all shadow-lg -mt-6",
               isDark
                 ? "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20"
                 : "bg-primary hover:bg-primary/90 text-primary-foreground"
             )}
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-7 h-7" />
           </Button>
 
           {/* Right side - My Posts */}
