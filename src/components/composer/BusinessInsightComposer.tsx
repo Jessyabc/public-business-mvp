@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Plus, X, Link2, Target, HelpCircle, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +29,7 @@ interface BusinessInsightComposerProps {
 }
 
 export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProps) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: orgId } = useUserOrgId();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -173,10 +175,11 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
 
       toast.success('Business Insight created successfully');
       
-      // Navigate to the insight thread view
-      window.location.href = `/brainstorm/feed?post=${newPost.id}`;
-      
+      // Close the composer first
       onClose();
+      
+      // Navigate to the insight thread view using React Router
+      navigate(`/brainstorm/feed?post=${newPost.id}`);
     } catch (error: any) {
       console.error('Error creating business insight:', error);
       toast.error(error?.message || 'Failed to create insight');
