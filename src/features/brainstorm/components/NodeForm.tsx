@@ -198,11 +198,11 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
           };
 
           // Check if linking is allowed
-          if (!canLink(parentNode, childNode, 'hard')) {
+          if (!canLink(parentNode, childNode, 'origin')) {
             console.warn('Lineage rule violation: Cannot link', {
               parent: { type: parentPost.type, kind: parentPost.kind },
               child: { type: newPost.type, kind: newPost.kind },
-              relationType: 'hard',
+              relationType: 'origin',
             });
             toast.error('This type of post cannot be linked to that type of post yet.');
           } else {
@@ -212,7 +212,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
               .insert([{
                 parent_post_id: parentId,
                 child_post_id: newPost.id,
-                relation_type: 'hard', // Continuation uses 'hard' relation
+                relation_type: 'origin', // Continuation uses 'origin' relation (migrated from 'hard')
               }]);
 
             if (relationError) {
@@ -243,7 +243,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
           };
 
           // Filter out disallowed relations
-          const allowedRelations: Array<{ parent_post_id: string; child_post_id: string; relation_type: 'soft' }> = [];
+          const allowedRelations: Array<{ parent_post_id: string; child_post_id: string; relation_type: 'cross_link' }> = [];
           const disallowedPosts: string[] = [];
 
           for (const childPost of childPosts) {
@@ -253,11 +253,11 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
               kind: childPost.kind || undefined,
             };
 
-            if (canLink(parentNode, childNode, 'soft')) {
+            if (canLink(parentNode, childNode, 'cross_link')) {
               allowedRelations.push({
                 parent_post_id: newPost.id,
                 child_post_id: childPost.id,
-                relation_type: 'soft',
+                relation_type: 'cross_link',
               });
             } else {
               disallowedPosts.push(childPost.id);

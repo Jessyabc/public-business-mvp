@@ -55,7 +55,8 @@ export class BrainstormSupabaseAdapter {
         id: relation.id,
         source: relation.parent_post_id,
         target: relation.child_post_id,
-        type: relation.relation_type === 'hard' ? 'hard' : 'soft',
+        // Map standardized types back to legacy 'hard'/'soft' for BrainstormEdge compatibility
+        type: relation.relation_type === 'origin' ? 'hard' : 'soft',
         note: relation.note || '',
         created_at: relation.created_at
       }));
@@ -236,7 +237,8 @@ export class BrainstormSupabaseAdapter {
         .insert({
           parent_post_id: edgeData.source,
           child_post_id: edgeData.target,
-          relation_type: edgeData.type || 'soft'
+          // Map legacy 'hard'/'soft' to standardized types
+          relation_type: edgeData.type === 'hard' ? 'origin' : 'cross_link'
         })
         .select('id, parent_post_id, child_post_id, relation_type, created_at')
         .single();
@@ -253,7 +255,8 @@ export class BrainstormSupabaseAdapter {
         id: data.id,
         source: data.parent_post_id,
         target: data.child_post_id,
-        type: data.relation_type === 'hard' ? 'hard' : 'soft',
+        // Map back to legacy format for BrainstormEdge compatibility
+        type: data.relation_type === 'origin' ? 'hard' : 'soft',
         note: edgeData.note || '',
         created_at: data.created_at
       };
