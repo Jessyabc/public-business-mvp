@@ -194,6 +194,13 @@ export type Database = {
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "business_insights_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
         ]
       }
       business_invitations: {
@@ -762,6 +769,13 @@ export type Database = {
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
         ]
       }
       org_themes: {
@@ -790,6 +804,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "orgs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_themes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
           },
         ]
       }
@@ -877,6 +898,20 @@ export type Database = {
             referencedRelation: "public_posts_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "post_interactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_insight_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_interactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_post_t_score"
+            referencedColumns: ["post_id"]
+          },
         ]
       }
       post_relations: {
@@ -931,6 +966,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "post_relations_child_post_id_fkey"
+            columns: ["child_post_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_insight_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_relations_child_post_id_fkey"
+            columns: ["child_post_id"]
+            isOneToOne: false
+            referencedRelation: "view_post_t_score"
+            referencedColumns: ["post_id"]
+          },
+          {
             foreignKeyName: "post_relations_parent_post_id_fkey"
             columns: ["parent_post_id"]
             isOneToOne: false
@@ -958,6 +1007,20 @@ export type Database = {
             referencedRelation: "public_posts_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "post_relations_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_insight_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_relations_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "view_post_t_score"
+            referencedColumns: ["post_id"]
+          },
         ]
       }
       post_relations_backup_for_relation_type_fix: {
@@ -984,6 +1047,76 @@ export type Database = {
         }
         Relationships: []
       }
+      post_utility_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "business_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "my_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "public_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_insight_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_post_t_score"
+            referencedColumns: ["post_id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           body: string | null
@@ -999,6 +1132,7 @@ export type Database = {
           mode: string
           org_id: string | null
           published_at: string | null
+          shares_count: number | null
           status: string
           t_score: number | null
           title: string | null
@@ -1023,6 +1157,7 @@ export type Database = {
           mode: string
           org_id?: string | null
           published_at?: string | null
+          shares_count?: number | null
           status?: string
           t_score?: number | null
           title?: string | null
@@ -1047,6 +1182,7 @@ export type Database = {
           mode?: string
           org_id?: string | null
           published_at?: string | null
+          shares_count?: number | null
           status?: string
           t_score?: number | null
           title?: string | null
@@ -1064,6 +1200,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
           },
         ]
       }
@@ -1254,6 +1397,13 @@ export type Database = {
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
         ]
       }
       business_profiles_public: {
@@ -1421,6 +1571,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
           },
         ]
       }
@@ -1618,6 +1775,141 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      view_business_insight_analytics: {
+        Row: {
+          comments_count: number | null
+          continuations_count: number | null
+          created_at: string | null
+          crosslinks_count: number | null
+          likes_count: number | null
+          org_id: string | null
+          post_id: string | null
+          published_at: string | null
+          shares_count: number | null
+          t_score: number | null
+          title: string | null
+          u_score_avg: number | null
+          u_score_count: number | null
+          views_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      view_business_org_analytics: {
+        Row: {
+          avg_t_score: number | null
+          avg_u_score: number | null
+          last_insight_published_at: string | null
+          org_id: string | null
+          org_name: string | null
+          total_continuations: number | null
+          total_crosslinks: number | null
+          total_insights: number | null
+          total_likes: number | null
+          total_shares: number | null
+          total_u_ratings: number | null
+          total_views: number | null
+        }
+        Relationships: []
+      }
+      view_post_t_score: {
+        Row: {
+          age_minutes: number | null
+          content_length: number | null
+          post_id: string | null
+          reply_count: number | null
+          t_score: number | null
+        }
+        Insert: {
+          age_minutes?: never
+          content_length?: never
+          post_id?: string | null
+          reply_count?: number | null
+          t_score?: never
+        }
+        Update: {
+          age_minutes?: never
+          content_length?: never
+          post_id?: string | null
+          reply_count?: number | null
+          t_score?: never
+        }
+        Relationships: []
+      }
+      view_post_u_score: {
+        Row: {
+          negative_ratings: number | null
+          positive_ratings: number | null
+          post_id: string | null
+          u_score_avg: number | null
+          u_score_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "business_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "my_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "public_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_insight_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_utility_ratings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_post_t_score"
+            referencedColumns: ["post_id"]
           },
         ]
       }
