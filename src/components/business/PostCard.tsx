@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MessageCircle, Link, Eye, Share2, Bookmark, Zap, PlayCircle, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PostReaderModal } from "@/components/posts/PostReaderModal";
+import { ShareButton } from "@/components/ui/ShareButton";
 
 interface PostCardProps {
   post: BusinessPost;
@@ -187,6 +188,14 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
         >
           <Zap className="w-4 h-4" />
         </Button>
+        <ShareButton 
+          postId={post.id}
+          postTitle={post.title}
+          postContent={post.summary}
+          shareCount={post.uScore.breakdown.shares}
+          variant="ghost"
+          size="icon"
+        />
       </div>
 
       <PostReaderModal 
