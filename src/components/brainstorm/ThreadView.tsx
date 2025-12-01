@@ -11,6 +11,8 @@ import { PostToSparkCard } from './PostToSparkCard';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { LineageCard } from './LineageCard';
+import { CrossLinksSection } from './CrossLinksSection';
 
 interface ThreadViewProps {
   postId: string;
@@ -83,6 +85,9 @@ export function ThreadView({ postId, onClose }: ThreadViewProps) {
         )}
       </div>
 
+      {/* Lineage Card */}
+      <LineageCard postId={postId} currentPost={threadData.rootPost} />
+
       {/* Thread backbone */}
       <div className="space-y-4">
         {flatThread.map((node, index) => (
@@ -135,12 +140,8 @@ export function ThreadView({ postId, onClose }: ThreadViewProps) {
         ))}
       </div>
 
-      {/* Cross-links placeholder */}
-      <div className="mt-8 pt-6 border-t border-white/10">
-        <div className="text-sm text-white/50 italic">
-          Cross-links and soft relations will be displayed here
-        </div>
-      </div>
+      {/* Cross-links Section */}
+      <CrossLinksSection postId={postId} />
     </div>
   );
 }
