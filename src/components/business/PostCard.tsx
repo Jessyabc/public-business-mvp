@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MessageCircle, Link, Eye, Share2, Bookmark, Zap, PlayCircle, Calendar } from "lucide-react";
+import { MessageCircle, Link, Eye, Share2, Bookmark, Zap, PlayCircle, Calendar, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PostReaderModal } from "@/components/posts/PostReaderModal";
 import { ShareButton } from "@/components/ui/ShareButton";
@@ -134,8 +134,16 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
         </div>
       </div>
 
-      {/* U-Score Breakdown */}
+      {/* Metrics Row */}
       <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <TrendingUp className="w-3 h-3 text-green-600" />
+          <span className="font-medium">U: {post.uScore.total}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <TrendingUp className="w-3 h-3 text-purple-600" />
+          <span className="font-medium">T: {post.uScore.breakdown.comments || 0}</span>
+        </div>
         <div className="flex items-center gap-1">
           <MessageCircle className="w-3 h-3" />
           {formatCount(post.uScore.breakdown.comments)}
@@ -147,10 +155,6 @@ export function PostCard({ post, onViewPost, onSavePost, onLinkToBrainstorm }: P
         <div className="flex items-center gap-1">
           <Eye className="w-3 h-3" />
           {formatCount(post.uScore.breakdown.views)}
-        </div>
-        <div className="flex items-center gap-1">
-          <Share2 className="w-3 h-3" />
-          {formatCount(post.uScore.breakdown.shares)}
         </div>
       </div>
 
