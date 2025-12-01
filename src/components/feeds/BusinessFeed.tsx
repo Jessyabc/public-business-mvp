@@ -8,7 +8,6 @@ import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, ToggleLeft, Sparkles, Plus } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
-import { LiveBrainstormWindow } from "@/components/brainstorm/LiveBrainstormWindow";
 import { AccordionCard } from "@/components/posts/AccordionCard";
 import { useNavigate } from "react-router-dom";
 import { useComposerStore } from "@/hooks/useComposerStore";
@@ -249,11 +248,6 @@ export function BusinessFeed() {
                 )}
               </>
             )}
-          </div>
-
-          {/* Live Brainstorm Window */}
-          <div className="mt-8">
-            <LiveBrainstormWindow />
           </div>
         </div>
       </div>

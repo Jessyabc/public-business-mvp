@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { TimelineSection } from "@/components/landing/TimelineSection";
 import { ComposerSection } from "@/components/landing/ComposerSection";
-import { BrainstormPreviewList } from "@/components/BrainstormPreviewList";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import pbLogoHero from "@/assets/pb-logo-hero.png";
 export function NewLanding() {
@@ -52,19 +51,5 @@ export function NewLanding() {
 
       {/* Composer Section */}
       <ComposerSection isVisible={showComposer} />
-
-      {/* Featured Brainstorms Teaser */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-[var(--text-primary)] mb-4">Featured Branches</h2>
-            <p className="text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
-              See how ideas are already blossoming into collaboration
-            </p>
-          </div>
-
-          <BrainstormPreviewList />
-        </div>
-      </section>
     </div>;
 }

@@ -1,21 +1,23 @@
 import { Link } from 'react-router-dom';
 import { Plus, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useOpenIdeas, type OpenIdea } from '@/hooks/useOpenIdeas';
+import { usePosts } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
-import { PostCardModal } from '@/components/post/PostCardModal';
 import { useState } from 'react';
+import { useComposerStore } from '@/hooks/useComposerStore';
+import { ComposerModal } from '@/components/composer/ComposerModal';
 
-// Environment variable for gating (could be set in production)
-const REQUIRE_AUTH = true; // Set this based on your preference
-
+const REQUIRE_AUTH = true;
 
 export default function OpenIdeas() {
   const { user } = useAuth();
-  const { ideas, loading, error } = useOpenIdeas();
-  const [selectedIdea, setSelectedIdea] = useState<OpenIdea | null>(null);
+  const { posts, loading, fetchPosts } = usePosts();
+  const { isOpen, openComposer, closeComposer } = useComposerStore();
+  const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
 
-  // If authentication is required and user is not logged in
+  // Filter for open ideas (public sparks/brainstorms)
+  const openIdeas = posts.filter(p => p.kind === 'Spark' && p.mode === 'public');
+
   if (REQUIRE_AUTH && !user) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -42,63 +44,49 @@ export default function OpenIdeas() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2 text-foreground">Open Ideas Bank</h1>
-          <p className="text-muted-foreground">
-            Curated ideas from the community, waiting for your creative spark
-          </p>
-        </div>
-        <Link to="/open-ideas/new">
-          <Button className="mt-4 md:mt-0">
+    <>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Open Ideas Bank</h1>
+            <p className="text-muted-foreground">
+              Curated ideas from the community, waiting for your creative spark
+            </p>
+          </div>
+          <Button onClick={() => openComposer()} className="mt-4 md:mt-0">
             <Plus className="w-4 h-4 mr-2" />
             Submit an Idea
           </Button>
-        </Link>
+        </div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {loading && (
+            <div className="col-span-full text-sm text-muted-foreground">
+              Loading open ideas…
+            </div>
+          )}
+          {!loading && openIdeas.map((idea) => (
+            <div
+              key={idea.id}
+              onClick={() => {
+                setSelectedIdeaId(idea.id);
+                openComposer();
+              }}
+              className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent transition-all"
+            >
+              <p className="text-sm text-foreground line-clamp-4 leading-relaxed">
+                {idea.content}
+              </p>
+              <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+                <span>From the community</span>
+                <span>{new Date(idea.created_at).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {loading && (
-          <div className="col-span-full text-sm text-muted-foreground">
-            Loading open ideas…
-          </div>
-        )}
-        {error && !loading && (
-          <div className="col-span-full p-6 rounded-2xl bg-destructive/10 border border-destructive/20 space-y-2">
-            <div className="font-semibold text-destructive">Error loading ideas:</div>
-            <div className="text-destructive/80">{error}</div>
-            <div className="text-xs text-muted-foreground mt-2">
-              If you see a permission error, ensure the migration <code className="bg-muted px-1 rounded">20250106000000_add_open_ideas_select_policies.sql</code> has been applied.
-            </div>
-          </div>
-        )}
-        {!loading && !error && ideas.map((idea) => (
-          <div
-            key={idea.id}
-            onClick={() => setSelectedIdea(idea)}
-            className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent transition-all duration-200 theme-business:rounded-xl theme-business:shadow-[var(--neuro-card-shadow-light),var(--neuro-card-shadow-dark)] theme-business:border-0 theme-business:hover:shadow-[var(--neuro-shadow-inset-light),var(--neuro-shadow-inset-dark)] theme-business:relative theme-business:overflow-hidden theme-business:before:absolute theme-business:before:inset-0 theme-business:before:bg-[var(--neuro-gradient-subtle)] theme-business:before:pointer-events-none theme-business:after:absolute theme-business:after:inset-0 theme-business:after:bg-[var(--neuro-shine)] theme-business:after:opacity-0 theme-business:hover:after:opacity-100 theme-business:after:transition-opacity theme-business:after:duration-300 theme-business:after:pointer-events-none"
-          >
-            <p className="text-sm text-foreground line-clamp-4 leading-relaxed theme-business:relative theme-business:z-10">
-              {idea.text}
-            </p>
-            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground theme-business:border-t-0 theme-business:relative theme-business:z-10">
-              <span>{idea.source === 'user' ? 'From a member' : 'From the community'}</span>
-              <span>
-                {idea.created_at
-                  ? new Date(idea.created_at).toLocaleDateString()
-                  : ''}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <PostCardModal
-        openIdea={selectedIdea}
-        isOpen={!!selectedIdea}
-        onClose={() => setSelectedIdea(null)}
-      />
-    </div>
+      <ComposerModal isOpen={isOpen} onClose={closeComposer} />
+    </>
   );
 }
