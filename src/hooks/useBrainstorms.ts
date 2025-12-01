@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// New code should use usePosts from src/hooks/usePosts.ts
+// This hook wraps the posts table but uses legacy interface types for backward compatibility.
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';

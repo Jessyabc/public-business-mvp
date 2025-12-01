@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// This is a duplicate of usePostRelations functionality.
+// New code should use usePostRelations from src/hooks/usePostRelations.ts
+
 import { supabase } from '@/integrations/supabase/client';
 import type { Post, PostRelation } from '@/types/post';
 

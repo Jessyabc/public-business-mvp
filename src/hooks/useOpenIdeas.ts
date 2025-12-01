@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// New code should use the posts system (usePosts) for all content including ideas.
+// This uses legacy open_ideas tables that are being phased out.
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";

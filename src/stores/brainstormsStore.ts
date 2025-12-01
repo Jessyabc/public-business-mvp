@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// This uses mock brainstorm data and is not connected to the canonical posts system.
+// New code should use usePosts and usePostRelations for real post management.
+
 import { create } from 'zustand';
 import { brainstormService, type Brainstorm } from '@/services/mock/brainstorms';
 import { trackBrainstormCreated, trackBrainstormFailed, trackBrainstormReply } from '@/lib/track';

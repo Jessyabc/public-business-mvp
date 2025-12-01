@@ -1,3 +1,7 @@
+// LEGACY – do not extend. Kept temporarily for reference during migration.
+// New canonical post details should use the PostModal/BrainstormThread components.
+// This page uses the legacy useBrainstorms hook wrapper.
+
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
