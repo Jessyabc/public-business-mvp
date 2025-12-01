@@ -5,6 +5,7 @@ import { GlobalNavigationMenu } from '@/components/navigation/GlobalNavigationMe
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
+import { SwipeNavigationWrapper } from '@/components/layout/SwipeNavigationWrapper';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -51,33 +52,35 @@ export function MainLayout({ children, noTopPadding = false }: MainLayoutProps) 
       
       {/* Main Content with smooth transitions - ensure it's above background */}
       <main className={`relative z-10 ${user ? "min-h-screen pt-16" : noTopPadding ? "min-h-screen" : "min-h-screen pt-24"}`}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ 
-              opacity: 0, 
-              ...(useHorizontalSlide 
-                ? { x: slideDirection } 
-                : { y: 20 })
-            }}
-            animate={{ 
-              opacity: 1, 
-              ...(useHorizontalSlide ? { x: 0 } : { y: 0 })
-            }}
-            exit={{ 
-              opacity: 0, 
-              ...(useHorizontalSlide 
-                ? { x: -slideDirection } 
-                : { y: -20 })
-            }}
-            transition={{ 
-              duration: 0.35, 
-              ease: [0.4, 0, 0.2, 1]
-            }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <SwipeNavigationWrapper>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ 
+                opacity: 0, 
+                ...(useHorizontalSlide 
+                  ? { x: slideDirection } 
+                  : { y: 20 })
+              }}
+              animate={{ 
+                opacity: 1, 
+                ...(useHorizontalSlide ? { x: 0 } : { y: 0 })
+              }}
+              exit={{ 
+                opacity: 0, 
+                ...(useHorizontalSlide 
+                  ? { x: -slideDirection } 
+                  : { y: -20 })
+              }}
+              transition={{ 
+                duration: 0.35, 
+                ease: [0.4, 0, 0.2, 1]
+              }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </SwipeNavigationWrapper>
       </main>
 
       {/* Footer - only show when user is not logged in */}
