@@ -3,15 +3,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { PostCard as BusinessPostCard } from "@/components/business/PostCard";
 import { BusinessFeedFilters } from "@/types/business-post";
-import { Search, Filter, ToggleLeft, Sparkles, Plus } from "lucide-react";
+import { Search, Filter, Sparkles, Plus } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
 import { AccordionCard } from "@/components/posts/AccordionCard";
 import { useNavigate } from "react-router-dom";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Post } from "@/types/post";
+import { PostReaderModal } from "@/components/posts/PostReaderModal";
 
 export function BusinessFeed() {
   const { toggleMode } = useAppMode();
@@ -27,6 +28,8 @@ export function BusinessFeed() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isReaderOpen, setIsReaderOpen] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,12 +83,10 @@ export function BusinessFeed() {
   });
 
   const handleViewPost = (postId: string) => {
-    // Open post in new modal or navigate
-    window.dispatchEvent(
-      new CustomEvent('pb:post:view', {
-        detail: { postId, mode: 'business' }
-      })
-    );
+    const post = posts.find((p) => p.id === postId);
+    if (!post) return;
+    setSelectedPost(post);
+    setIsReaderOpen(true);
   };
 
   const handleSavePost = (postId: string) => {
@@ -255,6 +256,16 @@ export function BusinessFeed() {
           </div>
         </div>
       </div>
+
+      {/* Post Reader Modal */}
+      <PostReaderModal
+        isOpen={isReaderOpen}
+        onClose={() => {
+          setIsReaderOpen(false);
+          setSelectedPost(null);
+        }}
+        post={selectedPost}
+      />
     </div>
   );
 }
