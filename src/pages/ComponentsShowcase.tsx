@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,23 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Toggle } from '@/components/ui/toggle';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Calendar } from '@/components/ui/calendar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { GlassCard } from '@/ui/components/GlassCard';
 import { 
   AlertCircle,
@@ -28,7 +45,27 @@ import {
   Shield,
   Crown,
   Gem,
-  Lightbulb
+  Lightbulb,
+  ChevronDown,
+  Settings,
+  User,
+  LogOut,
+  Mail,
+  MessageSquare,
+  Plus,
+  X,
+  Calendar as CalendarIcon,
+  Menu,
+  Bold,
+  Italic,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Upload,
+  Download,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -66,6 +103,9 @@ export default function ComponentsShowcase() {
   const [showComponents, setShowComponents] = useState(true);
   const [sliderValue, setSliderValue] = useState([50]);
   const [progress, setProgress] = useState(65);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const showToast = (type: string) => {
@@ -75,6 +115,11 @@ export default function ComponentsShowcase() {
       info: { title: "Info", description: "Here's some information for you" }
     };
     toast(toasts[type as keyof typeof toasts] as any);
+  };
+
+  const handleCopy = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -96,10 +141,10 @@ export default function ComponentsShowcase() {
       </div>
 
       <Tabs defaultValue="glass" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-1">
           <TabsTrigger value="glass" className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
-            Glass Effects
+            Glass
           </TabsTrigger>
           <TabsTrigger value="buttons" className="flex items-center gap-2">
             <Zap className="w-4 h-4" />
@@ -113,13 +158,21 @@ export default function ComponentsShowcase() {
             <Eye className="w-4 h-4" />
             Display
           </TabsTrigger>
+          <TabsTrigger value="overlays" className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Overlays
+          </TabsTrigger>
+          <TabsTrigger value="navigation" className="flex items-center gap-2">
+            <Menu className="w-4 h-4" />
+            Navigation
+          </TabsTrigger>
           <TabsTrigger value="feedback" className="flex items-center gap-2">
             <Info className="w-4 h-4" />
             Feedback
           </TabsTrigger>
-          <TabsTrigger value="icons" className="flex items-center gap-2">
+          <TabsTrigger value="data" className="flex items-center gap-2">
             <Palette className="w-4 h-4" />
-            Icons
+            Data
           </TabsTrigger>
         </TabsList>
 
@@ -215,6 +268,7 @@ export default function ComponentsShowcase() {
                 <Lightbulb className="w-5 h-5" />
                 Input Components
               </CardTitle>
+              <CardDescription>When to use: User data collection and interaction</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -224,23 +278,33 @@ export default function ComponentsShowcase() {
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" placeholder="Enter your email" />
+                      <Input id="email" type="email" placeholder="user@example.com" />
+                      <p className="text-xs text-muted-foreground mt-1">Use for single-line text</p>
                     </div>
                     <div>
                       <Label htmlFor="message">Message</Label>
-                      <Textarea id="message" placeholder="Type your message..." />
+                      <Textarea id="message" placeholder="Type your message..." rows={4} />
+                      <p className="text-xs text-muted-foreground mt-1">Use for multi-line text</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Controls */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold">Controls</h3>
+                  <h3 className="font-semibold">Binary Controls</h3>
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2">
                       <Switch id="notifications" />
                       <Label htmlFor="notifications">Enable notifications</Label>
                     </div>
+                    <p className="text-xs text-muted-foreground">Use Switch for on/off settings</p>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="terms" />
+                      <Label htmlFor="terms">Accept terms and conditions</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Use Checkbox for optional selections</p>
+
                     <div className="space-y-2">
                       <Label>Volume: {sliderValue[0]}%</Label>
                       <Slider
@@ -249,9 +313,49 @@ export default function ComponentsShowcase() {
                         max={100}
                         step={1}
                       />
+                      <p className="text-xs text-muted-foreground">Use Slider for range values</p>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-4">Radio Groups</h3>
+                <RadioGroup defaultValue="option1">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="option1" id="r1" />
+                    <Label htmlFor="r1">Option 1</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="option2" id="r2" />
+                    <Label htmlFor="r2">Option 2</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="option3" id="r3" />
+                    <Label htmlFor="r3">Option 3</Label>
+                  </div>
+                </RadioGroup>
+                <p className="text-xs text-muted-foreground mt-2">Use RadioGroup for mutually exclusive choices</p>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-4">Toggle Buttons</h3>
+                <div className="flex gap-2">
+                  <Toggle aria-label="Toggle bold">
+                    <Bold className="h-4 w-4" />
+                  </Toggle>
+                  <Toggle aria-label="Toggle italic">
+                    <Italic className="h-4 w-4" />
+                  </Toggle>
+                  <Toggle aria-label="Toggle underline">
+                    <Underline className="h-4 w-4" />
+                  </Toggle>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Use Toggle for formatting or filter options</p>
               </div>
             </CardContent>
           </Card>
@@ -401,51 +505,344 @@ export default function ComponentsShowcase() {
           </Card>
         </TabsContent>
 
-        {/* Icons */}
-        <TabsContent value="icons" className="space-y-6">
+        {/* Overlays */}
+        <TabsContent value="overlays" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Icon Library Sample
-              </CardTitle>
+              <CardTitle>Dialogs & Modals</CardTitle>
+              <CardDescription>When to use: Important actions requiring user attention</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4">
-                {[
-                  Star, Heart, Shield, Crown, Gem, Lightbulb, 
-                  Zap, Eye, EyeOff, Info, CheckCircle, AlertCircle,
-                  Sparkles, Palette
-                ].map((Icon, index) => (
-                  <div 
-                    key={index}
-                    className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-                  >
-                    <Icon className="w-6 h-6 text-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      Icon {index + 1}
-                    </span>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3 flex-wrap">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Open Dialog</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Confirmation Dialog</DialogTitle>
+                      <DialogDescription>
+                        This is a dialog modal. Use for critical actions that need user confirmation.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="outline">Cancel</Button>
+                      <Button>Confirm</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline">Open Sheet</Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Sheet Panel</SheetTitle>
+                      <SheetDescription>
+                        Use sheets for secondary content or settings panels
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="py-4">
+                      <p className="text-sm text-muted-foreground">
+                        Sheet content appears from the side, great for filters, settings, or additional information.
+                      </p>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline">Hover Tooltip</Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Useful for quick contextual help</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline">Open Popover</Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Popover Component</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Use popovers for additional content that doesn't require modal focus
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Button variant="outline">Hover Card</Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="flex gap-4">
+                      <Avatar>
+                        <AvatarFallback>HC</AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-semibold">Hover Card</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Rich preview cards on hover
+                        </p>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Navigation */}
+        <TabsContent value="navigation" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dropdown & Select Menus</CardTitle>
+              <CardDescription>When to use: Choice selection and contextual actions</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex gap-3 flex-wrap">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Dropdown Menu
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Messages
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="option1">Option 1</SelectItem>
+                    <SelectItem value="option2">Option 2</SelectItem>
+                    <SelectItem value="option3">Option 3</SelectItem>
+                    <SelectItem value="option4">Option 4</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <ToggleGroup type="single">
+                  <ToggleGroupItem value="left" aria-label="Align left">
+                    <AlignLeft className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="center" aria-label="Align center">
+                    <AlignCenter className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="right" aria-label="Align right">
+                    <AlignRight className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-4">Collapsible & Accordion</h3>
+                <div className="space-y-4">
+                  <Collapsible open={isCollapsibleOpen} onOpenChange={setIsCollapsibleOpen}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="outline" className="w-full justify-between">
+                        Collapsible Section
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isCollapsibleOpen ? 'rotate-180' : ''}`} />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-4 px-4">
+                      <p className="text-sm text-muted-foreground">
+                        This content can be toggled. Use collapsibles for optional content.
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger>When to use Accordion?</AccordionTrigger>
+                      <AccordionContent>
+                        Use accordions for FAQs, settings categories, or any content where only one section should be open at a time.
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                      <AccordionTrigger>Multiple sections</AccordionTrigger>
+                      <AccordionContent>
+                        Accordions organize related content into collapsible sections.
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Data Display */}
+        <TabsContent value="data" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tables & Data Display</CardTitle>
+              <CardDescription>When to use: Structured data presentation</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="font-semibold mb-4">Table Component</h3>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Component</TableHead>
+                        <TableHead>Use Case</TableHead>
+                        <TableHead className="text-right">Context</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">Button</TableCell>
+                        <TableCell>Primary actions</TableCell>
+                        <TableCell className="text-right">CTA, forms, navigation</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Dialog</TableCell>
+                        <TableCell>Critical decisions</TableCell>
+                        <TableCell className="text-right">Confirmations, forms</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Toast</TableCell>
+                        <TableCell>Feedback messages</TableCell>
+                        <TableCell className="text-right">Success, errors, info</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-4">Scroll Area</h3>
+                <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                  <div className="space-y-2">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <p key={i} className="text-sm">
+                        Scrollable content item {i + 1}. Use ScrollArea for fixed-height scrollable regions.
+                      </p>
+                    ))}
                   </div>
-                ))}
+                </ScrollArea>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-4">Skeleton Loading States</h3>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <p className="text-xs text-muted-foreground pt-2">
+                    Use skeletons as placeholders while content loads
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-4">Calendar & Date Picker</h3>
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border w-fit"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Use calendar for date selection, scheduling, or date range pickers
+                </p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Footer Note */}
-      <Card className="border-blue-200 bg-blue-50/50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <Gem className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-blue-800 mb-1">Component Showcase</h4>
-              <p className="text-blue-700 text-sm">
-                This showcase demonstrates all available UI components and their variants. 
-                All components are interactive and no authentication is required to view them.
-              </p>
+      {/* Usage Guide */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gem className="w-5 h-5" />
+            Component Selection Guide
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="space-y-2">
+              <h4 className="font-semibold">User Actions</h4>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• <strong>Button:</strong> Primary CTAs, form submissions</li>
+                <li>• <strong>Dialog:</strong> Critical confirmations, irreversible actions</li>
+                <li>• <strong>Sheet:</strong> Settings panels, filters</li>
+                <li>• <strong>Dropdown:</strong> Contextual menus, account actions</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold">Data Input</h4>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• <strong>Input:</strong> Single-line text (email, search)</li>
+                <li>• <strong>Textarea:</strong> Multi-line text (messages, comments)</li>
+                <li>• <strong>Select:</strong> Choose from predefined list</li>
+                <li>• <strong>Checkbox:</strong> Multiple optional selections</li>
+                <li>• <strong>Radio:</strong> Single selection from group</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold">Feedback</h4>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• <strong>Toast:</strong> Non-blocking success/error messages</li>
+                <li>• <strong>Alert:</strong> Persistent inline warnings/info</li>
+                <li>• <strong>Progress:</strong> Task completion status</li>
+                <li>• <strong>Skeleton:</strong> Loading placeholders</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold">Organization</h4>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• <strong>Tabs:</strong> Organize related content sections</li>
+                <li>• <strong>Accordion:</strong> Collapsible content groups (FAQs)</li>
+                <li>• <strong>Table:</strong> Structured data display</li>
+                <li>• <strong>Card:</strong> Group related information</li>
+              </ul>
             </div>
           </div>
+          <Separator />
+          <p className="text-xs text-muted-foreground">
+            💡 <strong>Pro Tip:</strong> Choose components based on user intent. Use modals for important decisions, 
+            toasts for feedback, and tooltips for contextual help. Keep interactions intuitive and minimize friction.
+          </p>
         </CardContent>
       </Card>
     </div>
