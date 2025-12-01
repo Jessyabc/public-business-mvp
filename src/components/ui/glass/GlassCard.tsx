@@ -12,29 +12,28 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, title, subtitle, icon: Icon, iconColor = 'text-[#00D9FF]', action, children, ...props }, ref) => {
+  ({ className, title, subtitle, icon: Icon, iconColor = 'text-[hsl(var(--neon-aqua))]', action, children, ...props }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          // Base glass card styling
+          // Base glass card styling - uses theme tokens
           'relative rounded-2xl backdrop-blur-xl',
-          'bg-white/[0.06] border border-white/[0.1]',
-          'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]',
-          'shadow-[0_12px_24px_-8px_rgba(0,0,0,0.2)]',
+          'bg-[var(--card-bg)] border border-[var(--card-border)]',
+          'shadow-[var(--card-shadow)]',
           'transition-all duration-300',
-          'hover:bg-white/[0.08] hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.25)]',
+          'hover:bg-[var(--card-bg-hover)] hover:shadow-[var(--elevation-8)]',
           className
         )}
         {...props}
       >
         {(title || Icon || action) && (
-          <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
+          <div className="flex items-center justify-between p-4 border-b border-[var(--card-border)]">
             <div className="flex items-center gap-3">
               {Icon && (
                 <div className={cn(
                   'flex items-center justify-center w-10 h-10 rounded-full',
-                  'bg-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.1)]',
+                  'bg-[var(--glass-subtle)] shadow-[var(--elevation-1)]',
                   iconColor
                 )}>
                   <Icon className="w-5 h-5" />
@@ -42,17 +41,17 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               )}
               <div>
                 {title && (
-                  <h3 className="text-sm font-semibold text-white/90">{title}</h3>
+                  <h3 className="text-sm font-semibold text-[var(--card-fg)]">{title}</h3>
                 )}
                 {subtitle && (
-                  <p className="text-xs text-white/50 mt-0.5">{subtitle}</p>
+                  <p className="text-xs text-[var(--card-fg-muted)] mt-0.5">{subtitle}</p>
                 )}
               </div>
             </div>
             {action && <div>{action}</div>}
           </div>
         )}
-        <div className="p-4">
+        <div className="p-4 text-[var(--card-fg)]">
           {children}
         </div>
       </div>

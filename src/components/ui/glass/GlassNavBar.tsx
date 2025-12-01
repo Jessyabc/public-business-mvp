@@ -33,19 +33,18 @@ export const GlassNavBar: React.FC<GlassNavBarProps> = ({
       className
     )}>
       <div className={cn(
-        // Glass container
+        // Glass container - uses theme tokens
         'relative rounded-[32px] backdrop-blur-2xl',
-        'bg-white/[0.08] border border-white/[0.12]',
-        'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]',
-        'shadow-[0_20px_40px_-12px_rgba(0,0,0,0.3)]',
+        'bg-[var(--glass-fill)] border border-[var(--glass-border)]',
+        'shadow-[var(--card-shadow)]',
         
         // Layout
         'flex items-center justify-around',
         'px-3 py-3',
         
-        // Neon rim
+        // Subtle accent rim
         'before:absolute before:inset-0 before:rounded-[32px] before:p-[1px]',
-        'before:bg-gradient-to-br before:from-[#00D9FF]/20 before:via-transparent before:to-[#9D6CFF]/20',
+        'before:bg-gradient-to-br before:from-[var(--accent)]/15 before:via-transparent before:to-[var(--accent)]/10',
         'before:-z-10'
       )}>
         {/* Left items */}
@@ -57,8 +56,8 @@ export const GlassNavBar: React.FC<GlassNavBarProps> = ({
               'flex flex-col items-center gap-1 p-2.5 rounded-2xl',
               'transition-all duration-200 relative group',
               isActive
-                ? 'bg-white/[0.12] text-white'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]'
+                ? 'bg-[var(--glass-elevated)] text-[var(--card-fg)]'
+                : 'text-[var(--card-fg-muted)] hover:text-[var(--card-fg)] hover:bg-[var(--glass-subtle)]'
             )}
           >
             {({ isActive }) => (
@@ -66,7 +65,7 @@ export const GlassNavBar: React.FC<GlassNavBarProps> = ({
                 <item.icon className="w-6 h-6" />
                 <span className="text-[10px] font-medium">{item.label}</span>
                 {isActive && (
-                  <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-[#00D9FF] shadow-[0_0_8px_rgba(0,217,255,0.6)]" />
+                  <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-[var(--accent)] shadow-[var(--accent-glow)]" />
                 )}
               </>
             )}
@@ -79,9 +78,9 @@ export const GlassNavBar: React.FC<GlassNavBarProps> = ({
             onClick={composeButton.onClick}
             className={cn(
               'relative w-14 h-14 rounded-full -mt-4',
-              'bg-gradient-to-br from-[#00D9FF] to-[#00A3CC]',
-              'text-white shadow-[0_0_24px_rgba(0,217,255,0.5)]',
-              'hover:shadow-[0_0_32px_rgba(0,217,255,0.7)]',
+              'bg-[var(--accent)] text-white',
+              'shadow-[var(--accent-glow)]',
+              'hover:shadow-[0_0_32px_var(--accent-glow)]',
               'active:scale-95 transition-all duration-200',
               
               // Inner glow
@@ -103,8 +102,8 @@ export const GlassNavBar: React.FC<GlassNavBarProps> = ({
               'flex flex-col items-center gap-1 p-2.5 rounded-2xl',
               'transition-all duration-200 relative group',
               isActive
-                ? 'bg-white/[0.12] text-white'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]'
+                ? 'bg-[var(--glass-elevated)] text-[var(--card-fg)]'
+                : 'text-[var(--card-fg-muted)] hover:text-[var(--card-fg)] hover:bg-[var(--glass-subtle)]'
             )}
           >
             {({ isActive }) => (
@@ -112,7 +111,7 @@ export const GlassNavBar: React.FC<GlassNavBarProps> = ({
                 <item.icon className="w-6 h-6" />
                 <span className="text-[10px] font-medium">{item.label}</span>
                 {isActive && (
-                  <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-[#00D9FF] shadow-[0_0_8px_rgba(0,217,255,0.6)]" />
+                  <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-[var(--accent)] shadow-[var(--accent-glow)]" />
                 )}
               </>
             )}

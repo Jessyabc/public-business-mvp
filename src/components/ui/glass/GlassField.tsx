@@ -14,28 +14,28 @@ export const GlassField = React.forwardRef<HTMLInputElement | HTMLTextAreaElemen
       <Component
         ref={ref as any}
         className={cn(
-          // Base glass field styling
+          // Base glass field styling - uses theme tokens
           'w-full px-4 py-3 rounded-2xl',
-          'backdrop-blur-xl bg-white/[0.05] border border-white/[0.12]',
-          'text-white/90 placeholder:text-white/40',
+          'backdrop-blur-xl bg-[var(--glass-fill)] border border-[var(--glass-border)]',
+          'text-[var(--card-fg)] placeholder:text-[var(--card-fg-muted)]',
           
           // Inner shadow for depth
-          'shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.1)]',
+          'shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.05)]',
           
           // Focus states
           'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent',
-          'focus:ring-[#00D9FF]/50 focus:border-[#00D9FF]/30',
-          'focus:shadow-[0_0_0_4px_rgba(0,217,255,0.1)]',
+          'focus:ring-[var(--card-ring)] focus:border-[var(--accent)]',
+          'focus:shadow-[0_0_0_4px_var(--accent-glow)]',
           
           // Hover state
-          'hover:bg-white/[0.08] hover:border-white/[0.16]',
+          'hover:bg-[var(--glass-elevated)] hover:border-[var(--accent)]/30',
           
           // Transition
           'transition-all duration-200',
           
           // Error state
           {
-            'border-red-400/50 focus:ring-red-400/50 focus:border-red-400/30': error,
+            'border-[hsl(var(--neon-red))]/50 focus:ring-[hsl(var(--neon-red))]/50 focus:border-[hsl(var(--neon-red))]/30': error,
           },
           
           // Textarea specific

@@ -20,16 +20,16 @@ export const GlassChip: React.FC<GlassChipProps> = ({
   return (
     <span
       className={cn(
-        // Base chip styling
+        // Base chip styling - uses theme tokens
         'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full',
-        'backdrop-blur-xl bg-white/[0.08] border border-white/[0.12]',
-        'text-xs font-medium text-white/80',
-        'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]',
+        'backdrop-blur-xl bg-[var(--glass-fill)] border border-[var(--glass-border)]',
+        'text-xs font-medium text-[var(--card-fg)]',
+        'shadow-[inset_0_1px_0_0_var(--glass-border)]',
         'transition-all duration-200',
         
         // Glow effect
         {
-          'shadow-[0_0_12px_rgba(0,217,255,0.3)] border-[#00D9FF]/30': glow,
+          'shadow-[0_0_12px_var(--accent-glow)] border-[var(--accent)]': glow,
         },
         
         className
@@ -39,7 +39,7 @@ export const GlassChip: React.FC<GlassChipProps> = ({
       {removable && (
         <button
           onClick={onRemove}
-          className="ml-1 hover:bg-white/[0.1] rounded-full p-0.5 transition-colors"
+          className="ml-1 hover:bg-[var(--glass-elevated)] rounded-full p-0.5 transition-colors"
           type="button"
         >
           <X className="w-3 h-3" />
