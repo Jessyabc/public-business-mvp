@@ -149,70 +149,56 @@
   --dock-gap: 24px;
 }
 
-/* Business mode – professional glassmorphism theme */
+/* Business mode – light theme override */
 [data-theme="business"] {
-  /* Light neutral gradient background */
-  --background: linear-gradient(135deg, #f8f9fb 0%, #e8edf3 50%, #f0f4f8 100%);
-  --surface: rgba(255, 255, 255, 0.85);
-  --surface-raised: rgba(255, 255, 255, 0.95);
-  --text-primary: hsl(220, 15%, 20%);
-  --text-secondary: hsl(220, 10%, 45%);
-  --text-tertiary: hsl(220, 8%, 60%);
+  --background: hsl(210, 12%, 92%);
+  --surface: hsl(210, 12%, 92%);
+  --surface-raised: hsl(210, 12%, 94%);
+  --text-primary: hsl(212, 84%, 7%);
+  --text-secondary: hsl(215, 16%, 47%);
+  --text-tertiary: hsl(215, 20%, 65%);
+  --accent: hsl(221, 83%, 53%);
+  --accent-on: hsl(0, 0%, 100%);
+  --border: hsl(210, 12%, 85%);
+  --focus: hsl(221, 83%, 53%);
+
+  /* Elevation tokens – lighter shadows for light theme */
+  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --elevation-2: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --elevation-4: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --elevation-8: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --elevation-16: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --elevation-24: 0 35px 60px -15px rgb(0 0 0 / 0.3);
+
+  /* Glass effect tokens – light theme glass */
+  --glass-fill: rgba(255, 255, 255, 0.48);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-blur: 18px;
+  --glass-bg: rgba(255, 255, 255, 0.48);
+
+  /* Card tokens – light surfaces for business mode */
+  --card-bg: hsl(210, 12%, 92%);
+  --card-fg: hsl(212, 84%, 7%);
+  --card-fg-muted: hsl(215, 16%, 47%);
+  --card-border: hsl(210, 12%, 85%);
+  --card-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+  --card-bg-hover: hsl(210, 12%, 90%);
+  --card-ring: hsl(206, 74%, 59%);
   
-  /* Professional accents – neutral blues */
-  --accent: hsl(205, 70%, 50%);
-  --accent-on: #ffffff;
-  --accent-glow: 0 0 16px hsla(205, 70%, 50%, 0.2);
+  /* Enhanced Neumorphism tokens – dramatic 3D effect for business mode */
+  --neuro-bg: hsl(210, 12%, 92%);
+  --neuro-shadow-light: -10px -10px 20px rgba(255, 255, 255, 0.9);
+  --neuro-shadow-dark: 10px 10px 20px rgba(163, 177, 198, 0.7);
+  --neuro-shadow-inset-light: inset -6px -6px 12px rgba(255, 255, 255, 0.6);
+  --neuro-shadow-inset-dark: inset 6px 6px 12px rgba(163, 177, 198, 0.5);
+  --neuro-card-shadow-light: -8px -8px 16px rgba(255, 255, 255, 0.8);
+  --neuro-card-shadow-dark: 8px 8px 16px rgba(163, 177, 198, 0.6);
   
-  /* Muted accent colors */
-  --neon-aqua: hsl(195, 85%, 55%);
-  --neon-red: hsl(4, 85%, 60%);
-  
-  /* Glass tokens – clear and readable */
-  --glass-fill: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-blur: 20px;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-elevated: rgba(255, 255, 255, 0.95);
-  --glass-subtle: rgba(255, 255, 255, 0.75);
-  
-  /* Card tokens – high contrast for readability */
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --card-fg: hsl(220, 15%, 20%);
-  --card-fg-muted: hsl(220, 10%, 45%);
-  --card-border: rgba(0, 0, 0, 0.06);
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  --card-bg-hover: rgba(255, 255, 255, 1);
-  --card-ring: hsl(205, 70%, 50%);
-  
-  /* Elevation tokens – subtle professional shadows */
-  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --elevation-2: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --elevation-4: 0 4px 16px rgba(0, 0, 0, 0.1);
-  --elevation-8: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --elevation-16: 0 12px 32px rgba(0, 0, 0, 0.14);
-  --elevation-24: 0 16px 40px rgba(0, 0, 0, 0.16);
-  
-  /* Radius tokens – modern rounded corners */
-  --radius-sm: 12px;
-  --radius-md: 20px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
-  
-  /* Border styles */
-  --border: rgba(0, 0, 0, 0.08);
-  --focus: hsl(205, 70%, 50%);
-  
-  /* Legacy compatibility */
-  --pb-blue: hsl(205, 70%, 50%);
-  --text-ink: var(--text-primary);
-  --text-ink-d: var(--text-primary);
-  --shadow-md: var(--elevation-4);
-  --shadow-lg: var(--elevation-8);
-  --radius: var(--radius-lg);
-  --t-fast: 120ms;
-  --t-med: 220ms;
-  --ease: cubic-bezier(.2, .6, .2, 1);
+  /* Lighting gradients for enhanced 3D depth */
+  --neuro-gradient-light: linear-gradient(145deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 50%);
+  --neuro-gradient-subtle: linear-gradient(145deg, hsl(210, 12%, 95%) 0%, hsl(210, 12%, 90%) 100%);
+  --neuro-gradient-raised: linear-gradient(145deg, hsl(210, 12%, 94%) 0%, hsl(210, 12%, 88%) 100%);
+  --neuro-shine: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%);
 }
 
 /* ========================================
