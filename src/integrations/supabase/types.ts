@@ -1816,6 +1816,7 @@ export type Database = {
       hash_ip: { Args: { ip_address: string }; Returns: string }
       increment_post_comments: { Args: { post_id: string }; Returns: undefined }
       increment_post_likes: { Args: { p_post_id: string }; Returns: undefined }
+      increment_post_shares: { Args: { p_post_id: string }; Returns: undefined }
       increment_post_views: { Args: { p_post_id: string }; Returns: undefined }
       invite_to_org: {
         Args: { p_role?: string; p_target_org: string; p_target_user: string }
