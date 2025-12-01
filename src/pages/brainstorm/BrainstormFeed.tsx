@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FeedContainer } from '@/features/feed/FeedContainer';
 import { BrainstormLayoutShell } from '@/features/brainstorm/components/BrainstormLayoutShell';
 import { ComposerModal } from '@/components/composer/ComposerModal';
@@ -12,6 +13,7 @@ import { ThreadView } from '@/components/brainstorm/ThreadView';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export default function BrainstormFeed() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const [composerOpen, setComposerOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
@@ -80,6 +82,16 @@ export default function BrainstormFeed() {
     window.addEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
     return () => window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
   }, []);
+
+  // Check for post query parameter on mount and open thread view
+  useEffect(() => {
+    const postId = searchParams.get('post');
+    if (postId && !isInitialMount) {
+      setThreadViewPostId(postId);
+      // Clear the query parameter after opening
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams, isInitialMount]);
 
   // Load post when selectedPostId changes (but only if it's explicitly set by user action)
   useEffect(() => {
