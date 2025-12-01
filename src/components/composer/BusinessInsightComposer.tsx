@@ -151,15 +151,31 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
 
       if (error) throw error;
 
-      // Create soft links to related Sparks
+      // Create cross_link relations: Spark (parent) -> Insight (child)
+      // This means the Insight is derived from/references the Sparks
       if (data.relatedSparks && data.relatedSparks.length > 0 && newPost?.id) {
-        await supabase.rpc('api_create_soft_links', {
-          p_parent: newPost.id,
-          p_children: data.relatedSparks,
-        });
+        const relationPromises = data.relatedSparks.map((sparkId) =>
+          supabase.rpc('create_post_relation', {
+            p_parent_post_id: sparkId,      // Spark is parent
+            p_child_post_id: newPost.id,     // Insight is child
+            p_relation_type: 'cross_link',   // Canonical relation type
+          })
+        );
+
+        const relationResults = await Promise.allSettled(relationPromises);
+        const failedRelations = relationResults.filter((r) => r.status === 'rejected');
+        
+        if (failedRelations.length > 0) {
+          console.error('Some relations failed to create:', failedRelations);
+          toast.warning(`Insight created but ${failedRelations.length} link(s) failed`);
+        }
       }
 
       toast.success('Business Insight created successfully');
+      
+      // Navigate to the insight thread view
+      window.location.href = `/brainstorm/feed?post=${newPost.id}`;
+      
       onClose();
     } catch (error: any) {
       console.error('Error creating business insight:', error);
