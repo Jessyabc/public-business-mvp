@@ -42,26 +42,26 @@ export const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>
           
           // Primary variant (glowing circular button)
           {
-            'bg-gradient-to-br shadow-lg hover:shadow-xl active:scale-95': variant === 'primary',
-            'from-[#00D9FF] to-[#00A3CC] text-white shadow-[0_0_24px_rgba(0,217,255,0.4)] hover:shadow-[0_0_32px_rgba(0,217,255,0.6)]': 
+            'shadow-lg hover:shadow-xl active:scale-95': variant === 'primary',
+            'bg-[hsl(var(--neon-aqua))] text-white shadow-[0_0_20px_hsla(var(--neon-aqua),0.3)] hover:shadow-[0_0_28px_hsla(var(--neon-aqua),0.5)]': 
               variant === 'primary' && glow === 'aqua',
-            'from-[#FF3B5C] to-[#CC2E49] text-white shadow-[0_0_24px_rgba(255,59,92,0.4)] hover:shadow-[0_0_32px_rgba(255,59,92,0.6)]': 
+            'bg-[hsl(var(--neon-red))] text-white shadow-[0_0_20px_hsla(var(--neon-red),0.3)] hover:shadow-[0_0_28px_hsla(var(--neon-red),0.5)]': 
               variant === 'primary' && glow === 'red',
-            'from-[#9D6CFF] to-[#7D4FCC] text-white shadow-[0_0_24px_rgba(157,108,255,0.4)] hover:shadow-[0_0_32px_rgba(157,108,255,0.6)]': 
-              variant === 'primary' && glow === 'purple',
+            'bg-[var(--accent)] text-white shadow-[0_0_20px_hsla(var(--accent),0.3)] hover:shadow-[0_0_28px_hsla(var(--accent),0.5)]': 
+              variant === 'primary' && glow === 'none',
           },
           
-          // Secondary variant (glass pill)
+          // Secondary variant (glass pill) - uses theme tokens
           {
-            'backdrop-blur-xl bg-white/[0.08] border border-white/[0.12] text-white/90 hover:bg-white/[0.12] active:scale-98':
+            'backdrop-blur-xl bg-[var(--glass-fill)] border border-[var(--glass-border)] text-[var(--card-fg)] hover:bg-[var(--glass-elevated)] active:scale-98':
               variant === 'secondary',
-            'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] shadow-[0_8px_16px_-4px_rgba(0,0,0,0.2)]':
+            'shadow-[inset_0_1px_0_0_var(--glass-border)] shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]':
               variant === 'secondary',
           },
           
           // Ghost variant
           {
-            'text-white/70 hover:text-white hover:bg-white/[0.05] active:bg-white/[0.08]':
+            'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-subtle)] active:bg-[var(--glass-fill)]':
               variant === 'ghost',
           },
           

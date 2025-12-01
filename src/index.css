@@ -149,63 +149,62 @@
   --dock-gap: 24px;
 }
 
-/* Business mode – glassmorphism premium theme */
+/* Business mode – professional glassmorphism theme */
 [data-theme="business"] {
-  /* Deep gradient background – blue-purple cosmic */
-  --background: linear-gradient(135deg, #0f1729 0%, #1a1147 50%, #0f1729 100%);
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-raised: rgba(255, 255, 255, 0.08);
-  --text-primary: rgba(255, 255, 255, 0.95);
-  --text-secondary: rgba(255, 255, 255, 0.65);
-  --text-tertiary: rgba(255, 255, 255, 0.45);
+  /* Light neutral gradient background */
+  --background: linear-gradient(135deg, #f8f9fb 0%, #e8edf3 50%, #f0f4f8 100%);
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-raised: rgba(255, 255, 255, 0.95);
+  --text-primary: hsl(220, 15%, 20%);
+  --text-secondary: hsl(220, 10%, 45%);
+  --text-tertiary: hsl(220, 8%, 60%);
   
-  /* Neon accents – aqua/cyan primary */
-  --accent: #00D9FF;
-  --accent-on: #000000;
-  --accent-glow: 0 0 24px rgba(0, 217, 255, 0.4);
+  /* Professional accents – neutral blues */
+  --accent: hsl(205, 70%, 50%);
+  --accent-on: #ffffff;
+  --accent-glow: 0 0 16px hsla(205, 70%, 50%, 0.2);
   
-  /* Secondary neon accents */
-  --neon-red: #FF3B5C;
-  --neon-purple: #9D6CFF;
-  --neon-aqua: #00D9FF;
+  /* Muted accent colors */
+  --neon-aqua: hsl(195, 85%, 55%);
+  --neon-red: hsl(4, 85%, 60%);
   
-  /* Glass tokens – VisionOS-inspired translucency */
-  --glass-fill: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-blur: 32px;
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-elevated: rgba(255, 255, 255, 0.12);
-  --glass-subtle: rgba(255, 255, 255, 0.05);
+  /* Glass tokens – clear and readable */
+  --glass-fill: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: 20px;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-elevated: rgba(255, 255, 255, 0.95);
+  --glass-subtle: rgba(255, 255, 255, 0.75);
   
-  /* Card tokens – floating glass panels */
-  --card-bg: rgba(255, 255, 255, 0.06);
-  --card-fg: rgba(255, 255, 255, 0.9);
-  --card-fg-muted: rgba(255, 255, 255, 0.5);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --card-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
-  --card-bg-hover: rgba(255, 255, 255, 0.08);
-  --card-ring: rgba(0, 217, 255, 0.5);
+  /* Card tokens – high contrast for readability */
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-fg: hsl(220, 15%, 20%);
+  --card-fg-muted: hsl(220, 10%, 45%);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --card-bg-hover: rgba(255, 255, 255, 1);
+  --card-ring: hsl(205, 70%, 50%);
   
-  /* Elevation tokens – dramatic floating depth */
-  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --elevation-2: 0 8px 16px -4px rgb(0 0 0 / 0.2);
-  --elevation-4: 0 12px 24px -8px rgb(0 0 0 / 0.25);
-  --elevation-8: 0 20px 40px -12px rgb(0 0 0 / 0.3);
-  --elevation-16: 0 24px 48px -16px rgb(0 0 0 / 0.35);
-  --elevation-24: 0 32px 64px -20px rgb(0 0 0 / 0.4);
+  /* Elevation tokens – subtle professional shadows */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --elevation-2: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --elevation-4: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --elevation-8: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --elevation-16: 0 12px 32px rgba(0, 0, 0, 0.14);
+  --elevation-24: 0 16px 40px rgba(0, 0, 0, 0.16);
   
-  /* Radius tokens – large rounded corners */
+  /* Radius tokens – modern rounded corners */
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 28px;
   --radius-xl: 36px;
   
   /* Border styles */
-  --border: rgba(255, 255, 255, 0.1);
-  --focus: rgba(0, 217, 255, 0.5);
+  --border: rgba(0, 0, 0, 0.08);
+  --focus: hsl(205, 70%, 50%);
   
   /* Legacy compatibility */
-  --pb-blue: #00D9FF;
+  --pb-blue: hsl(205, 70%, 50%);
   --text-ink: var(--text-primary);
   --text-ink-d: var(--text-primary);
   --shadow-md: var(--elevation-4);
