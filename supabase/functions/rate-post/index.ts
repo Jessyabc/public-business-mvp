@@ -21,15 +21,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Create client with user's auth to verify identity
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
     // Get user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) {
       console.error('Auth error:', userError);
       return new Response(
@@ -58,8 +60,11 @@ Deno.serve(async (req) => {
 
     console.log(`User ${user.id} rating post ${post_id} with ${rating}`);
 
+    // Use service role client for the database operation (user already authenticated)
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
     // Check if post exists
-    const { data: post, error: postError } = await supabase
+    const { data: post, error: postError } = await adminClient
       .from('posts')
       .select('id')
       .eq('id', post_id)
@@ -73,8 +78,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Upsert rating (insert or update)
-    const { error: upsertError } = await supabase
+    // Upsert rating (insert or update) using service role
+    const { error: upsertError } = await adminClient
       .from('post_utility_ratings')
       .upsert(
         {
@@ -97,7 +102,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch updated aggregate
-    const { data: scoreData, error: scoreError } = await supabase
+    const { data: scoreData, error: scoreError } = await adminClient
       .from('view_post_u_score')
       .select('u_score_avg, u_score_count')
       .eq('post_id', post_id)
