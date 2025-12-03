@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import type { Post as CanonicalPost } from '@/types/post';
 import { UScoreRating } from './UScoreRating';
 import { usePostRating } from '@/hooks/usePostRating';
+import uScoreIcon from '@/assets/u-score-icon.png';
 
 type AccordionPost = Pick<
   CanonicalPost,
@@ -115,8 +116,9 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
           layout
         >
           {(averageScore !== null || ratingCount > 0) && (
-            <span className="font-semibold text-green-600">
-              U: {averageScore?.toFixed(1) ?? '—'} ({ratingCount})
+            <span className="flex items-center gap-1 font-semibold text-blue-500">
+              <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
+              {averageScore?.toFixed(1) ?? '—'} ({ratingCount})
             </span>
           )}
           {post.t_score && (

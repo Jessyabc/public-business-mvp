@@ -11,6 +11,7 @@ import { CrossLinksSection } from "@/components/brainstorm/CrossLinksSection";
 import { UScoreRating } from "./UScoreRating";
 import { usePostRating } from "@/hooks/usePostRating";
 import { toast } from "sonner";
+import uScoreIcon from '@/assets/u-score-icon.png';
 
 interface PostReaderModalProps {
   isOpen: boolean;
@@ -142,8 +143,8 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
             {/* Post Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
               <div className="flex items-center space-x-6">
-                <div className="flex items-center gap-1 text-sm text-green-500 font-semibold">
-                  <span>U:</span>
+                <div className="flex items-center gap-1.5 text-sm text-blue-500 font-semibold">
+                  <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
                   <span>{averageScore?.toFixed(1) ?? '—'}</span>
                   {ratingCount > 0 && (
                     <span className="text-muted-foreground font-normal">({ratingCount})</span>
