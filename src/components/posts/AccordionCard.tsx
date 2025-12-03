@@ -25,19 +25,24 @@ interface AccordionCardProps {
 
 export const AccordionCard = memo(({ post, onView, onSave, onShare, className }: AccordionCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { userRating, averageScore, ratingCount, submitRating } = usePostRating(post.id);
+  const { userRating, averageScore, ratingCount, submitRating, refetch } = usePostRating(post.id);
 
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
     setIsExpanded(!isExpanded);
-    if (!isExpanded && onView) {
-      onView(post.id);
+  };
+
+  const handleChevronKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggle(e);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleToggle();
+  const handleViewFull = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onView) {
+      onView(post.id);
     }
   };
 
@@ -56,13 +61,7 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
     >
       {/* Collapsed Preview */}
       <div
-        onClick={handleToggle}
-        onKeyDown={handleKeyDown}
-        className="p-6 cursor-pointer select-none"
-        role="button"
-        tabIndex={0}
-        aria-expanded={isExpanded}
-        aria-label={`${isExpanded ? 'Collapse' : 'Expand'} post: ${post.title || post.content.substring(0, 50)}`}
+        className="p-6 select-none"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -99,12 +98,16 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
             </div>
           </div>
           
-          {/* Toggle Button */}
+          {/* Toggle Button - Only this expands/collapses */}
           <motion.button
-            className="shrink-0 p-2 rounded-lg hover:bg-accent/10 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+            className="shrink-0 p-2 rounded-lg hover:bg-accent/10 transition-colors focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.3 }}
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
+            aria-expanded={isExpanded}
+            onClick={handleToggle}
+            onKeyDown={handleChevronKeyDown}
+            tabIndex={0}
           >
             <ChevronDown className="w-5 h-5 text-muted-foreground" />
           </motion.button>
@@ -179,12 +182,7 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
                     size="sm"
                     className="glass-low focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent/20"
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onView) {
-                        onView(post.id);
-                      }
-                    }}
+                    onClick={handleViewFull}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Full

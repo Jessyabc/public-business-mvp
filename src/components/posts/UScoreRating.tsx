@@ -52,6 +52,8 @@ export const UScoreRating = memo(({
       } else {
         toast.success(`Rated ${newValue}/5`);
       }
+      // Dispatch event so other components can sync
+      window.dispatchEvent(new CustomEvent('pb:rating:changed', { detail: { postId } }));
     } catch (error) {
       console.error('Failed to submit rating:', error);
       toast.error('Failed to submit rating');

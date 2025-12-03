@@ -78,6 +78,18 @@ export function usePostRating(postId: string): UsePostRatingReturn {
     fetchRatingData();
   }, [fetchRatingData]);
 
+  // Listen for rating changes from other components
+  useEffect(() => {
+    const handleRatingChange = (event: CustomEvent<{ postId: string }>) => {
+      if (event.detail.postId === postId) {
+        fetchRatingData();
+      }
+    };
+    
+    window.addEventListener('pb:rating:changed', handleRatingChange as EventListener);
+    return () => window.removeEventListener('pb:rating:changed', handleRatingChange as EventListener);
+  }, [postId, fetchRatingData]);
+
   const submitRating = useCallback(async (rating: number) => {
     if (!user) throw new Error('Must be logged in to rate');
     if (rating < 0 || rating > 5) throw new Error('Rating must be between 0 and 5');
