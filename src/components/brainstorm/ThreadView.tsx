@@ -13,6 +13,8 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { LineageCard } from './LineageCard';
 import { CrossLinksSection } from './CrossLinksSection';
+import { UScoreRating } from '@/components/posts/UScoreRating';
+import { usePostRating } from '@/hooks/usePostRating';
 
 interface ThreadViewProps {
   postId: string;
@@ -22,6 +24,7 @@ interface ThreadViewProps {
 export function ThreadView({ postId, onClose }: ThreadViewProps) {
   const { data: threadData, isLoading, error } = useThreadView(postId);
   const [authorNames, setAuthorNames] = useState<Map<string, string>>(new Map());
+  const { userRating, averageScore, ratingCount, submitRating } = usePostRating(postId);
 
   // Fetch author names for all posts in thread
   useEffect(() => {
@@ -77,6 +80,17 @@ export function ThreadView({ postId, onClose }: ThreadViewProps) {
 
       {/* Lineage Card */}
       <LineageCard postId={postId} currentPost={threadData.rootPost} />
+
+      {/* U-Score Rating for root post */}
+      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+        <UScoreRating
+          postId={postId}
+          currentScore={averageScore}
+          ratingCount={ratingCount}
+          userRating={userRating}
+          onRate={submitRating}
+        />
+      </div>
 
       {/* Thread backbone */}
       <div className="space-y-4">

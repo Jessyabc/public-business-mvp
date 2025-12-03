@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GlassSurface } from "@/components/ui/GlassSurface";
-import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, User, Reply } from "lucide-react";
-import { useAppMode } from "@/contexts/AppModeContext";
+import { Share2, Bookmark, Eye, Calendar, User, Reply, TrendingUp } from "lucide-react";
 import type { Post } from "@/types/post";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { LineageCard } from "@/components/brainstorm/LineageCard";
 import { CrossLinksSection } from "@/components/brainstorm/CrossLinksSection";
+import { UScoreRating } from "./UScoreRating";
+import { usePostRating } from "@/hooks/usePostRating";
+import { toast } from "sonner";
 
 interface PostReaderModalProps {
   isOpen: boolean;
@@ -17,10 +19,16 @@ interface PostReaderModalProps {
 }
 
 export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps) {
-  const { mode } = useAppMode();
   const { openComposer } = useComposerStore();
+  const { userRating, averageScore, ratingCount, submitRating } = usePostRating(post?.id ?? '');
 
   if (!post) return null;
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    await navigator.clipboard.writeText(url);
+    toast.success('Link copied to clipboard');
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -118,25 +126,33 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
               )}
             </GlassSurface>
 
+            {/* U-Score Rating Section */}
+            <GlassSurface inset className="mt-4">
+              <UScoreRating
+                postId={post.id}
+                currentScore={averageScore}
+                ratingCount={ratingCount}
+                userRating={userRating}
+                onRate={submitRating}
+              />
+            </GlassSurface>
+
             {/* Post Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
               <div className="flex items-center space-x-6">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                >
-                  <Heart className="h-4 w-4 mr-2" />
-                  {post.likes_count || 0}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  {post.comments_count || 0}
-                </Button>
+                <div className="flex items-center gap-1 text-sm text-green-500 font-semibold">
+                  <span>U:</span>
+                  <span>{averageScore?.toFixed(1) ?? '—'}</span>
+                  {ratingCount > 0 && (
+                    <span className="text-muted-foreground font-normal">({ratingCount})</span>
+                  )}
+                </div>
+                {post.t_score && (
+                  <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    <span>T: {post.t_score}</span>
+                  </div>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -167,8 +183,9 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                   variant="ghost"
                   size="sm"
                   className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  onClick={handleShare}
                 >
-                  <Share2 className="h-4 h-4" />
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

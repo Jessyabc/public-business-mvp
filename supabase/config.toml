@@ -58,3 +58,6 @@ verify_jwt = true
 
 [functions.submit-open-idea]
 verify_jwt = false
+
+[functions.rate-post]
+verify_jwt = true

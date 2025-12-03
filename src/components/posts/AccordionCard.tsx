@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { Post as CanonicalPost } from '@/types/post';
+import { UScoreRating } from './UScoreRating';
+import { usePostRating } from '@/hooks/usePostRating';
 
 type AccordionPost = Pick<
   CanonicalPost,
@@ -22,6 +24,7 @@ interface AccordionCardProps {
 
 export const AccordionCard = memo(({ post, onView, onSave, onShare, className }: AccordionCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { userRating, averageScore, ratingCount, submitRating } = usePostRating(post.id);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -111,9 +114,9 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
           className="flex items-center gap-4 mt-4 text-sm text-muted-foreground"
           layout
         >
-          {post.u_score !== undefined && post.u_score !== null && (
+          {(averageScore !== null || ratingCount > 0) && (
             <span className="font-semibold text-green-600">
-              U: {post.u_score}
+              U: {averageScore?.toFixed(1) ?? '—'} ({ratingCount})
             </span>
           )}
           {post.t_score && (
@@ -152,6 +155,17 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
                 {/* Full Content */}
                 <div className="prose prose-sm max-w-none mb-4">
                   <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
+                </div>
+
+                {/* U-Score Rating */}
+                <div className="mb-4 p-4 rounded-xl bg-muted/20 border border-[var(--card-border)]/30">
+                  <UScoreRating
+                    postId={post.id}
+                    currentScore={averageScore}
+                    ratingCount={ratingCount}
+                    userRating={userRating}
+                    onRate={submitRating}
+                  />
                 </div>
 
                 {/* Action Buttons */}
