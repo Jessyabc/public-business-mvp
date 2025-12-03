@@ -15,17 +15,19 @@ import { BusinessMemberBadge } from "@/components/business/BusinessMemberBadge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useProfile, Profile as ProfileType } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export function ProfileForm() {
   const { user } = useAuth();
   const { mode } = useAppMode();
   const { toast } = useToast();
   const { userRoles, refetch: refetchRoles } = useUserRoles();
+  const navigate = useNavigate();
 
   // ⬇️ consomme le hook unifié
   const { profile, loading, fetchProfile, updateProfile } = useProfile();
 
-  // état local d’édition (découplé du store du hook)
+  // état local d'édition (découplé du store du hook)
   const [form, setForm] = useState<ProfileType | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -247,7 +249,7 @@ export function ProfileForm() {
           )}
         </div>
 
-        {/* Business membership (inchangé) */}
+        {/* Business membership */}
         <Collapsible>
           <CollapsibleTrigger className={`w-full flex items-center justify-between p-4 rounded-lg transition-all duration-300 ${
             mode === "public"
@@ -281,7 +283,7 @@ export function ProfileForm() {
                   You have access to business features, can create business posts, and send invitations to other users.
                 </p>
                 <Button
-                  onClick={() => window.open("/business-profile", "_blank")}
+                  onClick={() => navigate("/settings?tab=business")}
                   variant="outline"
                   size="sm"
                   className={`mt-3 ${

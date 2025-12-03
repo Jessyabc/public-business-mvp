@@ -1,4 +1,5 @@
-import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Rocket, Compass, Users, AlertCircle, Crown, Settings2, BookOpen, MessageCircle, Briefcase, Scale, Shield, Layers } from "lucide-react";
+import { Home, User, Building2, Search, Bell, FileText, Plus, UserPlus, Info, Phone, Zap, HelpCircle, Compass, Users, AlertCircle, Crown, Settings2, BookOpen, MessageCircle, Briefcase, Scale, Shield, Layers } from "lucide-react";
+import { Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -13,11 +14,9 @@ import Settings from "./pages/Settings";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import BusinessMembership from "./pages/BusinessMembership";
 import CreateBusiness from "./pages/CreateBusiness";
-import MyPosts from "./pages/MyPosts";
 import Notifications from "./pages/Notifications";
 import AcceptInvite from "./pages/AcceptInvite";
 import Research from "./pages/Research";
-import BusinessProfile from "./pages/BusinessProfile";
 import Careers from "./pages/Careers";
 import BusinessMembers from "./pages/BusinessMembers";
 import PublicMembers from "./pages/PublicMembers";
@@ -57,11 +56,12 @@ export const navItems = [
     icon: Settings2,
     page: <Settings />,
   },
+  // Redirect /business-profile to /settings?tab=business
   {
     title: "Business Profile",
     to: "/business-profile", 
     icon: Building2,
-    page: <BusinessProfile />,
+    page: <Navigate to="/settings?tab=business" replace />,
   },
   {
     title: "Business Dashboard",
@@ -81,11 +81,12 @@ export const navItems = [
     icon: Plus,
     page: <CreateBusiness />,
   },
+  // Redirect /my-posts to /profile (content now embedded)
   {
     title: "My Posts",
     to: "/my-posts",
     icon: FileText,
-    page: <MyPosts />,
+    page: <Navigate to="/profile" replace />,
   },
   {
     title: "Notifications",
@@ -98,6 +99,13 @@ export const navItems = [
     to: "/research",
     icon: Search,
     page: <Research />,
+  },
+  // Redirect /open-ideas to /research?tab=open-ideas
+  {
+    title: "Open Ideas",
+    to: "/open-ideas",
+    icon: FileText,
+    page: <Navigate to="/research?tab=open-ideas" replace />,
   },
   {
     title: "Accept Invite",
