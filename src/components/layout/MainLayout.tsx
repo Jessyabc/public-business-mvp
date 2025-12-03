@@ -48,7 +48,7 @@ export function MainLayout({
       <GlobalNavigationMenu />
       
       {/* Header - only show when user is not logged in */}
-      {!user && <Header className="bg-[#65758c]/[0.63]" />}
+      {!user && <Header className="bg-[#65758c]/65" />}
       
       {/* Main Content with smooth transitions - ensure it's above background */}
       <main className={`relative z-10 ${user ? "min-h-screen pt-16" : noTopPadding ? "min-h-screen" : "min-h-screen pt-24"}`}>
