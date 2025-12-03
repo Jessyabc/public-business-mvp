@@ -39,6 +39,12 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
     }
   };
 
+  const handleCardClick = () => {
+    if (onView) {
+      onView(post.id);
+    }
+  };
+
   const handleViewFull = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onView) {
@@ -61,7 +67,16 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
     >
       {/* Collapsed Preview */}
       <div
-        className="p-6 select-none"
+        className="p-6 select-none cursor-pointer"
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
