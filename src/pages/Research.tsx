@@ -129,36 +129,61 @@ const Research = () => {
     }
   };
 
+  const isBusinessMode = mode === 'business';
+
   return (
-    <div className="min-h-screen p-6 pb-32 bg-gradient-space">
+    <div className={cn(
+      "min-h-screen p-6 pb-32 transition-colors duration-300",
+      isBusinessMode ? "bg-background" : "bg-gradient-space"
+    )}>
       <div className="max-w-6xl mx-auto">
         {/* Simple Header */}
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center space-x-3 mb-2">
-            <Search className="w-8 h-8 text-[var(--accent)]" />
-            <h1 className="text-4xl font-light tracking-wide text-[var(--text-primary)]">
+            <Search className={cn("w-8 h-8", isBusinessMode ? "text-primary" : "text-[var(--accent)]")} />
+            <h1 className={cn(
+              "text-4xl font-light tracking-wide",
+              isBusinessMode ? "text-foreground" : "text-[var(--text-primary)]"
+            )}>
               Research Hub
             </h1>
           </div>
-          <p className="font-light max-w-2xl mx-auto text-[var(--text-secondary)]">
+          <p className={cn(
+            "font-light max-w-2xl mx-auto",
+            isBusinessMode ? "text-muted-foreground" : "text-[var(--text-secondary)]"
+          )}>
             Explore sparks, business insights, and open ideas
           </p>
         </header>
 
         {/* Search and Filter Controls */}
-        <div className="mb-8 p-4 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">
+        <div className={cn(
+          "mb-8 p-4 rounded-2xl backdrop-blur-xl",
+          isBusinessMode 
+            ? "bg-card border border-border shadow-sm" 
+            : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
+        )}>
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Input
                 placeholder="Search for insights, sparks, or topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                className={cn(
+                  isBusinessMode 
+                    ? "bg-background border-input text-foreground placeholder:text-muted-foreground" 
+                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                )}
               />
             </div>
             <div className="flex gap-2">
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]">
+                <SelectTrigger className={cn(
+                  "w-40",
+                  isBusinessMode 
+                    ? "bg-background border-input text-foreground" 
+                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]"
+                )}>
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -173,7 +198,12 @@ const Research = () => {
                 </SelectContent>
               </Select>
               <Select value={filterIndustry} onValueChange={setFilterIndustry}>
-                <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]">
+                <SelectTrigger className={cn(
+                  "w-40",
+                  isBusinessMode 
+                    ? "bg-background border-input text-foreground" 
+                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]"
+                )}>
                   <SelectValue placeholder="Industry" />
                 </SelectTrigger>
                 <SelectContent>
@@ -184,7 +214,11 @@ const Research = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-on)]">
+              <Button type="submit" className={cn(
+                isBusinessMode 
+                  ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                  : "bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-on)]"
+              )}>
                 <Search className="h-4 w-4" />
               </Button>
             </div>
@@ -193,16 +227,30 @@ const Research = () => {
 
         {/* Research Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">
-            <TabsTrigger value="sparks" className="flex items-center gap-2 data-[state=active]:bg-white/10">
+          <TabsList className={cn(
+            "grid w-full grid-cols-3 backdrop-blur-xl",
+            isBusinessMode 
+              ? "bg-muted border border-border" 
+              : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
+          )}>
+            <TabsTrigger value="sparks" className={cn(
+              "flex items-center gap-2",
+              isBusinessMode ? "data-[state=active]:bg-background" : "data-[state=active]:bg-white/10"
+            )}>
               <Sparkles className="h-4 w-4" />
               Sparks
             </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-white/10">
+            <TabsTrigger value="insights" className={cn(
+              "flex items-center gap-2",
+              isBusinessMode ? "data-[state=active]:bg-background" : "data-[state=active]:bg-white/10"
+            )}>
               <Building2 className="h-4 w-4" />
               Business Insights
             </TabsTrigger>
-            <TabsTrigger value="open-ideas" className="flex items-center gap-2 data-[state=active]:bg-white/10">
+            <TabsTrigger value="open-ideas" className={cn(
+              "flex items-center gap-2",
+              isBusinessMode ? "data-[state=active]:bg-background" : "data-[state=active]:bg-white/10"
+            )}>
               <Lightbulb className="h-4 w-4" />
               Open Ideas
             </TabsTrigger>
@@ -212,19 +260,24 @@ const Research = () => {
           <div className="min-h-[400px]">
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+                <Loader2 className={cn(
+                  "w-8 h-8 animate-spin",
+                  isBusinessMode ? "text-primary" : "text-[var(--accent)]"
+                )} />
               </div>
             ) : items.length === 0 ? (
               <div className="text-center py-20">
                 <div className={cn(
                   "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center",
-                  "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
+                  isBusinessMode 
+                    ? "bg-muted border border-border" 
+                    : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
                 )}>
-                  {activeTab === 'sparks' && <Sparkles className="w-8 h-8 text-[var(--text-tertiary)]" />}
-                  {activeTab === 'insights' && <Building2 className="w-8 h-8 text-[var(--text-tertiary)]" />}
-                  {activeTab === 'open-ideas' && <Lightbulb className="w-8 h-8 text-[var(--text-tertiary)]" />}
+                  {activeTab === 'sparks' && <Sparkles className={cn("w-8 h-8", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")} />}
+                  {activeTab === 'insights' && <Building2 className={cn("w-8 h-8", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")} />}
+                  {activeTab === 'open-ideas' && <Lightbulb className={cn("w-8 h-8", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")} />}
                 </div>
-                <p className="text-[var(--text-secondary)]">
+                <p className={cn(isBusinessMode ? "text-muted-foreground" : "text-[var(--text-secondary)]")}>
                   No {activeTab === 'sparks' ? 'sparks' : activeTab === 'insights' ? 'insights' : 'open ideas'} found
                 </p>
               </div>
@@ -235,18 +288,17 @@ const Research = () => {
                     <div
                       key={item.id}
                       className={cn(
-                        "rounded-2xl overflow-hidden",
-                        "bg-[var(--glass-bg)] border border-[var(--glass-border)]",
-                        "backdrop-blur-xl transition-all duration-300",
-                        "hover:bg-white/10 hover:border-white/20",
-                        "animate-feed-card-enter"
+                        "rounded-2xl overflow-hidden backdrop-blur-xl transition-all duration-300 animate-feed-card-enter",
+                        isBusinessMode 
+                          ? "bg-card border border-border shadow-sm hover:shadow-md hover:border-border/80" 
+                          : "bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-white/10 hover:border-white/20"
                       )}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       {activeTab === 'open-ideas' ? (
                         <div className="p-6">
-                          <p className="text-[var(--text-primary)] line-clamp-3">{item.content}</p>
-                          <p className="text-xs text-[var(--text-tertiary)] mt-3">
+                          <p className={cn("line-clamp-3", isBusinessMode ? "text-foreground" : "text-[var(--text-primary)]")}>{item.content}</p>
+                          <p className={cn("text-xs mt-3", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")}>
                             {new Date(item.created_at).toLocaleDateString()}
                           </p>
                         </div>
