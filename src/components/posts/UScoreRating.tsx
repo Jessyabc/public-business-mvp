@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import uScoreIcon from '@/assets/u-score-icon.png';
 
 interface UScoreRatingProps {
   postId: string;
@@ -57,9 +58,10 @@ export const UScoreRating = memo(({
 
   if (compact) {
     return (
-      <div className={cn('flex items-center gap-2', className)}>
-        <span className="text-sm font-semibold text-green-500">
-          U: {currentScore?.toFixed(1) ?? '—'}
+      <div className={cn('flex items-center gap-1.5', className)}>
+        <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
+        <span className="text-sm font-semibold text-blue-500">
+          {currentScore?.toFixed(1) ?? '—'}
         </span>
         {ratingCount > 0 && (
           <span className="text-xs text-muted-foreground">
@@ -75,6 +77,7 @@ export const UScoreRating = memo(({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <img src={uScoreIcon} alt="U-Score" className="w-5 h-5 object-contain" />
           <span className="text-sm font-medium text-foreground">Rate Utility</span>
           {ratingCount > 0 && (
             <span className="text-xs text-muted-foreground">
@@ -87,7 +90,7 @@ export const UScoreRating = memo(({
             key={displayValue}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-lg font-bold text-green-500"
+            className="text-lg font-bold text-blue-500"
           >
             {typeof displayValue === 'number' ? displayValue.toFixed(1) : displayValue}/10
           </motion.span>
@@ -114,7 +117,7 @@ export const UScoreRating = memo(({
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
                 isActive
-                  ? 'bg-green-500/80 shadow-[0_0_12px_rgba(34,197,94,0.4)]'
+                  ? 'bg-blue-500/80 shadow-[0_0_12px_rgba(59,130,246,0.4)]'
                   : 'bg-muted/30 hover:bg-muted/50'
               )}
               whileTap={{ scale: 0.95 }}
