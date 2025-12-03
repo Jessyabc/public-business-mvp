@@ -51,9 +51,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+    if (typeof rating !== 'number' || rating < 0 || rating > 5) {
       return new Response(
-        JSON.stringify({ error: 'rating must be a number between 1 and 5' }),
+        JSON.stringify({ error: 'rating must be a number between 0 and 5' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -78,27 +78,44 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Upsert rating (insert or update) using service role
-    const { error: upsertError } = await adminClient
-      .from('post_utility_ratings')
-      .upsert(
-        {
-          post_id,
-          user_id: user.id,
-          rating,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: 'post_id,user_id',
-        }
-      );
+    // If rating is 0, delete the rating (reset)
+    if (rating === 0) {
+      const { error: deleteError } = await adminClient
+        .from('post_utility_ratings')
+        .delete()
+        .eq('post_id', post_id)
+        .eq('user_id', user.id);
 
-    if (upsertError) {
-      console.error('Upsert error:', upsertError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to save rating' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to remove rating' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      // Upsert rating (insert or update) using service role
+      const { error: upsertError } = await adminClient
+        .from('post_utility_ratings')
+        .upsert(
+          {
+            post_id,
+            user_id: user.id,
+            rating,
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: 'post_id,user_id',
+          }
+        );
+
+      if (upsertError) {
+        console.error('Upsert error:', upsertError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to save rating' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Fetch updated aggregate

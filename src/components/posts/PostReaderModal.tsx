@@ -65,7 +65,7 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0 z-50">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0 z-50 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
         <GlassSurface>
           <DialogHeader>
             <DialogTitle className="sr-only">Post Details</DialogTitle>
