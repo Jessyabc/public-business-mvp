@@ -37,14 +37,21 @@ export const UScoreRating = memo(({
 
     if (isSubmitting) return;
 
+    // Toggle: if clicking the same value, reset to 0 (no rating)
+    const newValue = selectedValue === value ? 0 : value;
+
     setIsSubmitting(true);
-    setSelectedValue(value);
+    setSelectedValue(newValue === 0 ? null : newValue);
 
     try {
       if (onRate) {
-        await onRate(value);
+        await onRate(newValue);
       }
-      toast.success(`Rated ${value}/5`);
+      if (newValue === 0) {
+        toast.success('Rating removed');
+      } else {
+        toast.success(`Rated ${newValue}/5`);
+      }
     } catch (error) {
       console.error('Failed to submit rating:', error);
       toast.error('Failed to submit rating');
@@ -97,8 +104,8 @@ export const UScoreRating = memo(({
         )}
       </div>
 
-      {/* Rating Scale */}
-      <div className="flex items-center gap-1">
+      {/* Rating Scale - fixed height to prevent stutter */}
+      <div className="flex items-center gap-1 h-8">
         {[1, 2, 3, 4, 5].map((value) => {
           const isSelected = selectedValue !== null && value <= selectedValue;
           const isHovered = hoveredValue !== null && value <= hoveredValue;
@@ -113,7 +120,7 @@ export const UScoreRating = memo(({
               onMouseEnter={() => setHoveredValue(value)}
               onMouseLeave={() => setHoveredValue(null)}
               className={cn(
-                'relative flex-1 h-8 rounded-md transition-all duration-200',
+                'relative flex-1 h-8 rounded-md transition-colors duration-200',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
                 isActive

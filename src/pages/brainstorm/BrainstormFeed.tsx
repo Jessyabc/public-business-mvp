@@ -5,12 +5,10 @@ import { BrainstormLayoutShell } from '@/features/brainstorm/components/Brainsto
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
-import { PostModal } from '@/components/post/PostModal';
+import { PostReaderModal } from '@/components/posts/PostReaderModal';
 import { PullToRefresh } from '@/components/layout/PullToRefresh';
 import { supabase } from '@/integrations/supabase/client';
 import type { Post, BasePost } from '@/types/post';
-import { ThreadView } from '@/components/brainstorm/ThreadView';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export default function BrainstormFeed() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,7 +19,7 @@ export default function BrainstormFeed() {
   const [isInitialMount, setIsInitialMount] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const loadingRef = useRef(false);
-  const [threadViewPostId, setThreadViewPostId] = useState<string | null>(null);
+  const [readerModalPost, setReaderModalPost] = useState<Post | null>(null);
 
   const handleRefresh = async () => {
     setRefreshKey(prev => prev + 1);
@@ -73,25 +71,34 @@ export default function BrainstormFeed() {
     return () => window.removeEventListener('pb:brainstorm:continue', handleContinue);
   }, []);
 
-  // Listen for thread view events
+  // Listen for post click events - open PostReaderModal
   useEffect(() => {
-    const handleShowThread = (event: CustomEvent) => {
-      const { postId } = event.detail;
-      setThreadViewPostId(postId);
+    const handleShowThread = async (event: CustomEvent) => {
+      const { postId, post } = event.detail;
+      if (post) {
+        setReaderModalPost(post as Post);
+      } else if (postId) {
+        const fetchedPost = await fetchPostById(postId);
+        if (fetchedPost) {
+          setReaderModalPost(fetchedPost);
+        }
+      }
     };
     window.addEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
     return () => window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
-  }, []);
+  }, [fetchPostById]);
 
-  // Check for post query parameter on mount and open thread view
+  // Check for post query parameter on mount and open reader modal
   useEffect(() => {
     const postId = searchParams.get('post');
     if (postId && !isInitialMount) {
-      setThreadViewPostId(postId);
+      fetchPostById(postId).then((post) => {
+        if (post) setReaderModalPost(post);
+      });
       // Clear the query parameter after opening
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams, setSearchParams, isInitialMount]);
+  }, [searchParams, setSearchParams, isInitialMount, fetchPostById]);
 
   // Load post when selectedPostId changes (but only if it's explicitly set by user action)
   useEffect(() => {
@@ -135,36 +142,12 @@ export default function BrainstormFeed() {
       </PullToRefresh>
       <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
       
-      {/* Post Modal for sidebar breadcrumb clicks */}
-      {!isInitialMount && selectedPost && selectedPostId && (
-        <PostModal
-          isOpen={true}
-          onClose={handleClosePostModal}
-          id={selectedPost.id}
-          type="brainstorm"
-          title={selectedPost.title || undefined}
-          content={selectedPost.content}
-          created_at={selectedPost.created_at}
-          author={selectedPost.user_id || 'Anonymous'}
-          stats={{
-            views: selectedPost.views_count,
-            likes: selectedPost.likes_count,
-            comments: selectedPost.comments_count,
-          }}
-        />
-      )}
-
-      {/* Thread View Modal */}
-      <Dialog open={!!threadViewPostId} onOpenChange={(open) => !open && setThreadViewPostId(null)}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border border-white/10">
-          {threadViewPostId && (
-            <ThreadView
-              postId={threadViewPostId}
-              onClose={() => setThreadViewPostId(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Post Reader Modal for feed post clicks */}
+      <PostReaderModal
+        isOpen={!!readerModalPost}
+        onClose={() => setReaderModalPost(null)}
+        post={readerModalPost}
+      />
     </>
   );
 }

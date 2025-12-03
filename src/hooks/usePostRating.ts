@@ -80,7 +80,7 @@ export function usePostRating(postId: string): UsePostRatingReturn {
 
   const submitRating = useCallback(async (rating: number) => {
     if (!user) throw new Error('Must be logged in to rate');
-    if (rating < 1 || rating > 10) throw new Error('Rating must be between 1 and 10');
+    if (rating < 0 || rating > 5) throw new Error('Rating must be between 0 and 5');
 
     const { data: result, error } = await supabase.functions.invoke('rate-post', {
       body: {
