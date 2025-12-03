@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppMode } from '@/contexts/AppModeContext';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, TrendingUp, Award, Clock, Sparkles, Building2, Lightbulb } from 'lucide-react';
+import { Search, TrendingUp, Award, Clock, Sparkles, Building2, Lightbulb, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { PostToSparkCard } from '@/components/brainstorm/PostToSparkCard';
+import { cn } from '@/lib/utils';
+
+interface ResearchItem {
+  id: string;
+  title: string | null;
+  content: string;
+  created_at: string;
+  type: string;
+  u_score?: number | null;
+  t_score?: number | null;
+}
 
 const Research = () => {
   const { mode } = useAppMode();
@@ -13,6 +25,8 @@ const Research = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [filterIndustry, setFilterIndustry] = useState('all');
+  const [items, setItems] = useState<ResearchItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const sortOptions = [
     { value: 'recent', label: 'Most Recent', icon: Clock },
@@ -21,34 +35,104 @@ const Research = () => {
   ];
 
   const industries = [
-    'All Industries',
-    'Technology',
-    'Healthcare',
-    'Finance',
-    'Manufacturing',
-    'Education',
-    'Marketing'
+    { value: 'all', label: 'All Industries' },
+    { value: 'technology', label: 'Technology' },
+    { value: 'healthcare', label: 'Healthcare' },
+    { value: 'finance', label: 'Finance' },
+    { value: 'manufacturing', label: 'Manufacturing' },
+    { value: 'education', label: 'Education' },
+    { value: 'marketing', label: 'Marketing' }
   ];
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('posts')
+        .select('id, title, content, created_at, type, u_score, t_score, industry_id')
+        .eq('status', 'active')
+        .eq('visibility', 'public');
+
+      // Filter by type based on tab
+      if (activeTab === 'sparks') {
+        query = query.eq('type', 'brainstorm');
+      } else if (activeTab === 'insights') {
+        query = query.eq('type', 'insight');
+      }
+
+      // Search filter
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      }
+
+      // Sort
+      if (sortBy === 'recent') {
+        query = query.order('created_at', { ascending: false });
+      } else if (sortBy === 't_score') {
+        query = query.order('t_score', { ascending: false, nullsFirst: false });
+      } else if (sortBy === 'u_score') {
+        query = query.order('u_score', { ascending: false, nullsFirst: false });
+      }
+
+      query = query.limit(20);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      setItems(data || []);
+    } catch (err) {
+      console.error('Error fetching research data:', err);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOpenIdeas = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('open_ideas_public_view')
+        .select('id, content, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setItems((data || []).map(item => ({
+        id: item.id || '',
+        title: null,
+        content: item.content || '',
+        created_at: item.created_at || '',
+        type: 'open_idea'
+      })));
+    } catch (err) {
+      console.error('Error fetching open ideas:', err);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'open-ideas') {
+      fetchOpenIdeas();
+    } else {
+      fetchData();
+    }
+  }, [activeTab, sortBy, filterIndustry]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
-  };
-
-  const handleSort = (value: string) => {
-    setSortBy(value);
-    console.log('Sorting by:', value);
-  };
-
-  const handleFilter = (value: string) => {
-    setFilterIndustry(value);
-    console.log('Filtering by industry:', value);
+    if (activeTab === 'open-ideas') {
+      fetchOpenIdeas();
+    } else {
+      fetchData();
+    }
   };
 
   return (
     <div className="min-h-screen p-6 pb-32 bg-gradient-space">
       <div className="max-w-6xl mx-auto">
-        {/* Simple Header - No Card */}
+        {/* Simple Header */}
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center space-x-3 mb-2">
             <Search className="w-8 h-8 text-[var(--accent)]" />
@@ -73,7 +157,7 @@ const Research = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Select value={sortBy} onValueChange={handleSort}>
+              <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -88,14 +172,14 @@ const Research = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={filterIndustry} onValueChange={handleFilter}>
+              <Select value={filterIndustry} onValueChange={setFilterIndustry}>
                 <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]">
                   <SelectValue placeholder="Industry" />
                 </SelectTrigger>
                 <SelectContent>
                   {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry.toLowerCase().replace(' ', '_')}>
-                      {industry}
+                    <SelectItem key={industry.value} value={industry.value}>
+                      {industry.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -107,7 +191,7 @@ const Research = () => {
           </form>
         </div>
 
-        {/* Research Tabs - Updated */}
+        {/* Research Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">
             <TabsTrigger value="sparks" className="flex items-center gap-2 data-[state=active]:bg-white/10">
@@ -124,92 +208,77 @@ const Research = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sparks" className="space-y-4">
-            <Card className={`p-8 text-center transition-all duration-700 ${
-              mode === 'public'
-                ? 'glass-card border-white/20 bg-black/20'
-                : 'border-blue-200/30 bg-white/40'
-            }`}>
-              <Sparkles className={`w-16 h-16 mx-auto mb-4 ${
-                mode === 'public' ? 'text-white/30' : 'text-slate-400'
-              }`} />
-              <h3 className={`text-xl font-medium mb-2 ${
-                mode === 'public' ? 'text-white' : 'text-slate-800'
-              }`}>
-                Community Sparks
-              </h3>
-              <p className={`text-sm mb-4 ${
-                mode === 'public' ? 'text-white/70' : 'text-slate-600'
-              }`}>
-                Explore innovative ideas and discussions from the community.
-              </p>
-              <Button onClick={() => console.log('Loading sparks...')} className={`${
-                mode === 'public'
-                  ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}>
-                Load Sparks
-              </Button>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="insights" className="space-y-4">
-            <Card className={`p-8 text-center transition-all duration-700 ${
-              mode === 'public'
-                ? 'glass-card border-white/20 bg-black/20'
-                : 'border-blue-200/30 bg-white/40'
-            }`}>
-              <Building2 className={`w-16 h-16 mx-auto mb-4 ${
-                mode === 'public' ? 'text-white/30' : 'text-slate-400'
-              }`} />
-              <h3 className={`text-xl font-medium mb-2 ${
-                mode === 'public' ? 'text-white' : 'text-slate-800'
-              }`}>
-                Business Insights
-              </h3>
-              <p className={`text-sm mb-4 ${
-                mode === 'public' ? 'text-white/70' : 'text-slate-600'
-              }`}>
-                Discover industry insights and strategic perspectives from business leaders.
-              </p>
-              <Button onClick={() => console.log('Loading insights...')} className={`${
-                mode === 'public'
-                  ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}>
-                Load Insights
-              </Button>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="open-ideas" className="space-y-4">
-            <Card className={`p-8 text-center transition-all duration-700 ${
-              mode === 'public'
-                ? 'glass-card border-white/20 bg-black/20'
-                : 'border-blue-200/30 bg-white/40'
-            }`}>
-              <Lightbulb className={`w-16 h-16 mx-auto mb-4 ${
-                mode === 'public' ? 'text-white/30' : 'text-slate-400'
-              }`} />
-              <h3 className={`text-xl font-medium mb-2 ${
-                mode === 'public' ? 'text-white' : 'text-slate-800'
-              }`}>
-                Open Ideas
-              </h3>
-              <p className={`text-sm mb-4 ${
-                mode === 'public' ? 'text-white/70' : 'text-slate-600'
-              }`}>
-                Browse and contribute to open ideas waiting for community input.
-              </p>
-              <Button onClick={() => console.log('Loading open ideas...')} className={`${
-                mode === 'public'
-                  ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}>
-                Load Open Ideas
-              </Button>
-            </Card>
-          </TabsContent>
+          {/* Content Area */}
+          <div className="min-h-[400px]">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+              </div>
+            ) : items.length === 0 ? (
+              <div className="text-center py-20">
+                <div className={cn(
+                  "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center",
+                  "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
+                )}>
+                  {activeTab === 'sparks' && <Sparkles className="w-8 h-8 text-[var(--text-tertiary)]" />}
+                  {activeTab === 'insights' && <Building2 className="w-8 h-8 text-[var(--text-tertiary)]" />}
+                  {activeTab === 'open-ideas' && <Lightbulb className="w-8 h-8 text-[var(--text-tertiary)]" />}
+                </div>
+                <p className="text-[var(--text-secondary)]">
+                  No {activeTab === 'sparks' ? 'sparks' : activeTab === 'insights' ? 'insights' : 'open ideas'} found
+                </p>
+              </div>
+            ) : (
+              <TabsContent value={activeTab} className="mt-0">
+                <div className="grid gap-4">
+                  {items.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className={cn(
+                        "rounded-2xl overflow-hidden",
+                        "bg-[var(--glass-bg)] border border-[var(--glass-border)]",
+                        "backdrop-blur-xl transition-all duration-300",
+                        "hover:bg-white/10 hover:border-white/20",
+                        "animate-feed-card-enter"
+                      )}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      {activeTab === 'open-ideas' ? (
+                        <div className="p-6">
+                          <p className="text-[var(--text-primary)] line-clamp-3">{item.content}</p>
+                          <p className="text-xs text-[var(--text-tertiary)] mt-3">
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ) : (
+                        <PostToSparkCard 
+                          post={{
+                            id: item.id,
+                            title: item.title,
+                            content: item.content,
+                            created_at: item.created_at,
+                            updated_at: item.created_at,
+                            type: item.type as 'brainstorm' | 'insight',
+                            kind: item.type === 'brainstorm' ? 'Spark' : 'BusinessInsight',
+                            user_id: '',
+                            mode: 'public',
+                            status: 'active',
+                            visibility: 'public',
+                            metadata: null,
+                            likes_count: 0,
+                            comments_count: 0,
+                            views_count: 0,
+                            t_score: item.t_score,
+                            u_score: item.u_score
+                          }} 
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            )}
+          </div>
         </Tabs>
       </div>
     </div>
