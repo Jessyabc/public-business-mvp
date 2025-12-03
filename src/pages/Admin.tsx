@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, TrendingUp, Lightbulb, Users, Link2, ArrowRight } from "lucide-react";
+import { Lock, TrendingUp, Lightbulb, Users, Link2, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useOrgAnalytics, useOrgTopInsights } from "@/hooks/useBusinessAnalytics";
 import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
+import { rpcAdminApproveIntake, rpcAdminApproveUser, rpcAdminListPending } from "@/integrations/supabase/rpc";
+import { AdminPendingIdea } from "@/features/admin/openIdeas/types";
 
 export function Admin() {
   const { toast } = useToast();
@@ -30,6 +32,74 @@ export function Admin() {
     limit: 10,
     sortBy,
   });
+
+  const [pendingIdeas, setPendingIdeas] = useState<AdminPendingIdea[]>([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [pendingError, setPendingError] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  const refreshPendingIdeas = useCallback(async () => {
+    if (!user || !isAdminUser) return;
+
+    setPendingLoading(true);
+    setPendingError(null);
+
+    const start = performance.now();
+    const { data, error } = await rpcAdminListPending(200);
+    const duration = performance.now() - start;
+    console.info(`[admin-open-ideas] list_pending duration=${duration.toFixed(1)}ms`);
+
+    if (error) {
+      console.error('Failed to fetch pending ideas', error.message);
+      setPendingError(error.message || 'Unable to load pending ideas');
+      toast({
+        title: 'Failed to load pending ideas',
+        description: error.message,
+        variant: 'destructive'
+      });
+      setPendingLoading(false);
+      return;
+    }
+
+    setPendingIdeas(data || []);
+    setPendingLoading(false);
+  }, [isAdminUser, toast, user]);
+
+  const approveIdea = useCallback(async (idea: AdminPendingIdea) => {
+    setApprovingId(idea.id);
+    setPendingError(null);
+
+    const start = performance.now();
+    const { error } = idea.source === 'intake'
+      ? await rpcAdminApproveIntake(idea.id)
+      : await rpcAdminApproveUser(idea.id);
+    const duration = performance.now() - start;
+    console.info(`[admin-open-ideas] approve_${idea.source} duration=${duration.toFixed(1)}ms`);
+
+    if (error) {
+      console.error('Failed to approve idea', error.message);
+      setPendingError(error.message || 'Unable to approve idea');
+      toast({
+        title: 'Approval failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+      setApprovingId(null);
+      return;
+    }
+
+    toast({
+      title: 'Idea approved',
+      description: 'The idea has been moved to approved status.'
+    });
+    setApprovingId(null);
+    refreshPendingIdeas();
+  }, [refreshPendingIdeas, toast]);
+
+  useEffect(() => {
+    if (!user || !isAdminUser) return;
+    refreshPendingIdeas();
+  }, [isAdminUser, refreshPendingIdeas, user]);
 
   // Force business mode
   if (mode !== 'business') {
@@ -221,6 +291,75 @@ export function Admin() {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No analytics data available</p>
+            </div>
+          )}
+        </GlassCard>
+
+        {/* Pending Open Ideas */}
+        <GlassCard className="border-primary/20" padding="lg">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Pending Open Ideas</h2>
+              <p className="text-muted-foreground">Combined intake + authenticated submissions</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={refreshPendingIdeas} disabled={pendingLoading}>
+              Refresh
+            </Button>
+          </div>
+
+          {pendingError && (
+            <div className="mb-4 text-sm text-destructive">
+              {pendingError}
+            </div>
+          )}
+
+          {pendingLoading ? (
+            <div className="text-center py-8">
+              <Clock className="w-10 h-10 text-primary animate-spin mx-auto mb-3" />
+              <p className="text-muted-foreground">Loading pending ideas...</p>
+            </div>
+          ) : pendingIdeas.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No pending submissions. Great job staying on top of reviews!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {pendingIdeas.map((idea) => (
+                <div
+                  key={`${idea.source}-${idea.id}`}
+                  className="rounded-xl border border-border/60 p-4 bg-background/50 backdrop-blur-sm"
+                >
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary capitalize">
+                        {idea.source}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {idea.created_at ? new Date(idea.created_at).toLocaleString() : 'Unknown date'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span className="capitalize">{idea.status}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap mb-4">{idea.text}</p>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      {idea.user_id ? `User: ${idea.user_id}` : 'Anonymous submission'}
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => approveIdea(idea)}
+                      disabled={approvingId === idea.id}
+                    >
+                      {approvingId === idea.id ? 'Approving...' : 'Approve'}
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </GlassCard>

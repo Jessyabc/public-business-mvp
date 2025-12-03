@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { AdminApprovalResult, AdminPendingIdea } from "@/features/admin/openIdeas/types";
 
 export async function rpcCreateBusinessInvite(p_invitee_email: string) {
   return supabase.rpc("create_business_invite", { p_invitee_email });
@@ -107,4 +108,16 @@ export async function rpcIncrementPostViews(p_post_id: string) {
 
 export async function rpcIncrementPostLikes(p_post_id: string) {
   return supabase.rpc("increment_post_likes", { p_post_id });
+}
+
+export async function rpcAdminListPending(p_limit?: number) {
+  return supabase.rpc<AdminPendingIdea[]>("admin_list_pending", { p_limit: p_limit || null });
+}
+
+export async function rpcAdminApproveIntake(p_id: string) {
+  return supabase.rpc<AdminApprovalResult>("admin_approve_intake", { p_id });
+}
+
+export async function rpcAdminApproveUser(p_id: string) {
+  return supabase.rpc<AdminApprovalResult>("admin_approve_user", { p_id });
 }
