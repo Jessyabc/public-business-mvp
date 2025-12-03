@@ -126,16 +126,18 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
               )}
             </GlassSurface>
 
-            {/* U-Score Rating Section */}
-            <GlassSurface inset className="mt-4">
-              <UScoreRating
-                postId={post.id}
-                currentScore={averageScore}
-                ratingCount={ratingCount}
-                userRating={userRating}
-                onRate={submitRating}
-              />
-            </GlassSurface>
+            {/* U-Score Rating Section - Only for Business Insights */}
+            {post.mode === 'business' && (
+              <GlassSurface inset className="mt-4">
+                <UScoreRating
+                  postId={post.id}
+                  currentScore={averageScore}
+                  ratingCount={ratingCount}
+                  userRating={userRating}
+                  onRate={submitRating}
+                />
+              </GlassSurface>
+            )}
 
             {/* Post Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">

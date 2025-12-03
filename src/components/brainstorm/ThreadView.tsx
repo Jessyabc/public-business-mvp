@@ -81,16 +81,18 @@ export function ThreadView({ postId, onClose }: ThreadViewProps) {
       {/* Lineage Card */}
       <LineageCard postId={postId} currentPost={threadData.rootPost} />
 
-      {/* U-Score Rating for root post */}
-      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-        <UScoreRating
-          postId={postId}
-          currentScore={averageScore}
-          ratingCount={ratingCount}
-          userRating={userRating}
-          onRate={submitRating}
-        />
-      </div>
+      {/* U-Score Rating for root post - Only for Business Insights */}
+      {threadData.rootPost.mode === 'business' && (
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <UScoreRating
+            postId={postId}
+            currentScore={averageScore}
+            ratingCount={ratingCount}
+            userRating={userRating}
+            onRate={submitRating}
+          />
+        </div>
+      )}
 
       {/* Thread backbone */}
       <div className="space-y-4">
