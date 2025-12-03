@@ -7,11 +7,8 @@ import { GlassInput } from '@/components/ui/GlassInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Building2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { useAppMode } from '@/contexts/AppModeContext';
-import { BusinessProfile } from '@/types/database';
 import { safeUrlOrEmpty } from '@/lib/validators';
 
 const businessProfileSchema = z.object({
@@ -29,9 +26,10 @@ type BusinessProfileFormData = z.infer<typeof businessProfileSchema>;
 interface BusinessProfileFormProps {
   onSuccess?: () => void;
   onClose?: () => void;
+  compact?: boolean; // New prop for embedded settings view
 }
 
-export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormProps) {
+export function BusinessProfileForm({ onSuccess, onClose, compact = false }: BusinessProfileFormProps) {
   const { mode } = useAppMode();
   const { profile, industries, departments, loading, createProfile, updateProfile } = useBusinessProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,56 +64,202 @@ export function BusinessProfileForm({ onSuccess, onClose }: BusinessProfileFormP
     }
   };
 
-  const getStatusBadge = (status: BusinessProfile['status']) => {
-    switch (status) {
-      case 'pending':
-        return (
-          <Badge variant="secondary" className="glass-business-card bg-yellow-100/50 text-yellow-700 border-yellow-200/30">
-            <Clock className="w-3 h-3 mr-1" />
-            Pending Review
-          </Badge>
-        );
-      case 'approved':
-        return (
-          <Badge variant="secondary" className="glass-business-card bg-green-100/50 text-green-700 border-green-200/30">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Approved
-          </Badge>
-        );
-      case 'rejected':
-        return (
-          <Badge variant="destructive" className="glass-business-card bg-red-100/50 text-red-700 border-red-200/30">
-            <XCircle className="w-3 h-3 mr-1" />
-            Rejected
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
+  // Compact mode for settings page - just the form card
+  if (compact) {
+    return (
+      <Card className="glass-business-card animate-scale-in">
+        <CardHeader>
+          <CardTitle className={mode === 'business' ? 'text-blue-900' : 'text-slate-900'}>
+            Business Information
+          </CardTitle>
+          <CardDescription className={mode === 'business' ? 'text-blue-700' : 'text-slate-600'}>
+            Update your business details and company information.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="company_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      Company Name
+                    </FormLabel>
+                    <FormControl>
+                       <GlassInput 
+                         placeholder="Enter your company name" 
+                         {...field} 
+                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="industry_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Industry
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <FormControl>
+                           <SelectTrigger className="glass-business-card">
+                             <SelectValue placeholder="Select industry" />
+                           </SelectTrigger>
+                         </FormControl>
+                        <SelectContent>
+                          {industries.map((industry) => (
+                            <SelectItem key={industry.id} value={industry.id}>
+                              {industry.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="department_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Department
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <FormControl>
+                           <SelectTrigger className="glass-business-card">
+                             <SelectValue placeholder="Select department" />
+                           </SelectTrigger>
+                         </FormControl>
+                        <SelectContent>
+                          {departments.map((department) => (
+                            <SelectItem key={department.id} value={department.id}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="company_size"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      Company Size
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                       <FormControl>
+                         <SelectTrigger className="glass-business-card">
+                           <SelectValue placeholder="Select company size" />
+                         </SelectTrigger>
+                       </FormControl>
+                      <SelectContent>
+                        <SelectItem value="1-10">1-10 employees</SelectItem>
+                        <SelectItem value="11-50">11-50 employees</SelectItem>
+                        <SelectItem value="51-200">51-200 employees</SelectItem>
+                        <SelectItem value="201-1000">201-1000 employees</SelectItem>
+                        <SelectItem value="1000+">1000+ employees</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Phone
+                      </FormLabel>
+                      <FormControl>
+                         <GlassInput 
+                           placeholder="Enter phone number" 
+                           {...field} 
+                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="website"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        Website
+                      </FormLabel>
+                      <FormControl>
+                         <GlassInput 
+                           placeholder="https://example.com" 
+                           {...field} 
+                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      Company Bio
+                    </FormLabel>
+                    <FormControl>
+                       <GlassInput 
+                         as="textarea"
+                         placeholder="Tell us about your company..."
+                         className="min-h-[100px]"
+                         {...field} 
+                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={loading || isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Full page mode (legacy - redirect to settings instead)
   return (
-    <div className="min-h-screen bg-background p-6 animate-fade-in">
+    <div className="min-h-screen bg-background p-6 pb-32 animate-fade-in">
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center space-y-4">
-          <div className="glass-business w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto border border-accent/20">
-            <Building2 className="w-8 h-8 text-accent" />
-          </div>
-          <div>
-            <h1 className={`text-3xl font-bold ${
-              mode === 'business' ? 'text-blue-900' : 'text-slate-900'
-            }`}>
-              {profile ? 'Update Business Profile' : 'Create Business Profile'}
-            </h1>
-            <p className={`mt-2 ${
-              mode === 'business' ? 'text-blue-700' : 'text-slate-600'
-            }`}>
-              {profile ? 'Update your business information' : 'Join our business community and unlock professional features'}
-            </p>
-          </div>
-          {profile && getStatusBadge(profile.status)}
-        </div>
-
         <Card className="glass-business-card animate-scale-in">
           <CardHeader>
             <CardTitle className={mode === 'business' ? 'text-blue-900' : 'text-slate-900'}>

@@ -1,105 +1,271 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppMode } from "@/contexts/AppModeContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
-import { Settings, User, Plus, FileText, Building2 } from "lucide-react";
+import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle } from "lucide-react";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { usePosts } from "@/hooks/usePosts";
 import { ComposerModal } from "@/components/composer/ComposerModal";
-import { useState } from "react";
+import { PostReaderModal } from "@/components/posts/PostReaderModal";
+import { PullToRefresh } from "@/components/layout/PullToRefresh";
+import { FeedContainer } from "@/features/feed/FeedContainer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import type { Post } from "@/types/post";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile, loading } = useProfile();
+  const { mode } = useAppMode();
+  const { profile, loading: profileLoading } = useProfile();
   const { isBusinessMember, isAdmin } = useUserRoles();
+  const { posts, loading: postsLoading, error, fetchUserPosts } = usePosts();
   const [showComposer, setShowComposer] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts');
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserPosts();
+    }
+  }, [user]);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   return (
     <ProtectedRoute requireAuth={true}>
-      <div className="min-h-screen p-6 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-      
-      <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-          <p className="text-muted-foreground">Manage your profile and create content</p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Button 
-            onClick={() => setShowComposer(true)}
-            className="glass-ios-triple h-16 text-left justify-start"
-            variant="outline"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            <div>
-              <div className="font-medium">Create Post</div>
-              <div className="text-xs text-muted-foreground">Share your insights</div>
-            </div>
-          </Button>
+      <PullToRefresh onRefresh={() => fetchUserPosts()}>
+        <div className="min-h-screen p-6 pb-32 relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
           
-          <Button 
-            onClick={() => navigate("/my-posts")}
-            className="glass-ios-triple h-16 text-left justify-start"
-            variant="outline"
-          >
-            <FileText className="h-5 w-5 mr-2" />
-            <div>
-              <div className="font-medium">My Posts</div>
-              <div className="text-xs text-muted-foreground">View your content</div>
+          <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold text-foreground">Profile</h1>
+              <p className="text-muted-foreground">Manage your profile and view your content</p>
             </div>
-          </Button>
 
-          {(isBusinessMember() || isAdmin()) && (
-            <Button 
-              onClick={() => navigate("/business-dashboard")}
-              className="glass-ios-triple h-16 text-left justify-start"
-              variant="outline"
-            >
-              <Building2 className="h-5 w-5 mr-2" />
-              <div>
-                <div className="font-medium">Business</div>
-                <div className="text-xs text-muted-foreground">Dashboard & tools</div>
-              </div>
-            </Button>
-          )}
-        </div>
+            {/* Quick Actions - Only Create Post and Business */}
+            <div className={`grid gap-4 mb-6 ${(isBusinessMember() || isAdmin()) ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+              <Button 
+                onClick={() => setShowComposer(true)}
+                className="glass-ios-triple h-16 text-left justify-start"
+                variant="outline"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                <div>
+                  <div className="font-medium">Create Post</div>
+                  <div className="text-xs text-muted-foreground">Share your insights</div>
+                </div>
+              </Button>
 
-        {/* Profile Form */}
-        <ProfileForm />
-
-        {/* Settings Link */}
-        <GlassCard className="glass-ios-triple glass-corner-distort">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Settings className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <h3 className="font-medium">Account Settings</h3>
-                <p className="text-sm text-muted-foreground">Manage preferences and account options</p>
-              </div>
+              {(isBusinessMember() || isAdmin()) && (
+                <Button 
+                  onClick={() => navigate("/business-dashboard")}
+                  className="glass-ios-triple h-16 text-left justify-start"
+                  variant="outline"
+                >
+                  <Building2 className="h-5 w-5 mr-2" />
+                  <div>
+                    <div className="font-medium">Business</div>
+                    <div className="text-xs text-muted-foreground">Dashboard & tools</div>
+                  </div>
+                </Button>
+              )}
             </div>
-            <Button 
-              onClick={() => navigate("/settings")}
-              variant="outline"
-              className="glass-ios-triple"
-            >
-              Open Settings
-            </Button>
+
+            {/* My Posts Section - Now embedded */}
+            <GlassCard className="glass-ios-triple glass-corner-distort">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className={`grid w-full grid-cols-2 glass-ios-triple mb-6 ${
+                  mode === 'public'
+                    ? 'border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-[#489FE3]/20'
+                    : 'border-blue-300/50 bg-blue-50/30 backdrop-blur-xl shadow-lg shadow-blue-500/20'
+                }`}>
+                  <TabsTrigger value="posts" className={`flex items-center gap-2 ${
+                    mode === 'public'
+                      ? 'data-[state=active]:bg-[#489FE3]/30 data-[state=active]:text-white'
+                      : 'data-[state=active]:bg-blue-200/60 data-[state=active]:text-blue-700'
+                  }`}>
+                    <FileText className="w-4 h-4" />
+                    My Posts
+                  </TabsTrigger>
+                  <TabsTrigger value="lastSeen" className={`flex items-center gap-2 ${
+                    mode === 'public'
+                      ? 'data-[state=active]:bg-[#489FE3]/30 data-[state=active]:text-white'
+                      : 'data-[state=active]:bg-blue-200/60 data-[state=active]:text-blue-700'
+                  }`}>
+                    <Clock className="w-4 h-4" />
+                    Last Seen
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="posts" className="mt-0">
+                  {/* Loading State */}
+                  {postsLoading && (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
+                          <Skeleton className="h-6 w-3/4 mb-4" />
+                          <Skeleton className="h-4 w-full mb-2" />
+                          <Skeleton className="h-4 w-2/3" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Error State */}
+                  {error && !postsLoading && (
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+                      <h3 className="text-lg font-medium mb-2">Failed to Load Posts</h3>
+                      <p className="text-muted-foreground mb-4">{error}</p>
+                      <Button onClick={() => fetchUserPosts()} variant="outline">
+                        Try Again
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Posts List */}
+                  {!postsLoading && !error && (
+                    <div className="space-y-4">
+                      {posts.length === 0 ? (
+                        <div className="text-center py-8">
+                          <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                          <h3 className="text-lg font-medium mb-2">No Posts Yet</h3>
+                          <p className="text-muted-foreground mb-4">
+                            You haven't created any posts yet. Share your ideas!
+                          </p>
+                          <Button onClick={() => setShowComposer(true)}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create Your First Post
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-center mb-4">
+                            <p className="text-sm text-muted-foreground">
+                              {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+                            </p>
+                            <Button onClick={() => setShowComposer(true)} size="sm" variant="outline">
+                              <Plus className="w-4 h-4 mr-2" />
+                              New Post
+                            </Button>
+                          </div>
+
+                          {posts.map((post) => (
+                            <div
+                              key={post.id}
+                              onClick={() => {
+                                setSelectedPost(post);
+                                setIsModalOpen(true);
+                              }}
+                              className="p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all"
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={post.mode === 'public' ? 'default' : 'secondary'}>
+                                    {post.mode}
+                                  </Badge>
+                                  <Badge variant="outline">{post.type}</Badge>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Calendar className="w-3 h-3" />
+                                  {formatDate(post.created_at)}
+                                </div>
+                              </div>
+                              
+                              {post.title && (
+                                <h3 className="font-semibold mb-2">{post.title}</h3>
+                              )}
+                              
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                                {post.content}
+                              </p>
+                              
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Eye className="w-4 h-4" />
+                                  {post.views_count || 0}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Heart className="w-4 h-4" />
+                                  {post.likes_count || 0}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MessageCircle className="w-4 h-4" />
+                                  {post.comments_count || 0}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="lastSeen" className="mt-0">
+                  <div className="h-[400px]">
+                    <FeedContainer mode="brainstorm_last_seen" />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </GlassCard>
+
+            {/* Profile Form */}
+            <ProfileForm />
+
+            {/* Settings Link */}
+            <GlassCard className="glass-ios-triple glass-corner-distort">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Settings className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <h3 className="font-medium">Account Settings</h3>
+                    <p className="text-sm text-muted-foreground">Manage preferences and account options</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate("/settings")}
+                  variant="outline"
+                  className="glass-ios-triple"
+                >
+                  Open Settings
+                </Button>
+              </div>
+            </GlassCard>
           </div>
-        </GlassCard>
-      </div>
 
-      <ComposerModal 
-        isOpen={showComposer} 
-        onClose={() => setShowComposer(false)} 
-      />
-      </div>
+          <ComposerModal 
+            isOpen={showComposer} 
+            onClose={() => setShowComposer(false)} 
+          />
+          
+          <PostReaderModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedPost(null);
+            }}
+            post={selectedPost}
+          />
+        </div>
+      </PullToRefresh>
     </ProtectedRoute>
   );
 }
