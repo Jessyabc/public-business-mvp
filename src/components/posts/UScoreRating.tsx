@@ -117,7 +117,6 @@ export const UScoreRating = memo(({
                   ? 'bg-green-500/80 shadow-[0_0_12px_rgba(34,197,94,0.4)]'
                   : 'bg-muted/30 hover:bg-muted/50'
               )}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <span

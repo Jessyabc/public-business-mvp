@@ -157,16 +157,18 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
                   <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
                 </div>
 
-                {/* U-Score Rating */}
-                <div className="mb-4 p-4 rounded-xl bg-muted/20 border border-[var(--card-border)]/30">
-                  <UScoreRating
-                    postId={post.id}
-                    currentScore={averageScore}
-                    ratingCount={ratingCount}
-                    userRating={userRating}
-                    onRate={submitRating}
-                  />
-                </div>
+                {/* U-Score Rating - Only for Business Insights */}
+                {post.mode === 'business' && (
+                  <div className="mb-4 p-4 rounded-xl bg-muted/20 border border-[var(--card-border)]/30">
+                    <UScoreRating
+                      postId={post.id}
+                      currentScore={averageScore}
+                      ratingCount={ratingCount}
+                      userRating={userRating}
+                      onRate={submitRating}
+                    />
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 pt-4 border-t border-[var(--card-border)]/20">
