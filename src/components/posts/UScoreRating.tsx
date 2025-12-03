@@ -44,7 +44,7 @@ export const UScoreRating = memo(({
       if (onRate) {
         await onRate(value);
       }
-      toast.success(`Rated ${value}/10`);
+      toast.success(`Rated ${value}/5`);
     } catch (error) {
       console.error('Failed to submit rating:', error);
       toast.error('Failed to submit rating');
@@ -92,14 +92,14 @@ export const UScoreRating = memo(({
             animate={{ scale: 1, opacity: 1 }}
             className="text-lg font-bold text-blue-500"
           >
-            {typeof displayValue === 'number' ? displayValue.toFixed(1) : displayValue}/10
+            {typeof displayValue === 'number' ? displayValue.toFixed(1) : displayValue}/5
           </motion.span>
         )}
       </div>
 
       {/* Rating Scale */}
       <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => {
+        {[1, 2, 3, 4, 5].map((value) => {
           const isSelected = selectedValue !== null && value <= selectedValue;
           const isHovered = hoveredValue !== null && value <= hoveredValue;
           const isActive = isHovered || isSelected;
@@ -144,7 +144,7 @@ export const UScoreRating = memo(({
       {/* User's existing rating indicator */}
       {userRating && (
         <p className="text-xs text-muted-foreground text-center">
-          You rated this {userRating}/10
+          You rated this {userRating}/5
         </p>
       )}
     </div>
