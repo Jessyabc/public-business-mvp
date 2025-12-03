@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 interface LineageCardProps {
   postId: string;
   currentPost: Post;
+  onSelectPost?: (post: Post) => void;
 }
 
 interface LineageNode {
@@ -21,7 +22,7 @@ interface LineageNode {
   authorName: string;
 }
 
-export function LineageCard({ postId, currentPost }: LineageCardProps) {
+export function LineageCard({ postId, currentPost, onSelectPost }: LineageCardProps) {
   const [lineage, setLineage] = useState<LineageNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -91,6 +92,12 @@ export function LineageCard({ postId, currentPost }: LineageCardProps) {
     fetchLineage();
   }, [postId]);
 
+  const handleNodeClick = (node: LineageNode) => {
+    if (onSelectPost) {
+      onSelectPost(node.post);
+    }
+  };
+
   if (isLoading) {
     return null;
   }
@@ -118,10 +125,11 @@ export function LineageCard({ postId, currentPost }: LineageCardProps) {
           <div key={node.post.id} className="flex items-center gap-2">
             {/* Parent node */}
             <div
+              onClick={() => handleNodeClick(node)}
               className={cn(
-                'px-3 py-1.5 rounded-lg',
+                'px-3 py-1.5 rounded-lg cursor-pointer',
                 'bg-white/5 border border-white/15',
-                'transition-all duration-200 hover:bg-white/10'
+                'transition-all duration-200 hover:bg-white/10 hover:border-primary/40'
               )}
             >
               <div className="text-xs text-white/90 font-medium">
