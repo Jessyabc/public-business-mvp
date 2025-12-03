@@ -51,9 +51,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (typeof rating !== 'number' || rating < 1 || rating > 10) {
+    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
       return new Response(
-        JSON.stringify({ error: 'rating must be a number between 1 and 10' }),
+        JSON.stringify({ error: 'rating must be a number between 1 and 5' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
