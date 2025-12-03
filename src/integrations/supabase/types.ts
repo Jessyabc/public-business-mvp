@@ -1919,6 +1919,19 @@ export type Database = {
         Args: { invitation_id: string }
         Returns: boolean
       }
+      admin_approve_intake: { Args: { p_id: string }; Returns: Json }
+      admin_approve_user: { Args: { p_id: string }; Returns: Json }
+      admin_list_pending: {
+        Args: { p_limit?: number }
+        Returns: {
+          created_at: string
+          id: string
+          source: string
+          status: string
+          text: string
+          user_id: string
+        }[]
+      }
       api_brainstorm_recent: {
         Args: { p_limit?: number }
         Returns: {
