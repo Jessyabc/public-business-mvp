@@ -326,6 +326,64 @@ body {
 }
 
 /* ========================================
+   Brainstorm Feed Animations
+   ======================================== */
+
+/* Ambient floating particles */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translate(50px, -100px);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-30px, -200px);
+    opacity: 0.15;
+  }
+  75% {
+    transform: translate(80px, -150px);
+    opacity: 0.35;
+  }
+}
+
+.animate-particle {
+  animation: particle-float 40s ease-in-out infinite;
+}
+
+/* Feed card entry animation */
+@keyframes feed-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-feed-card-enter {
+  animation: feed-card-enter 0.5s ease-out forwards;
+}
+
+/* Glow pulse for accent elements */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(72, 159, 227, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(72, 159, 227, 0.5);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
    Liquid Glass Dock Navigation
    VisionOS/iOS26 Style - Mode-Aware
    ======================================== */

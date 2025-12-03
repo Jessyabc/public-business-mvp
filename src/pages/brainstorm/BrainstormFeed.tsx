@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { FeedContainer } from '@/features/feed/FeedContainer';
 import { BrainstormLayoutShell } from '@/features/brainstorm/components/BrainstormLayoutShell';
 import { ComposerModal } from '@/components/composer/ComposerModal';
@@ -8,6 +8,9 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { PostReaderModal } from '@/components/posts/PostReaderModal';
 import { PullToRefresh } from '@/components/layout/PullToRefresh';
 import { supabase } from '@/integrations/supabase/client';
+import { Bell, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { Post, BasePost } from '@/types/post';
 
 export default function BrainstormFeed() {
@@ -25,7 +28,6 @@ export default function BrainstormFeed() {
     setRefreshKey(prev => prev + 1);
   };
 
-  // Clear all state on mount to ensure clean start - no overlays on page load
   useEffect(() => {
     setSelectedPostId(null);
     setSelectedPost(null);
@@ -39,7 +41,6 @@ export default function BrainstormFeed() {
     setIsInitialMount(false);
   }, []);
 
-  // Memoized fetch function to prevent re-renders
   const fetchPostById = useCallback(async (id: string): Promise<Post | null> => {
     if (loadingRef.current) return null;
     
@@ -62,7 +63,6 @@ export default function BrainstormFeed() {
     }
   }, []);
 
-  // Listen for continue events
   useEffect(() => {
     const handleContinue = () => {
       setComposerOpen(true);
@@ -71,7 +71,6 @@ export default function BrainstormFeed() {
     return () => window.removeEventListener('pb:brainstorm:continue', handleContinue);
   }, []);
 
-  // Listen for post click events - open PostReaderModal
   useEffect(() => {
     const handleShowThread = async (event: CustomEvent) => {
       const { postId, post } = event.detail;
@@ -88,27 +87,22 @@ export default function BrainstormFeed() {
     return () => window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
   }, [fetchPostById]);
 
-  // Check for post query parameter on mount and open reader modal
   useEffect(() => {
     const postId = searchParams.get('post');
     if (postId && !isInitialMount) {
       fetchPostById(postId).then((post) => {
         if (post) setReaderModalPost(post);
       });
-      // Clear the query parameter after opening
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams, isInitialMount, fetchPostById]);
 
-  // Load post when selectedPostId changes (but only if it's explicitly set by user action)
   useEffect(() => {
-    // Don't load if selectedPostId is null (clean state)
     if (!selectedPostId) {
       setSelectedPost(null);
       return;
     }
     
-    // Only fetch if selectedPostId is actually set (user clicked something)
     fetchPostById(selectedPostId).then((post) => {
       if (post) {
         setSelectedPost(post);
@@ -120,7 +114,6 @@ export default function BrainstormFeed() {
   }, [selectedPostId, fetchPostById]);
 
   const handleSelectPost = useCallback((postId: string) => {
-    // Only set if different to prevent unnecessary re-renders
     if (selectedPostId !== postId) {
       setSelectedPostId(postId);
     }
@@ -133,6 +126,64 @@ export default function BrainstormFeed() {
 
   return (
     <>
+      {/* Ambient particles background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute w-full h-full">
+          {/* Floating particles */}
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 rounded-full bg-white/20 animate-particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 20}s`,
+                animationDuration: `${20 + Math.random() * 20}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Header with notifications */}
+      <div className="relative z-10 flex items-center justify-between px-4 py-3 lg:px-6">
+        <h1 className="text-lg font-semibold text-white/90">Feed</h1>
+        <div className="flex items-center gap-2">
+          <Link to="/notifications">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "relative w-10 h-10 rounded-full",
+                "bg-white/5 hover:bg-white/10",
+                "border border-white/10 hover:border-white/20",
+                "text-white/70 hover:text-white",
+                "transition-all duration-200"
+              )}
+            >
+              <Bell className="w-5 h-5" />
+              {/* Notification dot */}
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+            </Button>
+          </Link>
+          <Button
+            onClick={() => setComposerOpen(true)}
+            size="icon"
+            className={cn(
+              "w-10 h-10 rounded-full",
+              "bg-[var(--accent)]/20 hover:bg-[var(--accent)]/30",
+              "border border-[var(--accent)]/30 hover:border-[var(--accent)]/50",
+              "text-[var(--accent)] hover:text-white",
+              "shadow-[0_0_15px_rgba(72,159,227,0.3)]",
+              "hover:shadow-[0_0_25px_rgba(72,159,227,0.5)]",
+              "transition-all duration-200"
+            )}
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
+
       <PullToRefresh onRefresh={handleRefresh}>
         <BrainstormLayoutShell
           main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} key={refreshKey} />}
@@ -140,9 +191,9 @@ export default function BrainstormFeed() {
           sidebar={<RightSidebar variant="feed" onSelectPost={handleSelectPost} />}
         />
       </PullToRefresh>
+      
       <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
       
-      {/* Post Reader Modal for feed post clicks */}
       <PostReaderModal
         isOpen={!!readerModalPost}
         onClose={() => setReaderModalPost(null)}

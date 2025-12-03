@@ -4,22 +4,20 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, TrendingUp, Award, Clock, Filter, FileText, Users, Building2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Search, TrendingUp, Award, Clock, Sparkles, Building2, Lightbulb } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GlassCard } from '@/ui/components/GlassCard';
 
 const Research = () => {
   const { mode } = useAppMode();
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('sparks');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('t_score');
+  const [sortBy, setSortBy] = useState('recent');
   const [filterIndustry, setFilterIndustry] = useState('all');
 
   const sortOptions = [
+    { value: 'recent', label: 'Most Recent', icon: Clock },
     { value: 't_score', label: 'T-Score', icon: TrendingUp },
-    { value: 'u_score', label: 'U-Score', icon: Award },
-    { value: 'recent', label: 'Most Recent', icon: Clock }
+    { value: 'u_score', label: 'U-Score', icon: Award }
   ];
 
   const industries = [
@@ -34,45 +32,41 @@ const Research = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add search functionality here
     console.log('Searching for:', searchQuery);
   };
 
   const handleSort = (value: string) => {
     setSortBy(value);
-    // Add sort functionality here
     console.log('Sorting by:', value);
   };
 
   const handleFilter = (value: string) => {
     setFilterIndustry(value);
-    // Add filter functionality here
     console.log('Filtering by industry:', value);
   };
 
   return (
     <div className="min-h-screen p-6 pb-32 bg-gradient-space">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <GlassCard padding="lg">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <Search className="w-8 h-8 text-[var(--accent)]" />
-              <h1 className="text-4xl font-light tracking-wide text-[var(--text-primary)]">
-                Research Hub
-              </h1>
-            </div>
-            <p className="mt-2 font-light max-w-2xl mx-auto text-center text-[var(--text-secondary)]">
-              Explore high-value business reports, insights, and community brainstorms
-            </p>
-          </GlassCard>
+        {/* Simple Header - No Card */}
+        <header className="mb-8 text-center">
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            <Search className="w-8 h-8 text-[var(--accent)]" />
+            <h1 className="text-4xl font-light tracking-wide text-[var(--text-primary)]">
+              Research Hub
+            </h1>
+          </div>
+          <p className="font-light max-w-2xl mx-auto text-[var(--text-secondary)]">
+            Explore sparks, business insights, and open ideas
+          </p>
         </header>
 
         {/* Search and Filter Controls */}
-        <GlassCard padding="md" className="mb-8">
+        <div className="mb-8 p-4 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Input
-                placeholder="Search for insights, reports, or topics..."
+                placeholder="Search for insights, sparks, or topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
@@ -111,59 +105,55 @@ const Research = () => {
               </Button>
             </div>
           </form>
-        </GlassCard>
+        </div>
 
-        {/* Research Tabs */}
+        {/* Research Tabs - Updated */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-            <TabsTrigger value="all" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              All Content
+          <TabsList className="grid w-full grid-cols-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">
+            <TabsTrigger value="sparks" className="flex items-center gap-2 data-[state=active]:bg-white/10">
+              <Sparkles className="h-4 w-4" />
+              Sparks
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
+            <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-white/10">
               <Building2 className="h-4 w-4" />
-              Business Reports
+              Business Insights
             </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Insights
-            </TabsTrigger>
-            <TabsTrigger value="brainstorms" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Brainstorms
+            <TabsTrigger value="open-ideas" className="flex items-center gap-2 data-[state=active]:bg-white/10">
+              <Lightbulb className="h-4 w-4" />
+              Open Ideas
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="all" className="space-y-4">
+          <TabsContent value="sparks" className="space-y-4">
             <Card className={`p-8 text-center transition-all duration-700 ${
               mode === 'public'
                 ? 'glass-card border-white/20 bg-black/20'
                 : 'border-blue-200/30 bg-white/40'
             }`}>
-              <FileText className={`w-16 h-16 mx-auto mb-4 ${
+              <Sparkles className={`w-16 h-16 mx-auto mb-4 ${
                 mode === 'public' ? 'text-white/30' : 'text-slate-400'
               }`} />
               <h3 className={`text-xl font-medium mb-2 ${
                 mode === 'public' ? 'text-white' : 'text-slate-800'
               }`}>
-                All Research Content
+                Community Sparks
               </h3>
               <p className={`text-sm mb-4 ${
                 mode === 'public' ? 'text-white/70' : 'text-slate-600'
               }`}>
-                Browse all available research content including business reports, insights, and community brainstorms.
+                Explore innovative ideas and discussions from the community.
               </p>
-              <Button onClick={() => console.log('Loading all content...')} className={`${
+              <Button onClick={() => console.log('Loading sparks...')} className={`${
                 mode === 'public'
                   ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}>
-                Load Content
+                Load Sparks
               </Button>
             </Card>
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-4">
+          <TabsContent value="insights" className="space-y-4">
             <Card className={`p-8 text-center transition-all duration-700 ${
               mode === 'public'
                 ? 'glass-card border-white/20 bg-black/20'
@@ -175,41 +165,12 @@ const Research = () => {
               <h3 className={`text-xl font-medium mb-2 ${
                 mode === 'public' ? 'text-white' : 'text-slate-800'
               }`}>
-                Business Reports
-              </h3>
-              <p className={`text-sm mb-4 ${
-                mode === 'public' ? 'text-white/70' : 'text-slate-600'
-              }`}>
-                Access detailed business reports, whitepapers, and financial insights from verified business members.
-              </p>
-              <Button onClick={() => console.log('Loading business reports...')} className={`${
-                mode === 'public'
-                  ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}>
-                Load Reports
-              </Button>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="insights" className="space-y-4">
-            <Card className={`p-8 text-center transition-all duration-700 ${
-              mode === 'public'
-                ? 'glass-card border-white/20 bg-black/20'
-                : 'border-blue-200/30 bg-white/40'
-            }`}>
-              <TrendingUp className={`w-16 h-16 mx-auto mb-4 ${
-                mode === 'public' ? 'text-white/30' : 'text-slate-400'
-              }`} />
-              <h3 className={`text-xl font-medium mb-2 ${
-                mode === 'public' ? 'text-white' : 'text-slate-800'
-              }`}>
                 Business Insights
               </h3>
               <p className={`text-sm mb-4 ${
                 mode === 'public' ? 'text-white/70' : 'text-slate-600'
               }`}>
-                Discover industry insights, trend analyses, and strategic perspectives from business leaders.
+                Discover industry insights and strategic perspectives from business leaders.
               </p>
               <Button onClick={() => console.log('Loading insights...')} className={`${
                 mode === 'public'
@@ -221,31 +182,31 @@ const Research = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="brainstorms" className="space-y-4">
+          <TabsContent value="open-ideas" className="space-y-4">
             <Card className={`p-8 text-center transition-all duration-700 ${
               mode === 'public'
                 ? 'glass-card border-white/20 bg-black/20'
                 : 'border-blue-200/30 bg-white/40'
             }`}>
-              <Users className={`w-16 h-16 mx-auto mb-4 ${
+              <Lightbulb className={`w-16 h-16 mx-auto mb-4 ${
                 mode === 'public' ? 'text-white/30' : 'text-slate-400'
               }`} />
               <h3 className={`text-xl font-medium mb-2 ${
                 mode === 'public' ? 'text-white' : 'text-slate-800'
               }`}>
-                Community Brainstorms
+                Open Ideas
               </h3>
               <p className={`text-sm mb-4 ${
                 mode === 'public' ? 'text-white/70' : 'text-slate-600'
               }`}>
-                Explore collaborative brainstorming sessions and innovative ideas from the community.
+                Browse and contribute to open ideas waiting for community input.
               </p>
-              <Button onClick={() => console.log('Loading brainstorms...')} className={`${
+              <Button onClick={() => console.log('Loading open ideas...')} className={`${
                 mode === 'public'
                   ? 'bg-[#489FE3] hover:bg-[#489FE3]/80'
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}>
-                Load Brainstorms
+                Load Open Ideas
               </Button>
             </Card>
           </TabsContent>
