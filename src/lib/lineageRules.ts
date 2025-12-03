@@ -18,7 +18,7 @@ export interface LineageNode {
   visibility?: string; // posts.visibility
 }
 
-export type RelationKind = "origin" | "reply" | "continu" | "cross_link";
+export type RelationKind = "origin" | "reply" | "quote" | "continu" | "cross_link";
 
 // Legacy support: map old types to new
 export function normalizeRelationType(oldType: string): RelationKind {

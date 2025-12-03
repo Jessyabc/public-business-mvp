@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { CrossLinksSection } from "@/components/brainstorm/CrossLinksSection";
 import { UScoreRating } from "./UScoreRating";
 import { usePostRating } from "@/hooks/usePostRating";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import uScoreIcon from '@/assets/u-score-icon.png';
 
 interface PostReaderModalProps {
@@ -19,14 +21,59 @@ interface PostReaderModalProps {
   post: Post | null;
 }
 
+interface AuthorInfo {
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
 export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps) {
   const { openComposer } = useComposerStore();
   const { userRating, averageScore, ratingCount, submitRating } = usePostRating(post?.id ?? '');
+  const [authorInfo, setAuthorInfo] = useState<AuthorInfo | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  if (!post) return null;
+  // Use selectedPost if available, otherwise use the prop post
+  const displayPost = selectedPost || post;
+
+  // Fetch author info when post changes
+  useEffect(() => {
+    if (!displayPost?.user_id) {
+      setAuthorInfo(null);
+      return;
+    }
+
+    const fetchAuthor = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', displayPost.user_id)
+        .single();
+
+      if (data) {
+        setAuthorInfo(data);
+      }
+    };
+
+    fetchAuthor();
+  }, [displayPost?.user_id]);
+
+  // Reset selected post when modal closes or main post changes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedPost(null);
+    }
+  }, [isOpen]);
+
+  // Handler for when a cross-link or lineage card is clicked
+  const handleSelectPost = (newPost: Post) => {
+    setSelectedPost(newPost);
+    setAuthorInfo(null); // Reset author info to trigger refetch
+  };
+
+  if (!displayPost) return null;
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/post/${post.id}`;
+    const url = `${window.location.origin}/post/${displayPost.id}`;
     await navigator.clipboard.writeText(url);
     toast.success('Link copied to clipboard');
   };
@@ -63,6 +110,9 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
     }
   };
 
+  const authorName = authorInfo?.display_name || 'Unknown Author';
+  const authorAvatar = authorInfo?.avatar_url || '';
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0 z-50 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
@@ -73,65 +123,55 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
           
           <div className="space-y-6">
           {/* Lineage Card */}
-          <LineageCard postId={post.id} currentPost={post} />
+          <LineageCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
 
           {/* Post Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="" />
+                <AvatarImage src={authorAvatar} />
                 <AvatarFallback className="bg-primary/20 text-primary">
-                  <User className="h-6 w-6" />
+                  {authorName.charAt(0).toUpperCase() || <User className="h-6 w-6" />}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-[var(--text-primary)]">{post.user_id}</p>
+                <p className="font-medium text-[var(--text-primary)]">{authorName}</p>
                 <div className="flex items-center space-x-2 text-sm text-[var(--text-secondary)]">
                   <Calendar className="h-3 w-3" />
-                  <span>{formatDate(post.created_at)}</span>
+                  <span>{formatDate(displayPost.created_at)}</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge className={getTypeColor(post.type)}>
-                {post.type}
+              <Badge className={getTypeColor(displayPost.type)}>
+                {displayPost.type}
               </Badge>
-              <Badge className={getVisibilityColor(post.visibility)}>
-                {post.visibility}
+              <Badge className={getVisibilityColor(displayPost.visibility)}>
+                {displayPost.visibility}
               </Badge>
             </div>
           </div>
 
             {/* Post Content */}
             <GlassSurface inset className="space-y-4">
-              {post.title && (
+              {displayPost.title && (
                 <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-                  {post.title}
+                  {displayPost.title}
                 </h2>
               )}
               
               <div className="prose prose-invert max-w-none">
                 <p className="text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
-                  {post.content}
+                  {displayPost.content}
                 </p>
               </div>
-
-              {/* Post Metadata */}
-              {post.metadata && Object.keys(post.metadata).length > 0 && (
-                <div className="mt-6 p-4 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                  <h4 className="text-sm font-medium text-[var(--text-primary)] mb-2">Additional Information</h4>
-                  <pre className="text-xs text-[var(--text-secondary)] overflow-x-auto">
-                    {JSON.stringify(post.metadata, null, 2)}
-                  </pre>
-                </div>
-              )}
             </GlassSurface>
 
             {/* U-Score Rating Section - Only for Business Insights */}
-            {post.mode === 'business' && (
+            {displayPost.mode === 'business' && (
               <GlassSurface inset className="mt-4">
                 <UScoreRating
-                  postId={post.id}
+                  postId={displayPost.id}
                   currentScore={averageScore}
                   ratingCount={ratingCount}
                   userRating={userRating}
@@ -150,10 +190,10 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                     <span className="text-muted-foreground font-normal">({ratingCount})</span>
                   )}
                 </div>
-                {post.t_score && (
+                {displayPost.t_score && (
                   <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
                     <TrendingUp className="h-3.5 w-3.5" />
-                    <span>T: {post.t_score}</span>
+                    <span>T: {displayPost.t_score}</span>
                   </div>
                 )}
                 <Button
@@ -162,7 +202,7 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                   className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  {post.views_count || 0}
+                  {displayPost.views_count || 0}
                 </Button>
               </div>
               <div className="flex items-center space-x-2">
@@ -170,7 +210,7 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                   variant="ghost"
                   size="sm"
                   className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  onClick={() => openComposer({ parentPostId: post.id, relationType: 'continuation' })}
+                  onClick={() => openComposer({ parentPostId: displayPost.id, relationType: 'continuation' })}
                 >
                   <Reply className="h-4 w-4 mr-2" />
                   Reply
@@ -194,7 +234,7 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
             </div>
 
             {/* Cross-links Section */}
-            <CrossLinksSection postId={post.id} />
+            <CrossLinksSection postId={displayPost.id} onSelectPost={handleSelectPost} />
           </div>
         </GlassSurface>
       </DialogContent>

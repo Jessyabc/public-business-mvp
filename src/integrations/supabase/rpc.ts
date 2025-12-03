@@ -111,13 +111,16 @@ export async function rpcIncrementPostLikes(p_post_id: string) {
 }
 
 export async function rpcAdminListPending(p_limit?: number) {
-  return supabase.rpc<AdminPendingIdea[]>("admin_list_pending", { p_limit: p_limit || null });
+  // @ts-expect-error - Function exists but not in generated types
+  return supabase.rpc("admin_list_pending", { p_limit: p_limit || null }) as Promise<{ data: AdminPendingIdea[] | null; error: Error | null }>;
 }
 
 export async function rpcAdminApproveIntake(p_id: string) {
-  return supabase.rpc<AdminApprovalResult>("admin_approve_intake", { p_id });
+  // @ts-expect-error - Function exists but not in generated types
+  return supabase.rpc("admin_approve_intake", { p_id }) as Promise<{ data: AdminApprovalResult | null; error: Error | null }>;
 }
 
 export async function rpcAdminApproveUser(p_id: string) {
-  return supabase.rpc<AdminApprovalResult>("admin_approve_user", { p_id });
+  // @ts-expect-error - Function exists but not in generated types
+  return supabase.rpc("admin_approve_user", { p_id }) as Promise<{ data: AdminApprovalResult | null; error: Error | null }>;
 }

@@ -9,15 +9,17 @@ import { useEffect, useState } from 'react';
 import { useCrossLinks } from '@/hooks/useCrossLinks';
 import { supabase } from '@/integrations/supabase/client';
 import type { CrossLink } from '@/hooks/useCrossLinks';
+import type { Post } from '@/types/post';
 import { Link2, ArrowRight, ArrowLeft, Lightbulb, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 interface CrossLinksSectionProps {
   postId: string;
+  onSelectPost?: (post: Post) => void;
 }
 
-export function CrossLinksSection({ postId }: CrossLinksSectionProps) {
+export function CrossLinksSection({ postId, onSelectPost }: CrossLinksSectionProps) {
   const { data: crossLinks, isLoading } = useCrossLinks(postId);
   const [authorNames, setAuthorNames] = useState<Map<string, string>>(new Map());
 
@@ -57,6 +59,22 @@ export function CrossLinksSection({ postId }: CrossLinksSectionProps) {
   const incoming = crossLinks.filter((cl) => cl.direction === 'incoming');
   const outgoing = crossLinks.filter((cl) => cl.direction === 'outgoing');
 
+  const handleCardClick = (crossLink: CrossLink) => {
+    if (onSelectPost) {
+      // Convert the cross-link post to a full Post type
+      const post: Post = {
+        ...crossLink.post,
+        mode: crossLink.post.mode || 'public',
+        status: crossLink.post.status || 'active',
+        updated_at: crossLink.post.created_at,
+        likes_count: crossLink.post.likes_count || 0,
+        comments_count: crossLink.post.comments_count || 0,
+        views_count: crossLink.post.views_count || 0,
+      };
+      onSelectPost(post);
+    }
+  };
+
   const renderCrossLinkCard = (crossLink: CrossLink) => {
     const { post, direction, relationType } = crossLink;
     const isSpark = post.kind === 'Spark';
@@ -65,6 +83,7 @@ export function CrossLinksSection({ postId }: CrossLinksSectionProps) {
     return (
       <div
         key={crossLink.id}
+        onClick={() => handleCardClick(crossLink)}
         className={cn(
           'rounded-xl p-4',
           'bg-white/5 backdrop-blur-xl border border-white/10',
