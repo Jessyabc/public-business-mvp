@@ -78,7 +78,7 @@ export function AuthModal({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md border-border/20 bg-background/95 backdrop-blur-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-8">
         <DialogHeader className="flex flex-col items-center space-y-4">
-          <img alt="Public Business Logo" src="/lovable-uploads/026cde7d-5594-4af4-911f-1d3b2e12acd8.png" className="h-auto w-13 object-fill backdrop-brightness-100" />
+          <img alt="Public Business Logo" src="/lovable-uploads/ed5d63eb-6f9b-49cf-93a9-6da7cef3b358.png" className="object-fill backdrop-brightness-100" />
           <DialogTitle className="text-2xl font-bold text-center text-foreground">
             Welcome to Public Business
           </DialogTitle>
