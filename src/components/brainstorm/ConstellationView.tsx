@@ -15,6 +15,12 @@ interface ConstellationNode {
   parentId: string | null;
 }
 
+interface ConstellationConnection {
+  from: ConstellationNode;
+  to: ConstellationNode;
+  type: 'hard' | 'soft'; // hard = continuation, soft = cross-link
+}
+
 interface ConstellationViewProps {
   rootPostId: string;
   isOpen: boolean;
@@ -29,6 +35,7 @@ export function ConstellationView({
   onSelectPost 
 }: ConstellationViewProps) {
   const [nodes, setNodes] = useState<ConstellationNode[]>([]);
+  const [softLinks, setSoftLinks] = useState<{ parentId: string; childId: string }[]>([]);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
 
@@ -36,13 +43,15 @@ export function ConstellationView({
     if (!isOpen) return;
 
     const fetchThread = async () => {
-      // Recursive fetch of thread
+      // Recursive fetch of thread (hard links only for positioning)
       const visited = new Set<string>();
       const result: ConstellationNode[] = [];
+      const allNodeIds: string[] = [];
 
       const fetchNode = async (postId: string, depth: number, parentId: string | null, angle: number) => {
         if (visited.has(postId) || depth > 4) return;
         visited.add(postId);
+        allNodeIds.push(postId);
 
         const { data: post } = await supabase
           .from('posts')
@@ -67,12 +76,12 @@ export function ConstellationView({
           parentId
         });
 
-        // Fetch children
+        // Fetch children (hard links / continuations - relation_type 'reply' or 'hard')
         const { data: children } = await supabase
           .from('post_relations')
           .select('child_post_id')
           .eq('parent_post_id', postId)
-          .eq('relation_type', 'reply');
+          .in('relation_type', ['reply', 'hard']);
 
         if (children?.length) {
           const angleStep = (Math.PI * 0.8) / Math.max(children.length, 1);
@@ -91,21 +100,58 @@ export function ConstellationView({
 
       await fetchNode(rootPostId, 0, null, -Math.PI / 2);
       setNodes(result);
+
+      // Fetch soft links (cross-links) for all nodes
+      if (allNodeIds.length > 0) {
+        const { data: softRelations } = await supabase
+          .from('post_relations')
+          .select('parent_post_id, child_post_id')
+          .in('relation_type', ['soft', 'cross_link'])
+          .or(`parent_post_id.in.(${allNodeIds.join(',')}),child_post_id.in.(${allNodeIds.join(',')})`);
+
+        if (softRelations) {
+          setSoftLinks(softRelations.map(r => ({
+            parentId: r.parent_post_id,
+            childId: r.child_post_id
+          })));
+        }
+      }
     };
 
     fetchThread();
   }, [rootPostId, isOpen]);
 
-  const connections = useMemo(() => {
+  // Calculate hard connections (continuations)
+  const hardConnections = useMemo(() => {
     return nodes
       .filter(n => n.parentId)
       .map(n => {
         const parent = nodes.find(p => p.id === n.parentId);
         if (!parent) return null;
-        return { from: parent, to: n };
+        return { from: parent, to: n, type: 'hard' as const };
       })
-      .filter(Boolean);
+      .filter(Boolean) as ConstellationConnection[];
   }, [nodes]);
+
+  // Calculate soft connections (cross-links)
+  const softConnections = useMemo(() => {
+    return softLinks
+      .map(link => {
+        const from = nodes.find(n => n.id === link.parentId);
+        const to = nodes.find(n => n.id === link.childId);
+        if (!from || !to) return null;
+        // Avoid duplicating hard connections
+        const isHardLink = from.id === to.parentId || to.id === from.parentId;
+        if (isHardLink) return null;
+        return { from, to, type: 'soft' as const };
+      })
+      .filter(Boolean) as ConstellationConnection[];
+  }, [nodes, softLinks]);
+
+  const allConnections = useMemo(() => 
+    [...hardConnections, ...softConnections], 
+    [hardConnections, softConnections]
+  );
 
   if (!isOpen) return null;
 
@@ -170,14 +216,40 @@ export function ConstellationView({
             {/* Connection lines */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none">
               <defs>
-                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="rgba(72,159,227,0.5)" />
-                  <stop offset="100%" stopColor="rgba(147,112,219,0.5)" />
+                {/* Gradient for hard links (continuations) */}
+                <linearGradient id="hardLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(var(--accent) / 0.6)" />
+                  <stop offset="100%" stopColor="hsl(280 70% 60% / 0.6)" />
+                </linearGradient>
+                {/* Gradient for soft links (cross-links) */}
+                <linearGradient id="softLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(200 60% 50% / 0.4)" />
+                  <stop offset="100%" stopColor="hsl(220 60% 60% / 0.4)" />
                 </linearGradient>
               </defs>
-              {connections.map((conn, i) => conn && (
+              
+              {/* Render soft connections first (behind) */}
+              {softConnections.map((conn, i) => conn && (
                 <motion.line
-                  key={i}
+                  key={`soft-${i}`}
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 0.6 }}
+                  transition={{ delay: hardConnections.length * 0.1 + i * 0.05, duration: 0.5 }}
+                  x1={`calc(50% + ${conn.from.x}px)`}
+                  y1={`calc(50% + ${conn.from.y}px)`}
+                  x2={`calc(50% + ${conn.to.x}px)`}
+                  y2={`calc(50% + ${conn.to.y}px)`}
+                  stroke="url(#softLineGradient)"
+                  strokeWidth="1.5"
+                  strokeDasharray="6 4"
+                  className="opacity-60"
+                />
+              ))}
+              
+              {/* Render hard connections (on top) */}
+              {hardConnections.map((conn, i) => conn && (
+                <motion.line
+                  key={`hard-${i}`}
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ delay: i * 0.1, duration: 0.5 }}
@@ -185,7 +257,7 @@ export function ConstellationView({
                   y1={`calc(50% + ${conn.from.y}px)`}
                   x2={`calc(50% + ${conn.to.x}px)`}
                   y2={`calc(50% + ${conn.to.y}px)`}
-                  stroke="url(#lineGradient)"
+                  stroke="url(#hardLineGradient)"
                   strokeWidth="2"
                 />
               ))}
@@ -215,7 +287,7 @@ export function ConstellationView({
                     "border backdrop-blur-sm transition-all duration-200",
                     "hover:scale-110",
                     node.depth === 0 
-                      ? "w-24 h-24 bg-gradient-to-br from-[var(--accent)]/30 to-purple-500/20 border-[var(--accent)]/50 shadow-[0_0_30px_rgba(72,159,227,0.3)]"
+                      ? "w-24 h-24 bg-gradient-to-br from-[hsl(var(--accent)/0.3)] to-purple-500/20 border-[hsl(var(--accent)/0.5)] shadow-[0_0_30px_hsl(var(--accent)/0.3)]"
                       : "w-16 h-16 bg-white/5 border-white/20 hover:border-white/40"
                   )}
                 >
@@ -255,12 +327,22 @@ export function ConstellationView({
         {/* Legend */}
         <div className="absolute bottom-4 left-4 flex items-center gap-4 text-xs text-white/40">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-gradient-to-br from-[var(--accent)] to-purple-500" />
+            <div className="w-3 h-3 rounded-full bg-gradient-to-br from-[hsl(var(--accent))] to-purple-500" />
             <span>Root</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-white/20 border border-white/40" />
             <span>Reply</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-0.5 bg-gradient-to-r from-[hsl(var(--accent)/0.6)] to-purple-500/60" />
+            <span>Continuation</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-0.5 bg-blue-400/40" style={{ 
+              backgroundImage: 'repeating-linear-gradient(90deg, hsl(200 60% 50% / 0.4), hsl(200 60% 50% / 0.4) 6px, transparent 6px, transparent 10px)' 
+            }} />
+            <span>Cross-link</span>
           </div>
           <span className="text-white/20">|</span>
           <span>Drag to pan, scroll to zoom</span>

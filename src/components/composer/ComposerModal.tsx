@@ -15,6 +15,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { buildSparkPayload, buildBusinessInsightPayload } from "@/lib/posts";
 import { BusinessInsightComposer } from "./BusinessInsightComposer";
+import { ContinuationBanner } from "./ContinuationBanner";
+import { usePendingReferencesStore } from "@/stores/pendingReferencesStore";
+import { createHardLink, createSoftLinks } from "@/lib/posts/relations";
 interface ComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -49,9 +52,16 @@ export function ComposerModal({
   const [availablePosts, setAvailablePosts] = useState<any[]>([]);
   const [selectedLinks, setSelectedLinks] = useState<string[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  
+  const { pendingRefs, clearRefs } = usePendingReferencesStore();
+  
   const isPublicMode = mode === 'public';
   const maxChars = isPublicMode ? PUBLIC_MAX_CHARS : BUSINESS_MAX_CHARS;
   const canSubmit = content.trim().length > 0 && content.length <= maxChars;
+  
+  // Check if we're in continuation mode
+  const isContinuationMode = context?.relationType === 'continuation' && context?.parentPostId;
+  const isFromOpenIdea = !!context?.originOpenIdeaId;
 
   // Load draft from localStorage
   useEffect(() => {
@@ -203,19 +213,43 @@ export function ComposerModal({
         return;
       }
 
-      // Create soft links if any posts were selected
-      // Note: api_create_soft_links RPC should ensure relation_type='soft' on the server side
-      if (selectedLinks.length > 0 && newPost?.id) {
+      // Create hard link if continuing a spark
+      if (isContinuationMode && context?.parentPostId && newPost?.id) {
         try {
-          await supabase.rpc('api_create_soft_links', {
-            p_parent: newPost.id,
-            p_children: selectedLinks
-          });
+          await createHardLink(context.parentPostId, newPost.id);
         } catch (linkError) {
-          console.error('Error creating links:', linkError);
+          console.error('Error creating hard link:', linkError);
+          toast.warning('Post created but continuation link failed');
+        }
+      }
+
+      // Create soft links from pending references
+      const allSoftLinks = [...selectedLinks, ...pendingRefs];
+      if (allSoftLinks.length > 0 && newPost?.id) {
+        try {
+          await createSoftLinks(newPost.id, allSoftLinks);
+          clearRefs(); // Clear pending refs after successful creation
+        } catch (linkError) {
+          console.error('Error creating soft links:', linkError);
           toast.warning('Post created but some links failed');
         }
       }
+
+      // Create idea_link if sparked from open idea
+      if (isFromOpenIdea && context?.originOpenIdeaId && newPost?.id) {
+        try {
+          await supabase.from('idea_links').insert({
+            source_id: context.originOpenIdeaId,
+            source_type: 'open_idea',
+            target_id: newPost.id,
+            target_type: 'spark',
+            created_by: user.id
+          });
+        } catch (linkError) {
+          console.error('Error creating idea link:', linkError);
+        }
+      }
+
       toast.success(`${isPublicMode ? 'Brainstorm' : 'Insight'} created successfully`);
       clearDraft();
       handleClose();
@@ -287,11 +321,24 @@ export function ComposerModal({
         </button>
       </div>
     </div>;
+  const handleClearContext = () => {
+    setContext(null);
+  };
+
   const renderPublicForm = () => <div className="space-y-4">
       <div className="flex items-center space-x-2 mb-4">
-        <Brain className="w-5 h-5 text-[var(--accent)]" />
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">Wanna share a Spark?   </h3>
+        <Brain className="w-5 h-5 text-[hsl(var(--accent))]" />
+        <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+          {isContinuationMode ? 'Continue this Spark' : 'Share a new Spark'}
+        </h3>
       </div>
+      
+      {/* Context banners */}
+      <ContinuationBanner 
+        parentPostId={context?.parentPostId}
+        originOpenIdeaId={context?.originOpenIdeaId}
+        onClear={handleClearContext}
+      />
       
       <div className="space-y-2">
         <Label htmlFor="brainstorm-content" className="text-[var(--text-primary)]">Your spark of inspiration</Label>
