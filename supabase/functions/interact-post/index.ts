@@ -60,6 +60,40 @@ serve(async (req) => {
 
     console.log('Creating interaction for user:', actor_user_id || 'anonymous');
 
+    // Rate limit anonymous interactions (view/share only)
+    if (!actor_user_id && (type === 'view' || type === 'share')) {
+      const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
+      
+      // Hash the IP for privacy
+      const { data: ipHashData } = await supabaseClient.rpc('hash_ip', { ip_address: clientIP });
+      const ipHash = ipHashData as string | null;
+      
+      if (ipHash) {
+        // Check rate limit: 100 interactions per hour per IP
+        const { count } = await supabaseClient
+          .from('post_interactions')
+          .select('*', { count: 'exact', head: true })
+          .is('user_id', null)
+          .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString());
+        
+        if (count && count >= 100) {
+          console.log('Rate limit exceeded for anonymous IP:', ipHash.substring(0, 8));
+          return new Response(
+            JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
+    // Require authentication for like, branch, reply
+    if (!actor_user_id && (type === 'like' || type === 'branch' || type === 'reply')) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required for this interaction type' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // For 'like' type, check if it already exists and toggle it
     if (type === 'like' && actor_user_id) {
       const { data: existing } = await supabaseClient

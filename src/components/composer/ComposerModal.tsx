@@ -8,6 +8,7 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { toast } from 'sonner';
 import { useAuth } from "@/contexts/AuthContext";
+import { sanitizeText } from "@/lib/sanitize";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -262,9 +263,18 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   };
 
   const handleCreateOpenIdea = async () => {
+    // Block authenticated users from creating open ideas
+    if (user) {
+      toast.error('Logged-in users should create Sparks instead of Open Ideas. Switch to the Brainstorm tab.');
+      return;
+    }
+    
     if (!content.trim() || isSubmitting) return;
-    if (content.length < 10 || content.length > 280) {
-      toast.error('Open ideas must be between 10-280 characters');
+    
+    // Sanitize and validate content
+    const sanitizedContent = sanitizeText(content.trim());
+    if (sanitizedContent.length < 10 || sanitizedContent.length > 500) {
+      toast.error('Open ideas must be between 10-500 characters');
       return;
     }
 
@@ -272,7 +282,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     try {
       const { data, error: functionError } = await supabase.functions.invoke('submit-open-idea', {
         body: {
-          content: content.trim(),
+          content: sanitizedContent,
           email: null,
           notify_on_interaction: false,
           subscribe_newsletter: false
@@ -281,7 +291,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
       if (functionError) throw functionError;
       if (!data?.success || !data?.id) {
-        throw new Error('Failed to submit idea');
+        throw new Error(data?.error || 'Failed to submit idea');
       }
 
       toast.success('Open idea created successfully');

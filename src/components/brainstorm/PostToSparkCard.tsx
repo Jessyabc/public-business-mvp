@@ -60,20 +60,20 @@ export function PostToSparkCard({
     ? (post.metadata as any).origin_open_idea_id as string
     : null;
 
-  // Fetch author profile
+  // Fetch author profile using profile_cards view for safer public access
   useEffect(() => {
     const fetchAuthor = async () => {
       if (!post.user_id) return;
 
       const { data } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_url')
+        .from('profile_cards')
+        .select('display_name')
         .eq('id', post.user_id)
         .maybeSingle();
 
       if (data) {
         setAuthorDisplayName(data.display_name);
-        setAuthorAvatarUrl(data.avatar_url);
+        // Note: profile_cards doesn't expose avatar_url for privacy - leave as null
       }
     };
 

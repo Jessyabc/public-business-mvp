@@ -30,8 +30,9 @@ export function CrossLinksSection({ postId, onSelectPost }: CrossLinksSectionPro
     const fetchAuthors = async () => {
       const userIds = Array.from(new Set(crossLinks.map((cl) => cl.post.user_id)));
       
+      // Use profile_cards view for public profile data (safer than direct profiles access)
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profile_cards')
         .select('id, display_name')
         .in('id', userIds);
 

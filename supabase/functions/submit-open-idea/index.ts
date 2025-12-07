@@ -26,13 +26,24 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Create client with user's auth token if present
+    // Check if user is authenticated - reject if so
     const authHeader = req.headers.get('Authorization') ?? '';
-    const supabaseUser = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
+    if (authHeader) {
+      const supabaseUser = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      
+      const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+      if (!authError && user !== null) {
+        console.log('Rejecting authenticated user from open ideas:', user.id);
+        return new Response(
+          JSON.stringify({ error: 'Authenticated users should create Sparks instead of Open Ideas. Please use the Brainstorm composer.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     const { content, email, notify_on_interaction = false, subscribe_newsletter = false, session_id } = await req.json() as SubmitIdeaRequest;
 
@@ -51,42 +62,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
-    const isAuthenticated = !authError && user !== null;
+    console.log('Processing anonymous idea submission');
 
-    console.log('Processing idea submission - Authenticated:', isAuthenticated, 'User ID:', user?.id);
-
-    // Get client IP for rate limiting (anonymous only)
+    // Get client IP for rate limiting
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
-
-    let ideaId: string;
-    let tableName: string;
-
-    if (isAuthenticated && user) {
-      // Authenticated user → insert into open_ideas_user
-      tableName = 'open_ideas_user';
-      const { data: ideaData, error: ideaError } = await supabaseUser
-        .from('open_ideas_user')
-        .insert({
-          text: content.trim(),
-          user_id: user.id,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (ideaError) {
-        console.error('Error inserting authenticated idea:', ideaError);
-        return new Response(
-          JSON.stringify({ error: 'Failed to submit idea' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      ideaId = ideaData.id;
-      console.log('Authenticated idea submitted:', ideaId);
-    } else {
       // Anonymous user → insert into open_ideas_intake
       tableName = 'open_ideas_intake';
 
@@ -139,21 +118,20 @@ Deno.serve(async (req) => {
         );
       }
 
-      ideaId = ideaData.id;
-      console.log('Anonymous idea submitted:', ideaId);
-    }
+    const ideaId = ideaData.id;
+    console.log('Anonymous idea submitted:', ideaId);
 
     // Log analytics event
     await supabaseAdmin
       .from('analytics_events')
       .insert({
         event_name: 'open_idea_submitted',
-        user_id: user?.id || null,
+        user_id: null,
         properties: {
           target_id: ideaId,
-          table: tableName,
+          table: 'open_ideas_intake',
           content_length: content.length,
-          is_authenticated: isAuthenticated,
+          is_authenticated: false,
           has_email: !!email,
           notify_on_interaction,
           subscribe_newsletter
