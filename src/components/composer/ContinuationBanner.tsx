@@ -104,7 +104,7 @@ export function ContinuationBanner({
       if (data) {
         const titles: Record<string, string> = {};
         data.forEach(post => {
-          titles[post.id] = post.title || post.content.slice(0, 30) + '...';
+          titles[post.id] = post.title || (post.content ? post.content.slice(0, 30) + '...' : 'Untitled');
         });
         setRefTitles(titles);
       }
