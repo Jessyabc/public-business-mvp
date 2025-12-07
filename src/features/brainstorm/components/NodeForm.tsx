@@ -12,7 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { BRAINSTORM_WRITES_ENABLED } from '@/config/flags';
 import { supabase } from '@/integrations/supabase/client';
-import { GlassCard } from '@/ui/components/GlassCard';
 import { Search, X, Plus } from 'lucide-react';
 import { useBrainstormExperienceStore } from '../stores/experience';
 import type { BasePost } from '@/types/post';
@@ -338,10 +337,10 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[var(--card-bg)] backdrop-blur-xl border-white/20 text-white max-w-lg max-h-[85vh] flex flex-col">
+      <DialogContent className="bg-[var(--surface)]/95 backdrop-blur-xl border border-white/10 text-foreground max-w-lg max-h-[85vh] flex flex-col shadow-[0_25px_80px_rgba(0,0,0,0.6),0_0_40px_rgba(72,159,227,0.15)] rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-white">
-            {mode === 'root' ? 'New Brainstorm' : 'Continue Brainstorm'}
+          <DialogTitle className="text-xl font-semibold text-foreground">
+            {mode === 'root' ? 'New Spark' : 'Continue Spark'}
           </DialogTitle>
         </DialogHeader>
 
@@ -352,12 +351,12 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/90">Title (optional)</FormLabel>
+                  <FormLabel className="text-foreground/80">Title (optional)</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       placeholder="Brief title..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-2 focus:ring-[hsl(var(--accent))]/50 focus:border-transparent transition-all"
                       disabled={isSubmitting}
                     />
                   </FormControl>
@@ -371,17 +370,17 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/90">Content *</FormLabel>
+                  <FormLabel className="text-foreground/80">Your spark of inspiration *</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="Describe your idea..."
-                      className="min-h-[120px] bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
+                      placeholder="Share your idea, thought, or insight..."
+                      className="min-h-[120px] bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground resize-none rounded-xl focus:ring-2 focus:ring-[hsl(var(--accent))]/50 focus:border-transparent transition-all"
                       disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-white/60 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {field.value?.length || 0} / 1000 characters
                   </p>
                 </FormItem>
@@ -390,16 +389,16 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
 
             {/* Soft Links Section */}
             <div className="flex-1 space-y-3 overflow-hidden flex flex-col">
-              <FormLabel className="text-white/90 flex-shrink-0">Inspiration (soft links)</FormLabel>
+              <FormLabel className="text-foreground/80 flex-shrink-0">Link to existing Sparks (optional)</FormLabel>
               
               {/* Search */}
               <div className="relative flex-shrink-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search recent posts..."
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="Search Sparks..."
+                  className="pl-10 bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-2 focus:ring-[hsl(var(--accent))]/50 focus:border-transparent transition-all"
                   disabled={isSubmitting}
                 />
               </div>
@@ -413,7 +412,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
                       <Badge
                         key={id}
                         variant="secondary"
-                        className="bg-[#3aa0ff]/20 text-white border-[#3aa0ff]/40 gap-1"
+                        className="text-xs gap-1 bg-[hsl(var(--accent))]/20 border-[hsl(var(--accent))]/30 text-[hsl(var(--accent))]"
                       >
                         {post?.title || 'Unknown'}
                         <X
@@ -427,74 +426,70 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
               )}
 
               {/* Recent posts list */}
-              <ScrollArea className="flex-1 rounded-md border border-white/10 bg-white/5 p-2">
+              <ScrollArea className="flex-1 rounded-xl border border-white/10 bg-white/5">
                 {isLoadingHistory ? (
-                  <div className="text-center text-white/50 py-8">Loading...</div>
+                  <div className="text-center text-muted-foreground py-8">Loading...</div>
                 ) : recentPosts.length === 0 ? (
-                  <div className="text-center text-white/50 py-8">No recent posts found</div>
+                  <div className="text-center text-muted-foreground py-8">No recent Sparks found</div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="p-2 space-y-1">
                     {recentPosts.map((post) => {
                       const isSelected = selectedSoftLinks.includes(post.post_id);
                       const canAdd = selectedSoftLinks.length < 5;
                       
                       return (
-                        <GlassCard
+                        <button
                           key={post.post_id}
-                          className={`p-3 cursor-pointer transition-all ${
-                            isSelected 
-                              ? 'border-[#3aa0ff]/60 bg-[#3aa0ff]/10' 
-                              : 'hover:bg-white/10'
-                          }`}
+                          type="button"
                           onClick={() => canAdd || isSelected ? toggleSoftLink(post.post_id) : null}
+                          className={`w-full text-left p-2 rounded-lg text-sm transition-all ${
+                            isSelected 
+                              ? 'bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/40' 
+                              : 'hover:bg-white/10 border border-transparent'
+                          }`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-white truncate">
+                              <div className="font-medium text-foreground line-clamp-1">
                                 {post.title || 'Untitled'}
                               </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="text-xs border-white/20 text-white/70">
-                                  {post.post_type}
-                                </Badge>
-                                <span className="text-xs text-white/50">
-                                  {new Date(post.created_at).toLocaleDateString()}
-                                </span>
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                {new Date(post.created_at).toLocaleDateString()}
                               </div>
                             </div>
                             {isSelected ? (
-                              <X className="h-4 w-4 text-[#3aa0ff] flex-shrink-0" />
+                              <X className="h-4 w-4 text-[hsl(var(--accent))] flex-shrink-0" />
                             ) : canAdd ? (
-                              <Plus className="h-4 w-4 text-white/50 flex-shrink-0" />
+                              <Plus className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             ) : null}
                           </div>
-                        </GlassCard>
+                        </button>
                       );
                     })}
                   </div>
                 )}
               </ScrollArea>
-              <p className="text-xs text-white/60 flex-shrink-0">
-                {selectedSoftLinks.length} / 5 soft links selected
+              <p className="text-xs text-muted-foreground flex-shrink-0">
+                {selectedSoftLinks.length} / 5 links selected
               </p>
             </div>
 
             <div className="flex gap-3 pt-2 flex-shrink-0">
               <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 bg-[#3aa0ff]/30 hover:bg-[#3aa0ff]/40 text-white border border-[#3aa0ff]/40 backdrop-blur-sm"
-              >
-                {isSubmitting ? 'Creating...' : mode === 'root' ? 'Create' : 'Continue'}
-              </Button>
-              <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+                className="text-muted-foreground hover:text-foreground"
               >
                 Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90 text-white font-medium shadow-[0_0_20px_rgba(72,159,227,0.3)] hover:shadow-[0_0_30px_rgba(72,159,227,0.5)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none"
+              >
+                {isSubmitting ? 'Creating...' : mode === 'root' ? 'Create Spark' : 'Continue Spark'}
               </Button>
             </div>
           </form>
