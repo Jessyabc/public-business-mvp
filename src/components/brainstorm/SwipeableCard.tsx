@@ -51,7 +51,7 @@ export function SwipeableCard({
     const threshold = 100;
     
     if (info.offset.x < -threshold) {
-      // Swipe Left → Continue Spark
+      // Swipe Left → Continue Spark (does NOT add as reference - continuation is separate)
       if (onSwipeLeft) {
         onSwipeLeft();
       } else {
@@ -60,9 +60,11 @@ export function SwipeableCard({
           relationType: 'continuation' 
         });
         toast.success(`Continuing: ${postTitle || 'this Spark'}`);
+        // Note: We intentionally don't add/remove references here.
+        // Continuation creates a hard link, references create soft links - they're independent.
       }
     } else if (info.offset.x > threshold) {
-      // Swipe Right → Add/Remove Reference
+      // Swipe Right → Add/Remove Reference (only if not currently continuing this post)
       if (onSwipeRight) {
         onSwipeRight();
       } else {
