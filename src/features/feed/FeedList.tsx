@@ -50,6 +50,7 @@ const GlassCardWrapper = ({
       <div className="absolute -bottom-6 left-8 w-px h-6 bg-gradient-to-b from-white/20 via-[var(--accent)]/30 to-transparent pointer-events-none z-10" />
       
       <SwipeableCard
+        postId={postId}
         onSwipeLeft={onSwipeLeft}
         onSwipeRight={onSwipeRight}
         onLongPress={onLongPress}
