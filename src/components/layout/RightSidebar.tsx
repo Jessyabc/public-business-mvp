@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { ArrowRight } from 'lucide-react';
 
 interface RightSidebarProps {
   variant?: 'default' | 'feed';
@@ -130,41 +132,56 @@ export function RightSidebar({
     };
 
     const renderOpenIdeas = () => {
-      if (openIdeas.length === 0) {
-        return (
-          <p className="text-sm text-white/50 text-center py-8">No open ideas yet.</p>
-        );
-      }
-      
       return (
         <div className="space-y-3">
-          {openIdeas.map(idea => (
-            <div 
-              key={idea.id} 
-              className={cn(
-                "p-3 rounded-xl",
-                "bg-white/5 backdrop-blur-sm",
-                "border border-white/10",
-                "hover:bg-white/10 hover:border-white/20",
-                "transition-all duration-300"
-              )}
-            >
-              <p className="text-sm text-white/80">{idea.text}</p>
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-                  {new Date(idea.created_at).toLocaleDateString()}
-                </p>
-                <span className={cn(
-                  "text-xs px-2 py-0.5 rounded-full",
-                  idea.status === 'active' 
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                    : 'bg-white/10 text-white/50 border border-white/20'
-                )}>
-                  {idea.status}
-                </span>
-              </div>
-            </div>
-          ))}
+          {openIdeas.length === 0 ? (
+            <p className="text-sm text-white/50 text-center py-8">No open ideas yet.</p>
+          ) : (
+            <>
+              {openIdeas.map(idea => (
+                <div 
+                  key={idea.id} 
+                  className={cn(
+                    "p-3 rounded-xl",
+                    "bg-white/5 backdrop-blur-sm",
+                    "border border-white/10",
+                    "hover:bg-white/10 hover:border-white/20",
+                    "transition-all duration-300"
+                  )}
+                >
+                  <p className="text-sm text-white/80 line-clamp-3">{idea.text}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                      {new Date(idea.created_at).toLocaleDateString()}
+                    </p>
+                    <span className={cn(
+                      "text-xs px-2 py-0.5 rounded-full",
+                      idea.status === 'approved' 
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                        : 'bg-white/10 text-white/50 border border-white/20'
+                    )}>
+                      {idea.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+          
+          {/* View All link */}
+          <Link 
+            to="/trail/openideas" 
+            className={cn(
+              "flex items-center justify-center gap-2 p-3 rounded-xl mt-4",
+              "bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/20",
+              "text-[hsl(var(--accent))] text-sm font-medium",
+              "hover:bg-[hsl(var(--accent))]/20 hover:border-[hsl(var(--accent))]/30",
+              "transition-all duration-300"
+            )}
+          >
+            View All Open Ideas
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       );
     };

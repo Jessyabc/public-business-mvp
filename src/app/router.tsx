@@ -97,6 +97,15 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
       </MainLayout>
     ),
   },
+  // Trail/Open Ideas alias route
+  {
+    path: '/trail/openideas',
+    element: (
+      <MainLayout>
+        <LazyWrapper><OpenIdeas /></LazyWrapper>
+      </MainLayout>
+    ),
+  },
   {
     path: '/open-ideas/new',
     element: (
