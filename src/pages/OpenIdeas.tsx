@@ -20,20 +20,20 @@ function useIdeaLineageCounts(ideaIds: string[]) {
 
     const fetchCounts = async () => {
       const { data, error } = await supabase
-        .from('idea_links')
-        .select('source_id')
-        .eq('source_type', 'open_idea')
-        .in('source_id', ideaIds);
+        .from('post_relations')
+        .select('parent_post_id')
+        .eq('relation_type', 'origin')
+        .in('parent_post_id', ideaIds);
 
       if (error) {
         console.error('Error fetching lineage counts:', error);
         return;
       }
 
-      // Count occurrences per source_id
+      // Count occurrences per parent_post_id
       const countMap: Record<string, number> = {};
       data?.forEach((row) => {
-        countMap[row.source_id] = (countMap[row.source_id] || 0) + 1;
+        countMap[row.parent_post_id] = (countMap[row.parent_post_id] || 0) + 1;
       });
       setCounts(countMap);
     };
