@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { Spark } from "./BrainstormLayout";
 import { cn } from "@/lib/utils";
+import { Globe } from "lucide-react";
 
 export type SparkCardProps = {
   spark: Spark;
@@ -214,7 +215,27 @@ export const SparkCard: React.FC<SparkCardProps> = ({
                 "transition-all duration-200"
               )}
             >
-              Save
+              Save reference
+            </button>
+
+            {/* Preview button - circular with globe icon */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(
+                  new CustomEvent('pb:post:preview', { detail: { sparkId: spark.id } })
+                );
+              }}
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center",
+                "bg-white/5 border border-white/10",
+                "hover:bg-white/10",
+                "transition-all duration-200"
+              )}
+              title="Preview"
+            >
+              <Globe className="w-4 h-4 text-white/70" />
             </button>
           </div>
         </div>
