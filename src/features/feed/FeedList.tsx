@@ -4,6 +4,7 @@ import { PostToSparkCard } from '@/components/brainstorm/PostToSparkCard';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
 import { SwipeableCard } from '@/components/brainstorm/SwipeableCard';
 import { LineagePreview } from '@/components/brainstorm/LineagePreview';
+import { ConstellationView } from '@/components/brainstorm/ConstellationView';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -17,16 +18,12 @@ const GlassCardWrapper = ({
   children, 
   index,
   postId,
-  onSwipeLeft,
-  onSwipeRight,
-  onLongPress
+  postTitle,
 }: { 
   children: React.ReactNode; 
   index: number;
   postId: string;
-  onSwipeLeft?: () => void;
-  onSwipeRight?: () => void;
-  onLongPress?: () => void;
+  postTitle?: string;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -51,9 +48,7 @@ const GlassCardWrapper = ({
       
       <SwipeableCard
         postId={postId}
-        onSwipeLeft={onSwipeLeft}
-        onSwipeRight={onSwipeRight}
-        onLongPress={onLongPress}
+        postTitle={postTitle}
       >
         <div className={cn(
           "rounded-3xl overflow-hidden",
@@ -79,6 +74,9 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  
+  // Constellation view state
+  const [constellationPostId, setConstellationPostId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -101,6 +99,18 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
     };
   }, [onEndReached, loading]);
 
+  // Listen for long press event to open constellation view
+  useEffect(() => {
+    const handleOpenConstellation = (e: CustomEvent<{ postId: string }>) => {
+      setConstellationPostId(e.detail.postId);
+    };
+
+    window.addEventListener('pb:post:preview' as any, handleOpenConstellation);
+    return () => {
+      window.removeEventListener('pb:post:preview' as any, handleOpenConstellation);
+    };
+  }, []);
+
   const handlePostSelect = (post: BasePost) => {
     window.dispatchEvent(
       new CustomEvent('pb:brainstorm:show-thread', {
@@ -115,33 +125,6 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
     }
   };
 
-  const handleContinueSpark = (post: BasePost) => {
-    // Open composer with this post as parent
-    window.dispatchEvent(
-      new CustomEvent('pb:composer:open', {
-        detail: { parentPost: post, mode: 'continue' },
-      })
-    );
-  };
-
-  const handleSaveReference = (post: BasePost) => {
-    // Save as reference/bookmark
-    window.dispatchEvent(
-      new CustomEvent('pb:post:bookmark', {
-        detail: { postId: post.id },
-      })
-    );
-  };
-
-  const handlePreview = (post: BasePost) => {
-    // Show preview modal
-    window.dispatchEvent(
-      new CustomEvent('pb:post:preview', {
-        detail: { post },
-      })
-    );
-  };
-
   return (
     <>
       <ul className="mx-auto w-full max-w-3xl px-4 space-y-6 pb-20 relative">
@@ -153,9 +136,7 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
             key={item.id} 
             index={index}
             postId={item.id}
-            onSwipeLeft={() => handleContinueSpark(item)}
-            onSwipeRight={() => handleSaveReference(item)}
-            onLongPress={() => handlePreview(item)}
+            postTitle={item.title || item.content?.slice(0, 40)}
           >
             <PostToSparkCard post={item} onSelect={handlePostSelect} />
           </GlassCardWrapper>
@@ -171,6 +152,18 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
         </div>
       )}
       <div ref={sentinelRef} style={{ height: '1px' }} />
+      
+      {/* Constellation View Modal */}
+      <ConstellationView
+        rootPostId={constellationPostId || ''}
+        isOpen={!!constellationPostId}
+        onClose={() => setConstellationPostId(null)}
+        onSelectPost={(postId) => {
+          setConstellationPostId(null);
+          const post = items.find(p => p.id === postId);
+          if (post) handlePostSelect(post);
+        }}
+      />
     </>
   );
 });

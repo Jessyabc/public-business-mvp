@@ -84,8 +84,14 @@ export function SwipeableCard({
       if (!isDragging) {
         if (onLongPress) {
           onLongPress();
+        } else {
+          // Dispatch event to open ConstellationView
+          window.dispatchEvent(
+            new CustomEvent('pb:post:preview', {
+              detail: { postId },
+            })
+          );
         }
-        // Long press triggers OrbitView - handled by parent
       }
     }, 500);
   };
