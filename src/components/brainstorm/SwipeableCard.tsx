@@ -189,43 +189,6 @@ export function SwipeableCard({
         </div>
       )}
 
-      {/* Desktop hover action buttons */}
-      {!isMobile && isHovered && !isDragging && (
-        <div className="absolute inset-x-0 bottom-0 z-20 p-3 bg-gradient-to-t from-background/90 to-transparent flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={handleContinue}
-            className="h-8 text-xs bg-[hsl(var(--accent))]/10 hover:bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/30 text-[hsl(var(--accent))]"
-          >
-            <MessageCircle className="w-3 h-3 mr-1" />
-            Continue
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={handleReference}
-            className={cn(
-              "h-8 text-xs border",
-              isReferenced 
-                ? "bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400"
-                : "bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-400"
-            )}
-          >
-            {isReferenced ? <Check className="w-3 h-3 mr-1" /> : <Bookmark className="w-3 h-3 mr-1" />}
-            {isReferenced ? 'Referenced' : 'Reference'}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handlePreview}
-            className="h-8 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Preview
-          </Button>
-        </div>
-      )}
-
       {/* Swipeable card */}
       <motion.div
         style={{ x, rotate, scale }}

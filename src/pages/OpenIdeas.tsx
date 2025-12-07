@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Plus, Lightbulb, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { usePosts } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -11,7 +10,42 @@ import { supabase } from '@/integrations/supabase/client';
 
 const REQUIRE_AUTH = true;
 
-// Hook to fetch lineage counts for open ideas
+// Type for open ideas from the public view
+interface OpenIdea {
+  id: string;
+  content: string;
+  source: string;
+  created_at: string;
+}
+
+// Hook to fetch open ideas from the correct view
+function useOpenIdeas() {
+  const [ideas, setIdeas] = useState<OpenIdea[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchIdeas = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('open_ideas_public_view')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching open ideas:', error);
+    } else if (data) {
+      setIdeas(data as OpenIdea[]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchIdeas();
+  }, []);
+
+  return { ideas, loading, fetchIdeas };
+}
+
+// Hook to fetch lineage counts for open ideas using idea_links table
 function useIdeaLineageCounts(ideaIds: string[]) {
   const [counts, setCounts] = useState<Record<string, number>>({});
 
@@ -20,20 +54,20 @@ function useIdeaLineageCounts(ideaIds: string[]) {
 
     const fetchCounts = async () => {
       const { data, error } = await supabase
-        .from('post_relations')
-        .select('parent_post_id')
-        .eq('relation_type', 'origin')
-        .in('parent_post_id', ideaIds);
+        .from('idea_links')
+        .select('source_id')
+        .eq('source_type', 'open_idea')
+        .in('source_id', ideaIds);
 
       if (error) {
         console.error('Error fetching lineage counts:', error);
         return;
       }
 
-      // Count occurrences per parent_post_id
+      // Count occurrences per source_id
       const countMap: Record<string, number> = {};
       data?.forEach((row) => {
-        countMap[row.parent_post_id] = (countMap[row.parent_post_id] || 0) + 1;
+        countMap[row.source_id] = (countMap[row.source_id] || 0) + 1;
       });
       setCounts(countMap);
     };
@@ -46,15 +80,12 @@ function useIdeaLineageCounts(ideaIds: string[]) {
 
 export default function OpenIdeas() {
   const { user } = useAuth();
-  const { posts, loading, fetchPosts } = usePosts();
+  const { ideas, loading, fetchIdeas } = useOpenIdeas();
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
 
-  // Filter for open ideas (public sparks/brainstorms)
-  const openIdeas = posts.filter(p => p.kind === 'Spark' && p.mode === 'public');
-  
   // Fetch lineage counts for all open ideas
-  const ideaIds = openIdeas.map(idea => idea.id);
+  const ideaIds = ideas.map(idea => idea.id);
   const lineageCounts = useIdeaLineageCounts(ideaIds);
 
   if (REQUIRE_AUTH && !user) {
@@ -89,7 +120,7 @@ export default function OpenIdeas() {
 
   return (
     <>
-      <PullToRefresh onRefresh={() => fetchPosts()}>
+      <PullToRefresh onRefresh={() => fetchIdeas()}>
         <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
@@ -110,7 +141,12 @@ export default function OpenIdeas() {
               Loading open ideas…
             </div>
           )}
-          {!loading && openIdeas.map((idea) => {
+          {!loading && ideas.length === 0 && (
+            <div className="col-span-full text-sm text-muted-foreground">
+              No open ideas yet. Be the first to submit one!
+            </div>
+          )}
+          {!loading && ideas.map((idea) => {
             const sparkCount = lineageCounts[idea.id] || 0;
             return (
               <div
@@ -122,7 +158,9 @@ export default function OpenIdeas() {
                   {idea.content}
                 </p>
                 <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>From the community</span>
+                  <span>
+                    {idea.source === 'intake' ? 'From a visitor' : 'From the community'}
+                  </span>
                   <div className="flex items-center gap-3">
                     {sparkCount > 0 && (
                       <span className="flex items-center gap-1 text-[hsl(var(--accent))]">
