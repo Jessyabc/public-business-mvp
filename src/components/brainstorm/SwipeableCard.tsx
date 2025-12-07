@@ -5,6 +5,8 @@ import { ArrowRight, Bookmark, MessageCircle, Check } from 'lucide-react';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { usePendingReferencesStore } from '@/stores/pendingReferencesStore';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
 
 interface SwipeableCardProps {
   children: React.ReactNode;
@@ -26,8 +28,10 @@ export function SwipeableCard({
   className
 }: SwipeableCardProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   
+  const isMobile = useIsMobile();
   const { openComposer } = useComposerStore();
   const { addRef, hasRef, pendingRefs, removeRef } = usePendingReferencesStore();
   
@@ -106,34 +110,77 @@ export function SwipeableCard({
     }
   };
 
-  return (
-    <div className={cn("relative", className)}>
-      {/* Left action indicator (Continue) */}
-      <motion.div
-        style={{ opacity: leftOpacity }}
-        className="absolute inset-y-0 left-0 w-20 flex items-center justify-center pointer-events-none"
-      >
-        <div className="flex flex-col items-center gap-1 text-[hsl(var(--accent))]">
-          <MessageCircle className="w-6 h-6" />
-          <span className="text-xs font-medium">Continue</span>
-        </div>
-      </motion.div>
+  // Desktop action handlers
+  const handleContinue = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isReferenced) {
+      removeRef(postId);
+    }
+    openComposer({ 
+      parentPostId: postId, 
+      relationType: 'continuation' 
+    });
+    toast.success(`Continuing: ${postTitle || 'this Spark'}`);
+  };
 
-      {/* Right action indicator (Save/Saved) */}
-      <motion.div
-        style={{ opacity: rightOpacity }}
-        className="absolute inset-y-0 right-0 w-20 flex items-center justify-center pointer-events-none"
-      >
-        <div className={cn(
-          "flex flex-col items-center gap-1",
-          isReferenced ? "text-green-400" : "text-purple-400"
-        )}>
-          {isReferenced ? <Check className="w-6 h-6" /> : <Bookmark className="w-6 h-6" />}
-          <span className="text-xs font-medium">
-            {isReferenced ? 'Remove' : 'Reference'}
-          </span>
-        </div>
-      </motion.div>
+  const handleReference = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isReferenced) {
+      removeRef(postId);
+      toast.info('Removed from references');
+    } else {
+      addRef(postId);
+      toast.success(`Added to references (${pendingRefs.length + 1})`, {
+        description: 'Will be linked to your next Spark',
+      });
+    }
+  };
+
+  const handlePreview = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(
+      new CustomEvent('pb:post:preview', {
+        detail: { postId },
+      })
+    );
+  };
+
+  return (
+    <div 
+      className={cn("relative group", className)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Left action indicator (Continue) - Mobile only */}
+      {isMobile && (
+        <motion.div
+          style={{ opacity: leftOpacity }}
+          className="absolute inset-y-0 left-0 w-20 flex items-center justify-center pointer-events-none"
+        >
+          <div className="flex flex-col items-center gap-1 text-[hsl(var(--accent))]">
+            <MessageCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Continue</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Right action indicator (Save/Saved) - Mobile only */}
+      {isMobile && (
+        <motion.div
+          style={{ opacity: rightOpacity }}
+          className="absolute inset-y-0 right-0 w-20 flex items-center justify-center pointer-events-none"
+        >
+          <div className={cn(
+            "flex flex-col items-center gap-1",
+            isReferenced ? "text-green-400" : "text-purple-400"
+          )}>
+            {isReferenced ? <Check className="w-6 h-6" /> : <Bookmark className="w-6 h-6" />}
+            <span className="text-xs font-medium">
+              {isReferenced ? 'Remove' : 'Reference'}
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Reference indicator badge */}
       {isReferenced && (
@@ -142,27 +189,65 @@ export function SwipeableCard({
         </div>
       )}
 
+      {/* Desktop hover action buttons */}
+      {!isMobile && isHovered && !isDragging && (
+        <div className="absolute inset-x-0 bottom-0 z-20 p-3 bg-gradient-to-t from-background/90 to-transparent flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleContinue}
+            className="h-8 text-xs bg-[hsl(var(--accent))]/10 hover:bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/30 text-[hsl(var(--accent))]"
+          >
+            <MessageCircle className="w-3 h-3 mr-1" />
+            Continue
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleReference}
+            className={cn(
+              "h-8 text-xs border",
+              isReferenced 
+                ? "bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400"
+                : "bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-400"
+            )}
+          >
+            {isReferenced ? <Check className="w-3 h-3 mr-1" /> : <Bookmark className="w-3 h-3 mr-1" />}
+            {isReferenced ? 'Referenced' : 'Reference'}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handlePreview}
+            className="h-8 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Preview
+          </Button>
+        </div>
+      )}
+
       {/* Swipeable card */}
       <motion.div
         style={{ x, rotate, scale }}
-        drag="x"
+        drag={isMobile ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        whileTap={{ scale: 0.98 }}
+        onPointerDown={isMobile ? handlePointerDown : undefined}
+        onPointerUp={isMobile ? handlePointerUp : undefined}
+        onPointerLeave={isMobile ? handlePointerUp : undefined}
+        whileTap={isMobile ? { scale: 0.98 } : undefined}
         className={cn(
-          "relative cursor-grab active:cursor-grabbing touch-pan-y",
+          "relative",
+          isMobile && "cursor-grab active:cursor-grabbing touch-pan-y",
           isDragging && "z-10"
         )}
       >
         {children}
         
-        {/* Drag hint */}
-        {!isDragging && (
+        {/* Drag hint - Mobile only */}
+        {isMobile && !isDragging && (
           <div className="absolute inset-x-0 bottom-2 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             <div className="flex items-center gap-2 text-xs text-white/30">
               <ArrowRight className="w-3 h-3 rotate-180" />

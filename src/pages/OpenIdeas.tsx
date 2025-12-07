@@ -1,14 +1,48 @@
 import { Link } from 'react-router-dom';
-import { Plus, Lightbulb } from 'lucide-react';
+import { Plus, Lightbulb, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePosts } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { PullToRefresh } from '@/components/layout/PullToRefresh';
+import { supabase } from '@/integrations/supabase/client';
 
 const REQUIRE_AUTH = true;
+
+// Hook to fetch lineage counts for open ideas
+function useIdeaLineageCounts(ideaIds: string[]) {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (ideaIds.length === 0) return;
+
+    const fetchCounts = async () => {
+      const { data, error } = await supabase
+        .from('idea_links')
+        .select('source_id')
+        .eq('source_type', 'open_idea')
+        .in('source_id', ideaIds);
+
+      if (error) {
+        console.error('Error fetching lineage counts:', error);
+        return;
+      }
+
+      // Count occurrences per source_id
+      const countMap: Record<string, number> = {};
+      data?.forEach((row) => {
+        countMap[row.source_id] = (countMap[row.source_id] || 0) + 1;
+      });
+      setCounts(countMap);
+    };
+
+    fetchCounts();
+  }, [ideaIds.join(',')]);
+
+  return counts;
+}
 
 export default function OpenIdeas() {
   const { user } = useAuth();
@@ -18,6 +52,10 @@ export default function OpenIdeas() {
 
   // Filter for open ideas (public sparks/brainstorms)
   const openIdeas = posts.filter(p => p.kind === 'Spark' && p.mode === 'public');
+  
+  // Fetch lineage counts for all open ideas
+  const ideaIds = openIdeas.map(idea => idea.id);
+  const lineageCounts = useIdeaLineageCounts(ideaIds);
 
   if (REQUIRE_AUTH && !user) {
     return (
@@ -44,6 +82,11 @@ export default function OpenIdeas() {
     );
   }
 
+  const handleIdeaClick = (ideaId: string) => {
+    setSelectedIdeaId(ideaId);
+    openComposer({ originOpenIdeaId: ideaId });
+  };
+
   return (
     <>
       <PullToRefresh onRefresh={() => fetchPosts()}>
@@ -67,24 +110,32 @@ export default function OpenIdeas() {
               Loading open ideas…
             </div>
           )}
-          {!loading && openIdeas.map((idea) => (
-            <div
-              key={idea.id}
-              onClick={() => {
-                setSelectedIdeaId(idea.id);
-                openComposer();
-              }}
-              className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent transition-all"
-            >
-              <p className="text-sm text-foreground line-clamp-4 leading-relaxed">
-                {idea.content}
-              </p>
-              <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                <span>From the community</span>
-                <span>{new Date(idea.created_at).toLocaleDateString()}</span>
+          {!loading && openIdeas.map((idea) => {
+            const sparkCount = lineageCounts[idea.id] || 0;
+            return (
+              <div
+                key={idea.id}
+                onClick={() => handleIdeaClick(idea.id)}
+                className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-col justify-between min-h-[160px] cursor-pointer hover:bg-accent/50 transition-all group"
+              >
+                <p className="text-sm text-foreground line-clamp-4 leading-relaxed">
+                  {idea.content}
+                </p>
+                <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>From the community</span>
+                  <div className="flex items-center gap-3">
+                    {sparkCount > 0 && (
+                      <span className="flex items-center gap-1 text-[hsl(var(--accent))]">
+                        <Sparkles className="w-3 h-3" />
+                        Sparked {sparkCount} chain{sparkCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                    <span>{new Date(idea.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       </PullToRefresh>
