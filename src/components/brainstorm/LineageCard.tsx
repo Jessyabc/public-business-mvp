@@ -60,10 +60,10 @@ export function LineageCard({ postId, currentPost, onSelectPost }: LineageCardPr
           return;
         }
 
-        // Fetch author names
+        // Fetch author names using profile_cards view for safer public access
         const userIds = Array.from(new Set(posts.map((p) => p.user_id)));
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('profile_cards')
           .select('id, display_name')
           .in('id', userIds);
 
