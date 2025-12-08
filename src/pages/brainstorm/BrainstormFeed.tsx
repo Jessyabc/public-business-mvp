@@ -11,12 +11,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Bell, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useComposerStore } from '@/hooks/useComposerStore';
 import type { Post, BasePost } from '@/types/post';
 
 export default function BrainstormFeed() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
-  const [composerOpen, setComposerOpen] = useState(false);
+  const { openComposer, closeComposer, isOpen: composerOpen } = useComposerStore();
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isInitialMount, setIsInitialMount] = useState(true);
@@ -31,7 +32,7 @@ export default function BrainstormFeed() {
   useEffect(() => {
     setSelectedPostId(null);
     setSelectedPost(null);
-    setComposerOpen(false);
+    closeComposer();
     
     const currentActivePostId = useBrainstormExperienceStore.getState().activePostId;
     if (currentActivePostId) {
@@ -39,7 +40,7 @@ export default function BrainstormFeed() {
     }
     
     setIsInitialMount(false);
-  }, []);
+  }, [closeComposer]);
 
   const fetchPostById = useCallback(async (id: string): Promise<Post | null> => {
     if (loadingRef.current) return null;
@@ -64,12 +65,18 @@ export default function BrainstormFeed() {
   }, []);
 
   useEffect(() => {
-    const handleContinue = () => {
-      setComposerOpen(true);
+    const handleContinue = (event: CustomEvent) => {
+      const { parentId } = event.detail || {};
+      if (parentId) {
+        // Open composer with continuation context
+        openComposer({ parentPostId: parentId, relationType: 'continuation' });
+      } else {
+        openComposer();
+      }
     };
-    window.addEventListener('pb:brainstorm:continue', handleContinue);
-    return () => window.removeEventListener('pb:brainstorm:continue', handleContinue);
-  }, []);
+    window.addEventListener('pb:brainstorm:continue', handleContinue as EventListener);
+    return () => window.removeEventListener('pb:brainstorm:continue', handleContinue as EventListener);
+  }, [openComposer]);
 
   useEffect(() => {
     const handleShowThread = async (event: CustomEvent) => {
@@ -167,7 +174,7 @@ export default function BrainstormFeed() {
             </Button>
           </Link>
           <Button
-            onClick={() => setComposerOpen(true)}
+            onClick={() => openComposer()}
             size="icon"
             className={cn(
               "w-10 h-10 rounded-full",
@@ -192,7 +199,10 @@ export default function BrainstormFeed() {
         />
       </PullToRefresh>
       
-      <ComposerModal isOpen={composerOpen} onClose={() => setComposerOpen(false)} />
+      <ComposerModal 
+        isOpen={composerOpen} 
+        onClose={closeComposer}
+      />
       
       <PostReaderModal
         isOpen={!!readerModalPost}
