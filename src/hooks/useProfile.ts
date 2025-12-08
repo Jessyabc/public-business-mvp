@@ -10,7 +10,7 @@ export type Profile = {
   avatar_url: string | null;
   bio: string | null;
   website: string | null;
-  linkedin_url: string | null;
+  social_media: string | null;
   company: string | null;
   location: string | null;
   is_completed?: boolean | null;
@@ -22,7 +22,7 @@ const makeEmptyProfile = (id: string, fallbackName?: string | null): Profile => 
   avatar_url: null,
   bio: null,
   website: null,
-  linkedin_url: null,
+  social_media: null,
   company: null,
   location: null,
   is_completed: false,
@@ -56,18 +56,16 @@ export function useProfile() {
       if (!data) {
         setProfile(makeEmptyProfile(user.id, user.user_metadata?.name));
       } else {
-        // type sûre : on s'assure que toutes les clés existent
-        const p = data as Partial<Profile>;
         setProfile({
           id: user.id,
-          display_name: p.display_name ?? "",
-          avatar_url: p.avatar_url ?? null,
-          bio: p.bio ?? null,
-          website: p.website ?? null,
-          linkedin_url: p.linkedin_url ?? null,
-          company: p.company ?? null,
-          location: p.location ?? null,
-          is_completed: p.is_completed ?? null,
+          display_name: data.display_name ?? "",
+          avatar_url: data.avatar_url ?? null,
+          bio: data.bio ?? null,
+          website: data.website ?? null,
+          social_media: data['Social Media'] ?? null,
+          company: data.company ?? null,
+          location: data.location ?? null,
+          is_completed: data.is_completed ?? null,
         });
       }
     } catch (err: any) {
@@ -83,9 +81,10 @@ export function useProfile() {
       if (!user) return { error: new Error("No user found") };
 
       try {
-        // On construit un objet COMPLET (toutes les propriétés de Profile)
         const current = profile ?? makeEmptyProfile(user.id, user.user_metadata?.name);
-        const merged: Profile = {
+        
+        // Build the database object with the correct column name
+        const dbPayload = {
           id: user.id,
           display_name: updates.display_name ?? current.display_name ?? "",
           avatar_url: updates.avatar_url ?? current.avatar_url ?? null,
@@ -93,9 +92,7 @@ export function useProfile() {
           website: safeUrlOrEmpty(
             (updates.website ?? current.website) as string | null | undefined
           ),
-          linkedin_url: safeUrlOrEmpty(
-            (updates.linkedin_url ?? current.linkedin_url) as string | null | undefined
-          ),
+          "Social Media": updates.social_media ?? current.social_media ?? null,
           company: updates.company ?? current.company ?? null,
           location: updates.location ?? current.location ?? null,
           is_completed:
@@ -106,16 +103,24 @@ export function useProfile() {
 
         const { data, error } = await supabase
           .from("profiles")
-          .upsert(merged, { onConflict: "id" })
+          .upsert(dbPayload, { onConflict: "id" })
           .select()
           .maybeSingle();
 
         if (error) throw error;
 
-        const profileData = data ? {
-          ...data,
-          linkedin_url: data['Social Media'] || null
-        } as Profile : merged;
+        // Map back to Profile type
+        const profileData: Profile = {
+          id: user.id,
+          display_name: data?.display_name ?? dbPayload.display_name,
+          avatar_url: data?.avatar_url ?? dbPayload.avatar_url,
+          bio: data?.bio ?? dbPayload.bio,
+          website: data?.website ?? dbPayload.website,
+          social_media: data?.['Social Media'] ?? dbPayload['Social Media'],
+          company: data?.company ?? dbPayload.company,
+          location: data?.location ?? dbPayload.location,
+          is_completed: data?.is_completed ?? dbPayload.is_completed,
+        };
         
         setProfile(profileData);
         return { error: null };

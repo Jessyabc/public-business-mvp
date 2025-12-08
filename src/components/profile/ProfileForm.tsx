@@ -278,14 +278,17 @@ export function ProfileForm() {
           <div className="space-y-2">
             <Label htmlFor="website" className="flex items-center gap-2 text-[var(--text-primary)]">
               <Globe className="w-4 h-4 text-[var(--text-secondary)]" />
-              Website
+              Website / Social Link
             </Label>
             <GlassInput
               id="website"
               value={form.website ?? ""}
               onChange={(e) => updateField("website", e.target.value)}
-              placeholder="https://yourwebsite.com"
+              placeholder="https://yourwebsite.com or social profile"
             />
+            <p className="text-xs text-muted-foreground">
+              Add your website, portfolio, or any social profile link
+            </p>
           </div>
         </div>
 
