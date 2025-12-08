@@ -224,7 +224,7 @@ export const SparkCard: React.FC<SparkCardProps> = ({
               onClick={(e) => {
                 e.stopPropagation();
                 window.dispatchEvent(
-                  new CustomEvent('pb:post:preview', { detail: { sparkId: spark.id } })
+                  new CustomEvent('pb:post:preview', { detail: { postId: spark.id } })
                 );
               }}
               className={cn(
