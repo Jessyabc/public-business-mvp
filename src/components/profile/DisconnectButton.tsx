@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 
 export function DisconnectButton() {
   const { signOut } = useAuth();
-  const { mode } = useAppMode();
+  const { mode, setMode } = useAppMode();
   const navigate = useNavigate();
 
   const handleDisconnect = async () => {
     try {
       await signOut();
+      // Reset to public mode on disconnect
+      setMode('public');
       toast.success('Successfully signed out');
       // Force navigation to root which will show Landing page
       navigate('/', { replace: true });
