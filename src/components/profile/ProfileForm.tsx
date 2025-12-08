@@ -1,5 +1,5 @@
 // src/components/profile/ProfileForm.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { GlassInput } from "@/components/ui/GlassInput";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useToast } from "@/hooks/use-toast";
-import { User, Building, MapPin, Globe, Save, Users, Mail } from "lucide-react";
+import { User, Building, MapPin, Globe, Save, Users, Mail, Camera, Loader2 } from "lucide-react";
 import { DisconnectButton } from "./DisconnectButton";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { BusinessMemberBadge } from "@/components/business/BusinessMemberBadge";
@@ -16,6 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useProfile, Profile as ProfileType } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export function ProfileForm() {
   const { user } = useAuth();
@@ -33,8 +34,57 @@ export function ProfileForm() {
   const [hasChanges, setHasChanges] = useState(false);
   const [inviteToken, setInviteToken] = useState("");
   const [acceptingInvite, setAcceptingInvite] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBusiness = userRoles.includes("business_member") || userRoles.includes("admin");
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Error", description: "Please upload an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image must be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update form state
+      if (form) {
+        setForm({ ...form, avatar_url: publicUrl });
+        setHasChanges(true);
+      }
+
+      toast({ title: "Success", description: "Avatar uploaded! Click Save to apply." });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({ title: "Error", description: "Failed to upload avatar", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   useEffect(() => {
     if (profile) setForm(profile);
@@ -130,14 +180,43 @@ export function ProfileForm() {
       <CardContent className="space-y-6">
         {/* Avatar + Display name */}
         <div className="flex items-center gap-4">
-          <Avatar className="w-20 h-20">
-            <AvatarImage src={form.avatar_url ?? undefined} />
-            <AvatarFallback className={`text-lg ${
-              mode === "public" ? "bg-primary/20 text-primary" : "bg-blue-500/20 text-blue-600"
-            }`}>
-              {form.display_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative group">
+            <Avatar className="w-20 h-20">
+              <AvatarImage src={form.avatar_url ?? undefined} />
+              <AvatarFallback className={`text-lg ${
+                mode === "public" ? "bg-primary/20 text-primary" : "bg-blue-500/20 text-blue-600"
+              }`}>
+                {form.display_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            
+            {/* Upload overlay */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className={cn(
+                "absolute inset-0 flex items-center justify-center rounded-full",
+                "bg-black/50 opacity-0 group-hover:opacity-100",
+                "transition-opacity duration-200 cursor-pointer",
+                uploadingAvatar && "opacity-100"
+              )}
+            >
+              {uploadingAvatar ? (
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              ) : (
+                <Camera className="w-6 h-6 text-white" />
+              )}
+            </button>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
 
           <div className="flex-1">
             <Label htmlFor="display_name" className="text-[var(--text-primary)]">

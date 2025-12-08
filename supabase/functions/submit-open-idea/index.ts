@@ -66,10 +66,8 @@ Deno.serve(async (req) => {
 
     // Get client IP for rate limiting
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
-      // Anonymous user → insert into open_ideas_intake
-      tableName = 'open_ideas_intake';
 
-      // Hash IP for rate limiting
+    // Hash IP for rate limiting
       const { data: ipHashData } = await supabaseAdmin.rpc('hash_ip', { ip_address: clientIP });
       const ipHash = ipHashData as string | null;
 
