@@ -213,54 +213,58 @@ export function ConstellationView({
             }}
             className="absolute inset-0 flex items-center justify-center"
           >
-            {/* Connection lines */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            {/* Connection lines - using a centered SVG viewBox */}
+            <svg 
+              className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+              style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
+            >
               <defs>
                 {/* Gradient for hard links (continuations) */}
                 <linearGradient id="hardLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(var(--accent) / 0.6)" />
-                  <stop offset="100%" stopColor="hsl(280 70% 60% / 0.6)" />
+                  <stop offset="0%" stopColor="#a855f7" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.6" />
                 </linearGradient>
                 {/* Gradient for soft links (cross-links) */}
                 <linearGradient id="softLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(200 60% 50% / 0.4)" />
-                  <stop offset="100%" stopColor="hsl(220 60% 60% / 0.4)" />
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0.4" />
                 </linearGradient>
               </defs>
               
-              {/* Render soft connections first (behind) */}
-              {softConnections.map((conn, i) => conn && (
-                <motion.line
-                  key={`soft-${i}`}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 0.6 }}
-                  transition={{ delay: hardConnections.length * 0.1 + i * 0.05, duration: 0.5 }}
-                  x1={`calc(50% + ${conn.from.x}px)`}
-                  y1={`calc(50% + ${conn.from.y}px)`}
-                  x2={`calc(50% + ${conn.to.x}px)`}
-                  y2={`calc(50% + ${conn.to.y}px)`}
-                  stroke="url(#softLineGradient)"
-                  strokeWidth="1.5"
-                  strokeDasharray="6 4"
-                  className="opacity-60"
-                />
-              ))}
-              
-              {/* Render hard connections (on top) */}
-              {hardConnections.map((conn, i) => conn && (
-                <motion.line
-                  key={`hard-${i}`}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
-                  x1={`calc(50% + ${conn.from.x}px)`}
-                  y1={`calc(50% + ${conn.from.y}px)`}
-                  x2={`calc(50% + ${conn.to.x}px)`}
-                  y2={`calc(50% + ${conn.to.y}px)`}
-                  stroke="url(#hardLineGradient)"
-                  strokeWidth="2"
-                />
-              ))}
+              <g style={{ transform: 'translate(50%, 50%)' }}>
+                {/* Render soft connections first (behind) */}
+                {softConnections.map((conn, i) => conn && (
+                  <motion.line
+                    key={`soft-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.6 }}
+                    transition={{ delay: hardConnections.length * 0.1 + i * 0.05, duration: 0.5 }}
+                    x1={conn.from.x}
+                    y1={conn.from.y}
+                    x2={conn.to.x}
+                    y2={conn.to.y}
+                    stroke="url(#softLineGradient)"
+                    strokeWidth="1.5"
+                    strokeDasharray="6 4"
+                  />
+                ))}
+                
+                {/* Render hard connections (on top) */}
+                {hardConnections.map((conn, i) => conn && (
+                  <motion.line
+                    key={`hard-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
+                    x1={conn.from.x}
+                    y1={conn.from.y}
+                    x2={conn.to.x}
+                    y2={conn.to.y}
+                    stroke="url(#hardLineGradient)"
+                    strokeWidth="2"
+                  />
+                ))}
+              </g>
             </svg>
 
             {/* Nodes */}
