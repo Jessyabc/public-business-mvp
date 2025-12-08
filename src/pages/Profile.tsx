@@ -3,8 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
-import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle } from "lucide-react";
-import { ProfileForm } from "@/components/profile/ProfileForm";
+import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, User } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePosts } from "@/hooks/usePosts";
@@ -59,8 +58,8 @@ export default function Profile() {
               <p className="text-muted-foreground">Manage your profile and view your content</p>
             </div>
 
-            {/* Quick Actions - Only Create Post and Business */}
-            <div className={`grid gap-4 mb-6 ${(isBusinessMember() || isAdmin()) ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+            {/* Quick Actions - Inline buttons */}
+            <div className={`grid gap-4 mb-6 ${(isBusinessMember() || isAdmin()) ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
               <Button 
                 onClick={() => setShowComposer(true)}
                 className="glass-ios-triple h-16 text-left justify-start"
@@ -86,6 +85,18 @@ export default function Profile() {
                   </div>
                 </Button>
               )}
+
+              <Button 
+                onClick={() => navigate("/settings")}
+                className="glass-ios-triple h-16 text-left justify-start"
+                variant="outline"
+              >
+                <User className="h-5 w-5 mr-2" />
+                <div>
+                  <div className="font-medium">Profile Settings</div>
+                  <div className="text-xs text-muted-foreground">Edit profile & preferences</div>
+                </div>
+              </Button>
             </div>
 
             {/* My Posts Section - Now embedded */}
@@ -227,28 +238,6 @@ export default function Profile() {
               </Tabs>
             </GlassCard>
 
-            {/* Profile Form */}
-            <ProfileForm />
-
-            {/* Settings Link */}
-            <GlassCard className="glass-ios-triple glass-corner-distort">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Settings className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <h3 className="font-medium">Account Settings</h3>
-                    <p className="text-sm text-muted-foreground">Manage preferences and account options</p>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => navigate("/settings")}
-                  variant="outline"
-                  className="glass-ios-triple"
-                >
-                  Open Settings
-                </Button>
-              </div>
-            </GlassCard>
           </div>
 
           <ComposerModal 
