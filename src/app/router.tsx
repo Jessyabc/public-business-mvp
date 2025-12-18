@@ -3,7 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import Index from '@/pages/Index';
 import { LazyWrapper, NotFound } from './router-helpers';
-import { RequireOrg } from '@/features/orgs/components/RequireOrg';
+import { RootLayout } from '@/components/layout/RootLayout';
 
 // Lazy-loaded pages
 const Discuss = lazy(() => import('@/pages/Discuss'));
@@ -14,7 +14,6 @@ const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 const Sitemap = lazy(() => import('@/pages/Sitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
-const Insights = lazy(() => import('@/pages/Insights'));
 const CreateOrganization = lazy(() => import('@/features/orgs/pages/CreateOrganization'));
 
 // Eager-loaded pages
@@ -73,7 +72,7 @@ const legacyRedirects = [
 ].map(r => ({ path: r.from, element: <Navigate to={r.to} replace /> }));
 
 // Build routes array
-const routes: Parameters<typeof createBrowserRouter>[0] = [
+const childRoutes = [
   // === Core Routes (Think / Discuss) ===
   { path: '/', element: withLayout(<Index />) },
   { path: '/discuss', element: withLayoutLazy(Discuss) },
@@ -139,10 +138,21 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
 
 // Dev sitemap (development only)
 if (import.meta.env.DEV) {
-  routes.splice(routes.length - 1, 0, {
-    path: '/dev/sitemap',
-    element: withLayoutLazy(DevSitemap),
-  });
+  // Find index of 404 route
+  const notFoundIndex = childRoutes.findIndex(r => r.path === '*');
+  if (notFoundIndex !== -1) {
+    childRoutes.splice(notFoundIndex, 0, {
+      path: '/dev/sitemap',
+      element: withLayoutLazy(DevSitemap),
+    });
+  }
 }
+
+const routes: Parameters<typeof createBrowserRouter>[0] = [
+  {
+    element: <RootLayout />,
+    children: childRoutes
+  }
+];
 
 export const router = createBrowserRouter(routes);
