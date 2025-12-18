@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeInjector } from "@/styles/ThemeInjector";
 import { router } from "./app/router";
 import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
 
@@ -16,7 +15,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <ThemeInjector />
         <div className="page-shell">
           <main className="page-content">
             <RouterProvider router={router} />

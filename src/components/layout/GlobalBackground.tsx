@@ -29,7 +29,7 @@ export function GlobalBackground() {
   }
 
   // Discuss respects the lens
-  if (location.pathname === '/discuss') {
+  if (location.pathname.startsWith('/discuss')) {
     return <OrbitalBackground mode={lens} />;
   }
 

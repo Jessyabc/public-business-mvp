@@ -8,6 +8,7 @@ import { GlobalBackground } from '@/components/layout/GlobalBackground';
 import { SwipeNavigationWrapper } from '@/components/layout/SwipeNavigationWrapper';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ThemeInjector } from '@/styles/ThemeInjector';
 interface MainLayoutProps {
   children: ReactNode;
   noTopPadding?: boolean;
@@ -42,6 +43,7 @@ export function MainLayout({
   return <div className="relative min-h-screen w-full bg-transparent" style={{
     color: 'var(--text-primary)'
   }}>
+      <ThemeInjector />
       <GlobalBackground />
       
       {/* Global Navigation Menu - always visible */}

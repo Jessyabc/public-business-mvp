@@ -14,6 +14,15 @@ const DiscussLensContext = createContext<DiscussLensContextType | undefined>(und
 
 export function DiscussLensProvider({ children }: { children: ReactNode }) {
   const [lens, setLens] = useState<DiscussLens>(() => {
+    // Optional: allow legacy links like /discuss?lens=business to set initial lens
+    // (Provider should be mounted only for /discuss subtree.)
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('lens');
+    if (fromQuery === 'public' || fromQuery === 'business') {
+      localStorage.setItem('pb-discuss-lens', fromQuery);
+      return fromQuery;
+    }
+
     const stored = localStorage.getItem('pb-discuss-lens');
     return (stored === 'public' || stored === 'business') ? stored : 'public';
   });
