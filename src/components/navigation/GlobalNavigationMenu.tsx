@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { Button } from '@/components/ui/button';
-import { ToggleLeft, User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Search, Plus, Palette, Map } from 'lucide-react';
+import { User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Plus, Palette, Map } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +22,6 @@ export function GlobalNavigationMenu() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { isBusinessMember, isAdmin } = useUserRoles();
-  const { mode, toggleMode } = useAppMode();
   const { openComposer } = useComposerStore();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -60,74 +57,32 @@ export function GlobalNavigationMenu() {
   };
 
   if (!user) {
-    return null; // Don't render anything when user is not logged in - use Header component instead
+    return null;
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2 sm:py-3 backdrop-blur-xl border-b ${
-      mode === 'public' 
-        ? 'bg-black/20 border-white/10' 
-        : 'bg-white/70 border-slate-300/40'
-    }`}>
+    <nav className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2 sm:py-3 backdrop-blur-xl border-b bg-black/20 border-white/10">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-        {/* Left side - Logo and Navigation */}
+        {/* Left side - Logo */}
         <div className="flex items-center gap-3 sm:gap-6">
           <div 
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <Brain className={`w-6 h-6 sm:w-8 sm:h-8 ${mode === 'public' ? 'text-primary' : 'text-blue-600'}`} />
-            <span className={`text-base sm:text-xl font-bold hidden xs:inline ${mode === 'public' ? 'text-white' : 'text-slate-800'}`}>
+            <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <span className="text-base sm:text-xl font-bold hidden xs:inline text-white">
               PublicBusiness
             </span>
-          </div>
-          
-          {/* Mode indicator */}
-          <div className={`hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border ${
-            mode === 'public' 
-              ? 'bg-primary/20 border-primary/30 text-primary' 
-              : 'bg-blue-600/20 border-blue-600/30 text-blue-600'
-          }`}>
-            {mode === 'public' ? (
-              <>
-                <Brain className="w-4 h-4" />
-                <span className="text-sm font-medium">Public Mode</span>
-              </>
-            ) : (
-              <>
-                <Building2 className="w-4 h-4" />
-                <span className="text-sm font-medium">Business Mode</span>
-              </>
-            )}
           </div>
         </div>
 
         {/* Right side - Actions and Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Mode Toggle */}
-          <Button
-            onClick={toggleMode}
-            variant="ghost"
-            size="sm"
-            className={`flex items-center gap-2 px-2 sm:px-3 ${
-              mode === 'public' 
-                ? 'text-white hover:bg-white/10' 
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <ToggleLeft className="w-4 h-4" />
-            <span className="hidden md:inline">Switch to {mode === 'public' ? 'Business' : 'Public'}</span>
-          </Button>
-
           {/* Create Content Button */}
           <Button
             onClick={handleCreateContent}
             size="sm"
-            className={`px-2 sm:px-4 ${
-              mode === 'public'
-                ? 'bg-primary hover:bg-primary/90 text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
+            className="px-2 sm:px-4 bg-primary hover:bg-primary/90 text-white"
           >
             <Plus className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Create</span>
@@ -138,17 +93,11 @@ export function GlobalNavigationMenu() {
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
-                className={`relative h-8 w-8 rounded-full ${
-                  mode === 'public' ? 'hover:bg-white/10' : 'hover:bg-slate-100'
-                }`}
+                className="relative h-8 w-8 rounded-full hover:bg-white/10"
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || 'User'} />
-                  <AvatarFallback className={
-                    mode === 'public' 
-                      ? 'bg-primary/20 text-primary' 
-                      : 'bg-blue-600/20 text-blue-600'
-                  }>
+                  <AvatarFallback className="bg-primary/20 text-primary">
                     {profile?.display_name?.[0] || user?.email?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>

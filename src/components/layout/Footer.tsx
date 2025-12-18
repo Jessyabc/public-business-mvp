@@ -1,12 +1,10 @@
 import { NavLink } from 'react-router-dom';
 import { Linkedin, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 
 export function Footer() {
   const { user } = useAuth();
-  const { mode } = useAppMode();
 
   if (user) return null; // Don't show footer when user is logged in
 

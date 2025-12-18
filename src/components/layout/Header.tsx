@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { useProfile } from '@/hooks/useProfile';
 import { Menu, X, LogOut, User, Settings } from 'lucide-react';
 import styles from '@/components/effects/glassSurface.module.css';
@@ -26,9 +25,6 @@ export function Header({ className }: HeaderProps) {
   const {
     profile
   } = useProfile();
-  const {
-    mode
-  } = useAppMode();
   const navigate = useNavigate();
   const {
     toast
