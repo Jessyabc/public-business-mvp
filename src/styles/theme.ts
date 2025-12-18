@@ -76,6 +76,10 @@ export interface ThemeEffects {
   glassBlur: string;
   /** Warp distortion amount – refraction simulation */
   warpDistortion: string;
+  /** Neumorphic raised shadow – soft outer shadow */
+  neumorphicRaised?: string;
+  /** Neumorphic inset shadow – soft inner shadow */
+  neumorphicInset?: string;
 }
 
 export interface Theme {
@@ -160,26 +164,29 @@ export const modes = {
   },
 
   /**
-   * Business mode – crisp white and neutral surfaces
-   * Professional palette with clean, focused aesthetic
+   * Business mode – warm neumorphic aesthetic
+   * Clean, tactile surfaces with soft shadows for depth
    */
   business: {
     colors: {
-      background: 'hsl(0, 0%, 98%)',          // Clean off-white canvas
-      surface: 'hsl(0, 0%, 100%)',            // Pure white surfaces
+      background: 'hsl(40, 10%, 97%)',        // Warm off-white canvas
+      surface: 'hsl(40, 8%, 99%)',            // Slightly warmer white surfaces
       textPrimary: 'hsl(212, 84%, 7%)',       // Near-black text
       textSecondary: 'hsl(215, 16%, 47%)',    // Medium grey text
       textTertiary: 'hsl(215, 20%, 65%)',     // Light grey text
       accent: 'hsl(221, 83%, 53%)',           // Professional blue
       accentOn: 'hsl(0, 0%, 100%)',           // White on accent
-      border: 'hsl(210, 20%, 88%)',           // Neutral grey borders
+      border: 'hsl(40, 10%, 90%)',            // Warm grey borders
       focus: 'hsl(221, 83%, 53%)',            // Match accent for focus
     },
     effects: {
-      glassBg: 'rgba(255, 255, 255, 0.48)',   // Same glass overlay as public
-      glassBorder: 'rgba(255, 255, 255, 0.55)', // Same glass border
-      glassBlur: '18px',                       // Standard blur
-      warpDistortion: '8',                     // Same warp as public
+      glassBg: 'rgba(255, 255, 255, 0.7)',    // More opaque for neumorphism
+      glassBorder: 'rgba(255, 255, 255, 0.9)', // Near-solid border
+      glassBlur: '8px',                        // Less blur, more solid
+      warpDistortion: '4',                     // Minimal distortion
+      // Neumorphic shadow effects
+      neumorphicRaised: '6px 6px 12px rgba(0,0,0,0.06), -6px -6px 12px rgba(255,255,255,0.9)',
+      neumorphicInset: 'inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px rgba(255,255,255,0.7)',
     },
   },
 } as const;
