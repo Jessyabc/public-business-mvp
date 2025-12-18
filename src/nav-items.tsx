@@ -19,7 +19,8 @@ export interface NavItem {
 
 // Primary navigation items (bottom nav, main menus)
 export const primaryNavItems: NavItem[] = [
-  { title: "Workspace", to: "/", icon: PenTool },
+  { title: "Think", to: "/", icon: PenTool },
+  { title: "Discuss", to: "/discuss", icon: MessageCircle },
   { title: "Profile", to: "/profile", icon: User },
 ];
 

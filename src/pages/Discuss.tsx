@@ -12,14 +12,14 @@ import { Bell, Plus, Brain, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useComposerStore } from '@/hooks/useComposerStore';
-import { DiscussLensProvider, useDiscussLens } from '@/contexts/DiscussLensContext';
+import { useDiscussLens } from '@/contexts/DiscussLensContext';
 import type { Post } from '@/types/post';
 
 function DiscussContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const { openComposer, closeComposer, isOpen: composerOpen } = useComposerStore();
-  const { lens, toggleLens } = useDiscussLens();
+  const { lens, setLens, toggleLens } = useDiscussLens();
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isInitialMount, setIsInitialMount] = useState(true);
@@ -104,6 +104,16 @@ function DiscussContent() {
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams, isInitialMount, fetchPostById]);
+
+  // Sync lens from URL param
+  useEffect(() => {
+    const lensParam = searchParams.get('lens');
+    if (lensParam === 'business' && lens !== 'business') {
+      setLens('business');
+    } else if (lensParam === 'public' && lens !== 'public') {
+      setLens('public');
+    }
+  }, [searchParams, lens, setLens]);
 
   useEffect(() => {
     if (!selectedPostId) {
@@ -262,8 +272,6 @@ function DiscussContent() {
 
 export default function Discuss() {
   return (
-    <DiscussLensProvider>
-      <DiscussContent />
-    </DiscussLensProvider>
+    <DiscussContent />
   );
 }
