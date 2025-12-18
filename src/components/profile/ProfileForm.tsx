@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { useToast } from "@/hooks/use-toast";
 import { User, Building, MapPin, Globe, Save, Users, Mail, Camera, Loader2 } from "lucide-react";
 import { DisconnectButton } from "./DisconnectButton";
@@ -20,7 +19,6 @@ import { cn } from "@/lib/utils";
 
 export function ProfileForm() {
   const { user } = useAuth();
-  const { mode } = useAppMode();
   const { toast } = useToast();
   const { userRoles, refetch: refetchRoles } = useUserRoles();
   const navigate = useNavigate();
@@ -183,9 +181,7 @@ export function ProfileForm() {
           <div className="relative group">
             <Avatar className="w-20 h-20">
               <AvatarImage src={form.avatar_url ?? undefined} />
-              <AvatarFallback className={`text-lg ${
-                mode === "public" ? "bg-primary/20 text-primary" : "bg-blue-500/20 text-blue-600"
-              }`}>
+              <AvatarFallback className="text-lg bg-primary/20 text-primary">
                 {form.display_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
@@ -297,11 +293,7 @@ export function ProfileForm() {
           <Button
             onClick={handleSave}
             disabled={saving || !hasChanges}
-            className={`flex-1 transition-all duration-300 ${
-              mode === "public"
-                ? "bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20 disabled:opacity-50"
-                : "bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 border border-blue-500/20 disabled:opacity-50"
-            }`}
+            className="flex-1 transition-all duration-300 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20 disabled:opacity-50"
           >
             {saving ? (
               <>
@@ -320,11 +312,7 @@ export function ProfileForm() {
             <Button
               variant="outline"
               onClick={fetchProfile}
-              className={`transition-all duration-300 ${
-                mode === "public"
-                  ? "border-white/20 text-white hover:bg-white/10"
-                  : "border-blue-200/30 text-slate-600 hover:bg-blue-50/50"
-              }`}
+              className="transition-all duration-300 border-white/20 text-foreground hover:bg-white/10"
             >
               Reset
             </Button>
@@ -333,13 +321,9 @@ export function ProfileForm() {
 
         {/* Business membership */}
         <Collapsible>
-          <CollapsibleTrigger className={`w-full flex items-center justify-between p-4 rounded-lg transition-all duration-300 ${
-            mode === "public"
-              ? "bg-white/5 border border-white/20 text-white hover:bg-white/10"
-              : "bg-blue-50/50 border border-blue-200/30 text-slate-700 hover:bg-blue-50"
-          }`}>
+          <CollapsibleTrigger className="w-full flex items-center justify-between p-4 rounded-lg transition-all duration-300 bg-white/5 border border-white/20 text-foreground hover:bg-white/10">
             <div className="flex items-center gap-2">
-              <Users className={`w-5 h-5 ${mode === "public" ? "text-white" : "text-blue-600"}`} />
+              <Users className="w-5 h-5 text-primary" />
               <span className="font-medium">Business Membership</span>
               {isBusiness && <BusinessMemberBadge />}
             </div>
@@ -352,40 +336,32 @@ export function ProfileForm() {
 
           <CollapsibleContent className="mt-4 space-y-4">
             {isBusiness ? (
-              <div className={`p-4 rounded-lg ${
-                mode === "public" ? "bg-green-500/10 border border-green-500/20" : "bg-green-50 border border-green-200"
-              }`}>
+              <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                 <div className="flex items-center gap-2 mb-2">
                   <BusinessMemberBadge />
-                  <span className={`text-sm font-medium ${mode === "public" ? "text-green-400" : "text-green-700"}`}>
+                  <span className="text-sm font-medium text-green-400">
                     Business Member Active
                   </span>
                 </div>
-                <p className={`text-sm ${mode === "public" ? "text-green-300" : "text-green-600"}`}>
+                <p className="text-sm text-green-300">
                   You have access to business features, can create business posts, and send invitations to other users.
                 </p>
                 <Button
                   onClick={() => navigate("/settings?tab=business")}
                   variant="outline"
                   size="sm"
-                  className={`mt-3 ${
-                    mode === "public"
-                      ? "border-green-400/20 text-green-400 hover:bg-green-400/10"
-                      : "border-green-600 text-green-600 hover:bg-green-50"
-                  }`}
+                  className="mt-3 border-green-400/20 text-green-400 hover:bg-green-400/10"
                 >
                   <Building className="w-4 h-4 mr-2" />
                   Edit Business Profile
                 </Button>
               </div>
             ) : (
-              <div className={`p-4 rounded-lg ${
-                mode === "public" ? "bg-yellow-500/10 border border-yellow-500/20" : "bg-yellow-50 border border-yellow-200"
-              }`}>
-                <h4 className={`font-medium mb-2 ${mode === "public" ? "text-yellow-400" : "text-yellow-700"}`}>
+              <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <h4 className="font-medium mb-2 text-yellow-400">
                   Business Membership (Invite-Only)
                 </h4>
-                <p className={`text-sm mb-4 ${mode === "public" ? "text-yellow-300" : "text-yellow-600"}`}>
+                <p className="text-sm mb-4 text-yellow-300">
                   Business membership is invite-only. If you have an invite token, paste it below to upgrade your account.
                 </p>
                 <div className="space-y-3">
@@ -399,11 +375,7 @@ export function ProfileForm() {
                     <Button
                       onClick={handleAcceptInvite}
                       disabled={acceptingInvite || !inviteToken.trim()}
-                      className={
-                        mode === "public"
-                          ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/20"
-                          : "bg-yellow-500 hover:bg-yellow-600 text-white"
-                      }
+                      className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/20"
                     >
                       {acceptingInvite ? (
                         <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -415,7 +387,7 @@ export function ProfileForm() {
                       )}
                     </Button>
                   </div>
-                  <p className={`text-xs ${mode === "public" ? "text-yellow-300/80" : "text-yellow-600/80"}`}>
+                  <p className="text-xs text-yellow-300/80">
                     Need an invite? Ask an existing business member or admin to send you one.
                   </p>
                 </div>

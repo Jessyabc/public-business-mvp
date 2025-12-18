@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAppMode } from '@/contexts/AppModeContext';
+import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 interface StylesheetInfo {
@@ -21,7 +21,7 @@ export function DeveloperPanel() {
   const [stylesheets, setStylesheets] = useState<StylesheetInfo[]>([]);
   const [selectorInput, setSelectorInput] = useState('');
   const [probeResult, setProbeResult] = useState<SelectorProbeResult | null>(null);
-  const { mode, setMode } = useAppMode();
+  const { lens, setLens } = useDiscussLensSafe();
   const { isAdmin } = useUserRoles();
   
   const isDev = import.meta.env.DEV;
@@ -145,7 +145,7 @@ export function DeveloperPanel() {
   const exportDiagnostics = () => {
     const data = {
       timestamp: new Date().toISOString(),
-      mode,
+      lens,
       proofOfLife,
       environment: {
         userAgent: navigator.userAgent,
@@ -233,15 +233,15 @@ export function DeveloperPanel() {
         </button>
       </div>
 
-      {/* Mode Switcher */}
+      {/* Lens Switcher (for Discuss testing) */}
       <div style={{ marginBottom: 12 }}>
-        <div style={{ marginBottom: 4, fontWeight: 'bold' }}>Mode: {mode}</div>
+        <div style={{ marginBottom: 4, fontWeight: 'bold' }}>Discuss Lens: {lens}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
-            onClick={() => setMode('public')}
+            onClick={() => setLens('public')}
             style={{
               padding: '6px 12px',
-              background: mode === 'public' ? '#0066cc' : '#333',
+              background: lens === 'public' ? '#0066cc' : '#333',
               color: '#fff',
               border: 'none',
               borderRadius: 4,
@@ -251,10 +251,10 @@ export function DeveloperPanel() {
             Public
           </button>
           <button
-            onClick={() => setMode('business')}
+            onClick={() => setLens('business')}
             style={{
               padding: '6px 12px',
-              background: mode === 'business' ? '#0066cc' : '#333',
+              background: lens === 'business' ? '#0066cc' : '#333',
               color: '#fff',
               border: 'none',
               borderRadius: 4,

@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { safeUrlOrEmpty } from '@/lib/validators';
 
 const businessProfileSchema = z.object({
@@ -30,7 +29,6 @@ interface BusinessProfileFormProps {
 }
 
 export function BusinessProfileForm({ onSuccess, onClose, compact = false }: BusinessProfileFormProps) {
-  const { mode } = useAppMode();
   const { profile, industries, departments, loading, createProfile, updateProfile } = useBusinessProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -69,10 +67,10 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
     return (
       <Card className="glass-business-card animate-scale-in">
         <CardHeader>
-          <CardTitle className={mode === 'business' ? 'text-blue-900' : 'text-slate-900'}>
+          <CardTitle className="text-foreground">
             Business Information
           </CardTitle>
-          <CardDescription className={mode === 'business' ? 'text-blue-700' : 'text-slate-600'}>
+          <CardDescription className="text-muted-foreground">
             Update your business details and company information.
           </CardDescription>
         </CardHeader>
@@ -84,7 +82,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                 name="company_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                    <FormLabel className="text-foreground">
                       Company Name
                     </FormLabel>
                     <FormControl>
@@ -104,7 +102,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="industry_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Industry
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -131,7 +129,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="department_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Department
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -159,7 +157,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                 name="company_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                    <FormLabel className="text-foreground">
                       Company Size
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -187,7 +185,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Phone
                       </FormLabel>
                       <FormControl>
@@ -206,7 +204,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="website"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Website
                       </FormLabel>
                       <FormControl>
@@ -226,7 +224,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                 name="bio"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                    <FormLabel className="text-foreground">
                       Company Bio
                     </FormLabel>
                     <FormControl>
@@ -262,10 +260,10 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
       <div className="max-w-2xl mx-auto space-y-6">
         <Card className="glass-business-card animate-scale-in">
           <CardHeader>
-            <CardTitle className={mode === 'business' ? 'text-blue-900' : 'text-slate-900'}>
+            <CardTitle className="text-foreground">
               Business Information
             </CardTitle>
-            <CardDescription className={mode === 'business' ? 'text-blue-700' : 'text-slate-600'}>
+            <CardDescription className="text-muted-foreground">
               Provide your business details for verification and access to business features.
             </CardDescription>
           </CardHeader>
@@ -277,7 +275,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="company_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Company Name
                       </FormLabel>
                       <FormControl>
@@ -297,7 +295,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                     name="industry_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        <FormLabel className="text-foreground">
                           Industry
                         </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -324,7 +322,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                     name="department_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        <FormLabel className="text-foreground">
                           Department
                         </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -352,7 +350,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="company_size"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Company Size
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -380,7 +378,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        <FormLabel className="text-foreground">
                           Phone
                         </FormLabel>
                         <FormControl>
@@ -399,7 +397,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                     name="website"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                        <FormLabel className="text-foreground">
                           Website
                         </FormLabel>
                         <FormControl>
@@ -419,7 +417,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   name="bio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={mode === 'business' ? 'text-blue-800' : 'text-slate-700'}>
+                      <FormLabel className="text-foreground">
                         Company Bio
                       </FormLabel>
                       <FormControl>
@@ -435,13 +433,20 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   )}
                 />
 
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={loading || isSubmitting}
-                >
-                  {isSubmitting ? 'Submitting...' : profile ? 'Update Profile' : 'Submit for Review'}
-                </Button>
+                <div className="flex gap-4">
+                  {onClose && (
+                    <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                      Cancel
+                    </Button>
+                  )}
+                  <Button 
+                    type="submit" 
+                    className="flex-1"
+                    disabled={loading || isSubmitting}
+                  >
+                    {isSubmitting ? 'Saving...' : profile ? 'Update Profile' : 'Create Profile'}
+                  </Button>
+                </div>
               </form>
             </Form>
           </CardContent>

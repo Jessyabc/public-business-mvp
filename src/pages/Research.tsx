@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -165,7 +164,6 @@ function useInfiniteScroll(callback: () => void, hasMore: boolean) {
 }
 
 const Research = () => {
-  const { mode } = useAppMode();
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const [activeTab, setActiveTab] = useState('sparks');
   const [searchQuery, setSearchQuery] = useState('');
@@ -263,62 +261,37 @@ const Research = () => {
     openComposer({ originOpenIdeaId: ideaId });
   };
 
-  const isBusinessMode = mode === 'business';
-
   return (
     <>
-      <div className={cn(
-        "min-h-screen p-6 pb-32 transition-colors duration-300",
-        isBusinessMode ? "bg-background" : "bg-gradient-space"
-      )}>
+      <div className="min-h-screen p-6 pb-32 transition-colors duration-300 bg-background">
         <div className="max-w-6xl mx-auto">
           {/* Simple Header */}
           <header className="mb-8 text-center">
             <div className="flex items-center justify-center space-x-3 mb-2">
-              <Search className={cn("w-8 h-8", isBusinessMode ? "text-primary" : "text-[var(--accent)]")} />
-              <h1 className={cn(
-                "text-4xl font-light tracking-wide",
-                isBusinessMode ? "text-foreground" : "text-[var(--text-primary)]"
-              )}>
+              <Search className="w-8 h-8 text-primary" />
+              <h1 className="text-4xl font-light tracking-wide text-foreground">
                 Research Hub
               </h1>
             </div>
-            <p className={cn(
-              "font-light max-w-2xl mx-auto",
-              isBusinessMode ? "text-muted-foreground" : "text-[var(--text-secondary)]"
-            )}>
+            <p className="font-light max-w-2xl mx-auto text-muted-foreground">
               Explore sparks, business insights, and open ideas
             </p>
           </header>
 
           {/* Search and Filter Controls */}
-          <div className={cn(
-            "mb-8 p-4 rounded-2xl backdrop-blur-xl",
-            isBusinessMode 
-              ? "bg-card border border-border shadow-sm" 
-              : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
-          )}>
+          <div className="mb-8 p-4 rounded-2xl backdrop-blur-xl bg-card border border-border shadow-sm">
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <Input
                   placeholder="Search for insights, sparks, or topics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={cn(
-                    isBusinessMode 
-                      ? "bg-background border-input text-foreground placeholder:text-muted-foreground" 
-                      : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
-                  )}
+                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <div className="flex gap-2">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className={cn(
-                    "w-40",
-                    isBusinessMode 
-                      ? "bg-background border-input text-foreground" 
-                      : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]"
-                  )}>
+                  <SelectTrigger className="w-40 bg-background border-input text-foreground">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,12 +306,7 @@ const Research = () => {
                   </SelectContent>
                 </Select>
                 <Select value={filterIndustry} onValueChange={setFilterIndustry}>
-                  <SelectTrigger className={cn(
-                    "w-40",
-                    isBusinessMode 
-                      ? "bg-background border-input text-foreground" 
-                      : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-primary)]"
-                  )}>
+                  <SelectTrigger className="w-40 bg-background border-input text-foreground">
                     <SelectValue placeholder="Industry" />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,11 +317,7 @@ const Research = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button type="submit" className={cn(
-                  isBusinessMode 
-                    ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
-                    : "bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-on)]"
-                )}>
+                <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -362,30 +326,16 @@ const Research = () => {
 
           {/* Research Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className={cn(
-              "grid w-full grid-cols-3 backdrop-blur-xl",
-              isBusinessMode 
-                ? "bg-muted border border-border" 
-                : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
-            )}>
-              <TabsTrigger value="sparks" className={cn(
-                "flex items-center gap-2",
-                isBusinessMode ? "data-[state=active]:bg-background" : "data-[state=active]:bg-white/10"
-              )}>
+            <TabsList className="grid w-full grid-cols-3 backdrop-blur-xl bg-muted border border-border">
+              <TabsTrigger value="sparks" className="flex items-center gap-2 data-[state=active]:bg-background">
                 <Sparkles className="h-4 w-4" />
                 Sparks
               </TabsTrigger>
-              <TabsTrigger value="insights" className={cn(
-                "flex items-center gap-2",
-                isBusinessMode ? "data-[state=active]:bg-background" : "data-[state=active]:bg-white/10"
-              )}>
+              <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-background">
                 <Building2 className="h-4 w-4" />
                 Business Insights
               </TabsTrigger>
-              <TabsTrigger value="open-ideas" className={cn(
-                "flex items-center gap-2",
-                isBusinessMode ? "data-[state=active]:bg-background" : "data-[state=active]:bg-white/10"
-              )}>
+              <TabsTrigger value="open-ideas" className="flex items-center gap-2 data-[state=active]:bg-background">
                 <Lightbulb className="h-4 w-4" />
                 Open Ideas
               </TabsTrigger>
@@ -396,29 +346,21 @@ const Research = () => {
               <div className="min-h-[400px]">
                 {loading ? (
                   <div className="flex items-center justify-center py-20">
-                    <Loader2 className={cn("w-8 h-8 animate-spin", isBusinessMode ? "text-primary" : "text-[var(--accent)]")} />
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : items.length === 0 ? (
                   <div className="text-center py-20">
-                    <div className={cn(
-                      "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center",
-                      isBusinessMode ? "bg-muted border border-border" : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
-                    )}>
-                      <Sparkles className={cn("w-8 h-8", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")} />
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-muted border border-border">
+                      <Sparkles className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <p className={cn(isBusinessMode ? "text-muted-foreground" : "text-[var(--text-secondary)]")}>No sparks found</p>
+                    <p className="text-muted-foreground">No sparks found</p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
                     {items.map((item, index) => (
                       <div
                         key={item.id}
-                        className={cn(
-                          "rounded-2xl overflow-hidden backdrop-blur-xl transition-all duration-300 animate-feed-card-enter",
-                          isBusinessMode 
-                            ? "bg-card border border-border shadow-sm hover:shadow-md hover:border-border/80" 
-                            : "bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-white/10 hover:border-white/20"
-                        )}
+                        className="rounded-2xl overflow-hidden backdrop-blur-xl transition-all duration-300 animate-feed-card-enter bg-card border border-border shadow-sm hover:shadow-md hover:border-border/80"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <PostToSparkCard 
@@ -453,29 +395,21 @@ const Research = () => {
               <div className="min-h-[400px]">
                 {loading ? (
                   <div className="flex items-center justify-center py-20">
-                    <Loader2 className={cn("w-8 h-8 animate-spin", isBusinessMode ? "text-primary" : "text-[var(--accent)]")} />
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : items.length === 0 ? (
                   <div className="text-center py-20">
-                    <div className={cn(
-                      "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center",
-                      isBusinessMode ? "bg-muted border border-border" : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
-                    )}>
-                      <Building2 className={cn("w-8 h-8", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")} />
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-muted border border-border">
+                      <Building2 className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <p className={cn(isBusinessMode ? "text-muted-foreground" : "text-[var(--text-secondary)]")}>No insights found</p>
+                    <p className="text-muted-foreground">No insights found</p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
                     {items.map((item, index) => (
                       <div
                         key={item.id}
-                        className={cn(
-                          "rounded-2xl overflow-hidden backdrop-blur-xl transition-all duration-300 animate-feed-card-enter",
-                          isBusinessMode 
-                            ? "bg-card border border-border shadow-sm hover:shadow-md hover:border-border/80" 
-                            : "bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-white/10 hover:border-white/20"
-                        )}
+                        className="rounded-2xl overflow-hidden backdrop-blur-xl transition-all duration-300 animate-feed-card-enter bg-card border border-border shadow-sm hover:shadow-md hover:border-border/80"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <PostToSparkCard 
@@ -485,10 +419,10 @@ const Research = () => {
                             content: item.content,
                             created_at: item.created_at,
                             updated_at: item.created_at,
-                            type: 'insight',
+                            type: item.type as 'brainstorm' | 'insight',
                             kind: 'BusinessInsight',
                             user_id: '',
-                            mode: 'public',
+                            mode: 'business',
                             status: 'active',
                             visibility: 'public',
                             metadata: null,
@@ -506,88 +440,58 @@ const Research = () => {
               </div>
             </TabsContent>
 
-            {/* Open Ideas with Infinite Scroll */}
             <TabsContent value="open-ideas" className="mt-0">
               <div className="min-h-[400px]">
                 {openIdeasLoading ? (
                   <div className="flex items-center justify-center py-20">
-                    <Loader2 className={cn("w-8 h-8 animate-spin", isBusinessMode ? "text-primary" : "text-[var(--accent)]")} />
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : openIdeas.length === 0 ? (
                   <div className="text-center py-20">
-                    <div className={cn(
-                      "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center",
-                      isBusinessMode ? "bg-muted border border-border" : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
-                    )}>
-                      <Lightbulb className={cn("w-8 h-8", isBusinessMode ? "text-muted-foreground" : "text-[var(--text-tertiary)]")} />
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-muted border border-border">
+                      <Lightbulb className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <p className={cn(isBusinessMode ? "text-muted-foreground" : "text-[var(--text-secondary)]")}>No open ideas found</p>
+                    <p className="text-muted-foreground">No open ideas yet</p>
                   </div>
                 ) : (
-                  <>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {openIdeas.map((idea, index) => {
-                        const sparkCount = lineageCounts[idea.id] || 0;
-                        return (
-                          <button
-                            key={idea.id}
-                            onClick={() => handleIdeaClick(idea.id)}
-                            className={cn(
-                              "group text-left rounded-2xl p-5 min-h-[180px]",
-                              "flex flex-col justify-between",
-                              "backdrop-blur-sm transition-all duration-300 animate-feed-card-enter cursor-pointer",
-                              isBusinessMode 
-                                ? "bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/30" 
-                                : "bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_30px_rgba(72,159,227,0.15)]"
-                            )}
-                            style={{ animationDelay: `${index * 50}ms` }}
-                          >
-                            <p className={cn(
-                              "text-sm leading-relaxed line-clamp-4",
-                              isBusinessMode ? "text-foreground" : "text-foreground/90"
-                            )}>
-                              {idea.content}
-                            </p>
-                            <div className={cn(
-                              "mt-4 pt-3 border-t flex items-center justify-between text-xs",
-                              isBusinessMode ? "border-border text-muted-foreground" : "border-white/10 text-muted-foreground"
-                            )}>
-                              <span className="uppercase tracking-wider text-[10px]">
-                                {idea.source === 'intake' ? 'From a visitor' : 'From the community'}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                {sparkCount > 0 && (
-                                  <span className={cn(
-                                    "flex items-center gap-1",
-                                    isBusinessMode ? "text-primary" : "text-[hsl(var(--accent))]"
-                                  )}>
-                                    <Sparkles className="w-3 h-3" />
-                                    {sparkCount} spark{sparkCount !== 1 ? 's' : ''}
-                                  </span>
-                                )}
-                                <span>{new Date(idea.created_at).toLocaleDateString()}</span>
-                              </div>
+                  <div className="grid gap-4">
+                    {openIdeas.map((idea, index) => (
+                      <div
+                        key={idea.id}
+                        onClick={() => handleIdeaClick(idea.id)}
+                        className="rounded-2xl p-6 backdrop-blur-xl transition-all duration-300 animate-feed-card-enter cursor-pointer bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/50"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <p className="text-foreground mb-3">{idea.content}</p>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>{new Date(idea.created_at).toLocaleDateString()}</span>
+                              {lineageCounts[idea.id] > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <Sparkles className="w-3 h-3" />
+                                  {lineageCounts[idea.id]} spark{lineageCounts[idea.id] > 1 ? 's' : ''}
+                                </span>
+                              )}
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Infinite scroll trigger */}
-                    <div ref={infiniteScrollTrigger} className="h-10 mt-4">
-                      {openIdeasLoadingMore && (
-                        <div className="flex items-center justify-center py-4">
-                          <Loader2 className={cn("w-5 h-5 animate-spin", isBusinessMode ? "text-primary" : "text-[var(--accent)]")} />
-                          <span className="ml-2 text-sm text-muted-foreground">Loading more…</span>
+                          </div>
+                          <Button size="sm" variant="outline">
+                            <Sparkles className="w-4 h-4 mr-1" />
+                            Spark
+                          </Button>
                         </div>
-                      )}
-                      {!openIdeasHasMore && openIdeas.length > 0 && (
-                        <p className="text-center text-sm text-muted-foreground py-4">
-                          You've reached the end
-                        </p>
-                      )}
-                    </div>
-                  </>
+                      </div>
+                    ))}
+                    
+                    {/* Infinite scroll trigger */}
+                    <div ref={infiniteScrollTrigger} className="h-10" />
+                    
+                    {openIdeasLoadingMore && (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </TabsContent>
