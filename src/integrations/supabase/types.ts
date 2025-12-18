@@ -1306,6 +1306,33 @@ export type Database = {
         }
         Relationships: []
       }
+      workspace_thoughts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          state?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       brainstorm_stats: {
