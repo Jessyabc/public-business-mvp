@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Brain, FileText, AlertCircle, Link2, X, Search } from "lucide-react";
+import { Brain, FileText, AlertCircle, Link2, X, Search, Info } from "lucide-react";
 import { useDiscussLensSafe } from "@/contexts/DiscussLensContext";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -26,8 +27,10 @@ interface ComposerModalProps {
 
 const PUBLIC_MAX_CHARS = 5000;
 const BUSINESS_MAX_CHARS = 10000;
+const WORKSPACE_BANNER_KEY = 'pb-composer-workspace-banner-dismissed';
 
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
+  const location = useLocation();
   const { lens } = useDiscussLensSafe();
   const { user } = useAuth();
   const { isBusinessMember } = useUserRoles();
@@ -36,6 +39,9 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [composerMode, setComposerMode] = useState<'post' | 'open-idea'>('post');
+  
+  // Workspace context banner state (sessionStorage - shows once per session)
+  const [showWorkspaceBanner, setShowWorkspaceBanner] = useState(false);
 
   // Link selector state
   const [showLinkSelector, setShowLinkSelector] = useState(false);
@@ -53,6 +59,16 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   // Check if we're in continuation mode
   const isContinuationMode = context?.relationType === 'continuation' && context?.parentPostId;
   const isFromOpenIdea = !!context?.originOpenIdeaId;
+
+  // Check if we should show workspace banner (sessionStorage - once per session)
+  useEffect(() => {
+    if (isOpen && location.pathname === '/') {
+      const dismissed = sessionStorage.getItem(WORKSPACE_BANNER_KEY);
+      setShowWorkspaceBanner(!dismissed);
+    } else {
+      setShowWorkspaceBanner(false);
+    }
+  }, [isOpen, location.pathname]);
 
   // Load draft from localStorage
   useEffect(() => {
@@ -79,6 +95,11 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       localStorage.setItem(draftKey, JSON.stringify(draft));
     }
   }, [content, title, isOpen, isPublicMode]);
+
+  const handleDismissBanner = () => {
+    sessionStorage.setItem(WORKSPACE_BANNER_KEY, 'true');
+    setShowWorkspaceBanner(false);
+  };
 
   const handleClose = () => {
     setContent("");
@@ -163,7 +184,9 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       let payload;
       
       if (isPublicMode) {
-        // Public Spark (brainstorm)
+        // Public Spark
+        // Note: "Spark" is the UI term for post_kind='brainstorm' in the database
+        // Composer always creates posts (never workspace thoughts)
         payload = buildSparkPayload({
           userId: user.id,
           content,
@@ -395,6 +418,29 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         originOpenIdeaId={context?.originOpenIdeaId}
         onClear={handleClearContext}
       />
+      
+      {/* Workspace context banner - shown only when opened from workspace */}
+      {showWorkspaceBanner && (
+        <div className={cn(
+          "flex items-start gap-3 p-3 rounded-lg",
+          "bg-blue-500/10 border border-blue-500/20",
+          "text-sm"
+        )}>
+          <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1 space-y-1">
+            <p className="font-medium text-blue-100">Sharing to Discuss</p>
+            <p className="text-blue-200/70 text-xs">
+              Posts you create here will appear in the Discuss feed. Your workspace thoughts remain private.
+            </p>
+          </div>
+          <button
+            onClick={handleDismissBanner}
+            className="text-blue-400/60 hover:text-blue-400 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       
       <div className="space-y-2">
         <Label htmlFor="brainstorm-content" className="text-foreground/80">

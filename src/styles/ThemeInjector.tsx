@@ -61,8 +61,8 @@ export function ThemeInjector() {
     const body = document.body;
 
     // Set data-theme attribute for variant selectors
+    // ThemeInjector is the single source of truth for theme state
     body.setAttribute('data-theme', currentTheme);
-    body.setAttribute('data-mode', currentTheme); // Legacy support
 
     // ===== Color Tokens =====
     root.style.setProperty('--background', mergedTheme.colors.background);
