@@ -6,7 +6,7 @@ import { LazyWrapper, NotFound } from './router-helpers';
 import { RequireOrg } from '@/features/orgs/components/RequireOrg';
 
 // Lazy-loaded pages
-const BrainstormFeed = lazy(() => import('@/pages/brainstorm/BrainstormFeed'));
+const Discuss = lazy(() => import('@/pages/Discuss'));
 const OpenIdeas = lazy(() => import('@/pages/OpenIdeas'));
 const OpenIdeaNew = lazy(() => import('@/pages/OpenIdeaNew'));
 const Admin = lazy(() => import('@/pages/Admin'));
@@ -54,27 +54,29 @@ const withLayoutLazy = (Component: React.LazyExoticComponent<any>) => (
   <MainLayout><LazyWrapper><Component /></LazyWrapper></MainLayout>
 );
 
-// Legacy redirects consolidated
+// Legacy redirects consolidated - all social routes now go to /discuss
 const legacyRedirects = [
-  { from: '/brainstorm/feed', to: '/brainstorm' },
-  { from: '/brainstorm-v2', to: '/brainstorm' },
-  { from: '/brainstorms', to: '/' },
-  { from: '/brainstorms/:id', to: '/' },
-  { from: '/brainstorms/:id/edit', to: '/' },
-  { from: '/brainstorms/new', to: '/' },
-  { from: '/brainstorms/canvas', to: '/brainstorm' },
-  { from: '/feed', to: '/' },
-  { from: '/public/feed', to: '/' },
+  { from: '/brainstorm', to: '/discuss' },
+  { from: '/brainstorm/feed', to: '/discuss' },
+  { from: '/brainstorm-v2', to: '/discuss' },
+  { from: '/brainstorms', to: '/discuss' },
+  { from: '/brainstorms/:id', to: '/discuss' },
+  { from: '/brainstorms/:id/edit', to: '/discuss' },
+  { from: '/brainstorms/new', to: '/discuss' },
+  { from: '/brainstorms/canvas', to: '/discuss' },
+  { from: '/feed', to: '/discuss' },
+  { from: '/public/feed', to: '/discuss' },
   { from: '/my-posts', to: '/profile' },
   { from: '/business-profile', to: '/settings?tab=business' },
   { from: '/open-ideas', to: '/research?tab=open-ideas' },
+  { from: '/app/insights', to: '/discuss?lens=business' },
 ].map(r => ({ path: r.from, element: <Navigate to={r.to} replace /> }));
 
 // Build routes array
 const routes: Parameters<typeof createBrowserRouter>[0] = [
-  // === Core Routes ===
+  // === Core Routes (Think / Discuss) ===
   { path: '/', element: withLayout(<Index />) },
-  { path: '/brainstorm', element: withLayoutLazy(BrainstormFeed) },
+  { path: '/discuss', element: withLayoutLazy(Discuss) },
   { path: '/landing', element: withLayout(<Landing />) },
   
   // === Auth & Profile ===
@@ -83,8 +85,7 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   { path: '/settings', element: withLayout(<Settings />) },
   { path: '/notifications', element: withLayout(<Notifications />) },
   
-  // === Business Routes ===
-  { path: '/app/insights', element: <MainLayout><RequireOrg><LazyWrapper><Insights /></LazyWrapper></RequireOrg></MainLayout> },
+  // === Organization Routes ===
   { path: '/org/new', element: withLayoutLazy(CreateOrganization) },
   { path: '/business-dashboard', element: withLayout(<BusinessDashboard />) },
   { path: '/business-membership', element: withLayout(<BusinessMembership />) },

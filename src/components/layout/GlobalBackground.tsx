@@ -1,21 +1,38 @@
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppMode } from '@/contexts/AppModeContext';
+import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { OrbitalBackground } from './OrbitalBackground';
 
 /**
- * GlobalBackground - Single source of truth for all background visuals
+ * GlobalBackground - Route-aware background
  * 
  * Rules:
  * - Logged-out users: Always see dark "public" mode
- * - Logged-in users: Respect mode toggle (public = dark, business = light)
+ * - Workspace (/): Always uses a neutral workspace aesthetic
+ * - Discuss (/discuss): Respects lens toggle (public = dark, business = light)
+ * - Other routes: Default to public aesthetic
  */
 export function GlobalBackground() {
   const { user } = useAuth();
-  const { mode } = useAppMode();
+  const location = useLocation();
+  const { lens } = useDiscussLensSafe();
 
   // Logged-out users always see public (dark) theme
-  // Logged-in users respect the mode toggle
-  const backgroundMode = user ? mode : 'public';
+  if (!user) {
+    return <OrbitalBackground mode="public" />;
+  }
 
-  return <OrbitalBackground mode={backgroundMode} />;
+  // Workspace always has a consistent, neutral aesthetic
+  // Using 'public' for now as the dark, focused workspace feel
+  if (location.pathname === '/' || location.pathname === '/workspace') {
+    return <OrbitalBackground mode="public" />;
+  }
+
+  // Discuss respects the lens
+  if (location.pathname === '/discuss') {
+    return <OrbitalBackground mode={lens} />;
+  }
+
+  // Default to public for other routes
+  return <OrbitalBackground mode="public" />;
 }
