@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { useUIModeStore } from '@/stores/uiModeStore';
 
 interface PageProps {
   children: ReactNode;
@@ -15,7 +14,6 @@ export function Page({
   maxWidth = 'lg',
   padding = 'md'
 }: PageProps) {
-  const { uiMode } = useUIModeStore();
 
   const maxWidthClasses = {
     sm: 'max-w-sm',
