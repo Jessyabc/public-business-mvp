@@ -1,10 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { Brain, Building2, Users, ArrowRight, CheckCircle, Lightbulb, Network, FileText, MessageSquare, Search } from "lucide-react";
 
 export default function HowItWorks() {
-  const { mode } = useAppMode();
-
   const steps = [
     {
       icon: Users,
@@ -84,13 +81,9 @@ export default function HowItWorks() {
               const IconComponent = step.icon;
               return (
                 <div key={index} className="relative">
-                  <Card className={`p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 ${
-                    mode === 'public' 
-                      ? 'bg-slate-800/40 border-white/20' 
-                      : 'bg-white/60 border-blue-200/30'
-                  }`}>
+                  <Card className="p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 bg-card/40 border-border/20">
                     <div className="flex justify-center">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center bg-white/10 border border-white/20`}>
+                      <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/10 border border-white/20">
                         <IconComponent className={`w-8 h-8 ${step.color}`} />
                       </div>
                     </div>
@@ -120,11 +113,7 @@ export default function HowItWorks() {
             {features.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
-                <Card key={index} className={`p-8 space-y-6 transition-all duration-300 hover:scale-105 ${
-                  mode === 'public' 
-                    ? 'bg-slate-800/40 border-white/20' 
-                    : 'bg-white/60 border-blue-200/30'
-                }`}>
+                <Card key={index} className="p-8 space-y-6 transition-all duration-300 hover:scale-105 bg-card/40 border-border/20">
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                       index === 0 ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-purple-500/20 border border-purple-500/30'
@@ -155,11 +144,7 @@ export default function HowItWorks() {
         <div className="space-y-8">
           <h2 className="text-3xl font-bold text-center text-foreground">Platform Features</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className={`p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 ${
-              mode === 'public' 
-                ? 'bg-slate-800/40 border-white/20' 
-                : 'bg-white/60 border-blue-200/30'
-            }`}>
+            <Card className="p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 bg-card/40 border-border/20">
               <FileText className="w-12 h-12 text-green-500 mx-auto" />
               <h3 className="text-lg font-semibold text-foreground">Content Sharing</h3>
               <p className="text-sm text-muted-foreground">
@@ -167,11 +152,7 @@ export default function HowItWorks() {
               </p>
             </Card>
             
-            <Card className={`p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 ${
-              mode === 'public' 
-                ? 'bg-slate-800/40 border-white/20' 
-                : 'bg-white/60 border-blue-200/30'
-            }`}>
+            <Card className="p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 bg-card/40 border-border/20">
               <MessageSquare className="w-12 h-12 text-blue-500 mx-auto" />
               <h3 className="text-lg font-semibold text-foreground">Real-time Communication</h3>
               <p className="text-sm text-muted-foreground">
@@ -179,11 +160,7 @@ export default function HowItWorks() {
               </p>
             </Card>
             
-            <Card className={`p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 ${
-              mode === 'public' 
-                ? 'bg-slate-800/40 border-white/20' 
-                : 'bg-white/60 border-blue-200/30'
-            }`}>
+            <Card className="p-6 text-center space-y-4 transition-all duration-300 hover:scale-105 bg-card/40 border-border/20">
               <Search className="w-12 h-12 text-purple-500 mx-auto" />
               <h3 className="text-lg font-semibold text-foreground">Discovery & Research</h3>
               <p className="text-sm text-muted-foreground">

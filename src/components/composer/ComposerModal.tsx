@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Brain, FileText, AlertCircle, Link2, X, Search } from "lucide-react";
-import { useAppMode } from "@/contexts/AppModeContext";
+import { useDiscussLensSafe } from "@/contexts/DiscussLensContext";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
@@ -28,7 +28,7 @@ const PUBLIC_MAX_CHARS = 5000;
 const BUSINESS_MAX_CHARS = 10000;
 
 export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
-  const { mode } = useAppMode();
+  const { lens } = useDiscussLensSafe();
   const { user } = useAuth();
   const { isBusinessMember } = useUserRoles();
   const { setContext, context } = useComposerStore();
@@ -46,7 +46,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   
   const { pendingRefs, clearRefs } = usePendingReferencesStore();
   
-  const isPublicMode = mode === 'public';
+  const isPublicMode = lens === 'public';
   const maxChars = isPublicMode ? PUBLIC_MAX_CHARS : BUSINESS_MAX_CHARS;
   const canSubmit = content.trim().length > 0 && content.length <= maxChars;
   
@@ -494,24 +494,23 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
               ) : (
                 <div className="p-2 space-y-1">
                   {availablePosts.map(post => (
-                    <button
+                    <div
                       key={post.id}
-                      type="button"
                       onClick={() => toggleLink(post.id)}
                       className={cn(
-                        "w-full text-left p-2 rounded-lg text-sm transition-all",
+                        "p-2 rounded-lg cursor-pointer transition-colors",
                         selectedLinks.includes(post.id)
-                          ? 'bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/40'
-                          : 'hover:bg-white/10 border border-transparent'
+                          ? "bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/30"
+                          : "hover:bg-white/10"
                       )}
                     >
-                      <div className="font-medium text-foreground line-clamp-1">
+                      <div className="text-sm font-medium line-clamp-1">
                         {post.title || 'Untitled'}
                       </div>
-                      <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                      <div className="text-xs text-muted-foreground line-clamp-1">
                         {post.content}
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -520,15 +519,17 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         )}
       </div>
 
-      {/* Action buttons */}
-      <div className="flex items-center justify-end gap-3 pt-2">
-        <Button
-          variant="ghost"
-          onClick={handleClose}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          Cancel
-        </Button>
+      <div className="flex justify-between pt-2">
+        {!user && (
+          <Button
+            variant="ghost"
+            onClick={() => setComposerMode('open-idea')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Submit Open Idea Instead
+          </Button>
+        )}
+        <div className="flex-1" />
         <Button
           onClick={handleCreate}
           disabled={!canSubmit || isSubmitting}
@@ -541,81 +542,46 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
             "disabled:opacity-50 disabled:shadow-none"
           )}
         >
-          {isSubmitting ? 'Creating...' : 'Create Brainstorm'}
+          {isSubmitting ? 'Creating...' : 'Create Spark'}
         </Button>
       </div>
     </div>
   );
 
-  const renderBusinessForm = () => {
-    if (!isBusinessMember()) {
-      return (
-        <div className="space-y-5">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
-              "bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/30"
-            )}>
-              <FileText className="w-5 h-5 text-[hsl(var(--accent))]" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground">New Business Insight</h3>
-          </div>
-          
-          <div className={cn(
-            "flex items-start gap-3 p-4 rounded-xl",
-            "bg-amber-500/10 border border-amber-500/20"
-          )}>
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Business membership required</p>
-              <p className="text-xs text-muted-foreground">
-                You need to be a member of an organization to create business insights.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button
-              variant="ghost"
-              onClick={handleClose}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      );
-    }
-    
-    return <BusinessInsightComposer onClose={handleClose} />;
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className={cn(
-        "max-w-lg p-0 overflow-hidden",
-        "bg-[var(--surface)]/95 backdrop-blur-xl",
-        "border border-white/10",
-        "shadow-[0_25px_80px_rgba(0,0,0,0.6),0_0_40px_rgba(72,159,227,0.15)]",
-        "rounded-2xl"
-      )}>
-        <div className="p-6">
-          <DialogHeader className="sr-only">
-            <DialogTitle>
-              {isPublicMode ? 'Create New Brainstorm' : 'Create New Business Insight'}
-            </DialogTitle>
-            <DialogDescription>
-              {isPublicMode ? 'Share a spark of inspiration with the community' : 'Share professional knowledge with your organization'}
+  // Business mode uses BusinessInsightComposer
+  if (!isPublicMode) {
+    return (
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <DialogContent className="sm:max-w-2xl bg-background/95 backdrop-blur-xl border-white/10">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Create Business Insight</DialogTitle>
+            <DialogDescription className="sr-only">
+              Create a new business insight to share with your organization
             </DialogDescription>
           </DialogHeader>
+          <BusinessInsightComposer 
+            onClose={handleClose}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
-          {composerMode === 'open-idea' 
-            ? renderOpenIdeaForm() 
-            : isPublicMode 
-              ? renderPublicForm() 
-              : renderBusinessForm()
-          }
-        </div>
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-xl bg-background/95 backdrop-blur-xl border-white/10">
+        <DialogHeader>
+          <DialogTitle className="sr-only">
+            {composerMode === 'open-idea' ? 'Create Open Idea' : 'Create Spark'}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {composerMode === 'open-idea' 
+              ? 'Share a question or idea with the community'
+              : 'Share your thoughts and insights'
+            }
+          </DialogDescription>
+        </DialogHeader>
+        {composerMode === 'open-idea' ? renderOpenIdeaForm() : renderPublicForm()}
       </DialogContent>
     </Dialog>
   );

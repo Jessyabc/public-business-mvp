@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, User } from "lucide-react";
@@ -21,7 +20,6 @@ import type { Post } from "@/types/post";
 export default function Profile() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { mode } = useAppMode();
   const { profile, loading: profileLoading } = useProfile();
   const { isBusinessMember, isAdmin } = useUserRoles();
   const { posts, loading: postsLoading, error, fetchUserPosts } = usePosts();
@@ -102,24 +100,12 @@ export default function Profile() {
             {/* My Posts Section - Now embedded */}
             <GlassCard className="glass-ios-triple glass-corner-distort">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className={`grid w-full grid-cols-2 glass-ios-triple mb-6 ${
-                  mode === 'public'
-                    ? 'border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-[#489FE3]/20'
-                    : 'border-blue-300/50 bg-blue-50/30 backdrop-blur-xl shadow-lg shadow-blue-500/20'
-                }`}>
-                  <TabsTrigger value="posts" className={`flex items-center gap-2 ${
-                    mode === 'public'
-                      ? 'data-[state=active]:bg-[#489FE3]/30 data-[state=active]:text-white'
-                      : 'data-[state=active]:bg-blue-200/60 data-[state=active]:text-blue-700'
-                  }`}>
+                <TabsList className="grid w-full grid-cols-2 glass-ios-triple mb-6 border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-primary/20">
+                  <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-primary/30 data-[state=active]:text-foreground">
                     <FileText className="w-4 h-4" />
                     My Posts
                   </TabsTrigger>
-                  <TabsTrigger value="lastSeen" className={`flex items-center gap-2 ${
-                    mode === 'public'
-                      ? 'data-[state=active]:bg-[#489FE3]/30 data-[state=active]:text-white'
-                      : 'data-[state=active]:bg-blue-200/60 data-[state=active]:text-blue-700'
-                  }`}>
+                  <TabsTrigger value="lastSeen" className="flex items-center gap-2 data-[state=active]:bg-primary/30 data-[state=active]:text-foreground">
                     <Clock className="w-4 h-4" />
                     Last Seen
                   </TabsTrigger>

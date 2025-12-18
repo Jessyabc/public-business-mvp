@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppMode } from '@/contexts/AppModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveTheme } from '@/styles/theme';
 import { toast } from 'sonner';
@@ -31,8 +30,7 @@ const STORAGE_KEY = 'theme-customization';
 export default function Customize() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { mode: appMode, setMode: setAppMode } = useAppMode();
-  const [editingMode, setEditingMode] = useState<'public' | 'business'>(appMode);
+  const [editingMode, setEditingMode] = useState<'public' | 'business'>('public');
   const [settings, setSettings] = useState<ModeThemeSettings>({
     public: {},
     business: {},
@@ -51,11 +49,6 @@ export default function Customize() {
   useEffect(() => {
     loadSettings();
   }, []);
-
-  // Switch app mode when editing mode changes
-  useEffect(() => {
-    setAppMode(editingMode);
-  }, [editingMode, setAppMode]);
 
   const loadSettings = async () => {
     try {
@@ -470,161 +463,30 @@ export default function Customize() {
           </TabsContent>
 
           <TabsContent value="guide" className="space-y-4">
-            <Card className="backdrop-blur-sm hover:shadow-lg transition-all">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Private Reference Guide
-                </CardTitle>
-                <CardDescription>
-                  Your personal cheat sheet for theme tokens and design vocabulary
-                </CardDescription>
+                <CardTitle>Theme Customization Guide</CardTitle>
+                <CardDescription>Learn how to customize your theme effectively</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-8">
-                {/* Colors Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Colors</h3>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div 
-                          className="w-8 h-8 rounded-md border"
-                          style={{ backgroundColor: currentSettings.colors?.background || defaultTheme.colors.background }}
-                        />
-                        <code className="text-sm font-mono">background</code>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        The main canvas — sets the overall page mood. Soft blue = dreamy public vibe.
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div 
-                          className="w-8 h-8 rounded-md border"
-                          style={{ backgroundColor: currentSettings.colors?.surface || defaultTheme.colors.surface }}
-                        />
-                        <code className="text-sm font-mono">surface</code>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Cards & menus — elevated above background for depth.
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div 
-                          className="w-8 h-8 rounded-md border"
-                          style={{ backgroundColor: currentSettings.colors?.accent || defaultTheme.colors.accent }}
-                        />
-                        <code className="text-sm font-mono">accent</code>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Call-to-action color — buttons, links. Try #489FE3 for PB-blue.
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-lg border backdrop-blur-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div 
-                          className="w-8 h-8 rounded-md border"
-                          style={{ backgroundColor: currentSettings.colors?.accentOn || defaultTheme.colors.accentOn }}
-                        />
-                        <code className="text-sm font-mono">accentOn</code>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Text on accent backgrounds — ensures readability.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Radii Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Border Radii</h3>
-                  <div className="grid gap-3">
-                    <div className="p-3 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">sm (8px)</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Tight curves for badges</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">md (12px)</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Standard for buttons and inputs</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">lg (16px)</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Card curves for panels</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">xl (24px)</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Pronounced curves for hero sections</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Elevation Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Elevation Levels</h3>
-                  <div className="grid gap-3">
-                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[1] }}>
-                      <code className="text-sm font-mono font-semibold">1</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Hover states & slight separation</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[2] }}>
-                      <code className="text-sm font-mono font-semibold">2</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Standard cards</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[8] }}>
-                      <code className="text-sm font-mono font-semibold">8</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Overlays & popovers</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[16] }}>
-                      <code className="text-sm font-mono font-semibold">16</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Modals & dialogs</span>
-                    </div>
-                    <div className="p-3 rounded-lg border backdrop-blur-sm" style={{ boxShadow: defaultTheme.elevation[24] }}>
-                      <code className="text-sm font-mono font-semibold">24</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Spotlight cards & tooltips</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Glass Effects Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Glass Effects</h3>
-                  <div className="grid gap-3">
-                    <div className="p-4 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">glassBlur</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Frost level for backdrop blur</span>
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        Current: {currentSettings.effects?.glassBlur || defaultTheme.effects.glassBlur}
-                      </div>
-                    </div>
-                    <div className="p-4 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">warpDistortion</code>
-                      <span className="text-sm text-muted-foreground ml-2">— iOS-style refraction intensity</span>
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        Current: {currentSettings.effects?.warpDistortion || defaultTheme.effects.warpDistortion}
-                      </div>
-                    </div>
-                    <div className="p-4 rounded-lg border backdrop-blur-sm">
-                      <code className="text-sm font-mono font-semibold">glassBg / glassBorder</code>
-                      <span className="text-sm text-muted-foreground ml-2">— Translucent fill & edge definition</span>
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        Bg: {currentSettings.effects?.glassBg || defaultTheme.effects.glassBg}<br />
-                        Border: {currentSettings.effects?.glassBorder || defaultTheme.effects.glassBorder}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pro Tips */}
-                <div className="p-4 rounded-lg bg-muted/50 border backdrop-blur-sm">
-                  <h4 className="font-semibold mb-2 text-foreground">Pro Tips</h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Use HSL colors for easier theming (hsl(hue, saturation%, lightness%))</li>
-                    <li>• Match glassBg opacity to background color for natural frosting</li>
-                    <li>• Higher blur = dreamier public mode; lower = crisp business mode</li>
-                    <li>• Test both light and dark modes after customization</li>
-                  </ul>
-                </div>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <h4>Colors</h4>
+                <p>Customize primary colors, backgrounds, and text colors. Use hex (#FF5733), RGB (rgb(255, 87, 51)), or HSL (hsl(11, 100%, 60%)) values.</p>
+                
+                <h4>Border Radii</h4>
+                <p>Adjust corner roundness for UI elements. Common values: 0 (sharp), 0.5rem (subtle), 1rem (rounded), 9999px (pill).</p>
+                
+                <h4>Elevation</h4>
+                <p>Configure shadow depths for layered interfaces. Higher levels create more prominent shadows.</p>
+                
+                <h4>Glass Effects</h4>
+                <p>Fine-tune glassmorphism properties like blur intensity and background opacity for the signature frosted glass look.</p>
+                
+                <h4>Tips</h4>
+                <ul>
+                  <li>Use "Preview Locally" to test changes before saving</li>
+                  <li>Both Public and Business themes can be customized independently</li>
+                  <li>Use "Revert to Defaults" if you want to start fresh</li>
+                </ul>
               </CardContent>
             </Card>
           </TabsContent>

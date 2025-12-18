@@ -6,7 +6,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { useOrgAnalytics, useOrgTopInsights } from "@/hooks/useBusinessAnalytics";
 import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
 import { rpcAdminApproveIntake, rpcAdminApproveUser, rpcAdminListPending } from "@/integrations/supabase/rpc";
@@ -17,7 +16,6 @@ export function Admin() {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin: checkAdmin, loading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
-  const { mode } = useAppMode();
   const { data: orgId } = useUserOrgId();
   
   const [sortBy, setSortBy] = useState<'u_score' | 't_score' | 'continuations' | 'crosslinks' | 'recent'>('u_score');
@@ -100,33 +98,6 @@ export function Admin() {
     if (!user || !isAdminUser) return;
     refreshPendingIdeas();
   }, [isAdminUser, refreshPendingIdeas, user]);
-
-  // Force business mode
-  if (mode !== 'business') {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-        
-        <GlassCard className="max-w-md w-full" padding="lg">
-          <div className="text-center mb-6">
-            <Lock className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h1 className="text-2xl font-bold">Business Mode Required</h1>
-            <p className="text-muted-foreground mt-2">
-              Admin panel is only accessible in Business mode
-            </p>
-          </div>
-          
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="w-full"
-          >
-            Return Home
-          </Button>
-        </GlassCard>
-      </div>
-    );
-  }
 
   // Show loading state
   if (loading) {
@@ -424,58 +395,36 @@ export function Admin() {
                       </h3>
                       
                       <div className="flex flex-wrap gap-4 text-sm">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <TrendingUp className="w-4 h-4 text-green-500" />
-                          <span className="font-medium text-green-500">
-                            U: {insight.u_score_avg?.toFixed(1) || '0.0'}
-                          </span>
-                          <span className="text-muted-foreground">
-                            ({insight.u_score_count} ratings)
-                          </span>
+                          <span className="text-muted-foreground">U-score:</span>
+                          <span className="font-medium text-green-500">{insight.u_score_avg?.toFixed(1) || '—'}</span>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <TrendingUp className="w-4 h-4 text-purple-500" />
-                          <span className="font-medium text-purple-500">
-                            T: {insight.t_score?.toFixed(1) || '0.0'}
-                          </span>
+                          <span className="text-muted-foreground">T-score:</span>
+                          <span className="font-medium text-purple-500">{insight.t_score?.toFixed(1) || '—'}</span>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <ArrowRight className="w-4 h-4 text-orange-500" />
-                          <span className="font-medium text-orange-500">
-                            {insight.continuations_count} continuations
-                          </span>
+                          <span className="text-muted-foreground">Continuations:</span>
+                          <span className="font-medium text-orange-500">{insight.continuations_count || 0}</span>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <Link2 className="w-4 h-4 text-pink-500" />
-                          <span className="font-medium text-pink-500">
-                            {insight.crosslinks_count} cross-links
-                          </span>
+                          <span className="text-muted-foreground">Cross-links:</span>
+                          <span className="font-medium text-pink-500">{insight.crosslinks_count || 0}</span>
                         </div>
                       </div>
                     </div>
-                    
-                    <Button
-                      onClick={() => navigate(`/posts/${insight.post_id}`)}
-                      className="shrink-0 bg-primary/20 hover:bg-primary/30 border border-primary/50"
-                      style={{ 
-                        boxShadow: '0 0 20px hsl(var(--primary) / 0.3)',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      Open Insight
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <Lightbulb className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No insights found</p>
+              <Lightbulb className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-muted-foreground">No insights yet. Create your first business insight!</p>
             </div>
           )}
         </GlassCard>

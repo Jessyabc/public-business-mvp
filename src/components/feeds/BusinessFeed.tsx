@@ -5,7 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { BusinessFeedFilters } from "@/types/business-post";
 import { Search, Filter, Sparkles, Plus } from "lucide-react";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { usePosts } from "@/hooks/usePosts";
 import { AccordionCard } from "@/components/posts/AccordionCard";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +14,6 @@ import type { Post } from "@/types/post";
 import { PostReaderModal } from "@/components/posts/PostReaderModal";
 
 export function BusinessFeed() {
-  const { toggleMode } = useAppMode();
   const { posts, loading, fetchPosts } = usePosts();
   const { openComposer } = useComposerStore();
   const { user } = useAuth();

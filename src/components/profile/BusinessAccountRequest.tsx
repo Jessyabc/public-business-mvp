@@ -4,12 +4,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building, Send, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { useBusinessProfile } from "@/hooks/useBusinessProfile";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { BusinessProfileForm } from "@/components/business/BusinessProfileForm";
 import { toast } from "sonner";
 
 export function BusinessAccountRequest() {
-  const { mode } = useAppMode();
   const { profile, loading } = useBusinessProfile();
   const [showForm, setShowForm] = useState(false);
 
