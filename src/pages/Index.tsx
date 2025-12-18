@@ -1,14 +1,18 @@
-import { useAppMode } from '@/contexts/AppModeContext';
+/**
+ * Pillar #1: Individual Workspace as Default Entry
+ * 
+ * For authenticated users, the workspace replaces feeds.
+ * This is a private cognitive sanctuary, not a content feed.
+ */
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Landing } from './Landing';
-import BrainstormFeed from '@/pages/brainstorm/BrainstormFeed';
-import { BusinessFeed } from "@/components/feeds/BusinessFeed";
+import { WorkspaceCanvas } from '@/features/workspace';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const Index = () => {
-  const { mode } = useAppMode();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -21,21 +25,23 @@ const Index = () => {
   }, [user, navigate]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">Loading...</div>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center text-[var(--text-secondary)]">Loading...</div>
+      </div>
+    );
   }
 
+  // Unauthenticated: show landing page
   if (!user) {
     return <Landing />;
   }
 
-  // If user is connected, show the feeds
-  const feedContent = mode === 'business' ? <BusinessFeed /> : <BrainstormFeed />;
-  
+  // Authenticated: show Individual Workspace (Pillar #1)
+  // Bypasses AppMode entirely - workspace is the default experience
   return (
     <ProtectedRoute requireAuth={true}>
-      {feedContent}
+      <WorkspaceCanvas />
     </ProtectedRoute>
   );
 };
