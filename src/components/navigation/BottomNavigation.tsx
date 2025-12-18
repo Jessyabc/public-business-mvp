@@ -3,6 +3,7 @@ import { PenTool, Plus, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +17,9 @@ export function BottomNavigation() {
   const isThinkActive = location.pathname === '/' || location.pathname === '/workspace';
   const isDiscussActive = location.pathname === '/discuss' || location.pathname.startsWith('/discuss');
   const isProfileActive = location.pathname === '/profile';
+  
+  // Route-aware tooltip text for composer button
+  const composerTooltip = isThinkActive ? 'Share to Discuss' : 'Create post';
 
   return (
     <>
@@ -45,16 +49,23 @@ export function BottomNavigation() {
           </NavLink>
 
           {/* Centered Composer Button */}
-          <Button
-            onClick={() => openComposer()}
-            size="icon"
-            className={cn(
-              "w-14 h-14 rounded-full transition-all duration-200 mx-2 shadow-xl",
-              "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20 hover:scale-105"
-            )}
-          >
-            <Plus className="w-7 h-7" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => openComposer()}
+                size="icon"
+                className={cn(
+                  "w-14 h-14 rounded-full transition-all duration-200 mx-2 shadow-xl",
+                  "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20 hover:scale-105"
+                )}
+              >
+                <Plus className="w-7 h-7" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{composerTooltip}</p>
+            </TooltipContent>
+          </Tooltip>
 
           {/* Discuss Link */}
           <NavLink
@@ -130,16 +141,23 @@ export function BottomNavigation() {
           </NavLink>
 
           {/* Centered Composer button */}
-          <Button
-            onClick={() => openComposer()}
-            size="icon"
-            className={cn(
-              "w-14 h-14 rounded-full transition-all shadow-lg -mt-6",
-              "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20"
-            )}
-          >
-            <Plus className="w-7 h-7" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => openComposer()}
+                size="icon"
+                className={cn(
+                  "w-14 h-14 rounded-full transition-all shadow-lg -mt-6",
+                  "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20"
+                )}
+              >
+                <Plus className="w-7 h-7" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{composerTooltip}</p>
+            </TooltipContent>
+          </Tooltip>
 
           {/* Profile */}
           <NavLink
