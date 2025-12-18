@@ -18,6 +18,7 @@ export function useWorkspaceSync() {
   const {
     thoughts,
     setThoughts,
+    setActiveThought,
     setLoading,
     setSyncing,
     setLastSynced,
@@ -46,16 +47,25 @@ export function useWorkspaceSync() {
           id: row.id,
           user_id: row.user_id,
           content: row.content,
-          state: row.state as 'active' | 'anchored',
+          // Normalize all loaded thoughts to anchored state
+          // User must deliberately re-enter active thinking
+          state: 'anchored' as const,
           created_at: row.created_at,
           updated_at: row.updated_at,
         }));
         
         // Merge with local thoughts (prefer newer)
         const localThoughts = useWorkspaceStore.getState().thoughts;
-        const mergedThoughts = mergeThoughts(localThoughts, loadedThoughts);
+        // Also normalize local active thoughts to anchored on reload
+        const normalizedLocal = localThoughts.map(t => ({
+          ...t,
+          state: 'anchored' as const
+        }));
+        const mergedThoughts = mergeThoughts(normalizedLocal, loadedThoughts);
         
         setThoughts(mergedThoughts);
+        // Clear any active thought on reload - user must deliberately re-enter
+        setActiveThought(null);
         lastSyncedThoughtsRef.current = JSON.stringify(mergedThoughts);
         setLastSynced(new Date().toISOString());
       }
@@ -66,7 +76,7 @@ export function useWorkspaceSync() {
         setLoading(false);
       }
     }
-  }, [user, setThoughts, setLoading, setLastSynced]);
+  }, [user, setThoughts, setActiveThought, setLoading, setLastSynced]);
 
   // Sync thoughts to Supabase
   const syncThoughts = useCallback(async () => {

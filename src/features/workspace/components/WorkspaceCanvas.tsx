@@ -5,24 +5,32 @@
  * Orchestrates Active Thinking and Anchored Thoughts.
  */
 
-import { useCallback } from 'react';
+/**
+ * Pillar #1: Workspace Canvas
+ * 
+ * The Individual Workspace - private cognitive sanctuary.
+ * A calm desk of thoughts, not a productivity tool.
+ */
+
+import { useCallback, useState } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useWorkspaceSync } from '../useWorkspaceSync';
 import { ThinkingSurface } from './ThinkingSurface';
 import { ThoughtStack } from './ThoughtStack';
 import { EmptyWorkspace } from './EmptyWorkspace';
 import { cn } from '@/lib/utils';
-import { Plus } from 'lucide-react';
 
 export function WorkspaceCanvas() {
   const { 
     thoughts,
-    activeThoughtId, 
     isLoading,
     isSyncing,
     createThought,
     getActiveThought,
   } = useWorkspaceStore();
+  
+  // Track if user deliberately started thinking (for auto-focus)
+  const [userInitiated, setUserInitiated] = useState(false);
   
   // Initialize sync
   useWorkspaceSync();
@@ -32,17 +40,26 @@ export function WorkspaceCanvas() {
   const hasAnchoredThoughts = thoughts.some((t) => t.state === 'anchored');
 
   const handleStartThinking = useCallback(() => {
+    setUserInitiated(true);
     createThought();
   }, [createThought]);
 
-  const handleNewThought = useCallback(() => {
-    createThought();
-  }, [createThought]);
+  const handleBreathingSpaceClick = useCallback(() => {
+    if (!activeThought) {
+      setUserInitiated(true);
+      createThought();
+    }
+  }, [activeThought, createThought]);
+
+  // Reset user-initiated flag when thought is anchored
+  const handleAnchor = useCallback(() => {
+    setUserInitiated(false);
+  }, []);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-[var(--text-secondary)]">Loading your thoughts...</div>
+        <div className="text-[var(--text-tertiary)] opacity-60">...</div>
       </div>
     );
   }
@@ -53,60 +70,50 @@ export function WorkspaceCanvas() {
       "w-full min-h-screen",
       "px-4 py-8 md:px-8 md:py-12"
     )}>
-      {/* Sync indicator - subtle */}
+      {/* Sync indicator - very subtle */}
       {isSyncing && (
         <div className="fixed top-4 right-4 z-50">
-          <span className="text-xs text-[var(--text-tertiary)] opacity-50">
-            Saving...
+          <span className="text-xs text-[var(--text-tertiary)] opacity-30">
+            ·
           </span>
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto space-y-12">
-        {/* Active Thinking Area */}
-        <section className="space-y-6">
+      <div className="max-w-3xl mx-auto space-y-8">
+        {/* Breathing space / Active thinking area */}
+        <section>
           {activeThought ? (
             <ThinkingSurface 
               thoughtId={activeThought.id}
-              onAnchor={() => {}}
+              onAnchor={handleAnchor}
+              autoFocus={userInitiated}
             />
           ) : hasThoughts ? (
-            /* New thought button - when not actively thinking */
-            <div className="flex justify-center">
-              <button
-                onClick={handleNewThought}
-                className={cn(
-                  "flex items-center gap-2",
-                  "px-6 py-3 rounded-xl",
-                  "bg-[var(--glass-bg)] backdrop-blur-lg",
-                  "border border-[var(--workspace-active-border)]",
-                  "text-[var(--text-secondary)]",
-                  "hover:text-[var(--text-primary)]",
-                  "hover:border-[hsl(var(--workspace-focus)/0.3)]",
-                  "hover:shadow-[var(--workspace-active-glow)]",
-                  "transition-all duration-300"
-                )}
-              >
-                <Plus className="w-5 h-5" />
-                <span>New thought</span>
-              </button>
+            /* Subtle breathing space - ambient, not a button */
+            <div
+              onClick={handleBreathingSpaceClick}
+              className={cn(
+                "min-h-[80px] rounded-2xl cursor-text",
+                "bg-transparent",
+                "border border-transparent",
+                "hover:bg-[var(--glass-bg)] hover:backdrop-blur-sm",
+                "hover:border-[var(--workspace-active-border)]",
+                "transition-all duration-500 ease-out",
+                "flex items-center justify-center"
+              )}
+            >
+              <span className="text-[var(--text-tertiary)] opacity-0 hover:opacity-40 transition-opacity duration-500">
+                
+              </span>
             </div>
           ) : (
             <EmptyWorkspace onStartThinking={handleStartThinking} />
           )}
         </section>
 
-        {/* Anchored Thoughts */}
+        {/* Anchored Thoughts - no header, just presence */}
         {hasAnchoredThoughts && (
-          <section className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--border)] to-transparent opacity-30" />
-              <span className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">
-                Stored thoughts
-              </span>
-              <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[var(--border)] to-transparent opacity-30" />
-            </div>
-            
+          <section>
             <ThoughtStack />
           </section>
         )}

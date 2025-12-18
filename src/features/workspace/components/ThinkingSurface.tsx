@@ -13,23 +13,24 @@ import { cn } from '@/lib/utils';
 interface ThinkingSurfaceProps {
   thoughtId: string;
   onAnchor?: () => void;
+  autoFocus?: boolean;
 }
 
-export function ThinkingSurface({ thoughtId, onAnchor }: ThinkingSurfaceProps) {
+export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: ThinkingSurfaceProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { thoughts, updateThought, anchorThought } = useWorkspaceStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
   
-  // Auto-focus on mount
+  // Only auto-focus when user deliberately initiated thinking
   useEffect(() => {
-    if (textareaRef.current) {
+    if (textareaRef.current && autoFocus) {
       textareaRef.current.focus();
       // Place cursor at end
       const len = textareaRef.current.value.length;
       textareaRef.current.setSelectionRange(len, len);
     }
-  }, [thoughtId]);
+  }, [thoughtId, autoFocus]);
 
   // Auto-resize textarea
   const handleInput = useCallback(() => {

@@ -1,8 +1,8 @@
 /**
  * Pillar #1: Thought Stack
  * 
- * Vertical list of anchored thoughts.
- * No pagination, no sorting controls - just your thoughts.
+ * Anchored thoughts with spatial hierarchy.
+ * Recent thoughts are more prominent, older ones gently recede.
  */
 
 import { useWorkspaceStore } from '../useWorkspaceStore';
@@ -21,10 +21,14 @@ export function ThoughtStack() {
     <div className={cn(
       "thought-stack",
       "w-full max-w-2xl mx-auto",
-      "space-y-4"
+      "space-y-3"
     )}>
-      {anchoredThoughts.map((thought) => (
-        <AnchoredThought key={thought.id} thoughtId={thought.id} />
+      {anchoredThoughts.map((thought, index) => (
+        <AnchoredThought 
+          key={thought.id} 
+          thoughtId={thought.id} 
+          depth={index}
+        />
       ))}
     </div>
   );
