@@ -7,7 +7,35 @@ interface OrbitalBackgroundProps {
 export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
   const isPublic = mode === 'public';
   
-  // Define orb configurations for each mode
+  // Business mode: Static neumorphic surface (no animations)
+  if (!isPublic) {
+    return (
+      <div 
+        className="pointer-events-none fixed inset-0 -z-50 transition-colors duration-[800ms]"
+        style={{
+          background: 'linear-gradient(145deg, hsl(40, 10%, 98%) 0%, hsl(40, 8%, 96%) 50%, hsl(40, 6%, 94%) 100%)'
+        }}
+      >
+        {/* Neumorphic inset shadow for depth */}
+        <div 
+          className="absolute inset-0" 
+          style={{
+            boxShadow: 'inset 0 2px 80px rgba(0,0,0,0.03), inset 0 -2px 80px rgba(255,255,255,0.8)'
+          }} 
+        />
+        {/* Subtle noise texture overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: 'url(/noise.png)',
+            backgroundRepeat: 'repeat',
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Public mode: Animated orbital orbs (space-inspired)
   const publicOrbs = [
     // Central warping orb - more defined
     {
@@ -73,98 +101,17 @@ export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
     },
   ];
 
-  const businessOrbs = [
-    // Large, soft pastel orbs for glassmorphism aesthetic - more visible
-    {
-      size: 800,
-      top: '20%',
-      left: '15%',
-      color: 'rgba(147, 197, 253, 0.25)', // Soft light blue - more visible
-      blur: 120,
-      duration: 30,
-      x: [-30, 30, -30],
-      y: [-40, 40, -40],
-      scale: [1, 1.1, 1],
-    },
-    {
-      size: 750,
-      top: '60%',
-      right: '20%',
-      color: 'rgba(196, 181, 253, 0.22)', // Soft lavender - more visible
-      blur: 110,
-      duration: 28,
-      x: [40, -40, 40],
-      y: [-35, 35, -35],
-      scale: [1, 1.08, 1],
-    },
-    {
-      size: 700,
-      bottom: '15%',
-      left: '25%',
-      color: 'rgba(167, 243, 208, 0.20)', // Soft mint green - more visible
-      blur: 100,
-      duration: 32,
-      x: [-25, 25, -25],
-      y: [30, -30, 30],
-    },
-    {
-      size: 650,
-      top: '10%',
-      right: '10%',
-      color: 'rgba(251, 207, 232, 0.22)', // Soft pink - more visible
-      blur: 105,
-      duration: 26,
-      x: [35, -35, 35],
-      y: [-25, 25, -25],
-    },
-    {
-      size: 600,
-      top: '50%',
-      left: '50%',
-      color: 'rgba(186, 230, 253, 0.28)', // Soft sky blue - central - more visible
-      blur: 90,
-      duration: 25,
-      x: [-20, 20, -20],
-      y: [-20, 20, -20],
-      scale: [1, 1.12, 1],
-    },
-    {
-      size: 550,
-      bottom: '25%',
-      right: '15%',
-      color: 'rgba(221, 214, 254, 0.20)', // Soft periwinkle - more visible
-      blur: 95,
-      duration: 29,
-      x: [30, -30, 30],
-      y: [-28, 28, -28],
-    },
-    {
-      size: 500,
-      top: '35%',
-      left: '5%',
-      color: 'rgba(254, 240, 138, 0.18)', // Soft yellow - more visible
-      blur: 85,
-      duration: 27,
-      x: [-22, 22, -22],
-      y: [-32, 32, -32],
-    },
-  ];
-
-  const orbs = isPublic ? publicOrbs : businessOrbs;
-  const baseBackground = isPublic ? '#020617' : 'linear-gradient(135deg, #F8FAFC 0%, #F0F4F8 50%, #FAFBFC 100%)';
-  const blendMode = isPublic ? 'screen' : 'normal';
-
   return (
     <div
       className="pointer-events-none fixed inset-0 -z-50 overflow-hidden transition-colors duration-[800ms]"
-      style={isPublic ? { backgroundColor: baseBackground } : { background: baseBackground }}
+      style={{ backgroundColor: '#020617' }}
     >
       {/* Animated orbital gradient orbs */}
       <div 
         className="absolute inset-0" 
-        style={{ mixBlendMode: blendMode as any }}
+        style={{ mixBlendMode: 'screen' }}
       >
-        {orbs.map((orb, index) => (
+        {publicOrbs.map((orb, index) => (
           <motion.div
             key={index}
             className="absolute rounded-full"

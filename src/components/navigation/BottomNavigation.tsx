@@ -1,5 +1,5 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Plus, Search, User } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { PenTool, Plus, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppMode } from '@/contexts/AppModeContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -10,21 +10,11 @@ import { cn } from '@/lib/utils';
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const { user } = useAuth();
-  const { mode, toggleMode } = useAppMode();
+  const { mode } = useAppMode();
   const location = useLocation();
-  const navigate = useNavigate();
-
-  // Handle feed link click - toggle mode if already on home
-  const handleFeedClick = (e: React.MouseEvent) => {
-    if (location.pathname === '/') {
-      e.preventDefault();
-      toggleMode();
-    }
-  };
 
   const navItems = [
-    { to: '/', icon: Home, label: 'Feed' },
-    { to: '/research', icon: Search, label: 'Research' },
+    { to: '/', icon: PenTool, label: 'Workspace' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
@@ -43,10 +33,9 @@ export function BottomNavigation() {
             ? "bg-background/80 border-white/10" 
             : "bg-white/90 border-black/5"
         )}>
-          {/* Feed Link - special handling for toggle */}
+          {/* Workspace Link */}
           <NavLink
             to="/"
-            onClick={handleFeedClick}
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
               "transition-all duration-200 relative group",
@@ -59,8 +48,8 @@ export function BottomNavigation() {
                   : "text-foreground/60 hover:text-foreground hover:bg-black/5"
             )}
           >
-            <Home className="w-6 h-6" />
-            <span className="text-xs font-medium">Feed</span>
+            <PenTool className="w-6 h-6" />
+            <span className="text-xs font-medium">Workspace</span>
             {location.pathname === '/' && (
               <span className={cn(
                 "absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full",
@@ -83,38 +72,30 @@ export function BottomNavigation() {
             <Plus className="w-7 h-7" />
           </Button>
 
-          {/* Right items */}
-          {navItems.slice(1).map((item) => {
-            const isActive = location.pathname === item.to;
-            const Icon = item.icon;
-            
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
-                  "transition-all duration-200 relative group",
-                  isActive
-                    ? isDark
-                      ? "bg-white/10 text-white"
-                      : "bg-black/5 text-foreground"
-                    : isDark
-                      ? "text-white/60 hover:text-white hover:bg-white/5"
-                      : "text-foreground/60 hover:text-foreground hover:bg-black/5"
-                )}
-              >
-                <Icon className="w-6 h-6" />
-                <span className="text-xs font-medium">{item.label}</span>
-                {isActive && (
-                  <span className={cn(
-                    "absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full",
-                    isDark ? "bg-white" : "bg-foreground"
-                  )} />
-                )}
-              </NavLink>
-            );
-          })}
+          {/* Profile Link */}
+          <NavLink
+            to="/profile"
+            className={cn(
+              "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
+              "transition-all duration-200 relative group",
+              location.pathname === '/profile'
+                ? isDark
+                  ? "bg-white/10 text-white"
+                  : "bg-black/5 text-foreground"
+                : isDark
+                  ? "text-white/60 hover:text-white hover:bg-white/5"
+                  : "text-foreground/60 hover:text-foreground hover:bg-black/5"
+            )}
+          >
+            <User className="w-6 h-6" />
+            <span className="text-xs font-medium">Profile</span>
+            {location.pathname === '/profile' && (
+              <span className={cn(
+                "absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full",
+                isDark ? "bg-white" : "bg-foreground"
+              )} />
+            )}
+          </NavLink>
         </div>
       </nav>
 
@@ -127,10 +108,9 @@ export function BottomNavigation() {
             ? "bg-background/90 border-white/10" 
             : "bg-white/95 border-black/5"
         )}>
-          {/* Feed - special handling for toggle */}
+          {/* Workspace */}
           <NavLink
             to="/"
-            onClick={handleFeedClick}
             className={cn(
               "flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative",
               location.pathname === '/'
@@ -138,7 +118,7 @@ export function BottomNavigation() {
                 : isDark ? "text-white/50" : "text-foreground/50"
             )}
           >
-            <Home className="w-6 h-6" />
+            <PenTool className="w-6 h-6" />
             {location.pathname === '/' && (
               <span className={cn("w-1 h-1 rounded-full", isDark ? "bg-white" : "bg-foreground")} />
             )}
