@@ -265,7 +265,7 @@ export function LiveBrainstormWindow({ dense = false, className }: LiveBrainstor
     <div 
       className={cn('glass-med rounded-xl p-6', className)}
       style={{ 
-        // @ts-ignore - CSS custom property
+        // @ts-expect-error - CSS custom property
         '--reduced-motion-scale': '0.99'
       }}
     >

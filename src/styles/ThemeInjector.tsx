@@ -31,7 +31,7 @@ export function ThemeInjector() {
 
   // Determine theme based on route
   useEffect(() => {
-    if (location.pathname === '/discuss') {
+    if (location.pathname.startsWith('/discuss')) {
       setCurrentTheme(lens);
     } else {
       // Workspace and other routes use public theme

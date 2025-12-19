@@ -12,7 +12,7 @@ import { Bell, Plus, Brain, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useComposerStore } from '@/hooks/useComposerStore';
-import { DiscussLensProvider, useDiscussLens } from '@/contexts/DiscussLensContext';
+import { useDiscussLens } from '@/contexts/DiscussLensContext';
 import type { Post } from '@/types/post';
 
 function DiscussContent() {
@@ -261,9 +261,5 @@ function DiscussContent() {
 }
 
 export default function Discuss() {
-  return (
-    <DiscussLensProvider>
-      <DiscussContent />
-    </DiscussLensProvider>
-  );
+  return <DiscussContent />;
 }

@@ -4,6 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import Index from '@/pages/Index';
 import { LazyWrapper, NotFound } from './router-helpers';
 import { RequireOrg } from '@/features/orgs/components/RequireOrg';
+import { DiscussLensProvider } from '@/contexts/DiscussLensContext';
 
 // Lazy-loaded pages
 const Discuss = lazy(() => import('@/pages/Discuss'));
@@ -53,6 +54,14 @@ const withLayout = (element: React.ReactNode) => <MainLayout>{element}</MainLayo
 const withLayoutLazy = (Component: React.LazyExoticComponent<any>) => (
   <MainLayout><LazyWrapper><Component /></LazyWrapper></MainLayout>
 );
+const withLayoutLazyRequireOrg = (Component: React.LazyExoticComponent<any>) => (
+  <MainLayout><RequireOrg><LazyWrapper><Component /></LazyWrapper></RequireOrg></MainLayout>
+);
+const withDiscussLayoutLazy = (Component: React.LazyExoticComponent<any>) => (
+  <DiscussLensProvider>
+    <MainLayout><LazyWrapper><Component /></LazyWrapper></MainLayout>
+  </DiscussLensProvider>
+);
 
 // Legacy redirects consolidated - all social routes now go to /discuss
 const legacyRedirects = [
@@ -69,14 +78,13 @@ const legacyRedirects = [
   { from: '/my-posts', to: '/profile' },
   { from: '/business-profile', to: '/settings?tab=business' },
   { from: '/open-ideas', to: '/research?tab=open-ideas' },
-  { from: '/app/insights', to: '/discuss?lens=business' },
 ].map(r => ({ path: r.from, element: <Navigate to={r.to} replace /> }));
 
 // Build routes array
 const routes: Parameters<typeof createBrowserRouter>[0] = [
   // === Core Routes (Think / Discuss) ===
   { path: '/', element: withLayout(<Index />) },
-  { path: '/discuss', element: withLayoutLazy(Discuss) },
+  { path: '/discuss', element: withDiscussLayoutLazy(Discuss) },
   { path: '/landing', element: withLayout(<Landing />) },
   
   // === Auth & Profile ===
@@ -91,6 +99,7 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   { path: '/business-membership', element: withLayout(<BusinessMembership />) },
   { path: '/create-business', element: withLayout(<CreateBusiness />) },
   { path: '/accept-invite/:token', element: withLayout(<AcceptInvite />) },
+  { path: '/app/insights', element: withLayoutLazyRequireOrg(Insights) },
   
   // === Research & Ideas ===
   { path: '/research', element: withLayout(<Research />) },

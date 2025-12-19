@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { Button } from '@/components/ui/button';
@@ -24,8 +24,12 @@ export function GlobalNavigationMenu() {
   const { isBusinessMember, isAdmin } = useUserRoles();
   const { openComposer } = useComposerStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { data: orgId } = useUserOrgId();
+
+  // PB requirement: lens/role UI should not appear in Think (/); keep it scoped to Discuss.
+  const showDiscussOnlyUi = location.pathname.startsWith('/discuss');
 
   const handleSignOut = async () => {
     try {
@@ -123,26 +127,28 @@ export function GlobalNavigationMenu() {
               <DropdownMenuSeparator />
               
               {/* Role indicators */}
-              <div className="px-2 py-1.5">
-                <div className="flex flex-wrap gap-1">
-                  {isAdmin() && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full">
-                      <Shield className="w-3 h-3" />
-                      Admin
+              {showDiscussOnlyUi && (
+                <div className="px-2 py-1.5">
+                  <div className="flex flex-wrap gap-1">
+                    {isAdmin() && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full">
+                        <Shield className="w-3 h-3" />
+                        Admin
+                      </span>
+                    )}
+                    {isBusinessMember() && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                        <Building2 className="w-3 h-3" />
+                        Business
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
+                      <UserCheck className="w-3 h-3" />
+                      Public
                     </span>
-                  )}
-                  {isBusinessMember() && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
-                      <Building2 className="w-3 h-3" />
-                      Business
-                    </span>
-                  )}
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
-                    <UserCheck className="w-3 h-3" />
-                    Public
-                  </span>
+                  </div>
                 </div>
-              </div>
+              )}
               
               <DropdownMenuSeparator />
               
