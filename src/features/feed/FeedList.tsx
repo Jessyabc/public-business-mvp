@@ -6,6 +6,7 @@ import { SwipeableCard } from '@/components/brainstorm/SwipeableCard';
 import { LineagePreview } from '@/components/brainstorm/LineagePreview';
 import { ConstellationView } from '@/components/brainstorm/ConstellationView';
 import { cn } from '@/lib/utils';
+import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 
 type Props = {
   items: BasePost[];
@@ -19,13 +20,26 @@ const GlassCardWrapper = ({
   index,
   postId,
   postTitle,
+  isBusiness,
 }: { 
   children: React.ReactNode; 
   index: number;
   postId: string;
   postTitle?: string;
+  isBusiness: boolean;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  // Business lens: crisp neumorphic card container
+  const businessCardStyle = isBusiness ? {
+    background: '#EAE6E2',
+    borderRadius: '24px',
+    boxShadow: isHovered 
+      ? '10px 10px 24px rgba(166, 150, 130, 0.35), -10px -10px 24px rgba(255, 255, 255, 0.95)'
+      : '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+    transition: 'all 0.3s ease-out',
+    transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+  } : {};
 
   return (
     <li 
@@ -40,37 +54,47 @@ const GlassCardWrapper = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Lineage preview above */}
-      <LineagePreview postId={postId} isHovered={isHovered} position="above" />
+      {/* Lineage preview above - only for public lens */}
+      {!isBusiness && <LineagePreview postId={postId} isHovered={isHovered} position="above" />}
       
-      {/* Connection line to next card */}
-      <div className="absolute -bottom-6 left-8 w-px h-6 bg-gradient-to-b from-white/20 via-[var(--accent)]/30 to-transparent pointer-events-none z-10" />
+      {/* Connection line to next card - only for public lens */}
+      {!isBusiness && (
+        <div className="absolute -bottom-6 left-8 w-px h-6 bg-gradient-to-b from-white/20 via-[var(--accent)]/30 to-transparent pointer-events-none z-10" />
+      )}
       
       <SwipeableCard
         postId={postId}
         postTitle={postTitle}
       >
-        <div className={cn(
-          "rounded-3xl overflow-hidden",
-          "backdrop-blur-xl",
-          "bg-white/5 dark:bg-white/10",
-          "border border-white/10",
-          "shadow-[0_0_20px_rgba(0,0,0,0.25)]",
-          "transition-all duration-500 ease-out",
-          "group-hover:bg-white/8 group-hover:shadow-[0_0_30px_rgba(72,159,227,0.2)]",
-          "group-hover:border-white/20"
-        )}>
+        <div 
+          className={cn(
+            "rounded-3xl overflow-hidden",
+            "transition-all duration-500 ease-out",
+            // Public lens: glass aesthetic
+            !isBusiness && [
+              "backdrop-blur-xl",
+              "bg-white/5 dark:bg-white/10",
+              "border border-white/10",
+              "shadow-[0_0_20px_rgba(0,0,0,0.25)]",
+              "group-hover:bg-white/8 group-hover:shadow-[0_0_30px_rgba(72,159,227,0.2)]",
+              "group-hover:border-white/20",
+            ]
+          )}
+          style={businessCardStyle}
+        >
           {children}
         </div>
       </SwipeableCard>
       
-      {/* Lineage preview below */}
-      <LineagePreview postId={postId} isHovered={isHovered} position="below" />
+      {/* Lineage preview below - only for public lens */}
+      {!isBusiness && <LineagePreview postId={postId} isHovered={isHovered} position="below" />}
     </li>
   );
 };
 
 export const FeedList = memo(function FeedList({ items, onEndReached, loading, onSelect }: Props) {
+  const { lens } = useDiscussLensSafe();
+  const isBusiness = lens === 'business';
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -128,8 +152,10 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
   return (
     <>
       <ul className="mx-auto w-full max-w-3xl px-4 space-y-6 pb-20 relative">
-        {/* Thread connection line overlay */}
-        <div className="absolute left-8 top-0 bottom-20 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
+        {/* Thread connection line overlay - only for public lens */}
+        {!isBusiness && (
+          <div className="absolute left-8 top-0 bottom-20 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
+        )}
         
         {items.map((item, index) => (
           <GlassCardWrapper 
@@ -137,6 +163,7 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
             index={index}
             postId={item.id}
             postTitle={item.title || item.content?.slice(0, 40)}
+            isBusiness={isBusiness}
           >
             <PostToSparkCard post={item} onSelect={handlePostSelect} />
           </GlassCardWrapper>
@@ -145,8 +172,14 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
       
       {loading && (
         <div className="py-4 text-center">
-          <div className="inline-flex items-center gap-2 text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+          <div 
+            className="inline-flex items-center gap-2"
+            style={{ color: isBusiness ? '#6B635B' : 'var(--muted-foreground)' }}
+          >
+            <div 
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: isBusiness ? '#4A7C9B' : 'var(--accent)' }}
+            />
             <span>Loading...</span>
           </div>
         </div>

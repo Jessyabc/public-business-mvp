@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { Button } from '@/components/ui/button';
 import { User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Plus, Palette, Map } from 'lucide-react';
 import {
@@ -18,6 +19,9 @@ import { useProfile } from '@/hooks/useProfile';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 
+// PB Blue for accents on light backgrounds
+const PB_BLUE = '#4A7C9B';
+
 export function GlobalNavigationMenu() {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -27,6 +31,7 @@ export function GlobalNavigationMenu() {
   const location = useLocation();
   const { toast } = useToast();
   const { data: orgId } = useUserOrgId();
+  const { lens } = useDiscussLensSafe();
 
   // PB requirement: lens/role UI should not appear in Think (/); keep it scoped to Discuss.
   const showDiscussOnlyUi = location.pathname.startsWith('/discuss');
@@ -60,12 +65,37 @@ export function GlobalNavigationMenu() {
     openComposer({});
   };
 
+  // Detect if we're on a light background
+  const isThinkPage = location.pathname === '/' || location.pathname === '/workspace';
+  const isDiscussPage = location.pathname.startsWith('/discuss');
+  const isLightBg = isThinkPage || (isDiscussPage && lens === 'business');
+
+  // Glass styling adapts to background
+  const glassStyle = isLightBg 
+    ? {
+        background: 'rgba(255, 255, 255, 0.6)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.4)',
+        boxShadow: '0 2px 16px rgba(166, 150, 130, 0.15)'
+      }
+    : {
+        background: 'rgba(0, 0, 0, 0.3)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 2px 16px rgba(0, 0, 0, 0.2)'
+      };
+
   if (!user) {
     return null;
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2 sm:py-3 backdrop-blur-xl border-b bg-black/20 border-white/10">
+    <nav 
+      className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2 sm:py-3 transition-all duration-300"
+      style={glassStyle}
+    >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo */}
         <div className="flex items-center gap-3 sm:gap-6">
@@ -73,8 +103,14 @@ export function GlobalNavigationMenu() {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-            <span className="text-base sm:text-xl font-bold hidden xs:inline text-white">
+            <Brain 
+              className="w-6 h-6 sm:w-8 sm:h-8"
+              style={{ color: isLightBg ? PB_BLUE : 'var(--primary)' }}
+            />
+            <span 
+              className="text-base sm:text-xl font-bold hidden xs:inline"
+              style={{ color: isLightBg ? '#3D3833' : 'white' }}
+            >
               PublicBusiness
             </span>
           </div>
@@ -86,7 +122,16 @@ export function GlobalNavigationMenu() {
           <Button
             onClick={handleCreateContent}
             size="sm"
-            className="px-2 sm:px-4 bg-primary hover:bg-primary/90 text-white"
+            className="px-2 sm:px-4 transition-all duration-200"
+            style={isLightBg ? {
+              background: 'rgba(255,255,255,0.8)',
+              color: PB_BLUE,
+              border: `1px solid rgba(74, 124, 155, 0.3)`,
+              boxShadow: '0 2px 8px rgba(74, 124, 155, 0.15)'
+            } : {
+              background: 'var(--primary)',
+              color: 'white'
+            }}
           >
             <Plus className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Create</span>
@@ -97,7 +142,10 @@ export function GlobalNavigationMenu() {
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
-                className="relative h-8 w-8 rounded-full hover:bg-white/10"
+                className="relative h-8 w-8 rounded-full"
+                style={{ 
+                  background: 'transparent'
+                }}
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || 'User'} />

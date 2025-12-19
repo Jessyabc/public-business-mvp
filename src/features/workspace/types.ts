@@ -14,6 +14,10 @@ export interface ThoughtObject {
   state: ThoughtState;
   created_at: string;
   updated_at: string;
+  /** When the thought was anchored - this is its temporal identity */
+  anchored_at?: string | null;
+  /** Optional user-provided label (replaces timestamp in display) */
+  display_label?: string | null;
 }
 
 export interface WorkspaceState {
@@ -31,6 +35,9 @@ export interface WorkspaceActions {
   anchorThought: (id: string) => void;
   reactivateThought: (id: string) => void;
   deleteThought: (id: string) => void;
+  
+  // Lineage: cosmetic label (does not affect ordering)
+  updateDisplayLabel: (id: string, label: string | null) => void;
   
   // State management
   setActiveThought: (id: string | null) => void;

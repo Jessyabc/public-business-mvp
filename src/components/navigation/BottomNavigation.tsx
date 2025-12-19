@@ -2,49 +2,87 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { PenTool, Plus, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { cn } from '@/lib/utils';
 
+// PB Blue for active states on business/light backgrounds
+const PB_BLUE = '#4A7C9B';
+
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const { user } = useAuth();
   const location = useLocation();
+  const { lens } = useDiscussLensSafe();
 
   if (!user) return null;
 
-  const isThinkActive = location.pathname === '/' || location.pathname === '/workspace';
-  const isDiscussActive = location.pathname === '/discuss' || location.pathname.startsWith('/discuss');
+  const isThinkPage = location.pathname === '/' || location.pathname === '/workspace';
+  const isDiscussPage = location.pathname === '/discuss' || location.pathname.startsWith('/discuss');
+  const isThinkActive = isThinkPage;
+  const isDiscussActive = isDiscussPage;
   const isProfileActive = location.pathname === '/profile';
   
   // Route-aware tooltip text for composer button
   const composerTooltip = isThinkActive ? 'Share to Discuss' : 'Create post';
 
+  // Determine if we're on a light background
+  // Light: Think page, or Discuss with business lens
+  const isLightBg = isThinkPage || (isDiscussPage && lens === 'business');
+  
+  // Glass styling adapts to background
+  const glassStyle = isLightBg 
+    ? {
+        background: 'rgba(255, 255, 255, 0.6)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.4)',
+        boxShadow: '0 8px 32px rgba(166, 150, 130, 0.2)'
+      }
+    : {
+        background: 'rgba(0, 0, 0, 0.3)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+      };
+
+  // Text colors based on background
+  const textActive = isLightBg ? PB_BLUE : 'white';
+  const textInactive = isLightBg ? '#6B635B' : 'rgba(255,255,255,0.6)';
+  const textHover = isLightBg ? '#3D3833' : 'white';
+
   return (
     <>
       {/* Desktop Navigation */}
       <nav className="hidden md:block fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <div className={cn(
-          "flex items-center gap-2 px-6 py-4 rounded-full",
-          "backdrop-blur-xl border shadow-2xl transition-all duration-300",
-          "bg-background/80 border-white/10"
-        )}>
+        <div 
+          className="flex items-center gap-2 px-6 py-4 rounded-full transition-all duration-300"
+          style={glassStyle}
+        >
           {/* Think Link */}
           <NavLink
             to="/"
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
-              "transition-all duration-200 relative group",
-              isThinkActive
-                ? "bg-white/10 text-white"
-                : "text-white/60 hover:text-white hover:bg-white/5"
+              "transition-all duration-200 relative group"
             )}
+            style={{ 
+              color: isThinkActive ? textActive : textInactive,
+              background: isThinkActive ? (isLightBg ? 'rgba(74, 124, 155, 0.1)' : 'rgba(255,255,255,0.1)') : 'transparent'
+            }}
+            onMouseEnter={(e) => !isThinkActive && (e.currentTarget.style.color = textHover)}
+            onMouseLeave={(e) => !isThinkActive && (e.currentTarget.style.color = textInactive)}
           >
             <PenTool className="w-6 h-6" />
             <span className="text-xs font-medium">Think</span>
             {isThinkActive && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white" />
+              <span 
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
+                style={{ background: textActive }}
+              />
             )}
           </NavLink>
 
@@ -54,10 +92,13 @@ export function BottomNavigation() {
               <Button
                 onClick={() => openComposer()}
                 size="icon"
-                className={cn(
-                  "w-14 h-14 rounded-full transition-all duration-200 mx-2 shadow-xl",
-                  "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20 hover:scale-105"
-                )}
+                className="w-14 h-14 rounded-full transition-all duration-200 mx-2 hover:scale-105 border-2"
+                style={{
+                  background: isLightBg ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.15)',
+                  color: isLightBg ? PB_BLUE : 'white',
+                  borderColor: isLightBg ? 'rgba(74, 124, 155, 0.3)' : 'rgba(255,255,255,0.2)',
+                  boxShadow: isLightBg ? '0 4px 16px rgba(74, 124, 155, 0.2)' : '0 4px 16px rgba(0,0,0,0.3)'
+                }}
               >
                 <Plus className="w-7 h-7" />
               </Button>
@@ -72,16 +113,22 @@ export function BottomNavigation() {
             to="/discuss"
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
-              "transition-all duration-200 relative group",
-              isDiscussActive
-                ? "bg-white/10 text-white"
-                : "text-white/60 hover:text-white hover:bg-white/5"
+              "transition-all duration-200 relative group"
             )}
+            style={{ 
+              color: isDiscussActive ? textActive : textInactive,
+              background: isDiscussActive ? (isLightBg ? 'rgba(74, 124, 155, 0.1)' : 'rgba(255,255,255,0.1)') : 'transparent'
+            }}
+            onMouseEnter={(e) => !isDiscussActive && (e.currentTarget.style.color = textHover)}
+            onMouseLeave={(e) => !isDiscussActive && (e.currentTarget.style.color = textInactive)}
           >
             <MessageCircle className="w-6 h-6" />
             <span className="text-xs font-medium">Discuss</span>
             {isDiscussActive && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white" />
+              <span 
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
+                style={{ background: textActive }}
+              />
             )}
           </NavLink>
 
@@ -90,16 +137,22 @@ export function BottomNavigation() {
             to="/profile"
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
-              "transition-all duration-200 relative group",
-              isProfileActive
-                ? "bg-white/10 text-white"
-                : "text-white/60 hover:text-white hover:bg-white/5"
+              "transition-all duration-200 relative group"
             )}
+            style={{ 
+              color: isProfileActive ? textActive : textInactive,
+              background: isProfileActive ? (isLightBg ? 'rgba(74, 124, 155, 0.1)' : 'rgba(255,255,255,0.1)') : 'transparent'
+            }}
+            onMouseEnter={(e) => !isProfileActive && (e.currentTarget.style.color = textHover)}
+            onMouseLeave={(e) => !isProfileActive && (e.currentTarget.style.color = textInactive)}
           >
             <User className="w-6 h-6" />
             <span className="text-xs font-medium">Profile</span>
             {isProfileActive && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white" />
+              <span 
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
+                style={{ background: textActive }}
+              />
             )}
           </NavLink>
         </div>
@@ -107,36 +160,37 @@ export function BottomNavigation() {
 
       {/* Mobile Navigation */}
       <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm">
-        <div className={cn(
-          "flex items-center justify-around px-4 py-3 rounded-2xl",
-          "backdrop-blur-xl border shadow-lg",
-          "bg-background/90 border-white/10"
-        )}>
+        <div 
+          className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300"
+          style={glassStyle}
+        >
           {/* Think */}
           <NavLink
             to="/"
-            className={cn(
-              "flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative",
-              isThinkActive ? "text-white" : "text-white/50"
-            )}
+            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
+            style={{ color: isThinkActive ? textActive : textInactive }}
           >
             <PenTool className="w-6 h-6" />
             {isThinkActive && (
-              <span className="w-1 h-1 rounded-full bg-white" />
+              <span 
+                className="w-1 h-1 rounded-full"
+                style={{ background: textActive }}
+              />
             )}
           </NavLink>
 
           {/* Discuss */}
           <NavLink
             to="/discuss"
-            className={cn(
-              "flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative",
-              isDiscussActive ? "text-white" : "text-white/50"
-            )}
+            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
+            style={{ color: isDiscussActive ? textActive : textInactive }}
           >
             <MessageCircle className="w-6 h-6" />
             {isDiscussActive && (
-              <span className="w-1 h-1 rounded-full bg-white" />
+              <span 
+                className="w-1 h-1 rounded-full"
+                style={{ background: textActive }}
+              />
             )}
           </NavLink>
 
@@ -146,10 +200,13 @@ export function BottomNavigation() {
               <Button
                 onClick={() => openComposer()}
                 size="icon"
-                className={cn(
-                  "w-14 h-14 rounded-full transition-all shadow-lg -mt-6",
-                  "bg-white/15 hover:bg-white/25 text-white border-2 border-white/20"
-                )}
+                className="w-14 h-14 rounded-full transition-all -mt-6 border-2"
+                style={{
+                  background: isLightBg ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.15)',
+                  color: isLightBg ? PB_BLUE : 'white',
+                  borderColor: isLightBg ? 'rgba(74, 124, 155, 0.3)' : 'rgba(255,255,255,0.2)',
+                  boxShadow: isLightBg ? '0 4px 16px rgba(74, 124, 155, 0.25)' : '0 4px 16px rgba(0,0,0,0.3)'
+                }}
               >
                 <Plus className="w-7 h-7" />
               </Button>
@@ -162,14 +219,15 @@ export function BottomNavigation() {
           {/* Profile */}
           <NavLink
             to="/profile"
-            className={cn(
-              "flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative",
-              isProfileActive ? "text-white" : "text-white/50"
-            )}
+            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
+            style={{ color: isProfileActive ? textActive : textInactive }}
           >
             <User className="w-6 h-6" />
             {isProfileActive && (
-              <span className="w-1 h-1 rounded-full bg-white" />
+              <span 
+                className="w-1 h-1 rounded-full"
+                style={{ background: textActive }}
+              />
             )}
           </NavLink>
         </div>

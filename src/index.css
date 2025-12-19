@@ -150,23 +150,27 @@
 
   /* ========================================
      Pillar #1: Individual Workspace Tokens
+     Light Neumorphic Style (always light for Think)
      ======================================== */
-  /* Active Thinking State - Glass/Frosted */
-  --workspace-focus: 210 80% 60%;
-  --workspace-active-border: rgba(120, 170, 255, 0.25);
-  --workspace-active-glow: 0 0 20px hsl(210 80% 60% / 0.15), 0 4px 16px rgba(0, 0, 0, 0.3);
+  /* Active Thinking State - Pressed inset neumorphic */
+  --workspace-focus: 35 50% 55%;
+  --workspace-active-border: rgba(180, 165, 145, 0.15);
+  --workspace-active-glow: inset 3px 3px 8px rgba(166, 150, 130, 0.15), inset -2px -2px 6px rgba(255, 255, 255, 0.7);
 
-  /* Anchored Thought State - Paper/Neumorphic (dark variant) */
-  --workspace-anchored-bg: rgba(15, 39, 74, 0.85);
-  --workspace-anchored-border: rgba(180, 200, 255, 0.12);
+  /* Anchored Thought State - Raised neumorphic */
+  --workspace-anchored-bg: #E4E0DC;
+  --workspace-anchored-border: transparent;
   --workspace-anchored-shadow: 
-    6px 6px 16px rgba(0, 0, 0, 0.4),
-    -4px -4px 12px rgba(180, 200, 255, 0.05);
+    8px 8px 16px rgba(166, 150, 130, 0.35),
+    -8px -8px 16px rgba(255, 255, 255, 0.8);
   --workspace-anchored-shadow-hover:
-    8px 8px 20px rgba(0, 0, 0, 0.45),
-    -6px -6px 16px rgba(180, 200, 255, 0.08);
-  --workspace-anchored-text: var(--text-primary);
-  --workspace-anchored-muted: var(--text-tertiary);
+    10px 10px 20px rgba(166, 150, 130, 0.4),
+    -10px -10px 20px rgba(255, 255, 255, 0.95);
+  --workspace-anchored-text: hsl(30, 10%, 20%);
+  --workspace-anchored-muted: hsl(30, 8%, 50%);
+  
+  /* Workspace surface color */
+  --workspace-surface: #E8E4E0;
 }
 
 /* Business mode – light theme override */
@@ -907,24 +911,49 @@ body {
 
 /* ========================================
    Pillar #1: Workspace Animations
+   Neumorphic entry and settle animations
+   Optimized for GPU - only transform/opacity
    ======================================== */
-@keyframes thought-settle {
+
+/* Smooth entry animation for anchored thoughts */
+@keyframes thought-enter {
   0% {
-    opacity: 0.7;
-    transform: scale(1.02) translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
   }
   60% {
-    opacity: 0.95;
-    transform: scale(1.005) translateY(-1px);
+    opacity: 0.8;
+    transform: translateY(2px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Settle/freeze animation when thought anchors */
+@keyframes thought-settle {
+  0% {
+    opacity: 0.85;
+    transform: scale(1.015) translateY(-6px);
+  }
+  40% {
+    transform: scale(1.005) translateY(-2px);
+  }
+  70% {
+    opacity: 0.98;
+    transform: scale(1.002) translateY(-1px);
   }
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
-    box-shadow: var(--workspace-anchored-shadow);
   }
 }
 
+.animate-thought-enter {
+  animation: thought-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .animate-thought-settle {
-  animation: thought-settle 400ms ease-out forwards;
+  animation: thought-settle 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

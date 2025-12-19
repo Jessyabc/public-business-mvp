@@ -54,11 +54,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       },
 
       // Anchor a thought (implicit transition, not "save" or "submit")
+      // Sets anchored_at - this becomes the thought's temporal identity
       anchorThought: (id) => {
+        const now = new Date().toISOString();
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
-              ? { ...t, state: 'anchored', updated_at: new Date().toISOString() }
+              ? { ...t, state: 'anchored', anchored_at: now, updated_at: now }
               : t
           ),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
@@ -85,6 +87,18 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }));
       },
 
+      // Update display label (cosmetic only - does not affect lineage ordering)
+      // Pass null or empty string to revert to timestamp
+      updateDisplayLabel: (id, label) => {
+        set((state) => ({
+          thoughts: state.thoughts.map((t) =>
+            t.id === id
+              ? { ...t, display_label: label || null }
+              : t
+          ),
+        }));
+      },
+
       // State setters
       setActiveThought: (id) => set({ activeThoughtId: id }),
       setThoughts: (thoughts) => set({ thoughts }),
@@ -102,7 +116,12 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         const { thoughts } = get();
         return thoughts
           .filter((t) => t.state === 'anchored')
-          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+          // Sort by anchored_at (temporal lineage), fallback to created_at for backward compatibility
+          .sort((a, b) => {
+            const timeA = a.anchored_at || a.created_at;
+            const timeB = b.anchored_at || b.created_at;
+            return new Date(timeB).getTime() - new Date(timeA).getTime();
+          });
       },
     }),
     {

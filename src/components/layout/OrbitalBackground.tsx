@@ -1,34 +1,108 @@
 import { motion } from 'framer-motion';
 
 interface OrbitalBackgroundProps {
-  mode: 'public' | 'business';
+  mode: 'public' | 'business' | 'workspace';
 }
 
 export function OrbitalBackground({ mode }: OrbitalBackgroundProps) {
-  const isPublic = mode === 'public';
-  
-  // Business mode: Static neumorphic surface (no animations)
-  if (!isPublic) {
+  // Workspace mode: Warm neumorphic sanctuary with PB blue ambient glow
+  // The "innermost layer" - private, warm, but clearly PB
+  if (mode === 'workspace') {
+    return (
+      <div 
+        className="pointer-events-none fixed inset-0 -z-50"
+        style={{
+          // Warmer base than business - sanctuary feel
+          background: '#EDE8E3'
+        }}
+      >
+        {/* Warm center gradient - like soft light from above */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 30%, rgba(255,252,245,0.6) 0%, transparent 60%)'
+          }}
+        />
+        
+        {/* PB Blue ambient glow at edges - you're still in PB */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse at 0% 0%, rgba(72, 159, 227, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 100% 0%, rgba(72, 159, 227, 0.06) 0%, transparent 45%),
+              radial-gradient(ellipse at 100% 100%, rgba(72, 159, 227, 0.07) 0%, transparent 50%),
+              radial-gradient(ellipse at 0% 100%, rgba(72, 159, 227, 0.05) 0%, transparent 45%)
+            `
+          }}
+        />
+        
+        {/* Paper texture overlay - warmth and intimacy */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'url(/noise.png)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '200px 200px',
+          }}
+        />
+        
+        {/* Soft vignette - cozy, focused */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            boxShadow: 'inset 0 0 250px rgba(140, 125, 110, 0.12)'
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Business mode: Crisp, neutral neumorphic surface
+  // The "middle layer" - professional, focused, structured
+  if (mode === 'business') {
     return (
       <div 
         className="pointer-events-none fixed inset-0 -z-50 transition-colors duration-[800ms]"
         style={{
-          background: 'linear-gradient(145deg, hsl(40, 10%, 98%) 0%, hsl(40, 8%, 96%) 50%, hsl(40, 6%, 94%) 100%)'
+          // Cooler, more neutral than workspace - professional feel
+          background: '#E6E4E2'
         }}
       >
-        {/* Neumorphic inset shadow for depth */}
+        {/* Clean top-down light gradient */}
         <div 
-          className="absolute inset-0" 
+          className="absolute inset-0"
           style={{
-            boxShadow: 'inset 0 2px 80px rgba(0,0,0,0.03), inset 0 -2px 80px rgba(255,255,255,0.8)'
-          }} 
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 30%, rgba(200,195,190,0.1) 100%)'
+          }}
         />
-        {/* Subtle noise texture overlay */}
+        
+        {/* Subtle PB Blue accent in corners - brand presence */}
         <div 
-          className="absolute inset-0 opacity-[0.015]"
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse at 0% 0%, rgba(72, 159, 227, 0.04) 0%, transparent 40%),
+              radial-gradient(ellipse at 100% 100%, rgba(72, 159, 227, 0.03) 0%, transparent 35%)
+            `
+          }}
+        />
+        
+        {/* Paper texture overlay - subtle */}
+        <div 
+          className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage: 'url(/noise.png)',
             backgroundRepeat: 'repeat',
+            backgroundSize: '200px 200px',
+          }}
+        />
+        
+        {/* Light vignette - professional focus */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            boxShadow: 'inset 0 0 200px rgba(160, 155, 150, 0.08)'
           }}
         />
       </div>

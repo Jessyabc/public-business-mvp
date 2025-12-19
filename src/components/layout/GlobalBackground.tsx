@@ -7,25 +7,25 @@ import { OrbitalBackground } from './OrbitalBackground';
  * GlobalBackground - Route-aware background
  * 
  * Rules:
- * - Logged-out users: Always see dark "public" mode
- * - Workspace (/): Always uses a neutral workspace aesthetic
- * - Discuss (/discuss): Respects lens toggle (public = dark, business = light)
- * - Other routes: Default to public aesthetic
+ * - Logged-out users: Animated orbs (public mode)
+ * - Think page (/): Static neumorphic (workspace mode) - light, paper-like
+ * - Discuss (/discuss): Respects lens toggle (public = dark animated, business = light static)
+ * - Other routes for logged-in users: Dark animated (public mode)
  */
 export function GlobalBackground() {
   const { user } = useAuth();
   const location = useLocation();
   const { lens } = useDiscussLensSafe();
 
-  // Logged-out users always see public (dark) theme
+  // Logged-out users on landing page get animated orbs
   if (!user) {
     return <OrbitalBackground mode="public" />;
   }
 
-  // Workspace always has a consistent, neutral aesthetic
-  // Using 'public' for now as the dark, focused workspace feel
-  if (location.pathname === '/' || location.pathname === '/workspace') {
-    return <OrbitalBackground mode="public" />;
+  // ONLY Think page uses neumorphic workspace background
+  const isThinkPage = location.pathname === '/' || location.pathname === '/workspace';
+  if (isThinkPage) {
+    return <OrbitalBackground mode="workspace" />;
   }
 
   // Discuss respects the lens
@@ -33,6 +33,6 @@ export function GlobalBackground() {
     return <OrbitalBackground mode={lens} />;
   }
 
-  // Default to public for other routes
+  // All other logged-in pages: use dark animated (public mode)
   return <OrbitalBackground mode="public" />;
 }

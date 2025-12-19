@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import type { Spark } from "./BrainstormLayout";
 import { cn } from "@/lib/utils";
 import { Globe } from "lucide-react";
+import { useDiscussLensSafe } from "@/contexts/DiscussLensContext";
+
+// PB Blue for accents on business lens
+const PB_BLUE = '#4A7C9B';
 
 export type SparkCardProps = {
   spark: Spark;
@@ -18,6 +22,8 @@ export const SparkCard: React.FC<SparkCardProps> = ({
   onSaveReference,
   onView,
 }) => {
+  const { lens } = useDiscussLensSafe();
+  const isBusiness = lens === 'business';
   const [tScore, setTScore] = useState(spark.t_score);
   const [viewCount, setViewCount] = useState(spark.view_count);
   const [hasGivenThought, setHasGivenThought] = useState(!!spark.has_given_thought);
@@ -91,23 +97,37 @@ export const SparkCard: React.FC<SparkCardProps> = ({
     }
   };
 
+  // Business lens: transparent bg, wrapper handles neumorphic container
+  // Public lens: glass aesthetic with shadows
+
   return (
     <article
       onClick={() => onView?.(spark.id)}
       className={cn(
         "relative w-full rounded-3xl px-6 py-5",
-        "bg-transparent",
-        "backdrop-blur-xl border border-white/10",
-        "shadow-[0_18px_60px_rgba(0,0,0,0.45)]",
         "transition-all duration-300",
-        "hover:scale-[1.01] hover:shadow-[0_20px_70px_rgba(0,0,0,0.5)]",
-        onView ? "cursor-pointer" : ""
+        onView ? "cursor-pointer" : "",
+        // Public lens: dark glass aesthetic
+        !isBusiness && [
+          "bg-transparent",
+          "backdrop-blur-xl",
+          "border border-white/10",
+          "shadow-[0_18px_60px_rgba(0,0,0,0.45)]",
+          "hover:shadow-[0_20px_70px_rgba(0,0,0,0.5)]",
+          "hover:scale-[1.01]",
+        ],
+        // Business lens: clean, let wrapper handle neumorphic
+        isBusiness && [
+          "bg-transparent",
+        ]
       )}
     >
-      {/* Gradient overlay */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/6 via-transparent to-[#489FE3]/12 opacity-70"
-      />
+      {/* Gradient overlay - only for public lens */}
+      {!isBusiness && (
+        <div
+          className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/6 via-transparent to-[#489FE3]/12 opacity-70"
+        />
+      )}
 
       {/* Content wrapper */}
       <div className="relative z-10">
@@ -115,13 +135,19 @@ export const SparkCard: React.FC<SparkCardProps> = ({
         <header className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             {/* avatar / initials could go here */}
-            <div className="text-sm font-medium text-white">
+            <div 
+              className="text-sm font-medium"
+              style={{ color: isBusiness ? '#3D3833' : 'white' }}
+            >
               {spark.is_anonymous
                 ? "Anonymous"
                 : spark.author_display_name || "Unknown author"}
             </div>
           </div>
-          <time className="text-xs text-white/60">
+          <time 
+            className="text-xs"
+            style={{ color: isBusiness ? '#8B8580' : 'rgba(255,255,255,0.6)' }}
+          >
             {new Date(spark.created_at).toLocaleString()}
           </time>
         </header>
@@ -129,43 +155,66 @@ export const SparkCard: React.FC<SparkCardProps> = ({
         {/* Body */}
         <div className="mb-4 space-y-2">
           {spark.title && (
-            <h2 className="text-base font-semibold text-white leading-tight">
+            <h2 
+              className="text-base font-semibold leading-tight"
+              style={{ color: isBusiness ? '#2D2926' : 'white' }}
+            >
               {spark.title}
             </h2>
           )}
-          <p className="text-sm text-white/90 leading-relaxed">
+          <p 
+            className="text-sm leading-relaxed"
+            style={{ color: isBusiness ? '#4D4843' : 'rgba(255,255,255,0.9)' }}
+          >
             {spark.body}
           </p>
         </div>
 
         {/* Footer: Metrics pill + Actions */}
         <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          {/* Glass metrics pill */}
+          {/* Metrics pill - neumorphic inset for business */}
           <div
             className={cn(
               "inline-flex items-center gap-3 rounded-full px-4 py-1.5",
-              "bg-white/8 backdrop-blur-xl border border-white/15",
-              "shadow-[0_0_12px_rgba(0,0,0,0.25)]",
               "transition-all duration-300",
-              "hover:bg-white/10"
+              !isBusiness && "backdrop-blur-xl bg-white/8 border border-white/15 shadow-[0_0_12px_rgba(0,0,0,0.25)] hover:bg-white/10"
             )}
+            style={isBusiness ? {
+              background: '#DDD9D5',
+              boxShadow: 'inset 2px 2px 4px rgba(166, 150, 130, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.7)'
+            } : undefined}
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-white">
+              <span 
+                className="text-xs font-semibold"
+                style={{ color: isBusiness ? PB_BLUE : 'white' }}
+              >
                 {tScore}
               </span>
-              <span className="text-[11px] text-white/70">Thoughts</span>
+              <span 
+                className="text-[11px]"
+                style={{ color: isBusiness ? '#6B635B' : 'rgba(255,255,255,0.7)' }}
+              >Thoughts</span>
             </div>
-            <div className="w-1 h-1 rounded-full bg-white/40" />
+            <div 
+              className="w-1 h-1 rounded-full"
+              style={{ background: isBusiness ? '#9B9590' : 'rgba(255,255,255,0.4)' }}
+            />
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-white">
+              <span 
+                className="text-xs font-semibold"
+                style={{ color: isBusiness ? PB_BLUE : 'white' }}
+              >
                 {viewCount}
               </span>
-              <span className="text-[11px] text-white/70">views</span>
+              <span 
+                className="text-[11px]"
+                style={{ color: isBusiness ? '#6B635B' : 'rgba(255,255,255,0.7)' }}
+              >views</span>
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Actions - neumorphic buttons for business */}
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
@@ -176,10 +225,21 @@ export const SparkCard: React.FC<SparkCardProps> = ({
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
                 "transition-all duration-200",
-                hasGivenThought
+                !isBusiness && (hasGivenThought
                   ? "bg-white/15 text-white border border-white/20"
-                  : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white"
+                  : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white")
               )}
+              style={isBusiness ? (hasGivenThought ? {
+                background: `${PB_BLUE}20`,
+                color: PB_BLUE,
+                border: `1px solid ${PB_BLUE}40`,
+                boxShadow: `inset 2px 2px 4px rgba(74, 124, 155, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.5)`
+              } : {
+                background: '#E0DCD8',
+                color: '#4D4843',
+                border: 'none',
+                boxShadow: '3px 3px 6px rgba(166, 150, 130, 0.25), -3px -3px 6px rgba(255, 255, 255, 0.8)'
+              }) : undefined}
             >
               <span className="mr-1.5">✦</span>
               <span className="hidden sm:inline">This made me think</span>
@@ -194,10 +254,15 @@ export const SparkCard: React.FC<SparkCardProps> = ({
               }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
-                "bg-white/5 text-white/80 border border-white/10",
-                "hover:bg-white/10 hover:text-white",
-                "transition-all duration-200"
+                "transition-all duration-200",
+                !isBusiness && "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white"
               )}
+              style={isBusiness ? {
+                background: '#E0DCD8',
+                color: '#4D4843',
+                border: 'none',
+                boxShadow: '3px 3px 6px rgba(166, 150, 130, 0.25), -3px -3px 6px rgba(255, 255, 255, 0.8)'
+              } : undefined}
             >
               Continue
             </button>
@@ -210,10 +275,15 @@ export const SparkCard: React.FC<SparkCardProps> = ({
               }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
-                "bg-white/5 text-white/80 border border-white/10",
-                "hover:bg-white/10 hover:text-white",
-                "transition-all duration-200"
+                "transition-all duration-200",
+                !isBusiness && "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white"
               )}
+              style={isBusiness ? {
+                background: '#E0DCD8',
+                color: '#4D4843',
+                border: 'none',
+                boxShadow: '3px 3px 6px rgba(166, 150, 130, 0.25), -3px -3px 6px rgba(255, 255, 255, 0.8)'
+              } : undefined}
             >
               Save reference
             </button>
@@ -229,13 +299,20 @@ export const SparkCard: React.FC<SparkCardProps> = ({
               }}
               className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center",
-                "bg-white/5 border border-white/10",
-                "hover:bg-white/10",
-                "transition-all duration-200"
+                "transition-all duration-200",
+                !isBusiness && "bg-white/5 border border-white/10 hover:bg-white/10"
               )}
+              style={isBusiness ? {
+                background: '#E0DCD8',
+                border: 'none',
+                boxShadow: '3px 3px 6px rgba(166, 150, 130, 0.25), -3px -3px 6px rgba(255, 255, 255, 0.8)'
+              } : undefined}
               title="Preview"
             >
-              <Globe className="w-4 h-4 text-white/70" />
+              <Globe 
+                className="w-4 h-4"
+                style={{ color: isBusiness ? '#6B635B' : 'rgba(255,255,255,0.7)' }}
+              />
             </button>
           </div>
         </div>

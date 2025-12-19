@@ -21,7 +21,7 @@ export function ThoughtStack() {
     <div className={cn(
       "thought-stack",
       "w-full max-w-2xl mx-auto",
-      "space-y-3"
+      "space-y-6" // More breathing room between thoughts
     )}>
       {anchoredThoughts.map((thought, index) => (
         <AnchoredThought 
