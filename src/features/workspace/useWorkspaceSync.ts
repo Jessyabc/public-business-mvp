@@ -43,25 +43,22 @@ export function useWorkspaceSync() {
       if (error) throw error;
       
       if (data && isMountedRef.current) {
-        const loadedThoughts: ThoughtObject[] = data.map((row) => {
-          // Derive day_key from created_at
-          const dayKey = row.created_at.split('T')[0]; // YYYY-MM-DD
-          return {
-            id: row.id,
-            user_id: row.user_id,
-            content: row.content,
-            // Normalize all loaded thoughts to anchored state
-            // User must deliberately re-enter active thinking
-            state: 'anchored' as const,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            day_key: dayKey,
-          };
-        });
+        const loadedThoughts: ThoughtObject[] = data.map((row) => ({
+          id: row.id,
+          user_id: row.user_id,
+          content: row.content,
+          // Normalize all loaded thoughts to anchored state
+          state: 'anchored' as const,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          // Use stored day_key or derive from created_at
+          day_key: row.day_key || row.created_at.split('T')[0],
+          display_label: row.display_label || null,
+          anchored_at: row.anchored_at || null,
+        }));
         
         // Merge with local thoughts (prefer newer)
         const localThoughts = useWorkspaceStore.getState().thoughts;
-        // Also normalize local active thoughts to anchored on reload
         const normalizedLocal = localThoughts.map(t => ({
           ...t,
           state: 'anchored' as const
@@ -69,7 +66,6 @@ export function useWorkspaceSync() {
         const mergedThoughts = mergeThoughts(normalizedLocal, loadedThoughts);
         
         setThoughts(mergedThoughts);
-        // Clear any active thought on reload - user must deliberately re-enter
         setActiveThought(null);
         lastSyncedThoughtsRef.current = JSON.stringify(mergedThoughts);
         setLastSynced(new Date().toISOString());
@@ -95,7 +91,7 @@ export function useWorkspaceSync() {
     
     setSyncing(true);
     try {
-      // Upsert all thoughts
+      // Upsert all thoughts with new columns
       const thoughtsWithUser = currentThoughts.map((t) => ({
         id: t.id,
         user_id: user.id,
@@ -103,6 +99,9 @@ export function useWorkspaceSync() {
         state: t.state,
         created_at: t.created_at,
         updated_at: t.updated_at,
+        day_key: t.day_key,
+        display_label: t.display_label || null,
+        anchored_at: t.anchored_at || null,
       }));
 
       if (thoughtsWithUser.length > 0) {

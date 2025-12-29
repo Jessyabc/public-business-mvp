@@ -1308,24 +1308,33 @@ export type Database = {
       }
       workspace_thoughts: {
         Row: {
+          anchored_at: string | null
           content: string
           created_at: string
+          day_key: string
+          display_label: string | null
           id: string
           state: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          anchored_at?: string | null
           content?: string
           created_at?: string
+          day_key?: string
+          display_label?: string | null
           id?: string
           state?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          anchored_at?: string | null
           content?: string
           created_at?: string
+          day_key?: string
+          display_label?: string | null
           id?: string
           state?: string
           updated_at?: string
