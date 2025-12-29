@@ -11,6 +11,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { cn } from '@/lib/utils';
+import { format, parseISO, isToday } from 'date-fns';
 
 // PB Blue - represents active cognition
 const PB_BLUE = '#489FE3';
@@ -24,9 +25,13 @@ interface ThinkingSurfaceProps {
 export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: ThinkingSurfaceProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const { thoughts, updateThought, anchorThought } = useWorkspaceStore();
+  const { thoughts, updateThought, anchorThought, activeDayKey } = useWorkspaceStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
+  
+  // Show which day we're adding to (only if not today)
+  const showDayLabel = activeDayKey && !isToday(parseISO(activeDayKey));
+  const dayLabel = activeDayKey ? format(parseISO(activeDayKey), 'MMMM d') : null;
   
   // Only auto-focus when user deliberately initiated thinking
   useEffect(() => {
@@ -143,6 +148,16 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
           }}
         />
       </div>
+      
+      {/* Day indicator when adding to a previous day */}
+      {showDayLabel && dayLabel && (
+        <p 
+          className="text-center text-xs mt-3 opacity-60"
+          style={{ color: '#9A8F85' }}
+        >
+          Adding to {dayLabel}
+        </p>
+      )}
       
       {/* Gentle hint - only show when empty */}
       {!thought.content && (

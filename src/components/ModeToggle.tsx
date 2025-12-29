@@ -55,13 +55,13 @@ export function ModeToggle() {
         <Label 
           htmlFor="mode-toggle" 
           className="text-sm font-medium cursor-pointer"
-          style={{ color: isBusiness ? PB_BLUE : (lens === 'business' ? '#cbd5e1' : 'var(--muted-foreground)') }}
+          style={{ color: isBusiness ? PB_BLUE : 'var(--muted-foreground)' }}
         >
           Business
         </Label>
         <Building2 
           className="w-4 h-4"
-          style={{ color: isBusiness ? PB_BLUE : (lens === 'business' ? '#cbd5e1' : 'var(--muted-foreground)') }}
+          style={{ color: isBusiness ? PB_BLUE : 'var(--muted-foreground)' }}
         />
       </div>
     </div>

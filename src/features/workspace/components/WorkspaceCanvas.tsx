@@ -2,14 +2,11 @@
  * Pillar #1: Workspace Canvas
  * 
  * The Individual Workspace - private cognitive sanctuary.
- * Orchestrates Active Thinking and Anchored Thoughts.
- */
-
-/**
- * Pillar #1: Workspace Canvas
+ * Orchestrates Active Thinking and Day Threads.
  * 
- * The Individual Workspace - private cognitive sanctuary.
- * A calm desk of thoughts, not a productivity tool.
+ * Daily threading: Each day creates a new thread.
+ * Tap breathing space to start today's thinking.
+ * Open previous days to continue adding thoughts.
  */
 
 import { useCallback, useState, useEffect } from 'react';
@@ -27,6 +24,8 @@ export function WorkspaceCanvas() {
     isSyncing,
     createThought,
     getActiveThought,
+    activeDayKey,
+    setActiveDayKey,
   } = useWorkspaceStore();
   
   // Track if user deliberately started thinking (for auto-focus)
@@ -41,31 +40,32 @@ export function WorkspaceCanvas() {
 
   const handleStartThinking = useCallback(() => {
     setUserInitiated(true);
+    setActiveDayKey(null); // New thought = today
     createThought();
-  }, [createThought]);
+  }, [createThought, setActiveDayKey]);
 
   // Reset user-initiated flag when thought is anchored
   const handleAnchor = useCallback(() => {
     setUserInitiated(false);
   }, []);
 
-  // Handle canvas click (Option C: tap anywhere empty to start writing)
+  // Handle canvas click (tap anywhere empty to start writing)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    // Only trigger if clicking directly on the canvas (not on a thought card)
     const target = e.target as HTMLElement;
-    const isOnThought = target.closest('.anchored-thought') || target.closest('.thinking-surface');
+    const isOnThought = target.closest('.anchored-thought') || 
+                        target.closest('.thinking-surface') ||
+                        target.closest('.day-thread');
     
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);
+      setActiveDayKey(null); // New thought = today
       createThought();
     }
-  }, [activeThought, createThought]);
+  }, [activeThought, createThought, setActiveDayKey]);
 
   // Global Enter key to start writing (when no thought is active)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if no active thought and Enter is pressed
-      // Ignore if user is typing elsewhere (input, textarea, contenteditable)
       const target = e.target as HTMLElement;
       const isTyping = 
         target.tagName === 'INPUT' || 
@@ -75,13 +75,14 @@ export function WorkspaceCanvas() {
       if (e.key === 'Enter' && !activeThought && !isTyping && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
         e.preventDefault();
         setUserInitiated(true);
+        setActiveDayKey(null);
         createThought();
       }
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [activeThought, createThought]);
+  }, [activeThought, createThought, setActiveDayKey]);
 
   if (isLoading) {
     return (
@@ -97,7 +98,6 @@ export function WorkspaceCanvas() {
         "workspace-canvas",
         "w-full min-h-screen",
         "px-4 py-8 md:px-8 md:py-12",
-        // Option C: entire canvas is tappable when no active thought
         !activeThought && hasThoughts && "cursor-text"
       )}
       onClick={handleCanvasClick}
@@ -126,14 +126,12 @@ export function WorkspaceCanvas() {
               className="group min-h-[80px] rounded-2xl transition-all duration-300 ease-out flex items-center justify-center cursor-text"
               style={{
                 background: '#EAE5E0',
-                // Subtle warm indent
                 boxShadow: `
                   inset 4px 4px 8px rgba(180, 165, 145, 0.15),
                   inset -4px -4px 8px rgba(255, 255, 255, 0.5)
                 `
               }}
               onMouseEnter={(e) => {
-                // Hint of PB blue on hover - invitation to think
                 e.currentTarget.style.boxShadow = `
                   inset 4px 4px 8px rgba(180, 165, 145, 0.15),
                   inset -4px -4px 8px rgba(255, 255, 255, 0.5),
@@ -159,7 +157,7 @@ export function WorkspaceCanvas() {
           )}
         </section>
 
-        {/* Anchored Thoughts - no header, just presence */}
+        {/* Day Threads */}
         {hasAnchoredThoughts && (
           <section onClick={(e) => e.stopPropagation()}>
             <ThoughtStack />
