@@ -1,15 +1,32 @@
 /**
  * Pillar #1: Individual Workspace - Zustand Store
  * 
- * Pure cognitive state management.
+ * Pure cognitive state management with daily threading.
  * No social metrics, no engagement tracking.
+ * 
+ * Threading model:
+ * - Thoughts are grouped by day_key (YYYY-MM-DD)
+ * - Each day forms a "thread" of related thinking
+ * - New entries prepend to the day (most recent at top)
+ * - Users can revisit and add to previous days
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { WorkspaceStore, ThoughtObject } from './types';
+import type { WorkspaceStore, ThoughtObject, DayThread } from './types';
+import { format, parseISO } from 'date-fns';
 
 const generateId = () => crypto.randomUUID();
+
+/** Get day key from ISO date string */
+const getDayKey = (isoString: string): string => {
+  return format(parseISO(isoString), 'yyyy-MM-dd');
+};
+
+/** Get today's day key */
+const getTodayKey = (): string => {
+  return format(new Date(), 'yyyy-MM-dd');
+};
 
 export const useWorkspaceStore = create<WorkspaceStore>()(
   persist(
@@ -17,14 +34,17 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       // Initial state
       thoughts: [],
       activeThoughtId: null,
+      activeDayKey: null,
       isLoading: false,
       isSyncing: false,
       lastSyncedAt: null,
 
-      // Create a new thought and make it active
-      createThought: () => {
+      // Create a new thought, optionally for a specific day
+      createThought: (dayKey?: string) => {
         const id = generateId();
         const now = new Date().toISOString();
+        const targetDayKey = dayKey || get().activeDayKey || getTodayKey();
+        
         const newThought: ThoughtObject = {
           id,
           user_id: '', // Will be set during sync
@@ -32,11 +52,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           state: 'active',
           created_at: now,
           updated_at: now,
+          day_key: targetDayKey,
         };
         
         set((state) => ({
           thoughts: [newThought, ...state.thoughts],
           activeThoughtId: id,
+          activeDayKey: targetDayKey,
         }));
         
         return id;
@@ -54,13 +76,19 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       },
 
       // Anchor a thought (implicit transition, not "save" or "submit")
-      // Sets anchored_at - this becomes the thought's temporal identity
       anchorThought: (id) => {
         const now = new Date().toISOString();
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
-              ? { ...t, state: 'anchored', anchored_at: now, updated_at: now }
+              ? { 
+                  ...t, 
+                  state: 'anchored', 
+                  anchored_at: now, 
+                  updated_at: now,
+                  // Ensure day_key is set based on when anchored
+                  day_key: t.day_key || getDayKey(now),
+                }
               : t
           ),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
@@ -69,6 +97,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       // Reactivate an anchored thought for continued thinking
       reactivateThought: (id) => {
+        const thought = get().thoughts.find(t => t.id === id);
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
@@ -76,6 +105,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
               : t
           ),
           activeThoughtId: id,
+          activeDayKey: thought?.day_key || null,
         }));
       },
 
@@ -87,13 +117,15 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }));
       },
 
-      // Update display label (cosmetic only - does not affect lineage ordering)
-      // Pass null or empty string to revert to timestamp
-      updateDisplayLabel: (id, label) => {
+      // Set which day thread to add to
+      setActiveDayKey: (dayKey) => set({ activeDayKey: dayKey }),
+
+      // Update display label for a day thread
+      updateDayLabel: (dayKey, label) => {
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
-            t.id === id
-              ? { ...t, display_label: label || null }
+            t.day_key === dayKey
+              ? { ...t, display_label: label }
               : t
           ),
         }));
@@ -116,12 +148,59 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         const { thoughts } = get();
         return thoughts
           .filter((t) => t.state === 'anchored')
-          // Sort by anchored_at (temporal lineage), fallback to created_at for backward compatibility
           .sort((a, b) => {
             const timeA = a.anchored_at || a.created_at;
             const timeB = b.anchored_at || b.created_at;
             return new Date(timeB).getTime() - new Date(timeA).getTime();
           });
+      },
+
+      // Get all thoughts grouped by day
+      getDayThreads: () => {
+        const { thoughts } = get();
+        const anchored = thoughts.filter((t) => t.state === 'anchored');
+        
+        // Group by day_key
+        const dayMap = new Map<string, ThoughtObject[]>();
+        
+        for (const thought of anchored) {
+          const key = thought.day_key || getDayKey(thought.anchored_at || thought.created_at);
+          if (!dayMap.has(key)) {
+            dayMap.set(key, []);
+          }
+          dayMap.get(key)!.push(thought);
+        }
+        
+        // Convert to DayThread array
+        const threads: DayThread[] = [];
+        
+        dayMap.forEach((dayThoughts, dayKey) => {
+          // Sort thoughts within day by anchored_at descending (newest first)
+          const sorted = dayThoughts.sort((a, b) => {
+            const timeA = a.anchored_at || a.created_at;
+            const timeB = b.anchored_at || b.created_at;
+            return new Date(timeB).getTime() - new Date(timeA).getTime();
+          });
+          
+          // Get the display label from any thought in this day (they all share it)
+          const displayLabel = sorted[0]?.display_label || null;
+          
+          threads.push({
+            day_key: dayKey,
+            display_label: displayLabel,
+            thoughts: sorted,
+            earliest_at: sorted[sorted.length - 1].anchored_at || sorted[sorted.length - 1].created_at,
+            latest_at: sorted[0].anchored_at || sorted[0].created_at,
+          });
+        });
+        
+        // Sort threads by day_key descending (most recent day first)
+        return threads.sort((a, b) => b.day_key.localeCompare(a.day_key));
+      },
+
+      getDayThread: (dayKey) => {
+        const threads = get().getDayThreads();
+        return threads.find((t) => t.day_key === dayKey) || null;
       },
     }),
     {
@@ -130,6 +209,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       partialize: (state) => ({
         thoughts: state.thoughts,
         activeThoughtId: state.activeThoughtId,
+        activeDayKey: state.activeDayKey,
         lastSyncedAt: state.lastSyncedAt,
       }),
     }

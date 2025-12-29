@@ -1,19 +1,19 @@
 /**
  * Pillar #1: Thought Stack
  * 
- * Anchored thoughts with spatial hierarchy.
- * Recent thoughts are more prominent, older ones gently recede.
+ * Displays day threads - groups of thoughts organized by day.
+ * Most recent day first, with ability to add to any previous day.
  */
 
 import { useWorkspaceStore } from '../useWorkspaceStore';
-import { AnchoredThought } from './AnchoredThought';
+import { DayThread } from './DayThread';
 import { cn } from '@/lib/utils';
 
 export function ThoughtStack() {
-  const getAnchoredThoughts = useWorkspaceStore((state) => state.getAnchoredThoughts);
-  const anchoredThoughts = getAnchoredThoughts();
+  const getDayThreads = useWorkspaceStore((state) => state.getDayThreads);
+  const dayThreads = getDayThreads();
 
-  if (anchoredThoughts.length === 0) {
+  if (dayThreads.length === 0) {
     return null;
   }
 
@@ -21,13 +21,13 @@ export function ThoughtStack() {
     <div className={cn(
       "thought-stack",
       "w-full max-w-2xl mx-auto",
-      "space-y-6" // More breathing room between thoughts
+      "space-y-10" // Generous spacing between days
     )}>
-      {anchoredThoughts.map((thought, index) => (
-        <AnchoredThought 
-          key={thought.id} 
-          thoughtId={thought.id} 
-          depth={index}
+      {dayThreads.map((thread, index) => (
+        <DayThread
+          key={thread.day_key}
+          thread={thread}
+          isFirst={index === 0}
         />
       ))}
     </div>

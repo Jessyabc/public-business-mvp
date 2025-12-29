@@ -43,16 +43,21 @@ export function useWorkspaceSync() {
       if (error) throw error;
       
       if (data && isMountedRef.current) {
-        const loadedThoughts: ThoughtObject[] = data.map((row) => ({
-          id: row.id,
-          user_id: row.user_id,
-          content: row.content,
-          // Normalize all loaded thoughts to anchored state
-          // User must deliberately re-enter active thinking
-          state: 'anchored' as const,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-        }));
+        const loadedThoughts: ThoughtObject[] = data.map((row) => {
+          // Derive day_key from created_at
+          const dayKey = row.created_at.split('T')[0]; // YYYY-MM-DD
+          return {
+            id: row.id,
+            user_id: row.user_id,
+            content: row.content,
+            // Normalize all loaded thoughts to anchored state
+            // User must deliberately re-enter active thinking
+            state: 'anchored' as const,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            day_key: dayKey,
+          };
+        });
         
         // Merge with local thoughts (prefer newer)
         const localThoughts = useWorkspaceStore.getState().thoughts;

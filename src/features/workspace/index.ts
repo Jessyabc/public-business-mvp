@@ -5,6 +5,7 @@
  */
 
 export { WorkspaceCanvas } from './components/WorkspaceCanvas';
+export { DayThread } from './components/DayThread';
 export { useWorkspaceStore } from './useWorkspaceStore';
 export { useWorkspaceSync } from './useWorkspaceSync';
-export type { ThoughtObject, ThoughtState, WorkspaceStore } from './types';
+export type { ThoughtObject, ThoughtState, DayThread as DayThreadType, WorkspaceStore } from './types';
