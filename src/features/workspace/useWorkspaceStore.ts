@@ -40,14 +40,15 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       lastSyncedAt: null,
 
       // Create a new thought, optionally for a specific day
-      createThought: (dayKey?: string) => {
+      // user_id is passed from the component that has auth context
+      createThought: (dayKey?: string, userId?: string) => {
         const id = generateId();
         const now = new Date().toISOString();
         const targetDayKey = dayKey || get().activeDayKey || getTodayKey();
         
         const newThought: ThoughtObject = {
           id,
-          user_id: '', // Will be set during sync
+          user_id: userId || '', // Set from auth context, fallback empty
           content: '',
           state: 'active',
           created_at: now,

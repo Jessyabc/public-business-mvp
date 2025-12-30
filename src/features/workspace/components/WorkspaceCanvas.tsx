@@ -15,9 +15,11 @@ import { useWorkspaceSync } from '../useWorkspaceSync';
 import { ThinkingSurface } from './ThinkingSurface';
 import { ThoughtStack } from './ThoughtStack';
 import { EmptyWorkspace } from './EmptyWorkspace';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 export function WorkspaceCanvas() {
+  const { user } = useAuth();
   const { 
     thoughts,
     isLoading,
@@ -41,8 +43,8 @@ export function WorkspaceCanvas() {
   const handleStartThinking = useCallback(() => {
     setUserInitiated(true);
     setActiveDayKey(null); // New thought = today
-    createThought();
-  }, [createThought, setActiveDayKey]);
+    createThought(undefined, user?.id);
+  }, [createThought, setActiveDayKey, user?.id]);
 
   // Reset user-initiated flag when thought is anchored
   const handleAnchor = useCallback(() => {
@@ -59,9 +61,9 @@ export function WorkspaceCanvas() {
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);
       setActiveDayKey(null); // New thought = today
-      createThought();
+      createThought(undefined, user?.id);
     }
-  }, [activeThought, createThought, setActiveDayKey]);
+  }, [activeThought, createThought, setActiveDayKey, user?.id]);
 
   // Global Enter key to start writing (when no thought is active)
   useEffect(() => {
@@ -76,13 +78,13 @@ export function WorkspaceCanvas() {
         e.preventDefault();
         setUserInitiated(true);
         setActiveDayKey(null);
-        createThought();
+        createThought(undefined, user?.id);
       }
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [activeThought, createThought, setActiveDayKey]);
+  }, [activeThought, createThought, setActiveDayKey, user?.id]);
 
   if (isLoading) {
     return (

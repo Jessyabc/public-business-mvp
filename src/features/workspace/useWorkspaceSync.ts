@@ -144,12 +144,26 @@ export function useWorkspaceSync() {
     };
   }, [loadThoughts]);
 
-  // Auto-sync when thoughts change
+  // Auto-sync when thoughts change (including when first thought is created)
   useEffect(() => {
+    // Sync whenever we have a user and any thoughts exist
+    // This ensures first thought gets persisted
     if (user && thoughts.length > 0) {
       debouncedSync();
     }
   }, [thoughts, user, debouncedSync]);
+
+  // Force immediate sync when a thought is anchored
+  useEffect(() => {
+    const anchoredCount = thoughts.filter(t => t.state === 'anchored').length;
+    if (user && anchoredCount > 0) {
+      // Small delay to ensure state is settled, then force sync
+      const timeoutId = setTimeout(() => {
+        syncThoughts();
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [thoughts.filter(t => t.state === 'anchored').length, user, syncThoughts]);
 
   // Sync before unload
   useEffect(() => {
