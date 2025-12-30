@@ -114,6 +114,20 @@ export function AuthModal({
                 </div>
               </div>
 
+              <div className="text-center">
+                <a 
+                  href="/forgot-password" 
+                  className="text-sm text-muted-foreground hover:text-primary underline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onOpenChange(false);
+                    window.location.href = '/forgot-password';
+                  }}
+                >
+                  Forgot your password?
+                </a>
+              </div>
+
               <button type="submit" disabled={loading} className="glassButton glassButton--accent w-full">
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>

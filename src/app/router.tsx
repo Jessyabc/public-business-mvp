@@ -23,6 +23,8 @@ import { Landing } from '@/pages/Landing';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
+import ResetPassword from '@/pages/ResetPassword';
+import ForgotPassword from '@/pages/ForgotPassword';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Features from '@/pages/Features';
@@ -92,6 +94,8 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   { path: '/profile', element: withLayout(<Profile />) },
   { path: '/settings', element: withLayout(<Settings />) },
   { path: '/notifications', element: withLayout(<Notifications />) },
+  { path: '/forgot-password', element: withLayout(<ForgotPassword />) },
+  { path: '/reset-password', element: withLayout(<ResetPassword />) },
   
   // === Organization Routes ===
   { path: '/org/new', element: withLayoutLazy(CreateOrganization) },
