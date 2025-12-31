@@ -71,13 +71,14 @@ export function BusinessFeed() {
     openComposer({});
   };
 
-  // Filter posts based on current filters
+  // Filter posts: must be business mode AND type = insight (not sparks)
   const filteredPosts = posts.filter(post => {
     const matchesSearch = !filters.search || 
       post.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
       post.content.toLowerCase().includes(filters.search.toLowerCase());
     
-    return matchesSearch && post.mode === 'business';
+    // Business feed only shows insights, not sparks
+    return matchesSearch && post.mode === 'business' && post.type === 'insight';
   });
 
   const handleViewPost = (postId: string) => {
