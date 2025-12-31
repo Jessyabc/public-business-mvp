@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, TrendingUp, Lightbulb, Users, Link2, ArrowRight, CheckCircle2, Clock } from "lucide-react";
+import { Lock, TrendingUp, Lightbulb, Users, Link2, ArrowRight, CheckCircle2, Clock, Building, XCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { useOrgAnalytics, useOrgTopInsights } from "@/hooks/useBusinessAnalytics
 import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
 import { rpcAdminApproveIntake, rpcAdminApproveUser, rpcAdminListPending } from "@/integrations/supabase/rpc";
 import { AdminPendingIdea } from "@/features/admin/openIdeas/types";
+import { useAdminOrgRequests } from "@/hooks/useOrgRequests";
 
 export function Admin() {
   const { toast } = useToast();
@@ -30,6 +31,9 @@ export function Admin() {
     limit: 10,
     sortBy,
   });
+
+  // Org requests management
+  const { requests: orgRequests, loading: orgRequestsLoading, approveRequest, rejectRequest, refetch: refetchOrgRequests } = useAdminOrgRequests();
 
   const [pendingIdeas, setPendingIdeas] = useState<AdminPendingIdea[]>([]);
   const [pendingLoading, setPendingLoading] = useState(false);
@@ -262,6 +266,91 @@ export function Admin() {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No analytics data available</p>
+            </div>
+          )}
+        </GlassCard>
+
+        {/* Pending Organization Requests */}
+        <GlassCard className="border-blue-500/20" padding="lg">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                <Building className="w-6 h-6 text-blue-500" />
+                Organization Requests
+              </h2>
+              <p className="text-muted-foreground">Users requesting to create business accounts</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={refetchOrgRequests} disabled={orgRequestsLoading}>
+              Refresh
+            </Button>
+          </div>
+
+          {orgRequestsLoading ? (
+            <div className="text-center py-8">
+              <Clock className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-3" />
+              <p className="text-muted-foreground">Loading organization requests...</p>
+            </div>
+          ) : orgRequests.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No pending organization requests.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orgRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="rounded-xl border border-blue-500/30 p-4 bg-blue-500/5 backdrop-blur-sm"
+                >
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+                        Organization
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(request.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      <span className="capitalize">{request.status}</span>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-lg mb-1">{request.org_name}</h3>
+                    {request.org_description && (
+                      <p className="text-sm text-muted-foreground mb-2">{request.org_description}</p>
+                    )}
+                    {request.reason && (
+                      <p className="text-sm italic text-muted-foreground/80">"{request.reason}"</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      User: {request.user_id.slice(0, 8)}...
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-500 border-red-500/30 hover:bg-red-500/10"
+                        onClick={() => rejectRequest(request.id)}
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => approveRequest(request.id)}
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Approve
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </GlassCard>
