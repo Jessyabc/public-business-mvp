@@ -48,9 +48,12 @@ export function useUniversalFeed(params: {
           return;
         }
 
+        // Map mode to feed query mode
         const feedMode =
-          params.mode === 'public' || params.mode === 'business'
-            ? params.mode
+          params.mode === 'public' || params.mode === 'brainstorm_main' || params.mode === 'brainstorm_open_ideas'
+            ? 'public'
+            : params.mode === 'business'
+            ? 'business'
             : 'public';
 
         const { items: chunk, nextCursor } = await fetchUniversalFeed(supabase, {
