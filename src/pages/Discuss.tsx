@@ -240,7 +240,7 @@ function DiscussContent() {
 
       <PullToRefresh onRefresh={handleRefresh}>
         <BrainstormLayoutShell
-          main={<FeedContainer mode="brainstorm_main" activePostId={activePostId} key={refreshKey} />}
+          main={<FeedContainer mode={lens === 'business' ? 'business' : 'public'} activePostId={activePostId} key={`${refreshKey}-${lens}`} />}
           crossLinks={null}
           sidebar={<RightSidebar variant="feed" onSelectPost={handleSelectPost} />}
         />
