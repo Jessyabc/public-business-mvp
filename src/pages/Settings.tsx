@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useUserSettings } from '@/hooks/useUserSettings';
@@ -14,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Bell, Shield, Palette, Building2, BookOpen, Loader2 } from 'lucide-react';
+import { User, Bell, Shield, Palette, Building2, BookOpen, Loader2, Eye, EyeOff } from 'lucide-react';
 import Resources from './Resources';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import {
@@ -36,6 +37,9 @@ export default function Settings() {
   const { preferences, loading: settingsLoading, saving, updatePreference } = useUserSettings();
   const { toast } = useToast();
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [deletePasswordError, setDeletePasswordError] = useState('');
   
   // Get initial tab from URL params
   const initialTab = searchParams.get('tab') || 'profile';
@@ -66,8 +70,29 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = async () => {
+    // Validate password first
+    if (!deletePassword) {
+      setDeletePasswordError('Password is required');
+      return;
+    }
+
+    setDeletePasswordError('');
     setDeleteLoading(true);
+    
     try {
+      // Verify password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: deletePassword,
+      });
+
+      if (signInError) {
+        setDeletePasswordError('Incorrect password. Please try again.');
+        setDeleteLoading(false);
+        return;
+      }
+
+      // Password verified, proceed with deletion
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('Not authenticated');
@@ -103,6 +128,15 @@ export default function Settings() {
       });
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      // Reset password field when dialog closes
+      setDeletePassword('');
+      setDeletePasswordError('');
+      setShowDeletePassword(false);
     }
   };
 
@@ -337,7 +371,7 @@ export default function Settings() {
 
                 <div className="space-y-4">
                   <h3 className="font-medium text-destructive">Danger Zone</h3>
-                  <AlertDialog>
+                  <AlertDialog onOpenChange={handleDeleteDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" disabled={deleteLoading}>
                         {deleteLoading ? (
@@ -361,15 +395,57 @@ export default function Settings() {
                             <li>Your workspace thoughts</li>
                             <li>All your interactions and ratings</li>
                           </ul>
+                          <div className="mt-4 space-y-2">
+                            <Label htmlFor="delete-password" className="text-sm font-medium">
+                              Confirm your password to delete your account
+                            </Label>
+                            <div className="relative">
+                              <Input
+                                id="delete-password"
+                                type={showDeletePassword ? 'text' : 'password'}
+                                placeholder="Enter your password"
+                                value={deletePassword}
+                                onChange={(e) => {
+                                  setDeletePassword(e.target.value);
+                                  setDeletePasswordError('');
+                                }}
+                                className={deletePasswordError ? 'border-destructive' : ''}
+                                disabled={deleteLoading}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowDeletePassword(!showDeletePassword)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                disabled={deleteLoading}
+                              >
+                                {showDeletePassword ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+                            {deletePasswordError && (
+                              <p className="text-sm text-destructive">{deletePasswordError}</p>
+                            )}
+                          </div>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeleteAccount}
+                          disabled={deleteLoading || !deletePassword}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Yes, delete my account
+                          {deleteLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Deleting...
+                            </>
+                          ) : (
+                            'Yes, delete my account'
+                          )}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
