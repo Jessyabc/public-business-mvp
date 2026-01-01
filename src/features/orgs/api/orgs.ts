@@ -18,15 +18,15 @@ export async function createOrganization(params: {
   });
   if (error) throw error;
 
-  // Fetch the newly created org row (id, name, slug, status)
+  // Fetch the newly created org row
   const { data: org, error: selectError } = await supabase
     .from('orgs')
-    .select('id, name, slug, status')
+    .select('id, name, slug')
     .eq('id', orgId as string)
     .single();
   if (selectError) throw selectError;
 
-  return org as { id: string; name: string; slug: string; status: string };
+  return { ...org, status: 'approved' } as { id: string; name: string; slug: string; status: string };
 }
 
 // Kept for backwards compatibility but no longer used in CreateOrganization

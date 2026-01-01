@@ -191,6 +191,13 @@ export type Database = {
             foreignKeyName: "business_insights_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "business_insights_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -739,6 +746,64 @@ export type Database = {
         }
         Relationships: []
       }
+      org_member_applications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          org_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          org_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          org_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_member_applications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "org_member_applications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_member_applications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       org_members: {
         Row: {
           created_at: string
@@ -766,6 +831,13 @@ export type Database = {
             foreignKeyName: "org_members_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -780,9 +852,12 @@ export type Database = {
       }
       org_requests: {
         Row: {
+          company_size: string | null
           created_at: string
           id: string
+          industry_id: string | null
           org_description: string | null
+          org_id: string | null
           org_name: string
           reason: string | null
           reviewed_at: string | null
@@ -790,11 +865,15 @@ export type Database = {
           status: string
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
+          company_size?: string | null
           created_at?: string
           id?: string
+          industry_id?: string | null
           org_description?: string | null
+          org_id?: string | null
           org_name: string
           reason?: string | null
           reviewed_at?: string | null
@@ -802,11 +881,15 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
+          company_size?: string | null
           created_at?: string
           id?: string
+          industry_id?: string | null
           org_description?: string | null
+          org_id?: string | null
           org_name?: string
           reason?: string | null
           reviewed_at?: string | null
@@ -814,8 +897,38 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "org_requests_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "org_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_org_analytics"
+            referencedColumns: ["org_id"]
+          },
+        ]
       }
       org_themes: {
         Row: {
@@ -841,6 +954,13 @@ export type Database = {
             foreignKeyName: "org_themes_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: true
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "org_themes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -855,36 +975,56 @@ export type Database = {
       }
       orgs: {
         Row: {
+          company_size: string | null
           created_at: string
           created_by: string | null
           description: string | null
           id: string
+          industry_id: string | null
           logo_url: string | null
           name: string
           slug: string | null
+          status: string
           theme_version: number
+          website: string | null
         }
         Insert: {
+          company_size?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
+          industry_id?: string | null
           logo_url?: string | null
           name: string
           slug?: string | null
+          status?: string
           theme_version?: number
+          website?: string | null
         }
         Update: {
+          company_size?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
+          industry_id?: string | null
           logo_url?: string | null
           name?: string
           slug?: string | null
+          status?: string
           theme_version?: number
+          website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orgs_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_interactions: {
         Row: {
@@ -1237,6 +1377,13 @@ export type Database = {
             foreignKeyName: "posts_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -1490,6 +1637,13 @@ export type Database = {
             foreignKeyName: "posts_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -1665,6 +1819,13 @@ export type Database = {
             foreignKeyName: "posts_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -1760,6 +1921,34 @@ export type Database = {
           preview?: never
         }
         Relationships: []
+      }
+      org_approval_requests: {
+        Row: {
+          company_size: string | null
+          creator_email: string | null
+          creator_name: string | null
+          industry_id: string | null
+          org_created_at: string | null
+          org_description: string | null
+          org_id: string | null
+          org_name: string | null
+          org_status: string | null
+          reason: string | null
+          request_created_at: string | null
+          request_id: string | null
+          request_status: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_requests_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_cards: {
         Row: {
@@ -1869,6 +2058,13 @@ export type Database = {
             foreignKeyName: "posts_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
@@ -1899,6 +2095,13 @@ export type Database = {
           views_count: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "org_approval_requests"
+            referencedColumns: ["org_id"]
+          },
           {
             foreignKeyName: "posts_org_id_fkey"
             columns: ["org_id"]
@@ -2109,6 +2312,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_to_org: {
+        Args: { p_message?: string; p_org_id: string }
+        Returns: string
+      }
+      approve_org_member_application: {
+        Args: { p_application_id: string }
+        Returns: undefined
+      }
+      approve_org_request: {
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
       can_create_business_posts: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -2125,10 +2340,18 @@ export type Database = {
           token: string
         }[]
       }
-      create_org_and_owner: {
-        Args: { p_description?: string; p_name: string }
-        Returns: string
-      }
+      create_org_and_owner:
+        | { Args: { p_description?: string; p_name: string }; Returns: string }
+        | {
+            Args: {
+              p_company_size?: string
+              p_description?: string
+              p_industry_id?: string
+              p_name: string
+              p_website?: string
+            }
+            Returns: string
+          }
       create_post: {
         Args: {
           p_body: string
@@ -2226,6 +2449,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_business_member: { Args: never; Returns: boolean }
       is_business_user: { Args: { p_user_id?: string }; Returns: boolean }
+      is_org_admin: { Args: { p_org_id: string }; Returns: boolean }
       is_org_member: { Args: { p_org_id: string }; Returns: boolean }
       match_page_sections: {
         Args: {
@@ -2244,6 +2468,14 @@ export type Database = {
         }[]
       }
       obfuscate_email: { Args: { email: string }; Returns: string }
+      reject_org_member_application: {
+        Args: { p_application_id: string }
+        Returns: undefined
+      }
+      reject_org_request: {
+        Args: { p_reason?: string; p_request_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"
