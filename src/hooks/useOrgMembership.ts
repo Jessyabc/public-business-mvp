@@ -12,11 +12,11 @@ export interface OrgMembership {
     id: string;
     name: string;
     description: string | null;
-    website: string | null;
-    industry_id: string | null;
-    company_size: string | null;
-    status: 'pending' | 'approved' | 'rejected';
-    created_by: string;
+    slug: string | null;
+    logo_url: string | null;
+    created_by: string | null;
+    created_at: string;
+    theme_version: number;
   };
 }
 
@@ -34,25 +34,38 @@ export function useOrgMembership() {
       const { data, error } = await supabase
         .from('org_members')
         .select(`
-          *,
-          org:orgs(*)
+          id, org_id, user_id, role, created_at
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        // Log error but don't throw to prevent UI crashes
         console.error('[useOrgMembership] Error fetching memberships:', error);
         return [];
       }
       
-      return (data || []) as OrgMembership[];
+      // Fetch org details separately to avoid type issues with RLS
+      const memberships = (data || []) as OrgMembership[];
+      if (memberships.length > 0) {
+        const orgIds = Array.from(new Set(memberships.map(m => m.org_id)));
+        const { data: orgs } = await supabase
+          .from('orgs')
+          .select('id, name, description, slug, logo_url, created_by, created_at, theme_version')
+          .in('id', orgIds);
+        
+        const orgMap = new Map((orgs || []).map(o => [o.id, o]));
+        memberships.forEach(m => {
+          m.org = orgMap.get(m.org_id) as OrgMembership['org'];
+        });
+      }
+      
+      return memberships;
     },
     enabled: !!user,
-    staleTime: 0, // Reduced to 0 to always refetch (can increase later)
+    staleTime: 0,
     refetchOnMount: true,
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    retry: 2, // Retry failed requests up to 2 times
+    refetchOnWindowFocus: true,
+    retry: 2,
   });
 }
 

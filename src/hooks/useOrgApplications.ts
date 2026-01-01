@@ -46,14 +46,29 @@ export function useOrgApplications() {
       const { data, error } = await supabase
         .from('org_member_applications')
         .select(`
-          *,
-          org:orgs(id, name, description, website, status)
+          id, org_id, user_id, message, status, reviewed_by, reviewed_at, created_at, updated_at
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setApplications((data || []) as OrgMemberApplication[]);
+      
+      // Fetch org details separately to avoid type issues
+      const applications = (data || []) as OrgMemberApplication[];
+      if (applications.length > 0) {
+        const orgIds = Array.from(new Set(applications.map(a => a.org_id)));
+        const { data: orgs } = await supabase
+          .from('orgs')
+          .select('id, name, description, website, status')
+          .in('id', orgIds);
+        
+        const orgMap = new Map((orgs || []).map(o => [o.id, o]));
+        applications.forEach(app => {
+          app.org = orgMap.get(app.org_id) as OrgMemberApplication['org'];
+        });
+      }
+      
+      setApplications(applications);
     } catch (err) {
       console.error('Error fetching applications:', err);
       toast.error('Failed to load applications');
@@ -111,15 +126,29 @@ export function useOrgApplicationsForOrg(orgId: string | null) {
       const { data, error } = await supabase
         .from('org_member_applications')
         .select(`
-          *,
-          user:profiles!org_member_applications_user_id_fkey(id, display_name)
+          id, org_id, user_id, message, status, reviewed_by, reviewed_at, created_at, updated_at
         `)
         .eq('org_id', orgId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setApplications((data || []) as OrgMemberApplication[]);
+      // Fetch user profiles separately to avoid type issues
+      const applications = (data || []) as OrgMemberApplication[];
+      if (applications.length > 0) {
+        const userIds = Array.from(new Set(applications.map(a => a.user_id)));
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name')
+          .in('id', userIds);
+        
+        const profileMap = new Map((profiles || []).map(p => [p.id, p]));
+        applications.forEach(app => {
+          app.user = profileMap.get(app.user_id) as OrgMemberApplication['user'];
+        });
+      }
+
+      setApplications(applications);
     } catch (err) {
       console.error('Error fetching org applications:', err);
       toast.error('Failed to load applications');
