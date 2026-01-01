@@ -2318,12 +2318,9 @@ export type Database = {
       }
       approve_org_member_application: {
         Args: { p_application_id: string }
-        Returns: undefined
+        Returns: boolean
       }
-      approve_org_request: {
-        Args: { p_request_id: string }
-        Returns: undefined
-      }
+      approve_org_request: { Args: { p_request_id: string }; Returns: boolean }
       can_create_business_posts: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -2470,11 +2467,11 @@ export type Database = {
       obfuscate_email: { Args: { email: string }; Returns: string }
       reject_org_member_application: {
         Args: { p_application_id: string }
-        Returns: undefined
+        Returns: boolean
       }
       reject_org_request: {
         Args: { p_reason?: string; p_request_id: string }
-        Returns: undefined
+        Returns: boolean
       }
     }
     Enums: {
