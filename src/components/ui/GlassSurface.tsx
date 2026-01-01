@@ -15,6 +15,7 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
           'bg-[var(--glass-bg)]',
           'border border-[var(--glass-border)]',
           'backdrop-blur-[var(--glass-blur)]',
+          'text-foreground',
           inset ? 'p-3 sm:p-4' : 'p-4 sm:p-6',
           className
         )}

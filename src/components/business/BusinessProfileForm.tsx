@@ -26,9 +26,10 @@ interface BusinessProfileFormProps {
   onSuccess?: () => void;
   onClose?: () => void;
   compact?: boolean; // New prop for embedded settings view
+  isReadOnly?: boolean; // New prop for read-only mode (business members)
 }
 
-export function BusinessProfileForm({ onSuccess, onClose, compact = false }: BusinessProfileFormProps) {
+export function BusinessProfileForm({ onSuccess, onClose, compact = false, isReadOnly = false }: BusinessProfileFormProps) {
   const { profile, industries, departments, loading, createProfile, updateProfile } = useBusinessProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,7 +72,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
             Business Information
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            Update your business details and company information.
+            {isReadOnly ? 'View your business information (read-only)' : 'Update your business details and company information.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -88,7 +89,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                     <FormControl>
                        <GlassInput 
                          placeholder="Enter your company name" 
-                         {...field} 
+                         {...field}
+                         disabled={isReadOnly}
                        />
                     </FormControl>
                     <FormMessage />
@@ -105,9 +107,9 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                       <FormLabel className="text-foreground">
                         Industry
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                          <FormControl>
-                           <SelectTrigger className="glass-business-card">
+                           <SelectTrigger className="glass-business-card" disabled={isReadOnly}>
                              <SelectValue placeholder="Select industry" />
                            </SelectTrigger>
                          </FormControl>
@@ -132,9 +134,9 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                       <FormLabel className="text-foreground">
                         Department
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                          <FormControl>
-                           <SelectTrigger className="glass-business-card">
+                           <SelectTrigger className="glass-business-card" disabled={isReadOnly}>
                              <SelectValue placeholder="Select department" />
                            </SelectTrigger>
                          </FormControl>
@@ -160,9 +162,9 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                     <FormLabel className="text-foreground">
                       Company Size
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                        <FormControl>
-                         <SelectTrigger className="glass-business-card">
+                         <SelectTrigger className="glass-business-card" disabled={isReadOnly}>
                            <SelectValue placeholder="Select company size" />
                          </SelectTrigger>
                        </FormControl>
@@ -191,7 +193,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                       <FormControl>
                          <GlassInput 
                            placeholder="Enter phone number" 
-                           {...field} 
+                           {...field}
+                           disabled={isReadOnly}
                          />
                       </FormControl>
                       <FormMessage />
@@ -210,7 +213,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                       <FormControl>
                          <GlassInput 
                            placeholder="https://example.com" 
-                           {...field} 
+                           {...field}
+                           disabled={isReadOnly}
                          />
                       </FormControl>
                       <FormMessage />
@@ -232,7 +236,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                          as="textarea"
                          placeholder="Tell us about your company..."
                          className="min-h-[100px]"
-                         {...field} 
+                         {...field}
+                         disabled={isReadOnly}
                        />
                     </FormControl>
                     <FormMessage />
@@ -240,13 +245,15 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                 )}
               />
 
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={loading || isSubmitting}
-              >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </Button>
+              {!isReadOnly && (
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={loading || isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
+              )}
             </form>
           </Form>
         </CardContent>
@@ -264,7 +271,7 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
               Business Information
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Provide your business details for verification and access to business features.
+              {isReadOnly ? 'View your business information (read-only)' : 'Provide your business details for verification and access to business features.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -281,7 +288,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                       <FormControl>
                          <GlassInput 
                            placeholder="Enter your company name" 
-                           {...field} 
+                           {...field}
+                           disabled={isReadOnly}
                          />
                       </FormControl>
                       <FormMessage />
@@ -298,9 +306,9 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                         <FormLabel className="text-foreground">
                           Industry
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                            <FormControl>
-                             <SelectTrigger className="glass-business-card">
+                             <SelectTrigger className="glass-business-card" disabled={isReadOnly}>
                                <SelectValue placeholder="Select industry" />
                              </SelectTrigger>
                            </FormControl>
@@ -325,9 +333,9 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                         <FormLabel className="text-foreground">
                           Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                            <FormControl>
-                             <SelectTrigger className="glass-business-card">
+                             <SelectTrigger className="glass-business-card" disabled={isReadOnly}>
                                <SelectValue placeholder="Select department" />
                              </SelectTrigger>
                            </FormControl>
@@ -353,9 +361,9 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                       <FormLabel className="text-foreground">
                         Company Size
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                          <FormControl>
-                           <SelectTrigger className="glass-business-card">
+                           <SelectTrigger className="glass-business-card" disabled={isReadOnly}>
                              <SelectValue placeholder="Select company size" />
                            </SelectTrigger>
                          </FormControl>
@@ -384,7 +392,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                         <FormControl>
                            <GlassInput 
                              placeholder="Enter phone number" 
-                             {...field} 
+                             {...field}
+                             disabled={isReadOnly}
                            />
                         </FormControl>
                         <FormMessage />
@@ -403,7 +412,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                         <FormControl>
                            <GlassInput 
                              placeholder="https://example.com" 
-                             {...field} 
+                             {...field}
+                             disabled={isReadOnly}
                            />
                         </FormControl>
                         <FormMessage />
@@ -425,7 +435,8 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                            as="textarea"
                            placeholder="Tell us about your company..."
                            className="min-h-[100px]"
-                           {...field} 
+                           {...field}
+                           disabled={isReadOnly}
                          />
                       </FormControl>
                       <FormMessage />
@@ -433,20 +444,22 @@ export function BusinessProfileForm({ onSuccess, onClose, compact = false }: Bus
                   )}
                 />
 
-                <div className="flex gap-4">
-                  {onClose && (
-                    <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-                      Cancel
+                {!isReadOnly && (
+                  <div className="flex gap-4">
+                    {onClose && (
+                      <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                        Cancel
+                      </Button>
+                    )}
+                    <Button 
+                      type="submit" 
+                      className="flex-1"
+                      disabled={loading || isSubmitting}
+                    >
+                      {isSubmitting ? 'Saving...' : profile ? 'Update Profile' : 'Create Profile'}
                     </Button>
-                  )}
-                  <Button 
-                    type="submit" 
-                    className="flex-1"
-                    disabled={loading || isSubmitting}
-                  >
-                    {isSubmitting ? 'Saving...' : profile ? 'Update Profile' : 'Create Profile'}
-                  </Button>
-                </div>
+                  </div>
+                )}
               </form>
             </Form>
           </CardContent>

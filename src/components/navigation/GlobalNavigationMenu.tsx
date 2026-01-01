@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { Button } from '@/components/ui/button';
-import { User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Plus, Palette, Map } from 'lucide-react';
+import { User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Plus, Palette, Map, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -210,6 +210,11 @@ export function GlobalNavigationMenu() {
               <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => navigate('/research')}>
+                <Search className="mr-2 h-4 w-4" />
+                <span>Research Hub</span>
               </DropdownMenuItem>
               
               <DropdownMenuItem onClick={() => navigate('/settings')}>

@@ -13,6 +13,7 @@ import { useUserSettings } from '@/hooks/useUserSettings';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
+import { useIsOrgOwner } from '@/hooks/useOrgMembership';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Bell, Shield, Palette, Building2, BookOpen, Loader2 } from 'lucide-react';
 import Resources from './Resources';
@@ -32,14 +33,19 @@ import {
 export default function Settings() {
   const { user, signOut } = useAuth();
   const [searchParams] = useSearchParams();
-  const { userRoles, isBusinessMember } = useUserRoles();
+  const { userRoles, isBusinessMember, isAdmin } = useUserRoles();
   const { preferences, loading: settingsLoading, saving, updatePreference } = useUserSettings();
   const { toast } = useToast();
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const { isOrgOwner } = useIsOrgOwner();
   
   // Get initial tab from URL params
   const initialTab = searchParams.get('tab') || 'profile';
   const [activeTab, setActiveTab] = useState(initialTab);
+  
+  // Determine if business settings should be read-only
+  // Org owners and admins can edit, business members (non-owners) see read-only
+  const isBusinessSettingsReadOnly = isBusinessMember() && !isOrgOwner && !isAdmin();
 
   // Update tab when URL changes
   useEffect(() => {
@@ -162,7 +168,7 @@ export default function Settings() {
           {/* Business Settings */}
           <TabsContent value="business">
             {isBusiness ? (
-              <BusinessProfileForm compact />
+              <BusinessProfileForm compact isReadOnly={isBusinessSettingsReadOnly} />
             ) : (
               <Card>
                 <CardHeader>

@@ -6,6 +6,7 @@ import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, Messa
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePosts } from "@/hooks/usePosts";
+import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
 import { ComposerModal } from "@/components/composer/ComposerModal";
 import { PostReaderModal } from "@/components/posts/PostReaderModal";
 import { PullToRefresh } from "@/components/layout/PullToRefresh";
@@ -23,6 +24,7 @@ export default function Profile() {
   const { profile, loading: profileLoading } = useProfile();
   const { isBusinessMember, isAdmin } = useUserRoles();
   const { posts, loading: postsLoading, error, fetchUserPosts } = usePosts();
+  const { data: orgId } = useUserOrgId();
   const [showComposer, setShowComposer] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -57,7 +59,13 @@ export default function Profile() {
             </div>
 
             {/* Quick Actions - Inline buttons */}
-            <div className={`grid gap-4 mb-6 ${(isBusinessMember() || isAdmin()) ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+            <div className={`grid gap-4 mb-6 ${
+              (isBusinessMember() || isAdmin()) 
+                ? 'grid-cols-1 md:grid-cols-3' 
+                : !orgId 
+                  ? 'grid-cols-1 md:grid-cols-3' 
+                  : 'grid-cols-1 md:grid-cols-2'
+            }`}>
               <Button 
                 onClick={() => setShowComposer(true)}
                 className="glass-ios-triple h-16 text-left justify-start"
@@ -69,6 +77,20 @@ export default function Profile() {
                   <div className="text-xs text-muted-foreground">Share your insights</div>
                 </div>
               </Button>
+
+              {!orgId && (
+                <Button 
+                  onClick={() => navigate("/org/new")}
+                  className="glass-ios-triple h-16 text-left justify-start"
+                  variant="outline"
+                >
+                  <Building2 className="h-5 w-5 mr-2" />
+                  <div>
+                    <div className="font-medium">Create Organization</div>
+                    <div className="text-xs text-muted-foreground">Set up your business</div>
+                  </div>
+                </Button>
+              )}
 
               {(isBusinessMember() || isAdmin()) && (
                 <Button 

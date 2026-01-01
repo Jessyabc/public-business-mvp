@@ -4,23 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 export async function createOrganization(params: {
   name: string;
   description?: string | null;
+  website?: string | null;
+  industry_id?: string | null;
+  company_size?: string | null;
 }) {
-  // Call the RPC, passing name + description
+  // Call the RPC, passing all fields
   const { data: orgId, error } = await (supabase.rpc as any)('create_org_and_owner', {
     p_name: params.name,
     p_description: params.description ?? null,
+    p_website: params.website ?? null,
+    p_industry_id: params.industry_id ?? null,
+    p_company_size: params.company_size ?? null,
   });
   if (error) throw error;
 
-  // Fetch the newly created org row (id, name, slug)
+  // Fetch the newly created org row (id, name, slug, status)
   const { data: org, error: selectError } = await supabase
     .from('orgs')
-    .select('id, name, slug')
+    .select('id, name, slug, status')
     .eq('id', orgId as string)
     .single();
   if (selectError) throw selectError;
 
-  return org as { id: string; name: string; slug: string };
+  return org as { id: string; name: string; slug: string; status: string };
 }
 
 // Kept for backwards compatibility but no longer used in CreateOrganization

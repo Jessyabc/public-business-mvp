@@ -8,6 +8,7 @@ import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { BusinessInvitations } from '@/components/business/BusinessInvitations';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
+import { useIsOrgOwner } from '@/hooks/useOrgMembership';
 import { 
   Building2, 
   Users, 
@@ -23,6 +24,7 @@ export function BusinessDashboard() {
   const { isBusinessMember, isAdmin, canCreateBusinessPosts } = useUserRoles();
   const { profile } = useBusinessProfile();
   const { openComposer } = useComposerStore();
+  const { isOrgOwner } = useIsOrgOwner();
 
   const isBusinessMemberRole = isBusinessMember() || isAdmin();
   const isAdminRole = isAdmin();
@@ -53,6 +55,16 @@ export function BusinessDashboard() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold">Business Dashboard</h1>
+            {isOrgOwner && (
+              <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                Owner
+              </Badge>
+            )}
+            {isAdminRole && !isOrgOwner && (
+              <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                Admin
+              </Badge>
+            )}
             <BusinessMemberBadge />
           </div>
           {profile && (
@@ -76,8 +88,15 @@ export function BusinessDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
               <Building2 className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Company</p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-sm font-medium text-muted-foreground">Company</p>
+                  {isOrgOwner && (
+                    <Badge variant="default" className="bg-primary/20 text-primary border-primary/30 text-xs">
+                      Owner
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-lg font-semibold">{profile?.company_name || 'N/A'}</p>
               </div>
             </div>

@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, TrendingUp, Award, Clock, Sparkles, Building2, Lightbulb, Loader2 } from 'lucide-react';
+import { Search, TrendingUp, Award, Clock, Sparkles, Building2, Lightbulb, Loader2, Users } from 'lucide-react';
+import { CompanySearch } from '@/components/orgs/CompanySearch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { PostToSparkCard } from '@/components/brainstorm/PostToSparkCard';
@@ -274,7 +275,7 @@ const Research = () => {
               </h1>
             </div>
             <p className="font-light max-w-2xl mx-auto text-muted-foreground">
-              Explore sparks, business insights, and open ideas
+              Explore sparks, business insights, open ideas, and companies
             </p>
           </header>
 
@@ -326,7 +327,7 @@ const Research = () => {
 
           {/* Research Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 backdrop-blur-xl bg-muted border border-border">
+            <TabsList className="grid w-full grid-cols-4 backdrop-blur-xl bg-muted border border-border">
               <TabsTrigger value="sparks" className="flex items-center gap-2 data-[state=active]:bg-background">
                 <Sparkles className="h-4 w-4" />
                 Sparks
@@ -338,6 +339,10 @@ const Research = () => {
               <TabsTrigger value="open-ideas" className="flex items-center gap-2 data-[state=active]:bg-background">
                 <Lightbulb className="h-4 w-4" />
                 Open Ideas
+              </TabsTrigger>
+              <TabsTrigger value="companies" className="flex items-center gap-2 data-[state=active]:bg-background">
+                <Users className="h-4 w-4" />
+                Companies
               </TabsTrigger>
             </TabsList>
 
@@ -493,6 +498,12 @@ const Research = () => {
                     )}
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="companies" className="mt-0">
+              <div className="min-h-[400px]">
+                <CompanySearch searchQuery={searchQuery} onSearchChange={setSearchQuery} />
               </div>
             </TabsContent>
           </Tabs>

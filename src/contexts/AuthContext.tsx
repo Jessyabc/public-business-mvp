@@ -3,6 +3,7 @@ const { createContext, useContext, useEffect, useState } = React;
 type ReactNode = React.ReactNode;
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<'public' | 'business' | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Get initial session with error handling
@@ -33,6 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         // Get user type from metadata
         setUserType(session.user.user_metadata?.user_type || 'public');
+        
+        // Invalidate org membership queries to ensure fresh data
+        queryClient.invalidateQueries({ queryKey: ['org_membership'] });
         
         // After user signs in, if we stored an invite token before sign-in, consume it here once.
         setTimeout(async () => {
@@ -48,6 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } catch { /* no-op; UI toasts handled on /accept-invite page */ }
           }
         }, 0);
+      } else {
+        // User logged out - clear org membership queries
+        queryClient.invalidateQueries({ queryKey: ['org_membership'] });
       }
       setLoading(false);
     }).catch((error) => {
@@ -62,6 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         if (session?.user) {
           setUserType(session.user.user_metadata?.user_type || 'public');
+          
+          // Invalidate org membership queries when user logs in
+          queryClient.invalidateQueries({ queryKey: ['org_membership'] });
           
           // Check for pending token after sign-in
           setTimeout(async () => {
@@ -79,13 +90,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setUserType(null);
+          // User logged out - clear org membership queries
+          queryClient.invalidateQueries({ queryKey: ['org_membership'] });
         }
         setLoading(false);
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   // Remove consumeInvitationToken - now handled by AcceptInvite page
 

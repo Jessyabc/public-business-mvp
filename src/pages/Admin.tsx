@@ -11,6 +11,8 @@ import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
 import { rpcAdminApproveIntake, rpcAdminApproveUser, rpcAdminListPending } from "@/integrations/supabase/rpc";
 import { AdminPendingIdea } from "@/features/admin/openIdeas/types";
 import { useAdminOrgRequests } from "@/hooks/useOrgRequests";
+import { useIsBusinessMember, useIsOrgOwner } from "@/hooks/useOrgMembership";
+import { Badge } from "@/components/ui/badge";
 
 export function Admin() {
   const { toast } = useToast();
@@ -18,10 +20,13 @@ export function Admin() {
   const { isAdmin: checkAdmin, loading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
   const { data: orgId } = useUserOrgId();
+  const { isBusinessMember } = useIsBusinessMember();
+  const { isOrgOwner } = useIsOrgOwner();
   
   const [sortBy, setSortBy] = useState<'u_score' | 't_score' | 'continuations' | 'crosslinks' | 'recent'>('u_score');
 
   const isAdminUser = checkAdmin();
+  const hasAccess = isAdminUser || isBusinessMember; // Allow admins and business members
   const loading = authLoading || rolesLoading;
 
   // Fetch org analytics
@@ -32,7 +37,7 @@ export function Admin() {
     sortBy,
   });
 
-  // Org requests management
+  // Org requests management (only for admins)
   const { requests: orgRequests, loading: orgRequestsLoading, approveRequest, rejectRequest, refetch: refetchOrgRequests } = useAdminOrgRequests();
 
   const [pendingIdeas, setPendingIdeas] = useState<AdminPendingIdea[]>([]);
@@ -41,7 +46,7 @@ export function Admin() {
   const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const refreshPendingIdeas = useCallback(async () => {
-    if (!user || !isAdminUser) return;
+    if (!user || !isAdminUser) return; // Only admins can see pending ideas
 
     setPendingLoading(true);
     setPendingError(null);
@@ -140,8 +145,8 @@ export function Admin() {
     );
   }
 
-  // Require admin role
-  if (!isAdminUser) {
+  // Require admin or business member role
+  if (!hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-destructive/20 rounded-full blur-3xl"></div>
@@ -151,7 +156,7 @@ export function Admin() {
           <div className="text-center mb-6">
             <Lock className="w-16 h-16 text-destructive mx-auto mb-4" />
             <h1 className="text-2xl font-bold">Access Denied</h1>
-            <p className="text-muted-foreground">You don't have permission to access this page</p>
+            <p className="text-muted-foreground">You must be an admin or business member to access this page</p>
           </div>
           
           <Button
@@ -184,7 +189,19 @@ export function Admin() {
         {/* Organization Snapshot */}
         <GlassCard className="border-primary/20" padding="lg">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">Organization Snapshot</h2>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-2xl font-bold">Organization Snapshot</h2>
+              {isOrgOwner && (
+                <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                  Owner
+                </Badge>
+              )}
+              {isAdminUser && !isOrgOwner && (
+                <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  Admin
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground">
               {orgAnalytics?.org_name || 'Your Organization'}
             </p>
@@ -194,6 +211,11 @@ export function Admin() {
             <div className="text-center py-12">
               <Lightbulb className="w-16 h-16 text-primary animate-pulse mx-auto mb-4" />
               <p className="text-muted-foreground">Loading analytics...</p>
+            </div>
+          ) : !orgId ? (
+            <div className="text-center py-12">
+              <Building className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-muted-foreground">No organization found. Analytics require organization membership.</p>
             </div>
           ) : orgAnalytics ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -270,93 +292,96 @@ export function Admin() {
           )}
         </GlassCard>
 
-        {/* Pending Organization Requests */}
-        <GlassCard className="border-blue-500/20" padding="lg">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-                <Building className="w-6 h-6 text-blue-500" />
-                Organization Requests
-              </h2>
-              <p className="text-muted-foreground">Users requesting to create business accounts</p>
+        {/* Organization Approval Requests - Admins Only */}
+        {isAdminUser && (
+          <GlassCard className="border-blue-500/20" padding="lg">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                  <Building className="w-6 h-6 text-blue-500" />
+                  Organization Approval Requests
+                </h2>
+                <p className="text-muted-foreground">Review and approve organization creation requests</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={refetchOrgRequests} disabled={orgRequestsLoading}>
+                Refresh
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={refetchOrgRequests} disabled={orgRequestsLoading}>
-              Refresh
-            </Button>
-          </div>
 
-          {orgRequestsLoading ? (
-            <div className="text-center py-8">
-              <Clock className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-3" />
-              <p className="text-muted-foreground">Loading organization requests...</p>
-            </div>
-          ) : orgRequests.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No pending organization requests.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {orgRequests.map((request) => (
-                <div
-                  key={request.id}
-                  className="rounded-xl border border-blue-500/30 p-4 bg-blue-500/5 backdrop-blur-sm"
-                >
-                  <div className="flex items-center justify-between gap-4 mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
-                        Organization
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(request.created_at).toLocaleString()}
-                      </span>
+            {orgRequestsLoading ? (
+              <div className="text-center py-8">
+                <Clock className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-3" />
+                <p className="text-muted-foreground">Loading organization requests...</p>
+              </div>
+            ) : orgRequests.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No pending organization requests.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {orgRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="rounded-xl border border-blue-500/30 p-4 bg-blue-500/5 backdrop-blur-sm"
+                  >
+                    <div className="flex items-center justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+                          Organization
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(request.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4" />
+                        <span className="capitalize">{request.status}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span className="capitalize">{request.status}</span>
+
+                    <div className="mb-4">
+                      <h3 className="font-semibold text-lg mb-1">{request.org_name}</h3>
+                      {request.org_description && (
+                        <p className="text-sm text-muted-foreground mb-2">{request.org_description}</p>
+                      )}
+                      {request.reason && (
+                        <p className="text-sm italic text-muted-foreground/80">"{request.reason}"</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-muted-foreground">
+                        User: {request.user_id.slice(0, 8)}...
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-500 border-red-500/30 hover:bg-red-500/10"
+                          onClick={() => rejectRequest(request.id)}
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          Reject
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => approveRequest(request.id)}
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        )}
 
-                  <div className="mb-4">
-                    <h3 className="font-semibold text-lg mb-1">{request.org_name}</h3>
-                    {request.org_description && (
-                      <p className="text-sm text-muted-foreground mb-2">{request.org_description}</p>
-                    )}
-                    {request.reason && (
-                      <p className="text-sm italic text-muted-foreground/80">"{request.reason}"</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">
-                      User: {request.user_id.slice(0, 8)}...
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-500 border-red-500/30 hover:bg-red-500/10"
-                        onClick={() => rejectRequest(request.id)}
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Reject
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => approveRequest(request.id)}
-                      >
-                        <CheckCircle2 className="w-4 h-4 mr-1" />
-                        Approve
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </GlassCard>
-
-        {/* Pending Open Ideas */}
-        <GlassCard className="border-primary/20" padding="lg">
+        {/* Pending Open Ideas - Admins Only */}
+        {isAdminUser && (
+          <GlassCard className="border-primary/20" padding="lg">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold mb-2">Pending Open Ideas</h2>
@@ -422,7 +447,8 @@ export function Admin() {
               ))}
             </div>
           )}
-        </GlassCard>
+          </GlassCard>
+        )}
 
         {/* Top Insights */}
         <GlassCard className="border-primary/20" padding="lg">
