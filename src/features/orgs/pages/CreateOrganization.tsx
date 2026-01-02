@@ -152,12 +152,12 @@ export default function CreateOrganization() {
             <Label htmlFor="industry" className="block text-sm font-medium text-foreground mb-2">
               Industry
             </Label>
-            <Select value={industryId} onValueChange={setIndustryId} disabled={loadingIndustries}>
+            <Select value={industryId || undefined} onValueChange={(val) => setIndustryId(val === '__none__' ? '' : val)} disabled={loadingIndustries}>
               <SelectTrigger className="bg-background/50 border-input">
                 <SelectValue placeholder="Select an industry" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="__none__">None</SelectItem>
                 {industries.map((industry) => (
                   <SelectItem key={industry.id} value={industry.id}>
                     {industry.name}
@@ -171,12 +171,12 @@ export default function CreateOrganization() {
             <Label htmlFor="company-size" className="block text-sm font-medium text-foreground mb-2">
               Company size
             </Label>
-            <Select value={companySize} onValueChange={setCompanySize}>
+            <Select value={companySize || undefined} onValueChange={(val) => setCompanySize(val === '__none__' ? '' : val)}>
               <SelectTrigger className="bg-background/50 border-input">
                 <SelectValue placeholder="Select company size" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="__none__">None</SelectItem>
                 {COMPANY_SIZES.map((size) => (
                   <SelectItem key={size.value} value={size.value}>
                     {size.label}
