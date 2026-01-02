@@ -31,18 +31,22 @@ function DiscussContent() {
     setRefreshKey(prev => prev + 1);
   };
 
+  // Clear selected post and close modals when lens changes
   useEffect(() => {
     setSelectedPostId(null);
     setSelectedPost(null);
+    setReaderModalPost(null);
     closeComposer();
     
     const currentActivePostId = useBrainstormExperienceStore.getState().activePostId;
     if (currentActivePostId) {
       useBrainstormExperienceStore.setState({ activePostId: null });
     }
-    
+  }, [lens, closeComposer]);
+
+  useEffect(() => {
     setIsInitialMount(false);
-  }, [closeComposer]);
+  }, []);
 
   const fetchPostById = useCallback(async (id: string): Promise<Post | null> => {
     if (loadingRef.current) return null;

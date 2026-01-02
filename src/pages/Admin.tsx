@@ -174,11 +174,12 @@ export function Admin() {
   const isLoading = orgLoading || insightsLoading;
 
   return (
-    <div className="min-h-screen p-6 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '5s' }}></div>
-
+    <div 
+      className="min-h-screen p-6 relative overflow-hidden"
+      style={{
+        background: '#EAE6E2'
+      }}
+    >
       <div className="relative z-10 max-w-7xl mx-auto pt-20 space-y-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -187,19 +188,40 @@ export function Admin() {
         </div>
 
         {/* Organization Snapshot */}
-        <GlassCard className="border-primary/20" padding="lg">
+        <GlassCard 
+          className="border-0" 
+          padding="lg"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold">Organization Snapshot</h2>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold">Organization Snapshot</h2>
+                {isOrgOwner && (
+                  <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                    Owner
+                  </Badge>
+                )}
+                {isAdminUser && !isOrgOwner && (
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                    Admin
+                  </Badge>
+                )}
+              </div>
               {isOrgOwner && (
-                <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
-                  Owner
-                </Badge>
-              )}
-              {isAdminUser && !isOrgOwner && (
-                <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                  Admin
-                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/create-organization')}
+                  className="text-xs"
+                >
+                  <Building className="w-4 h-4 mr-1" />
+                  Create Another Organization
+                </Button>
               )}
             </div>
             <p className="text-muted-foreground">
@@ -294,7 +316,15 @@ export function Admin() {
 
         {/* Organization Approval Requests - Admins Only */}
         {isAdminUser && (
-          <GlassCard className="border-blue-500/20" padding="lg">
+          <GlassCard 
+            className="border-0" 
+            padding="lg"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+              borderRadius: '24px'
+            }}
+          >
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
@@ -381,7 +411,15 @@ export function Admin() {
 
         {/* Pending Open Ideas - Admins Only */}
         {isAdminUser && (
-          <GlassCard className="border-primary/20" padding="lg">
+          <GlassCard 
+            className="border-0" 
+            padding="lg"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+              borderRadius: '24px'
+            }}
+          >
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold mb-2">Pending Open Ideas</h2>

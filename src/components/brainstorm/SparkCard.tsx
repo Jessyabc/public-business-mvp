@@ -24,7 +24,10 @@ export const SparkCard: React.FC<SparkCardProps> = ({
 }) => {
   const { lens } = useDiscussLensSafe();
   const isBusiness = lens === 'business';
+  // Determine if this is a business insight based on kind or mode
+  const isBusinessInsight = spark.kind === 'BusinessInsight' || spark.mode === 'business';
   const [tScore, setTScore] = useState(spark.t_score);
+  const [uScore, setUScore] = useState(spark.u_score ?? null);
   const [viewCount, setViewCount] = useState(spark.view_count);
   const [hasGivenThought, setHasGivenThought] = useState(!!spark.has_given_thought);
   const hasIncrementedViewRef = useRef(false);
@@ -185,16 +188,45 @@ export const SparkCard: React.FC<SparkCardProps> = ({
             } : undefined}
           >
             <div className="flex items-center gap-1.5">
-              <span 
-                className="text-xs font-semibold"
-                style={{ color: isBusiness ? PB_BLUE : 'white' }}
-              >
-                {tScore}
-              </span>
-              <span 
-                className="text-[11px]"
-                style={{ color: isBusiness ? '#6B635B' : 'rgba(255,255,255,0.7)' }}
-              >Thoughts</span>
+              {isBusinessInsight ? (
+                // Show U-score for business insights
+                <>
+                  <span 
+                    className="text-xs font-semibold"
+                    style={{ color: isBusiness ? PB_BLUE : 'white' }}
+                  >
+                    {uScore?.toFixed(1) ?? '—'}
+                  </span>
+                  <span 
+                    className="text-[11px]"
+                    style={{ color: isBusiness ? '#6B635B' : 'rgba(255,255,255,0.7)' }}
+                  >U-score</span>
+                </>
+              ) : (
+                // Show T-score for public sparks
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGiveThought();
+                    }}
+                    className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+                    title="Give this a thought (T-score)"
+                  >
+                    <span 
+                      className="text-xs font-semibold"
+                      style={{ color: isBusiness ? PB_BLUE : 'white' }}
+                    >
+                      {tScore}
+                    </span>
+                    <span 
+                      className="text-[11px]"
+                      style={{ color: isBusiness ? '#6B635B' : 'rgba(255,255,255,0.7)' }}
+                    >T-score</span>
+                  </button>
+                </>
+              )}
             </div>
             <div 
               className="w-1 h-1 rounded-full"

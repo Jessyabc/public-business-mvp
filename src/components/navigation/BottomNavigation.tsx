@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { PenTool, Plus, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -15,7 +15,8 @@ export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
   const { user } = useAuth();
   const location = useLocation();
-  const { lens } = useDiscussLensSafe();
+  const navigate = useNavigate();
+  const { lens, toggleLens } = useDiscussLensSafe();
 
   if (!user) return null;
 
@@ -109,8 +110,15 @@ export function BottomNavigation() {
           </Tooltip>
 
           {/* Discuss Link */}
-          <NavLink
-            to="/discuss"
+          <button
+            onClick={() => {
+              if (isDiscussActive) {
+                // If already on Discuss, toggle lens instead of navigating
+                toggleLens();
+              } else {
+                navigate('/discuss');
+              }
+            }}
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
               "transition-all duration-200 relative group"
@@ -130,7 +138,7 @@ export function BottomNavigation() {
                 style={{ background: textActive }}
               />
             )}
-          </NavLink>
+          </button>
 
           {/* Profile Link */}
           <NavLink
@@ -180,8 +188,15 @@ export function BottomNavigation() {
           </NavLink>
 
           {/* Discuss */}
-          <NavLink
-            to="/discuss"
+          <button
+            onClick={() => {
+              if (isDiscussActive) {
+                // If already on Discuss, toggle lens instead of navigating
+                toggleLens();
+              } else {
+                navigate('/discuss');
+              }
+            }}
             className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
             style={{ color: isDiscussActive ? textActive : textInactive }}
           >
@@ -192,7 +207,7 @@ export function BottomNavigation() {
                 style={{ background: textActive }}
               />
             )}
-          </NavLink>
+          </button>
 
           {/* Centered Composer button */}
           <Tooltip>

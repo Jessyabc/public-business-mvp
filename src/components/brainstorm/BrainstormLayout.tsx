@@ -9,7 +9,10 @@ export type Spark = {
   author_display_name?: string | null;
   author_avatar_url?: string | null;
   is_anonymous: boolean;
-  t_score: number;       // number of Thought reactions
+  t_score: number;       // number of Thought reactions (for public sparks)
+  u_score?: number | null; // U-score for business insights
+  kind?: string;         // Post kind: 'Spark' or 'BusinessInsight'
+  mode?: string;         // Post mode: 'public' or 'business'
   view_count: number;    // total views
   has_given_thought?: boolean; // optional: whether current user already reacted
 };

@@ -25,6 +25,9 @@ function convertPostToSpark(post: BasePost, authorDisplayName?: string | null, a
     author_avatar_url: authorAvatarUrl || null,
     is_anonymous: false, // BasePost doesn't have anonymous flag, default to false
     t_score: post.t_score || 0,
+    u_score: post.u_score || null, // Add u_score for business insights
+    kind: post.kind, // Add kind to determine which score to show
+    mode: post.mode, // Add mode to determine which score to show
     view_count: post.views_count || 0,
     has_given_thought: false, // Would need to check user's interactions
   };

@@ -49,7 +49,14 @@ export function BusinessDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: '#EAE6E2',
+        padding: '1.5rem'
+      }}
+    >
+      <div className="container mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -84,7 +91,14 @@ export function BusinessDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
               <Building2 className="h-8 w-8 text-primary" />
@@ -103,7 +117,14 @@ export function BusinessDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
               <Users className="h-8 w-8 text-blue-500" />
@@ -115,7 +136,14 @@ export function BusinessDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
               <FileText className="h-8 w-8 text-green-500" />
@@ -127,7 +155,14 @@ export function BusinessDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-orange-500" />
@@ -152,7 +187,14 @@ export function BusinessDashboard() {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Activity */}
-            <Card>
+            <Card 
+              className="border-0"
+              style={{
+                background: '#EAE6E2',
+                boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+                borderRadius: '24px'
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
@@ -167,7 +209,14 @@ export function BusinessDashboard() {
             </Card>
 
             {/* Quick Actions */}
-            <Card>
+            <Card 
+              className="border-0"
+              style={{
+                background: '#EAE6E2',
+                boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+                borderRadius: '24px'
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
@@ -200,7 +249,14 @@ export function BusinessDashboard() {
           </div>
 
           {/* Business Benefits */}
-          <Card>
+          <Card 
+            className="border-0"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+              borderRadius: '24px'
+            }}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-yellow-500" />
@@ -239,7 +295,14 @@ export function BusinessDashboard() {
         </TabsContent>
 
         <TabsContent value="insights">
-          <Card>
+          <Card 
+            className="border-0"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+              borderRadius: '24px'
+            }}
+          >
             <CardHeader>
               <CardTitle>My Business Insights</CardTitle>
             </CardHeader>
@@ -263,7 +326,14 @@ export function BusinessDashboard() {
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card>
+          <Card 
+            className="border-0"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+              borderRadius: '24px'
+            }}
+          >
             <CardHeader>
               <CardTitle>Business Settings</CardTitle>
             </CardHeader>
