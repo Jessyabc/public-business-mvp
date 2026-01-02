@@ -76,32 +76,32 @@ export async function rpcIsBusinessUser(user_uuid?: string) {
 
 // Organization application RPC functions
 export async function rpcApplyToOrg(org_id: string, message?: string | null) {
-  return supabase.rpc("apply_to_org", {
+  return supabase.rpc("apply_to_org" as any, {
     p_org_id: org_id,
     p_message: message || null,
   });
 }
 
 export async function rpcApproveOrgMemberApplication(application_id: string) {
-  return supabase.rpc("approve_org_member_application", {
+  return supabase.rpc("approve_org_member_application" as any, {
     p_application_id: application_id,
   });
 }
 
 export async function rpcRejectOrgMemberApplication(application_id: string) {
-  return supabase.rpc("reject_org_member_application", {
+  return supabase.rpc("reject_org_member_application" as any, {
     p_application_id: application_id,
   });
 }
 
 export async function rpcApproveOrgRequest(request_id: string) {
-  return supabase.rpc("approve_org_request", {
+  return supabase.rpc("approve_org_request" as any, {
     p_request_id: request_id,
   });
 }
 
 export async function rpcRejectOrgRequest(request_id: string, reason?: string | null) {
-  return supabase.rpc("reject_org_request", {
+  return supabase.rpc("reject_org_request" as any, {
     p_request_id: request_id,
     p_reason: reason || null,
   });

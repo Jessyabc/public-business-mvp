@@ -73,11 +73,8 @@ export function CompanySearch({ searchQuery = '', onSearchChange }: CompanySearc
     try {
       let query = supabase
         .from('orgs')
-        .select(`
-          *,
-          industry:industries(id, name)
-        `)
-        .eq('status', 'approved') // Only show approved orgs
+        .select('id, name, description, website, industry_id, company_size, status')
+        .eq('status', 'approved')
         .order('name', { ascending: true });
 
       if (localSearchQuery.trim()) {
@@ -91,7 +88,26 @@ export function CompanySearch({ searchQuery = '', onSearchChange }: CompanySearc
       const { data, error } = await query;
       if (error) throw error;
 
-      setOrganizations((data || []) as Organization[]);
+      // Fetch industries separately to avoid type issues
+      const orgs = (data || []) as Organization[];
+      if (orgs.length > 0) {
+        const industryIds = Array.from(new Set(orgs.map(o => o.industry_id).filter(Boolean))) as string[];
+        if (industryIds.length > 0) {
+          const { data: industryData } = await supabase
+            .from('industries')
+            .select('id, name')
+            .in('id', industryIds);
+          
+          const industryMap = new Map((industryData || []).map(i => [i.id, i]));
+          orgs.forEach(org => {
+            if (org.industry_id) {
+              org.industry = industryMap.get(org.industry_id);
+            }
+          });
+        }
+      }
+
+      setOrganizations(orgs);
     } catch (err) {
       console.error('Error fetching organizations:', err);
     } finally {
