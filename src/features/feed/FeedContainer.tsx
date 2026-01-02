@@ -4,6 +4,7 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { useUniversalFeed } from './hooks/useUniversalFeed';
 import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
+import { useOrgMembership } from '@/hooks/useOrgMembership';
 
 type FeedMode = 'public' | 'business' | 'brainstorm_main' | 'brainstorm_open_ideas' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
 
@@ -18,7 +19,7 @@ type Props = {
 
 // Public = Sparks, Business = Insights
 const PUBLIC_KINDS: PostKind[] = ['Spark'];
-const BUSINESS_KINDS: PostKind[] = ['Insight'];
+const BUSINESS_KINDS: PostKind[] = ['BusinessInsight'];
 
 /**
  * FeedContainer now powers the Brainstorm layout columns via specialized modes:
@@ -38,6 +39,9 @@ export function FeedContainer({
   const [activePost, setActivePost] = React.useState<BasePost | null>(null);
   const lastSeen = useBrainstormExperienceStore(state => state.lastSeen);
   
+  // Get user's org memberships for business mode
+  const { data: memberships } = useOrgMembership();
+  
   // Determine kinds based on mode: public = Sparks, business = Insights
   const resolvedKinds = React.useMemo(() => {
     if (initialKinds) return initialKinds;
@@ -52,6 +56,12 @@ export function FeedContainer({
     kinds: resolvedKinds
   });
 
+  // Get primary org_id for business mode (first membership, or null if none)
+  const primaryOrgId = React.useMemo(() => {
+    if (mode !== 'business') return null;
+    return memberships?.[0]?.org_id ?? null;
+  }, [mode, memberships]);
+
   React.useEffect(() => {
     if (mode !== 'brainstorm_last_seen') return;
     onItemsChange?.(lastSeen);
@@ -62,6 +72,7 @@ export function FeedContainer({
     kinds: isMainFeed ? filters.kinds : resolvedKinds,
     sort: isMainFeed ? filters.sort : undefined,
     search: isMainFeed ? filters.search : undefined,
+    org_id: primaryOrgId,
     activePostId,
     pageSize: 20
   });

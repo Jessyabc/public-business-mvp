@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, X, Link2, Target, HelpCircle, TrendingUp } from 'lucide-react';
+import { FileText, Plus, X, Link2, Target, HelpCircle, TrendingUp, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
+import { useOrgMembership } from '@/hooks/useOrgMembership';
 import { GlassInput } from '@/components/ui/GlassInput';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 import { Label } from '@/components/ui/label';
@@ -31,12 +31,29 @@ interface BusinessInsightComposerProps {
 export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: orgId } = useUserOrgId();
+  const { data: memberships, isLoading: isLoadingMemberships } = useOrgMembership();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
   const [showReferences, setShowReferences] = useState(false);
   const [showSparkSelector, setShowSparkSelector] = useState(false);
   const [availableSparks, setAvailableSparks] = useState<any[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  // Determine org_id: use selected, or first membership if single, or null
+  const orgId = useMemo(() => {
+    if (selectedOrgId) return selectedOrgId;
+    if (memberships && memberships.length === 1) {
+      return memberships[0].org_id;
+    }
+    return null;
+  }, [selectedOrgId, memberships]);
+
+  // Auto-select first org if only one membership
+  useEffect(() => {
+    if (memberships && memberships.length === 1 && !selectedOrgId) {
+      setSelectedOrgId(memberships[0].org_id);
+    }
+  }, [memberships, selectedOrgId]);
 
   const form = useForm<BusinessInsightFormData>({
     resolver: zodResolver(businessInsightSchema),
@@ -115,8 +132,17 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
   };
 
   const onSubmit = async (data: BusinessInsightFormData) => {
-    if (!user || !orgId) {
+    if (!user) {
       toast.error('Authentication required');
+      return;
+    }
+
+    if (!orgId) {
+      if (!memberships || memberships.length === 0) {
+        toast.error('You must be a member of an organization to create business insights');
+      } else {
+        toast.error('Please select an organization');
+      }
       return;
     }
 
@@ -200,6 +226,50 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
         {/* Scrollable Content */}
         <ScrollArea className="flex-1 px-1">
           <div className="space-y-6 py-6">
+
+        {/* Organization Selector - Show if multiple orgs */}
+        {isLoadingMemberships ? (
+          <div className="text-sm text-[var(--text-secondary)]">Loading organizations...</div>
+        ) : memberships && memberships.length > 1 ? (
+          <FormItem>
+            <FormLabel className="text-[var(--text-primary)] flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Organization *
+            </FormLabel>
+            <Select value={selectedOrgId || ''} onValueChange={setSelectedOrgId}>
+              <FormControl>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectValue placeholder="Select an organization..." />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {memberships.map((membership) => (
+                  <SelectItem key={membership.org_id} value={membership.org_id}>
+                    {membership.org?.name || 'Unnamed Organization'}
+                    {membership.role === 'owner' && (
+                      <Badge variant="secondary" className="ml-2 text-xs">Owner</Badge>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {!orgId && (
+              <p className="text-xs text-red-400 mt-1">Please select an organization</p>
+            )}
+          </FormItem>
+        ) : memberships && memberships.length === 1 ? (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
+            <Building2 className="w-4 h-4 text-[var(--accent)]" />
+            <div className="flex-1">
+              <div className="text-sm font-medium text-[var(--text-primary)]">
+                {memberships[0].org?.name || 'Your Organization'}
+              </div>
+              <div className="text-xs text-[var(--text-secondary)]">
+                {memberships[0].role === 'owner' ? 'Organization Owner' : 'Member'}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* Focus Area */}
         <FormField
