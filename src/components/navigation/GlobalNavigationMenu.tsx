@@ -69,7 +69,8 @@ export function GlobalNavigationMenu() {
   // Detect if we're on a light background
   const isThinkPage = location.pathname === '/' || location.pathname === '/workspace';
   const isDiscussPage = location.pathname.startsWith('/discuss');
-  const isLightBg = isThinkPage || (isDiscussPage && lens === 'business');
+  const isBusinessPage = location.pathname.startsWith('/business-dashboard') || location.pathname.startsWith('/admin');
+  const isLightBg = isThinkPage || (isDiscussPage && lens === 'business') || isBusinessPage;
 
   // Glass styling adapts to background
   const glassStyle = isLightBg 

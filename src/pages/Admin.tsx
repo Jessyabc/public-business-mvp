@@ -228,7 +228,7 @@ export function Admin() {
               <div className="flex items-center gap-3">
                 <h2 className="text-2xl font-bold text-[#3A3530]">Organization Snapshot</h2>
                 {isOrgOwner && (
-                  <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                  <Badge variant="default" className="bg-primary text-white border-primary/30">
                     Owner
                   </Badge>
                 )}
@@ -242,8 +242,11 @@ export function Admin() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate('/create-organization')}
-                  className="text-xs"
+                  onClick={() => navigate('/org/new')}
+                  className="text-xs text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED] hover:text-[#3A3530]"
+                  style={{
+                    boxShadow: '4px 4px 8px rgba(166, 150, 130, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+                  }}
                 >
                   <Building className="w-4 h-4 mr-1" />
                   Create Another Organization
@@ -446,7 +449,10 @@ export function Admin() {
                 variant={sortBy === 'u_score' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('u_score')}
-                className={sortBy !== 'u_score' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
+                className={sortBy === 'u_score' ? 'bg-[#3A3530] text-white hover:bg-[#2A2520]' : 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]'}
+                style={sortBy === 'u_score' ? {
+                  boxShadow: '4px 4px 8px rgba(166, 150, 130, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+                } : {}}
               >
                 U-score
               </Button>
@@ -454,7 +460,10 @@ export function Admin() {
                 variant={sortBy === 'continuations' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('continuations')}
-                className={sortBy !== 'continuations' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
+                className={sortBy === 'continuations' ? 'bg-[#3A3530] text-white hover:bg-[#2A2520]' : 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]'}
+                style={sortBy === 'continuations' ? {
+                  boxShadow: '4px 4px 8px rgba(166, 150, 130, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+                } : {}}
               >
                 Continuations
               </Button>
@@ -462,7 +471,10 @@ export function Admin() {
                 variant={sortBy === 'crosslinks' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('crosslinks')}
-                className={sortBy !== 'crosslinks' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
+                className={sortBy === 'crosslinks' ? 'bg-[#3A3530] text-white hover:bg-[#2A2520]' : 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]'}
+                style={sortBy === 'crosslinks' ? {
+                  boxShadow: '4px 4px 8px rgba(166, 150, 130, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+                } : {}}
               >
                 Cross-links
               </Button>
@@ -470,7 +482,10 @@ export function Admin() {
                 variant={sortBy === 'recent' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('recent')}
-                className={sortBy !== 'recent' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
+                className={sortBy === 'recent' ? 'bg-[#3A3530] text-white hover:bg-[#2A2520]' : 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]'}
+                style={sortBy === 'recent' ? {
+                  boxShadow: '4px 4px 8px rgba(166, 150, 130, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+                } : {}}
               >
                 Recent
               </Button>

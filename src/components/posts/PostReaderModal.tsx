@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +15,9 @@ import { usePostRating } from "@/hooks/usePostRating";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import uScoreIcon from '@/assets/u-score-icon.png';
+import { useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
 
 interface PostReaderModalProps {
   isOpen: boolean;
@@ -29,12 +32,28 @@ interface AuthorInfo {
 
 export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps) {
   const { openComposer } = useComposerStore();
+  const { user } = useAuth();
+  const { data: selectedOrgId } = useUserOrgId();
   const { userRating, averageScore, ratingCount, submitRating } = usePostRating(post?.id ?? '');
   const [authorInfo, setAuthorInfo] = useState<AuthorInfo | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const location = useLocation();
 
   // Use selectedPost if available, otherwise use the prop post
   const displayPost = selectedPost || post;
+  
+  // Determine if we should use neumorphic styling (business mode or business route)
+  const isBusinessMode = displayPost?.mode === 'business';
+  const isBusinessRoute = location.pathname.startsWith('/business-dashboard') || 
+                         location.pathname.startsWith('/admin') ||
+                         location.pathname.startsWith('/insights');
+  const useNeumorphic = isBusinessMode || isBusinessRoute;
+  
+  // Check if user can rate this post (cannot rate own posts or posts from their organization)
+  const canRatePost = displayPost && user && (
+    displayPost.user_id !== user.id && 
+    (!displayPost.org_id || displayPost.org_id !== selectedOrgId)
+  );
 
   // Fetch author info when post changes
   useEffect(() => {
@@ -116,135 +135,292 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[var(--glass-border)] bg-transparent backdrop-blur-none p-0 z-50 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
-        <GlassSurface>
-          <DialogHeader>
-            <DialogTitle className="sr-only">Post Details</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-6">
-          {/* Lineage Card (parents) */}
-          <LineageCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
-          
-          {/* Continuations Card (children) */}
-          <ContinuationsCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
+      <DialogContent 
+        className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 z-50 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] ${
+          useNeumorphic 
+            ? 'bg-transparent backdrop-blur-none border-0 shadow-none' 
+            : 'border-[var(--glass-border)] bg-transparent backdrop-blur-none'
+        }`}
+      >
+        {useNeumorphic ? (
+          <div
+            className="p-6 rounded-2xl"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle className="sr-only">Post Details</DialogTitle>
+              <DialogDescription className="sr-only">View post details and navigate through continuations</DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Lineage Card (parents) */}
+              <LineageCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
+              
+              {/* Continuations Card (children) */}
+              <ContinuationsCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
 
-          {/* Post Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={authorAvatar} />
-                <AvatarFallback className="bg-primary/20 text-primary">
-                  {authorName.charAt(0).toUpperCase() || <User className="h-6 w-6" />}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-[var(--text-primary)]">{authorName}</p>
-                <div className="flex items-center space-x-2 text-sm text-[var(--text-secondary)]">
-                  <Calendar className="h-3 w-3" />
-                  <span>{formatDate(displayPost.created_at)}</span>
+              {/* Post Header */}
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={authorAvatar} />
+                    <AvatarFallback className="bg-[#4A7C9B]/20 text-[#4A7C9B]">
+                      {authorName.charAt(0).toUpperCase() || <User className="h-6 w-6" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-[#3A3530]">{authorName}</p>
+                    <div className="flex items-center space-x-2 text-sm text-[#6B635B]">
+                      <Calendar className="h-3 w-3" />
+                      <span>{formatDate(displayPost.created_at)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge className={getTypeColor(displayPost.type)}>
+                    {displayPost.type}
+                  </Badge>
+                  <Badge className={getVisibilityColor(displayPost.visibility)}>
+                    {displayPost.visibility}
+                  </Badge>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge className={getTypeColor(displayPost.type)}>
-                {displayPost.type}
-              </Badge>
-              <Badge className={getVisibilityColor(displayPost.visibility)}>
-                {displayPost.visibility}
-              </Badge>
-            </div>
-          </div>
 
-            {/* Post Content */}
-            <GlassSurface inset className="space-y-4">
-              {displayPost.title && (
-                <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-                  {displayPost.title}
-                </h2>
+              {/* Post Content */}
+              <div 
+                className="space-y-4 p-4 rounded-xl"
+                style={{
+                  boxShadow: 'inset 6px 6px 12px rgba(166, 150, 130, 0.4), inset -6px -6px 12px rgba(255, 255, 255, 0.6)',
+                }}
+              >
+                {displayPost.title && (
+                  <h2 className="text-2xl font-bold text-[#3A3530] mb-2">
+                    {displayPost.title}
+                  </h2>
+                )}
+                
+                <div className="max-w-none">
+                  <p className="text-[#3A3530] whitespace-pre-wrap leading-relaxed">
+                    {displayPost.content}
+                  </p>
+                </div>
+              </div>
+
+              {/* U-Score Rating Section - Only for Business Insights */}
+              {displayPost.mode === 'business' && (
+                <div 
+                  className="mt-4 p-4 rounded-xl"
+                  style={{
+                    boxShadow: 'inset 6px 6px 12px rgba(166, 150, 130, 0.4), inset -6px -6px 12px rgba(255, 255, 255, 0.6)',
+                  }}
+                >
+                  <UScoreRating
+                    postId={displayPost.id}
+                    currentScore={averageScore}
+                    ratingCount={ratingCount}
+                    userRating={userRating}
+                    onRate={submitRating}
+                    disabled={!canRatePost}
+                  />
+                </div>
               )}
-              
-              <div className="prose prose-invert max-w-none">
-                <p className="text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
-                  {displayPost.content}
-                </p>
-              </div>
-            </GlassSurface>
 
-            {/* U-Score Rating Section - Only for Business Insights */}
-            {displayPost.mode === 'business' && (
-              <GlassSurface inset className="mt-4">
-                <UScoreRating
-                  postId={displayPost.id}
-                  currentScore={averageScore}
-                  ratingCount={ratingCount}
-                  userRating={userRating}
-                  onRate={submitRating}
-                />
-              </GlassSurface>
-            )}
+              {/* Post Actions */}
+              <div className="flex items-center justify-between pt-4 border-t border-[#D4CEC5]">
+                <div className="flex items-center space-x-6">
+                  {/* U-Score - only for Business Insights */}
+                  {displayPost.mode === 'business' && (
+                    <div className="flex items-center gap-1.5 text-sm text-blue-500 font-semibold">
+                      <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
+                      <span>{averageScore?.toFixed(1) ?? '—'}</span>
+                      {ratingCount > 0 && (
+                        <span className="text-[#6B635B] font-normal">({ratingCount})</span>
+                      )}
+                    </div>
+                  )}
+                  {/* T-Score - only for Sparks (public mode) */}
+                  {displayPost.mode === 'public' && displayPost.t_score && (
+                    <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      <span>T: {displayPost.t_score}</span>
+                    </div>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#6B635B] hover:text-[#3A3530]"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {displayPost.views_count || 0}
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#6B635B] hover:text-[#3A3530]"
+                    onClick={() => openComposer({ parentPostId: displayPost.id, relationType: 'continuation' })}
+                  >
+                    <Reply className="h-4 w-4 mr-2" />
+                    Reply
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#6B635B] hover:text-[#3A3530]"
+                  >
+                    <Bookmark className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#6B635B] hover:text-[#3A3530]"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
 
-            {/* Post Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
-              <div className="flex items-center space-x-6">
-                {/* U-Score - only for Business Insights */}
-                {displayPost.mode === 'business' && (
-                  <div className="flex items-center gap-1.5 text-sm text-blue-500 font-semibold">
-                    <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
-                    <span>{averageScore?.toFixed(1) ?? '—'}</span>
-                    {ratingCount > 0 && (
-                      <span className="text-muted-foreground font-normal">({ratingCount})</span>
-                    )}
-                  </div>
-                )}
-                {/* T-Score - only for Sparks (public mode) */}
-                {displayPost.mode === 'public' && displayPost.t_score && (
-                  <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    <span>T: {displayPost.t_score}</span>
-                  </div>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  {displayPost.views_count || 0}
-                </Button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  onClick={() => openComposer({ parentPostId: displayPost.id, relationType: 'continuation' })}
-                >
-                  <Reply className="h-4 w-4 mr-2" />
-                  Reply
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                >
-                  <Bookmark className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  onClick={handleShare}
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Cross-links Section */}
+              <CrossLinksSection postId={displayPost.id} onSelectPost={handleSelectPost} />
             </div>
-
-            {/* Cross-links Section */}
-            <CrossLinksSection postId={displayPost.id} onSelectPost={handleSelectPost} />
           </div>
-        </GlassSurface>
+        ) : (
+          <GlassSurface>
+            <DialogHeader>
+              <DialogTitle className="sr-only">Post Details</DialogTitle>
+              <DialogDescription className="sr-only">View post details and navigate through continuations</DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Lineage Card (parents) */}
+              <LineageCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
+              
+              {/* Continuations Card (children) */}
+              <ContinuationsCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
+
+              {/* Post Header */}
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={authorAvatar} />
+                    <AvatarFallback className="bg-primary/20 text-primary">
+                      {authorName.charAt(0).toUpperCase() || <User className="h-6 w-6" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-[var(--text-primary)]">{authorName}</p>
+                    <div className="flex items-center space-x-2 text-sm text-[var(--text-secondary)]">
+                      <Calendar className="h-3 w-3" />
+                      <span>{formatDate(displayPost.created_at)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge className={getTypeColor(displayPost.type)}>
+                    {displayPost.type}
+                  </Badge>
+                  <Badge className={getVisibilityColor(displayPost.visibility)}>
+                    {displayPost.visibility}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Post Content */}
+              <GlassSurface inset className="space-y-4">
+                {displayPost.title && (
+                  <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+                    {displayPost.title}
+                  </h2>
+                )}
+                
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
+                    {displayPost.content}
+                  </p>
+                </div>
+              </GlassSurface>
+
+              {/* U-Score Rating Section - Only for Business Insights */}
+              {displayPost.mode === 'business' && (
+                <GlassSurface inset className="mt-4">
+                  <UScoreRating
+                    postId={displayPost.id}
+                    currentScore={averageScore}
+                    ratingCount={ratingCount}
+                    userRating={userRating}
+                    onRate={submitRating}
+                    disabled={!canRatePost}
+                  />
+                </GlassSurface>
+              )}
+
+              {/* Post Actions */}
+              <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
+                <div className="flex items-center space-x-6">
+                  {/* U-Score - only for Business Insights */}
+                  {displayPost.mode === 'business' && (
+                    <div className="flex items-center gap-1.5 text-sm text-blue-500 font-semibold">
+                      <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
+                      <span>{averageScore?.toFixed(1) ?? '—'}</span>
+                      {ratingCount > 0 && (
+                        <span className="text-muted-foreground font-normal">({ratingCount})</span>
+                      )}
+                    </div>
+                  )}
+                  {/* T-Score - only for Sparks (public mode) */}
+                  {displayPost.mode === 'public' && displayPost.t_score && (
+                    <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      <span>T: {displayPost.t_score}</span>
+                    </div>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {displayPost.views_count || 0}
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    onClick={() => openComposer({ parentPostId: displayPost.id, relationType: 'continuation' })}
+                  >
+                    <Reply className="h-4 w-4 mr-2" />
+                    Reply
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  >
+                    <Bookmark className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Cross-links Section */}
+              <CrossLinksSection postId={displayPost.id} onSelectPost={handleSelectPost} />
+            </div>
+          </GlassSurface>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchUniversalFeed, fetchCrossLinkedPosts } from '@/lib/feedQueries';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { BasePost, PostKind } from '@/types/post';
 
 export function useUniversalFeed(params: {
@@ -17,6 +18,7 @@ export function useUniversalFeed(params: {
   pageSize?: number;
   activePostId?: string | null;
 }) {
+  const { user } = useAuth();
   const [items, setItems] = useState<BasePost[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -61,6 +63,7 @@ export function useUniversalFeed(params: {
           sort: params.sort,
           search: params.search,
           org_id: feedMode === 'business' ? params.org_id : null,
+          user_id: feedMode === 'business' ? user?.id || null : null, // Pass user_id to allow seeing own posts across orgs
           cursor: reset ? null : cursor,
           limit: params.pageSize ?? 20,
         });
@@ -75,7 +78,7 @@ export function useUniversalFeed(params: {
         setLoading(false);
         loadingRef.current = false;
       }
-    }, [params.mode, params.kinds, params.sort, params.search, params.org_id, params.pageSize, params.activePostId, cursor]);
+    }, [params.mode, params.kinds, params.sort, params.search, params.org_id, params.pageSize, params.activePostId, cursor, user?.id]);
 
   useEffect(() => {
     setCursor(null);

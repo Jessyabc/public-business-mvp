@@ -50,7 +50,11 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   
   const { pendingRefs, clearRefs } = usePendingReferencesStore();
   
-  const isPublicMode = lens === 'public';
+  // Determine mode: business routes should use business mode, otherwise use lens context
+  const isBusinessRoute = location.pathname.startsWith('/business-dashboard') || 
+                          location.pathname.startsWith('/admin') ||
+                          location.pathname.startsWith('/insights');
+  const isPublicMode = !isBusinessRoute && lens === 'public';
   const maxChars = isPublicMode ? PUBLIC_MAX_CHARS : BUSINESS_MAX_CHARS;
   const canSubmit = content.trim().length > 0 && content.length <= maxChars;
   
@@ -459,10 +463,10 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   if (!isPublicMode) {
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="sm:max-w-2xl bg-background/95 backdrop-blur-xl border-white/10">
-          <DialogHeader>
-            <DialogTitle className="sr-only">Create Business Insight</DialogTitle>
-            <DialogDescription className="sr-only">
+        <DialogContent className="sm:max-w-2xl bg-transparent backdrop-blur-none border-0 shadow-none p-0 data-[theme=business]">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Create Business Insight</DialogTitle>
+            <DialogDescription>
               Create a new business insight to share with your organization
             </DialogDescription>
           </DialogHeader>

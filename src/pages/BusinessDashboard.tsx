@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { BusinessInvitations } from '@/components/business/BusinessInvitations';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { usePosts } from '@/hooks/usePosts';
 import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
 import { useIsOrgOwnerOf } from '@/hooks/useOrgMembership';
 import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
@@ -17,6 +18,9 @@ import { useUserOrgs } from '@/features/orgs/hooks/useUserOrgs';
 import { useOrganization } from '@/features/orgs/hooks/useOrganization';
 import { OrganizationProfileForm } from '@/features/orgs/components/OrganizationProfileForm';
 import { getOrgLogoSignedUrl } from '@/features/orgs/utils/getOrgLogoSignedUrl';
+import { PostReaderModal } from '@/components/posts/PostReaderModal';
+import { supabase } from '@/integrations/supabase/client';
+import type { Post } from '@/types/post';
 import { 
   Building2, 
   Users, 
@@ -37,11 +41,48 @@ export function BusinessDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: defaultOrgId } = useUserOrgId();
   const { data: userOrgs, isLoading: orgsLoading } = useUserOrgs();
+  const { posts, loading: postsLoading, fetchPosts } = usePosts();
+  const [readerModalPost, setReaderModalPost] = useState<Post | null>(null);
   
   // Get selected orgId from URL param or use default
   const orgIdFromUrl = searchParams.get('org');
   const selectedOrgId = orgIdFromUrl || defaultOrgId || (userOrgs?.[0]?.id);
   const [selectedOrgIdState, setSelectedOrgIdState] = useState<string | null>(null);
+  
+  // Fetch post by ID for modal
+  const fetchPostById = useCallback(async (id: string): Promise<Post | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .eq('status', 'active')
+        .single();
+
+      if (error) throw error;
+      return data as Post;
+    } catch (err) {
+      console.error('Error fetching post:', err);
+      return null;
+    }
+  }, []);
+  
+  // Listen for post view events
+  useEffect(() => {
+    const handleShowThread = async (event: CustomEvent) => {
+      const { postId, post } = event.detail;
+      if (post) {
+        setReaderModalPost(post as Post);
+      } else if (postId) {
+        const fetchedPost = await fetchPostById(postId);
+        if (fetchedPost) {
+          setReaderModalPost(fetchedPost);
+        }
+      }
+    };
+    window.addEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
+    return () => window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
+  }, [fetchPostById]);
   
   // Initialize and update selected org when data is available
   useEffect(() => {
@@ -93,6 +134,30 @@ export function BusinessDashboard() {
     fetchLogoSignedUrl();
   }, [currentOrganization?.logo_url, currentOrganization?.id]);
   
+  // Fetch business insights when selectedOrgIdState changes
+  useEffect(() => {
+    if (selectedOrgIdState) {
+      fetchPosts('business');
+    }
+  }, [selectedOrgIdState, fetchPosts]);
+  
+  // Filter business insights for the selected organization
+  const businessInsights = posts
+    .filter(p => 
+      p.kind === 'BusinessInsight' && 
+      p.mode === 'business' && 
+      p.org_id === selectedOrgIdState &&
+      p.status === 'active' &&
+      p.published_at !== null
+    )
+    .sort((a, b) => {
+      // Sort by created_at descending (newest first) for chronological order
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  
+  // Get the most recent insights for Recent Activity (limit to 5)
+  const recentActivityInsights = businessInsights.slice(0, 5);
+  
   const handleOrgChange = (newOrgId: string) => {
     setSelectedOrgIdState(newOrgId);
     setSearchParams(prev => {
@@ -141,16 +206,16 @@ export function BusinessDashboard() {
             />
             <h1 className="text-3xl font-bold text-[#3A3530]">Business Dashboard</h1>
             {isOrgOwner && (
-              <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+              <Badge variant="default" className="bg-primary text-white border-primary/30">
                 Owner
               </Badge>
             )}
             {isAdminRole && !isOrgOwner && (
-              <Badge variant="secondary" className="bg-[#D4CEC5]/50 text-[#6B635B]">
+              <Badge variant="secondary" className="bg-[#6B635B] text-white">
                 Admin
               </Badge>
             )}
-            <BusinessMemberBadge />
+            <BusinessMemberBadge className="bg-[#3A3530] text-white" />
           </div>
           {profile && (
             <p className="text-[#6B635B]">
@@ -214,7 +279,13 @@ export function BusinessDashboard() {
           )}
           
           {canCreateBusinessPosts && (
-            <Button onClick={() => openComposer()} className="flex items-center gap-2">
+            <Button 
+              onClick={() => openComposer()} 
+              className="flex items-center gap-2 text-white bg-[#3A3530] hover:bg-[#2A2520]"
+              style={{
+                boxShadow: '8px 8px 16px rgba(166, 150, 130, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85)'
+              }}
+            >
               <Plus className="h-4 w-4" />
               Create Business Insight
             </Button>
@@ -396,9 +467,54 @@ export function BusinessDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-[#6B635B] text-center py-8">
-                  No recent activity to display
-                </p>
+                {postsLoading ? (
+                  <p className="text-[#6B635B] text-center py-8">Loading...</p>
+                ) : recentActivityInsights.length === 0 ? (
+                  <p className="text-[#6B635B] text-center py-8">
+                    No recent activity to display
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {recentActivityInsights.map((insight) => (
+                      <div
+                        key={insight.id}
+                        onClick={() => {
+                          window.dispatchEvent(
+                            new CustomEvent('pb:brainstorm:show-thread', {
+                              detail: { postId: insight.id },
+                            })
+                          );
+                        }}
+                        className="p-3 rounded-xl bg-[#EAE6E2] cursor-pointer transition-all"
+                        style={{
+                          boxShadow: '8px 8px 16px rgba(166, 150, 130, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.boxShadow = 'inset 6px 6px 12px rgba(166, 150, 130, 0.4), inset -6px -6px 12px rgba(255, 255, 255, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.boxShadow = '8px 8px 16px rgba(166, 150, 130, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85)';
+                        }}
+                      >
+                        {insight.title && (
+                          <h4 className="font-semibold mb-1.5 text-[#3A3530] text-sm line-clamp-1">
+                            {insight.title}
+                          </h4>
+                        )}
+                        <p className="text-[#6B635B] text-xs line-clamp-2 mb-2">
+                          {insight.content}
+                        </p>
+                        <div className="text-xs text-[#6B635B]/70">
+                          {new Date(insight.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -515,16 +631,53 @@ export function BusinessDashboard() {
               <CardTitle className="text-[#3A3530]">My Business Insights</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-[#6B635B] text-center py-8">
-                No business insights posted yet. 
-                <Button 
-                  variant="link" 
-                  onClick={() => openComposer()}
-                  className="ml-1 p-0 h-auto"
-                >
-                  Create your first insight
-                </Button>
-              </p>
+              {postsLoading ? (
+                <p className="text-[#6B635B] text-center py-8">Loading insights...</p>
+              ) : businessInsights.length === 0 ? (
+                <p className="text-[#6B635B] text-center py-8">
+                  No business insights posted yet. 
+                  <Button 
+                    variant="link" 
+                    onClick={() => openComposer()}
+                    className="ml-1 p-0 h-auto"
+                  >
+                    Create your first insight
+                  </Button>
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {businessInsights.map((insight) => (
+                    <div
+                      key={insight.id}
+                      onClick={() => {
+                        window.dispatchEvent(
+                          new CustomEvent('pb:brainstorm:show-thread', {
+                            detail: { postId: insight.id },
+                          })
+                        );
+                      }}
+                      className="p-4 rounded-xl bg-[#EAE6E2] cursor-pointer transition-all"
+                      style={{
+                        boxShadow: '8px 8px 16px rgba(166, 150, 130, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = 'inset 6px 6px 12px rgba(166, 150, 130, 0.4), inset -6px -6px 12px rgba(255, 255, 255, 0.6)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '8px 8px 16px rgba(166, 150, 130, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85)';
+                      }}
+                    >
+                      {insight.title && (
+                        <h3 className="font-semibold mb-2 text-[#3A3530]">{insight.title}</h3>
+                      )}
+                      <p className="text-[#6B635B]">{insight.content}</p>
+                      <div className="mt-2 text-xs text-[#6B635B]">
+                        {new Date(insight.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -560,6 +713,12 @@ export function BusinessDashboard() {
         </TabsContent>
       </Tabs>
       </div>
+      
+      <PostReaderModal
+        isOpen={!!readerModalPost}
+        onClose={() => setReaderModalPost(null)}
+        post={readerModalPost}
+      />
     </div>
   );
 }

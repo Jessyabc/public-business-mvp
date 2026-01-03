@@ -69,7 +69,7 @@ export function FeedContainer({
 
   // Use cluster feed for public mode, regular feed for business and other modes
   const useClusterFeed = mode === 'public';
-  
+
   const feed = useUniversalFeed({
     mode,
     kinds: isMainFeed ? filters.kinds : resolvedKinds,
@@ -95,7 +95,7 @@ export function FeedContainer({
       const posts = clusterFeed.clusters.flatMap(c => [c.spark, ...c.continuations.map(cont => cont.post)]);
       onItemsChange?.(posts);
     } else {
-      onItemsChange?.(feed.items);
+    onItemsChange?.(feed.items);
     }
   }, [mode, feed.items, clusterFeed.clusters, onItemsChange, useClusterFeed]);
   
@@ -113,7 +113,7 @@ export function FeedContainer({
     return <div style={{
       flex: 1
     }}>
-      <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} onSelect={setActivePost} />
+        <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} onSelect={setActivePost} />
       </div>;
   }
   

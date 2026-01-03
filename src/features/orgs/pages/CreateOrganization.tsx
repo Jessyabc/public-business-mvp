@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createOrganization } from '../api/orgs';
-import { GlassSurface } from '@/components/ui/GlassSurface';
-import { GlassInput } from '@/components/ui/GlassInput';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -98,107 +98,158 @@ export default function CreateOrganization() {
   };
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-10">
-      <GlassSurface>
-        <h1 className="text-2xl font-semibold text-foreground">
-          Create Your Organization
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          Set up your business so teammates can post Insights and collaborate. Your organization will be reviewed before activation.
-        </p>
-        
-        <form onSubmit={onSubmit} className="space-y-6 mt-6">
-          <div>
-            <Label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-              Organization name <span className="text-red-500">*</span>
-            </Label>
-            <GlassInput
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Acme Inc."
-              required
-            />
-          </div>
+    <div 
+      className="min-h-screen"
+      style={{
+        background: '#EAE6E2',
+        padding: '1.5rem'
+      }}
+    >
+      <div className="mx-auto max-w-xl py-10">
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
+          <CardContent className="p-6">
+            <h1 className="text-2xl font-semibold text-[#3A3530]">
+              Create Your Organization
+            </h1>
+            <p className="text-sm text-[#6B635B] mt-2">
+              Set up your business so teammates can post Insights and collaborate. Your organization will be reviewed before activation.
+            </p>
+            
+            <form onSubmit={onSubmit} className="space-y-6 mt-6">
+              <div>
+                <Label htmlFor="name" className="block text-sm font-medium text-[#3A3530] mb-2">
+                  Organization name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Acme Inc."
+                  className="text-[#3A3530] placeholder:text-[#6B635B]"
+                  style={{
+                    background: '#F5F1ED',
+                    boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                    border: 'none'
+                  }}
+                  required
+                />
+              </div>
 
-          <div>
-            <Label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
-              Description <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tell us about your organization..."
-              className="min-h-[100px] bg-background/50 border-input"
-              required
-            />
-          </div>
+              <div>
+                <Label htmlFor="description" className="block text-sm font-medium text-[#3A3530] mb-2">
+                  Description <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Tell us about your organization..."
+                  className="min-h-[100px] text-[#3A3530] placeholder:text-[#6B635B]"
+                  style={{
+                    background: '#F5F1ED',
+                    boxShadow: 'inset 6px 6px 12px rgba(166, 150, 130, 0.2), inset -6px -6px 12px rgba(255, 255, 255, 0.5)',
+                    border: 'none'
+                  }}
+                  required
+                />
+              </div>
 
-          <div>
-            <Label htmlFor="website" className="block text-sm font-medium text-foreground mb-2">
-              Website
-            </Label>
-            <GlassInput
-              id="website"
-              type="url"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
-              placeholder="https://example.com"
-            />
-          </div>
+              <div>
+                <Label htmlFor="website" className="block text-sm font-medium text-[#3A3530] mb-2">
+                  Website
+                </Label>
+                <Input
+                  id="website"
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="https://example.com"
+                  className="text-[#3A3530] placeholder:text-[#6B635B]"
+                  style={{
+                    background: '#F5F1ED',
+                    boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                    border: 'none'
+                  }}
+                />
+              </div>
 
-          <div>
-            <Label htmlFor="industry" className="block text-sm font-medium text-foreground mb-2">
-              Industry
-            </Label>
-            <Select value={industryId || undefined} onValueChange={(val) => setIndustryId(val === '__none__' ? '' : val)} disabled={loadingIndustries}>
-              <SelectTrigger className="bg-background/50 border-input">
-                <SelectValue placeholder="Select an industry" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">None</SelectItem>
-                {industries.map((industry) => (
-                  <SelectItem key={industry.id} value={industry.id}>
-                    {industry.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div>
+                <Label htmlFor="industry" className="block text-sm font-medium text-[#3A3530] mb-2">
+                  Industry
+                </Label>
+                <Select value={industryId || undefined} onValueChange={(val) => setIndustryId(val === '__none__' ? '' : val)} disabled={loadingIndustries}>
+                  <SelectTrigger 
+                    className="text-[#3A3530]"
+                    style={{
+                      background: '#F5F1ED',
+                      boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                      border: 'none'
+                    }}
+                  >
+                    <SelectValue placeholder="Select an industry" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-[#D4CEC5] text-[#3A3530]">
+                    <SelectItem value="__none__" className="text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]">None</SelectItem>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry.id} value={industry.id} className="text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]">
+                        {industry.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div>
-            <Label htmlFor="company-size" className="block text-sm font-medium text-foreground mb-2">
-              Company size
-            </Label>
-            <Select value={companySize || undefined} onValueChange={(val) => setCompanySize(val === '__none__' ? '' : val)}>
-              <SelectTrigger className="bg-background/50 border-input">
-                <SelectValue placeholder="Select company size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">None</SelectItem>
-                {COMPANY_SIZES.map((size) => (
-                  <SelectItem key={size.value} value={size.value}>
-                    {size.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div>
+                <Label htmlFor="company-size" className="block text-sm font-medium text-[#3A3530] mb-2">
+                  Company size
+                </Label>
+                <Select value={companySize || undefined} onValueChange={(val) => setCompanySize(val === '__none__' ? '' : val)}>
+                  <SelectTrigger 
+                    className="text-[#3A3530]"
+                    style={{
+                      background: '#F5F1ED',
+                      boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                      border: 'none'
+                    }}
+                  >
+                    <SelectValue placeholder="Select company size" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-[#D4CEC5] text-[#3A3530]">
+                    <SelectItem value="__none__" className="text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]">None</SelectItem>
+                    {COMPANY_SIZES.map((size) => (
+                      <SelectItem key={size.value} value={size.value} className="text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]">
+                        {size.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <Button 
-            type="submit" 
-            disabled={busy || !name.trim() || !description.trim()}
-            className="w-full"
-          >
-            {busy ? 'Creating…' : 'Create organization'}
-          </Button>
+              <Button 
+                type="submit" 
+                disabled={busy || !name.trim() || !description.trim()}
+                className="w-full text-white bg-[#3A3530] hover:bg-[#2A2520]"
+                style={{
+                  boxShadow: '4px 4px 8px rgba(166, 150, 130, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+                }}
+              >
+                {busy ? 'Creating…' : 'Create organization'}
+              </Button>
 
-          <p className="text-xs text-muted-foreground text-center">
-            Your organization will be reviewed before activation. You'll receive a notification once approved.
-          </p>
-        </form>
-      </GlassSurface>
+              <p className="text-xs text-[#6B635B] text-center">
+                Your organization will be reviewed before activation. You'll receive a notification once approved.
+              </p>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

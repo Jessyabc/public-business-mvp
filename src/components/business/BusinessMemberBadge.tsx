@@ -19,7 +19,11 @@ export function BusinessMemberBadge({ className, showIcon = true }: BusinessMemb
   return (
     <Badge 
       variant="secondary" 
-      className={`bg-accent text-accent-foreground ${className}`}
+      className={`${className || ''}`}
+      style={{
+        background: className?.includes('bg-') ? undefined : '#3A3530',
+        color: className?.includes('text-') ? undefined : 'white',
+      }}
     >
       {showIcon && (
         isAdminRole ? (

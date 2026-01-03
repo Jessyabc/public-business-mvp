@@ -13,6 +13,7 @@ interface UScoreRatingProps {
   onRate?: (rating: number) => Promise<void>;
   compact?: boolean;
   className?: string;
+  disabled?: boolean;
 }
 
 export const UScoreRating = memo(({
@@ -22,7 +23,8 @@ export const UScoreRating = memo(({
   userRating,
   onRate,
   compact = false,
-  className
+  className,
+  disabled = false
 }: UScoreRatingProps) => {
   const { user } = useAuth();
   const [hoveredValue, setHoveredValue] = useState<number | null>(null);
@@ -30,6 +32,8 @@ export const UScoreRating = memo(({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRate = async (value: number) => {
+    if (disabled) return;
+    
     if (!user) {
       toast.error('Please sign in to rate posts');
       return;
@@ -117,9 +121,9 @@ export const UScoreRating = memo(({
             <motion.button
               key={value}
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || disabled}
               onClick={() => handleRate(value)}
-              onMouseEnter={() => setHoveredValue(value)}
+              onMouseEnter={() => !disabled && setHoveredValue(value)}
               onMouseLeave={() => setHoveredValue(null)}
               className={cn(
                 'relative flex-1 h-8 rounded-md transition-colors duration-200',
@@ -129,7 +133,7 @@ export const UScoreRating = memo(({
                   ? 'bg-blue-500/80 shadow-[0_0_12px_rgba(59,130,246,0.4)]'
                   : 'bg-muted/30 hover:bg-muted/50'
               )}
-              whileTap={{ scale: 0.95 }}
+              whileTap={disabled ? {} : { scale: 0.95 }}
             >
               <span
                 className={cn(

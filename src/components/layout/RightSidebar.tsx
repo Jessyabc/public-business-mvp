@@ -25,6 +25,7 @@ export function RightSidebar({
     if (variant === 'feed') {
       fetchFeeds();
 
+      // Sidebar always subscribes to public Sparks
       const channel = supabase.channel('sidebar-changes').on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -42,6 +43,8 @@ export function RightSidebar({
 
   const fetchFeeds = async () => {
     try {
+      // Sidebar always shows public Sparks, regardless of mode
+      // The feed (main content) shows the mode-specific content
       const { data: brainstorms } = await supabase
         .from('posts')
         .select('id, title, content, created_at')

@@ -95,7 +95,14 @@ export function BusinessInvitations() {
     <div className="space-y-6">
       {/* Received Invitations */}
       {receivedInvitations.length > 0 && (
-        <Card>
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-[#3A3530]">
               <Mail className="w-5 h-5" />
@@ -107,7 +114,14 @@ export function BusinessInvitations() {
           </CardHeader>
           <CardContent className="space-y-4">
             {receivedInvitations.map((invitation) => (
-              <div key={invitation.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div 
+                key={invitation.id} 
+                className="flex items-center justify-between p-4 rounded-lg"
+                style={{
+                  background: '#F5F1ED',
+                  boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                }}
+              >
                 <div>
                   <p className="font-medium text-[#3A3530]">Business Membership Invitation</p>
                   <p className="text-sm text-[#6B635B]">
@@ -142,7 +156,14 @@ export function BusinessInvitations() {
 
       {/* Send Invitations (only for business members/admins) */}
       {(isBusinessMember() || isAdmin()) && (
-        <Card>
+        <Card 
+          className="border-0"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-[#3A3530]">
               <UserPlus className="w-5 h-5" />
@@ -176,7 +197,14 @@ export function BusinessInvitations() {
                   {invitations.slice(0, 5).map((invitation) => {
                     const status = getInvitationStatus(invitation);
                     return (
-                      <div key={invitation.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                      <div 
+                        key={invitation.id} 
+                        className="flex items-center justify-between p-2 rounded-lg"
+                        style={{
+                          background: '#F5F1ED',
+                          boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                        }}
+                      >
                         <span className="text-sm text-[#3A3530]">{invitation.invitee_email}</span>
                         {renderStatusBadge(status)}
                       </div>

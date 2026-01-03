@@ -81,7 +81,7 @@ function DiscussContent() {
     // Wait a bit before allowing modal to open (prevents race conditions)
     const timer = setTimeout(() => {
       allowModalOpenRef.current = true;
-      setIsInitialMount(false);
+    setIsInitialMount(false);
     }, 100);
     
     return () => clearTimeout(timer);
