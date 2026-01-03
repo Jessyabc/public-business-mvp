@@ -82,7 +82,7 @@ export function useOrgMembership() {
 }
 
 /**
- * Hook to check if user is an org owner
+ * Hook to check if user is an org owner (of any org)
  */
 export function useIsOrgOwner() {
   const { data: memberships, isLoading } = useOrgMembership();
@@ -93,6 +93,23 @@ export function useIsOrgOwner() {
     isOrgOwner,
     ownedOrgs: memberships?.filter(m => m.role === 'owner') ?? [],
     isLoading,
+  };
+}
+
+/**
+ * Hook to check if user is owner of a specific organization
+ */
+export function useIsOrgOwnerOf(orgId?: string | null) {
+  const { data: memberships } = useOrgMembership();
+  
+  if (!orgId) return { isOwner: false };
+  
+  const membership = memberships?.find(m => m.org_id === orgId);
+  const isOwner = membership?.role === 'owner';
+  
+  return {
+    isOwner,
+    membership,
   };
 }
 

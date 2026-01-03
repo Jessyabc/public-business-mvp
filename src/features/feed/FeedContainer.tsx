@@ -2,8 +2,10 @@ import * as React from 'react';
 import { BasePost, PostKind } from '@/types/post';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
 import { useUniversalFeed } from './hooks/useUniversalFeed';
+import { useLineageClusterFeed } from './hooks/useLineageClusterFeed';
 import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
+import { ClusterFeedList } from './ClusterFeedList';
 import { useOrgMembership } from '@/hooks/useOrgMembership';
 
 type FeedMode = 'public' | 'business' | 'brainstorm_main' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
@@ -65,6 +67,9 @@ export function FeedContainer({
     onItemsChange?.(lastSeen);
   }, [mode, lastSeen, onItemsChange]);
 
+  // Use cluster feed for public mode, regular feed for business and other modes
+  const useClusterFeed = mode === 'public';
+  
   const feed = useUniversalFeed({
     mode,
     kinds: isMainFeed ? filters.kinds : resolvedKinds,
@@ -74,10 +79,25 @@ export function FeedContainer({
     activePostId,
     pageSize: 20
   });
+
+  const clusterFeed = useLineageClusterFeed({
+    mode: mode === 'public' ? 'public' : 'business',
+    kinds: isMainFeed ? filters.kinds : resolvedKinds,
+    search: isMainFeed ? filters.search : undefined,
+    org_id: primaryOrgId,
+    pageSize: 20
+  });
+
   React.useEffect(() => {
     if (mode === 'brainstorm_last_seen') return;
-    onItemsChange?.(feed.items);
-  }, [mode, feed.items, onItemsChange]);
+    if (useClusterFeed) {
+      // Extract posts from clusters for onItemsChange callback
+      const posts = clusterFeed.clusters.flatMap(c => [c.spark, ...c.continuations.map(cont => cont.post)]);
+      onItemsChange?.(posts);
+    } else {
+      onItemsChange?.(feed.items);
+    }
+  }, [mode, feed.items, clusterFeed.clusters, onItemsChange, useClusterFeed]);
   
   if (mode === 'brainstorm_last_seen') {
     const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
@@ -93,9 +113,35 @@ export function FeedContainer({
     return <div style={{
       flex: 1
     }}>
-        <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} onSelect={setActivePost} />
+      <FeedList items={syntheticFeed.items} onEndReached={syntheticFeed.loadMore} loading={syntheticFeed.loading} onSelect={setActivePost} />
       </div>;
   }
+  
+  // Use cluster feed list for public mode
+  if (useClusterFeed) {
+    const handleSelectPost = (post: BasePost) => {
+      setActivePost(post);
+      onItemsChange?.([post]);
+      // Dispatch event to open PostReaderModal (same as FeedList does)
+      window.dispatchEvent(
+        new CustomEvent('pb:brainstorm:show-thread', {
+          detail: { post, postId: post.id },
+        })
+      );
+    };
+    
+    return (
+      <div style={{ flex: 1 }}>
+        <ClusterFeedList 
+          clusters={clusterFeed.clusters} 
+          onEndReached={clusterFeed.loadMore}
+          loading={clusterFeed.loading}
+          onSelect={handleSelectPost}
+        />
+      </div>
+    );
+  }
+  
   if (renderFeed) {
     return <>{renderFeed(feed.items, feed)}</>;
   }

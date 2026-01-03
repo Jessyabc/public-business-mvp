@@ -62,5 +62,8 @@ verify_jwt = false
 [functions.rate-post]
 verify_jwt = true
 
+[functions.get-org-logo]
+verify_jwt = false
+
 [functions.delete-account]
 verify_jwt = true

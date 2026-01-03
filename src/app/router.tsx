@@ -31,7 +31,7 @@ import Explore from '@/pages/Explore';
 import Community from '@/pages/Community';
 import BusinessDashboard from '@/pages/BusinessDashboard';
 import BusinessMembership from '@/pages/BusinessMembership';
-import BusinessSettings from '@/pages/BusinessSettings';
+import BusinessProfile from '@/pages/BusinessProfile';
 import CreateBusiness from '@/pages/CreateBusiness';
 import Notifications from '@/pages/Notifications';
 import AcceptInvite from '@/pages/AcceptInvite';
@@ -77,7 +77,6 @@ const legacyRedirects = [
   { from: '/feed', to: '/discuss' },
   { from: '/public/feed', to: '/discuss' },
   { from: '/my-posts', to: '/profile' },
-  { from: '/business-profile', to: '/settings?tab=business' },
 ].map(r => ({ path: r.from, element: <Navigate to={r.to} replace /> }));
 
 // Build routes array
@@ -98,8 +97,9 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   // === Organization Routes ===
   { path: '/org/new', element: withLayoutLazy(CreateOrganization) },
   { path: '/business-dashboard', element: withLayout(<BusinessDashboard />) },
-  { path: '/business-settings', element: withLayout(<BusinessSettings />) },
+  { path: '/business-settings', element: <Navigate to="/business-dashboard?tab=settings" replace /> },
   { path: '/business-membership', element: withLayout(<BusinessMembership />) },
+  { path: '/business-profile', element: <Navigate to="/settings?tab=business" replace /> },
   { path: '/create-business', element: withLayout(<CreateBusiness />) },
   { path: '/accept-invite/:token', element: withLayout(<AcceptInvite />) },
   { path: '/app/insights', element: withLayoutLazyRequireOrg(Insights) },

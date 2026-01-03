@@ -8,6 +8,7 @@ import { Share2, Bookmark, Eye, Calendar, User, Reply, TrendingUp } from "lucide
 import type { Post } from "@/types/post";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { LineageCard } from "@/components/brainstorm/LineageCard";
+import { ContinuationsCard } from "@/components/brainstorm/ContinuationsCard";
 import { CrossLinksSection } from "@/components/brainstorm/CrossLinksSection";
 import { UScoreRating } from "./UScoreRating";
 import { usePostRating } from "@/hooks/usePostRating";
@@ -122,8 +123,11 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
           </DialogHeader>
           
           <div className="space-y-6">
-          {/* Lineage Card */}
+          {/* Lineage Card (parents) */}
           <LineageCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
+          
+          {/* Continuations Card (children) */}
+          <ContinuationsCard postId={displayPost.id} currentPost={displayPost} onSelectPost={handleSelectPost} />
 
           {/* Post Header */}
           <div className="flex items-start justify-between">

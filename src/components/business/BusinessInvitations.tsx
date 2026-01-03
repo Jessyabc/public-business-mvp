@@ -97,11 +97,11 @@ export function BusinessInvitations() {
       {receivedInvitations.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-[#3A3530]">
               <Mail className="w-5 h-5" />
               <span>Business Invitations</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-[#6B635B]">
               You have pending invitations to become a Business Member
             </CardDescription>
           </CardHeader>
@@ -109,11 +109,11 @@ export function BusinessInvitations() {
             {receivedInvitations.map((invitation) => (
               <div key={invitation.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <p className="font-medium">Business Membership Invitation</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="font-medium text-[#3A3530]">Business Membership Invitation</p>
+                  <p className="text-sm text-[#6B635B]">
                     Invite sent to: {invitation.invitee_email}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-[#6B635B]">
                     Expires: {new Date(invitation.expires_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -144,11 +144,11 @@ export function BusinessInvitations() {
       {(isBusinessMember() || isAdmin()) && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-[#3A3530]">
               <UserPlus className="w-5 h-5" />
               <span>Invite New Business Members</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-[#6B635B]">
               Send invitations to new users to join the business community
             </CardDescription>
           </CardHeader>
@@ -172,12 +172,12 @@ export function BusinessInvitations() {
               <>
                 <Separator />
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Sent Invitations</h4>
+                  <h4 className="text-sm font-medium text-[#3A3530]">Sent Invitations</h4>
                   {invitations.slice(0, 5).map((invitation) => {
                     const status = getInvitationStatus(invitation);
                     return (
                       <div key={invitation.id} className="flex items-center justify-between p-2 bg-muted rounded">
-                        <span className="text-sm">{invitation.invitee_email}</span>
+                        <span className="text-sm text-[#3A3530]">{invitation.invitee_email}</span>
                         {renderStatusBadge(status)}
                       </div>
                     );

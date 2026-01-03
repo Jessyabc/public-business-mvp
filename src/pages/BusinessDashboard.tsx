@@ -1,14 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { BusinessInvitations } from '@/components/business/BusinessInvitations';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { BusinessMemberBadge } from '@/components/business/BusinessMemberBadge';
-import { useIsOrgOwner } from '@/hooks/useOrgMembership';
+import { useIsOrgOwnerOf } from '@/hooks/useOrgMembership';
+import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
+import { useUserOrgs } from '@/features/orgs/hooks/useUserOrgs';
+import { useOrganization } from '@/features/orgs/hooks/useOrganization';
+import { OrganizationProfileForm } from '@/features/orgs/components/OrganizationProfileForm';
+import { getOrgLogoSignedUrl } from '@/features/orgs/utils/getOrgLogoSignedUrl';
 import { 
   Building2, 
   Users, 
@@ -21,13 +29,78 @@ import {
 } from 'lucide-react';
 
 export function BusinessDashboard() {
+  // All hooks must be called unconditionally before any early returns
   const { isBusinessMember, isAdmin, canCreateBusinessPosts } = useUserRoles();
   const { profile } = useBusinessProfile();
   const { openComposer } = useComposerStore();
-  const { isOrgOwner } = useIsOrgOwner();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { data: defaultOrgId } = useUserOrgId();
+  const { data: userOrgs, isLoading: orgsLoading } = useUserOrgs();
+  
+  // Get selected orgId from URL param or use default
+  const orgIdFromUrl = searchParams.get('org');
+  const selectedOrgId = orgIdFromUrl || defaultOrgId || (userOrgs?.[0]?.id);
+  const [selectedOrgIdState, setSelectedOrgIdState] = useState<string | null>(null);
+  
+  // Initialize and update selected org when data is available
+  useEffect(() => {
+    if (selectedOrgId) {
+      setSelectedOrgIdState(selectedOrgId);
+    } else if (userOrgs && userOrgs.length > 0) {
+      setSelectedOrgIdState((prev) => prev || userOrgs[0].id);
+    }
+  }, [selectedOrgId, userOrgs]);
+  
+  // Get initial tab from URL param, default to 'overview'
+  const initialTab = searchParams.get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
+  // Sync tab state when URL params change
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'overview';
+    setActiveTab(tab);
+  }, [searchParams]);
 
-  const isBusinessMemberRole = isBusinessMember() || isAdmin();
+  // These must come after all hooks but before early returns
+  const selectedOrg = userOrgs?.find(org => org.id === selectedOrgIdState);
+  const { data: currentOrganization } = useOrganization(selectedOrgIdState);
+  const { isOwner: isOrgOwner } = useIsOrgOwnerOf(selectedOrgIdState);
   const isAdminRole = isAdmin();
+  const isReadOnly = !isOrgOwner && !isAdminRole;
+  const isBusinessMemberRole = isBusinessMember() || isAdmin();
+  
+  // State for organization logo
+  const [orgLogoSignedUrl, setOrgLogoSignedUrl] = useState<string | null>(null);
+  
+  // Fetch signed URL for organization logo
+  useEffect(() => {
+    const fetchLogoSignedUrl = async () => {
+      if (currentOrganization?.logo_url && currentOrganization?.id) {
+        // Check if it's already a full URL (legacy) or a path
+        if (currentOrganization.logo_url.startsWith('http://') || currentOrganization.logo_url.startsWith('https://')) {
+          setOrgLogoSignedUrl(currentOrganization.logo_url);
+        } else {
+          // Get signed URL from Edge Function
+          const signedUrl = await getOrgLogoSignedUrl(currentOrganization.id, currentOrganization.logo_url);
+          setOrgLogoSignedUrl(signedUrl);
+        }
+      } else {
+        setOrgLogoSignedUrl(null);
+      }
+    };
+
+    fetchLogoSignedUrl();
+  }, [currentOrganization?.logo_url, currentOrganization?.id]);
+  
+  const handleOrgChange = (newOrgId: string) => {
+    setSelectedOrgIdState(newOrgId);
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('org', newOrgId);
+      return newParams;
+    }, { replace: true });
+  };
 
   if (!isBusinessMemberRole) {
     return (
@@ -61,6 +134,11 @@ export function BusinessDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
+            <img 
+              src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
+              alt="Public Business - Creating Collaboration" 
+              className="h-10 w-auto"
+            />
             <h1 className="text-3xl font-bold text-[#3A3530]">Business Dashboard</h1>
             {isOrgOwner && (
               <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
@@ -68,7 +146,7 @@ export function BusinessDashboard() {
               </Badge>
             )}
             {isAdminRole && !isOrgOwner && (
-              <Badge variant="secondary" className="bg-muted text-muted-foreground">
+              <Badge variant="secondary" className="bg-[#D4CEC5]/50 text-[#6B635B]">
                 Admin
               </Badge>
             )}
@@ -81,12 +159,67 @@ export function BusinessDashboard() {
           )}
         </div>
         
-        {canCreateBusinessPosts && (
-          <Button onClick={() => openComposer()} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Create Business Insight
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          {/* Organization Selector - show if user has multiple orgs */}
+          {userOrgs && userOrgs.length > 1 && (
+            <Select value={selectedOrgIdState || ''} onValueChange={handleOrgChange}>
+              <SelectTrigger 
+                className="w-[250px] text-[#3A3530] bg-[#F5F1ED] border-[#D4CEC5] hover:bg-[#EAE6E2]"
+                style={{
+                  background: '#F5F1ED',
+                  boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                }}
+              >
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    {selectedOrg?.logo_url && (
+                      <Avatar className="h-5 w-5 rounded">
+                        <AvatarImage src={selectedOrg.logo_url} />
+                        <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                          {selectedOrg.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <span className="truncate">{selectedOrg?.name || 'Select organization'}</span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#D4CEC5] text-[#3A3530]">
+                {userOrgs.map((org) => (
+                  <SelectItem 
+                    key={org.id} 
+                    value={org.id}
+                    className="text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]"
+                  >
+                    <div className="flex items-center gap-2">
+                      {org.logo_url && (
+                        <Avatar className="h-5 w-5 rounded">
+                          <AvatarImage src={org.logo_url} />
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                            {org.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <span>{org.name}</span>
+                      {org.role === 'owner' && (
+                        <Badge variant="secondary" className="ml-2 text-xs bg-primary/10 text-primary border-primary/20">
+                          Owner
+                        </Badge>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          
+          {canCreateBusinessPosts && (
+            <Button onClick={() => openComposer()} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Create Business Insight
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -101,7 +234,31 @@ export function BusinessDashboard() {
         >
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
-              <Building2 className="h-8 w-8 text-primary" />
+              {orgLogoSignedUrl ? (
+                <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0" style={{
+                  background: '#F5F1ED',
+                  boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                }}>
+                  <img 
+                    src={orgLogoSignedUrl} 
+                    alt={`${currentOrganization?.name || 'Organization'} logo`}
+                    className="w-full h-full object-cover"
+                    onError={() => setOrgLogoSignedUrl(null)}
+                  />
+                </div>
+              ) : currentOrganization?.name ? (
+                <div 
+                  className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold"
+                  style={{
+                    background: 'linear-gradient(135deg, #D4A574 0%, #B8865A 100%)',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  {currentOrganization.name.charAt(0).toUpperCase()}
+                </div>
+              ) : (
+                <Building2 className="h-8 w-8 text-primary flex-shrink-0" />
+              )}
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="text-sm font-medium text-[#6B635B]">Company</p>
@@ -111,7 +268,7 @@ export function BusinessDashboard() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-lg font-semibold text-[#3A3530]">{profile?.company_name || 'N/A'}</p>
+                <p className="text-lg font-semibold text-[#3A3530]">{currentOrganization?.name || profile?.company_name || 'N/A'}</p>
               </div>
             </div>
           </CardContent>
@@ -176,12 +333,49 @@ export function BusinessDashboard() {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="insights">My Insights</TabsTrigger>
-          <TabsTrigger value="team">Team Management</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('tab', value);
+        navigate(`/business-dashboard?${newParams.toString()}`, { replace: true });
+      }} className="space-y-6">
+        <TabsList 
+          className="grid w-full grid-cols-4 text-[#6B635B]"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: 'inset 4px 4px 10px rgba(166, 150, 130, 0.2), inset -4px -4px 10px rgba(255, 255, 255, 0.6)',
+            borderRadius: '16px',
+            padding: '4px'
+          }}
+        >
+          <TabsTrigger 
+            value="overview"
+            className="!text-[#6B635B] data-[state=active]:bg-white data-[state=active]:!text-[#3A3530] data-[state=active]:shadow-sm"
+            style={{ borderRadius: '12px', color: '#6B635B' }}
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger 
+            value="insights"
+            className="!text-[#6B635B] data-[state=active]:bg-white data-[state=active]:!text-[#3A3530] data-[state=active]:shadow-sm"
+            style={{ borderRadius: '12px', color: '#6B635B' }}
+          >
+            My Insights
+          </TabsTrigger>
+          <TabsTrigger 
+            value="team"
+            className="!text-[#6B635B] data-[state=active]:bg-white data-[state=active]:!text-[#3A3530] data-[state=active]:shadow-sm"
+            style={{ borderRadius: '12px', color: '#6B635B' }}
+          >
+            Team Management
+          </TabsTrigger>
+          <TabsTrigger 
+            value="settings"
+            className="!text-[#6B635B] data-[state=active]:bg-white data-[state=active]:!text-[#3A3530] data-[state=active]:shadow-sm"
+            style={{ borderRadius: '12px', color: '#6B635B' }}
+          >
+            Settings
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -226,23 +420,37 @@ export function BusinessDashboard() {
               <CardContent className="space-y-3">
                 <Button 
                   onClick={() => openComposer()} 
-                  className="w-full justify-start"
+                  className="w-full justify-start text-[#3A3530]"
                   variant="outline"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Business Insight
                 </Button>
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <a href="/business-settings">
-                    <Building2 className="h-4 w-4 mr-2" />
-                    Business Settings
-                  </a>
+                <Button 
+                  className="w-full justify-start text-[#3A3530]" 
+                  variant="outline"
+                  onClick={() => {
+                    const newParams = new URLSearchParams(searchParams);
+                    newParams.set('tab', 'settings');
+                    setActiveTab('settings');
+                    navigate(`/business-dashboard?${newParams.toString()}`, { replace: true });
+                  }}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Business Settings
                 </Button>
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <a href="/business-membership">
-                    <Users className="h-4 w-4 mr-2" />
-                    Manage Team Invitations
-                  </a>
+                <Button 
+                  className="w-full justify-start text-[#3A3530]" 
+                  variant="outline"
+                  onClick={() => {
+                    const newParams = new URLSearchParams(searchParams);
+                    newParams.set('tab', 'team');
+                    setActiveTab('team');
+                    navigate(`/business-dashboard?${newParams.toString()}`, { replace: true });
+                  }}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Manage Team Invitations
                 </Button>
               </CardContent>
             </Card>
@@ -326,36 +534,29 @@ export function BusinessDashboard() {
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card 
-            className="border-0"
-            style={{
-              background: '#EAE6E2',
-              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
-              borderRadius: '24px'
-            }}
-          >
-            <CardHeader>
-              <CardTitle className="text-[#3A3530]">Business Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Button asChild variant="outline">
-                  <a href="/business-settings">Business Settings</a>
-                </Button>
-                {isAdminRole && (
-                  <div className="space-y-2">
-                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                      <Crown className="h-3 w-3 mr-1" />
-                      Admin Privileges
-                    </Badge>
-                    <p className="text-sm text-[#6B635B]">
-                      As a business admin, you can approve posts and manage team members.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {orgsLoading ? (
+            <Card 
+              className="border-0"
+              style={{
+                background: '#EAE6E2',
+                boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+                borderRadius: '24px'
+              }}
+            >
+              <CardContent className="p-8 text-center">
+                <div className="text-[#6B635B]">Loading organizations...</div>
+              </CardContent>
+            </Card>
+          ) : (
+            <OrganizationProfileForm
+              key={selectedOrgIdState || 'no-org'}
+              orgId={selectedOrgIdState || undefined}
+              isReadOnly={isReadOnly}
+              onSuccess={() => {
+                // Optionally show success message or refresh data
+              }}
+            />
+          )}
         </TabsContent>
       </Tabs>
       </div>

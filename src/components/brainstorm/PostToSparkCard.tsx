@@ -137,9 +137,10 @@ export function PostToSparkCard({
       onSelect(post);
     } else {
       setActivePost(post);
+      // Dispatch event to open PostReaderModal
       window.dispatchEvent(
-        new CustomEvent('pb:brainstorm:show-lineage', {
-          detail: { postId: post.id },
+        new CustomEvent('pb:brainstorm:show-thread', {
+          detail: { post, postId: post.id },
         })
       );
     }

@@ -57,9 +57,16 @@ const GlassCardWrapper = ({
       {/* Lineage preview above - only for public lens */}
       {!isBusiness && <LineagePreview postId={postId} isHovered={isHovered} position="above" />}
       
-      {/* Connection line to next card - only for public lens */}
+      {/* Connection line to next card - solid blue glowing for continuations (matching ConstellationView) */}
       {!isBusiness && (
-        <div className="absolute -bottom-6 left-8 w-px h-6 bg-gradient-to-b from-white/20 via-[var(--accent)]/30 to-transparent pointer-events-none z-10" />
+        <div 
+          className="absolute -bottom-6 left-8 w-0.5 h-6 pointer-events-none z-10"
+          style={{
+            background: 'hsl(var(--accent))',
+            boxShadow: '0 0 8px hsl(var(--accent)), 0 0 4px hsl(var(--accent))80',
+            opacity: 0.9,
+          }}
+        />
       )}
       
       <SwipeableCard

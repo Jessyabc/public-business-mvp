@@ -28,6 +28,7 @@ function DiscussContent() {
   const [refreshKey, setRefreshKey] = useState(0);
   const loadingRef = useRef(false);
   const [readerModalPost, setReaderModalPost] = useState<Post | null>(null);
+  const allowModalOpenRef = useRef(false); // Prevent modal from opening during initial load
 
   // Clear activePostId synchronously on first render to prevent auto-opening
   if (!hasClearedOnMount) {
@@ -46,10 +47,18 @@ function DiscussContent() {
     setReaderModalPost(null);
     closeComposer();
     
+    // Temporarily block modal from opening during lens transition
+    allowModalOpenRef.current = false;
+    const timer = setTimeout(() => {
+      allowModalOpenRef.current = true;
+    }, 100);
+    
     const currentActivePostId = useBrainstormExperienceStore.getState().activePostId;
     if (currentActivePostId) {
       useBrainstormExperienceStore.setState({ activePostId: null });
     }
+    
+    return () => clearTimeout(timer);
   }, [lens, closeComposer]);
 
   // Clear all post-related state on mount for both public and business lenses
@@ -69,7 +78,13 @@ function DiscussContent() {
       setSearchParams({}, { replace: true });
     }
     
-    setIsInitialMount(false);
+    // Wait a bit before allowing modal to open (prevents race conditions)
+    const timer = setTimeout(() => {
+      allowModalOpenRef.current = true;
+      setIsInitialMount(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []); // Run once on mount, regardless of lens
 
   const fetchPostById = useCallback(async (id: string): Promise<Post | null> => {
@@ -109,6 +124,11 @@ function DiscussContent() {
 
   useEffect(() => {
     const handleShowThread = async (event: CustomEvent) => {
+      // Don't open modal during initial mount/clear period
+      if (!allowModalOpenRef.current || isInitialMount) {
+        return;
+      }
+      
       const { postId, post } = event.detail;
       if (post) {
         setReaderModalPost(post as Post);
@@ -121,11 +141,16 @@ function DiscussContent() {
     };
     window.addEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
     return () => window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
-  }, [fetchPostById]);
+  }, [fetchPostById, isInitialMount]);
 
   useEffect(() => {
+    // Only process URL params after initial mount and modal is allowed to open
+    if (!allowModalOpenRef.current || isInitialMount) {
+      return;
+    }
+    
     const postId = searchParams.get('post');
-    if (postId && !isInitialMount) {
+    if (postId) {
       fetchPostById(postId).then((post) => {
         if (post) setReaderModalPost(post);
       });

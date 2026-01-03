@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BasePost, PostKind } from '@/types/post';
+import { buildCluster, type LineageCluster } from './clusterUtils';
 
 type FeedQueryOpts = {
   mode: 'public' | 'business';
@@ -113,4 +114,95 @@ export async function fetchCrossLinkedPosts(
   }
 
   return (posts || []) as BasePost[];
+}
+
+/**
+ * Fetch lineage cluster feed - clusters ordered by latest activity
+ */
+export async function fetchLineageClusterFeed(
+  sb: SupabaseClient,
+  opts: FeedQueryOpts
+): Promise<{ clusters: LineageCluster[]; nextCursor: string | null }> {
+  const limit = opts.limit ?? 20;
+  
+  // Find root Sparks (posts with no parent 'reply' relation, kind='Spark', status='active')
+  // First, get all posts that ARE children (have a parent)
+  const { data: childPosts, error: childError } = await sb
+    .from('post_relations')
+    .select('child_post_id')
+    .eq('relation_type', 'reply');
+
+  if (childError) {
+    console.error('Error fetching child posts:', childError);
+    return { clusters: [], nextCursor: null };
+  }
+
+  const childPostIds = new Set((childPosts || []).map(p => p.child_post_id));
+
+  // Build query for root Sparks
+  let query = sb
+    .from('posts')
+    .select('*')
+    .eq('status', 'active')
+    .eq('kind', 'Spark');
+
+  // Filter by mode and visibility
+  if (opts.mode === 'public') {
+    query = query.eq('mode', 'public').eq('visibility', 'public');
+  } else if (opts.mode === 'business') {
+    query = query.eq('mode', 'business');
+    query = query.not('published_at', 'is', null);
+    if (opts.org_id) {
+      query = query.eq('org_id', opts.org_id).in('visibility', ['my_business', 'other_businesses', 'public']);
+    } else {
+      query = query.eq('visibility', 'public');
+    }
+  }
+
+  // Filter by kinds if specified (though we're already filtering by kind='Spark')
+  if (opts.kinds && opts.kinds.length > 0) {
+    query = query.in('kind', opts.kinds);
+  }
+
+  // Search filter
+  if (opts.search) {
+    query = query.or(`title.ilike.%${opts.search}%,content.ilike.%${opts.search}%`);
+  }
+
+  const { data: allPosts, error: postsError } = await query;
+
+  if (postsError || !allPosts) {
+    console.error('Error fetching posts:', postsError);
+    return { clusters: [], nextCursor: null };
+  }
+
+  // Filter to only root Sparks (not in childPostIds)
+  const rootSparks = (allPosts as BasePost[]).filter(p => !childPostIds.has(p.id));
+
+  // Build clusters for each root Spark
+  const clusters: LineageCluster[] = [];
+  for (const spark of rootSparks) {
+    try {
+      const cluster = await buildCluster(sb, spark);
+      clusters.push(cluster);
+    } catch (err) {
+      console.error(`Error building cluster for spark ${spark.id}:`, err);
+      // Continue with other clusters
+    }
+  }
+
+  // Sort by latestActivityAt DESC (most recent activity first)
+  clusters.sort((a, b) => {
+    const dateA = new Date(a.latestActivityAt).getTime();
+    const dateB = new Date(b.latestActivityAt).getTime();
+    return dateB - dateA;
+  });
+
+  // Paginate
+  const paginatedClusters = clusters.slice(0, limit);
+  const nextCursor = clusters.length > limit 
+    ? paginatedClusters[paginatedClusters.length - 1].latestActivityAt 
+    : null;
+
+  return { clusters: paginatedClusters, nextCursor };
 }

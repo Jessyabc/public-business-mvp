@@ -8,12 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ImageCropper } from '@/components/ui/ImageCropper';
 import { useOrganization, useUpdateOrganization } from '../hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Building2, Upload, X } from 'lucide-react';
 import { safeUrlOrEmpty } from '@/lib/validators';
+import { getOrgLogoSignedUrl } from '../utils/getOrgLogoSignedUrl';
 
 const organizationSchema = z.object({
   name: z.string().min(2, 'Organization name must be at least 2 characters'),
@@ -32,13 +34,17 @@ interface OrganizationProfileFormProps {
 }
 
 export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }: OrganizationProfileFormProps) {
+  // All hooks must be called unconditionally - handle !orgId in render
   const { user } = useAuth();
   const { toast } = useToast();
-  const { data: organization, isLoading } = useOrganization(orgId);
+  const { data: organization, isLoading, refetch: refetchOrganization } = useOrganization(orgId);
   const { mutate: updateOrganization, isPending } = useUpdateOrganization();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<File | null>(null);
+  const [signedLogoUrl, setSignedLogoUrl] = useState<string | null>(null);
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -61,11 +67,47 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
         industry_id: organization.industry_id || '',
         company_size: organization.company_size || '',
       });
-      setLogoUrl(organization.logo_url);
+      // Set logo URL and reset error state when organization loads
+      if (organization.logo_url) {
+        setLogoUrl(organization.logo_url);
+        setLogoError(false);
+      } else {
+        setLogoUrl(null);
+        setLogoError(false);
+      }
     }
   }, [organization, form]);
+  
+  // Fetch signed URL when logo path changes
+  useEffect(() => {
+    const fetchSignedUrl = async () => {
+      const logoPath = logoUrl || organization?.logo_url;
+      if (logoPath && organization?.id) {
+        // Check if it's already a full URL (legacy data) or a path
+        if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
+          // Legacy full URL - use it directly
+          setSignedLogoUrl(logoPath);
+        } else {
+          // New path format - get signed URL from Edge Function
+          const signedUrl = await getOrgLogoSignedUrl(organization.id, logoPath);
+          setSignedLogoUrl(signedUrl);
+        }
+      } else {
+        setSignedLogoUrl(null);
+      }
+    };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    fetchSignedUrl();
+  }, [logoUrl, organization?.logo_url, organization?.id]);
+  
+  // Reset error when logo URL changes
+  useEffect(() => {
+    if (logoUrl || organization?.logo_url) {
+      setLogoError(false);
+    }
+  }, [logoUrl, organization?.logo_url]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user || !organization) return;
 
@@ -79,56 +121,87 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
       return;
     }
 
+    // Open cropper dialog
+    setImageToCrop(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    setImageToCrop(null);
+    if (!user || !organization) return;
+
     setUploadingLogo(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${organization.id}/${Date.now()}.${fileExt}`;
-      const filePath = `org-logos/${fileName}`;
+      const fileExt = 'png'; // Always use PNG after cropping
+      const timestamp = Date.now();
+      
+      // Use simple user folder path - most likely to work with RLS
+      // Format: {user_id}/org-{org_id}-logo-{timestamp}.png
+      const uploadPath = `${user.id}/org-${organization.id}-logo-${timestamp}.${fileExt}`;
 
-      // Upload to Supabase Storage (using avatars bucket with org-logos prefix)
+      // Upload to user's folder (RLS should allow users to upload to their own folder)
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(uploadPath, croppedFile, { 
+          upsert: true,
+          contentType: 'image/png'
+        });
 
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // Update organization with new logo URL
-      if (organization) {
-        updateOrganization(
-          {
-            orgId: organization.id,
-            updates: { logo_url: publicUrl },
-          },
-          {
-            onSuccess: () => {
-              setLogoUrl(publicUrl);
-              toast({ title: "Success", description: "Logo uploaded successfully!" });
-            },
-            onError: (error: any) => {
-              toast({
-                title: "Error",
-                description: error.message || "Failed to update logo",
-                variant: "destructive",
-              });
-            },
-          }
-        );
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        // Provide helpful error message
+        if (uploadError.message?.includes('new row violates') || uploadError.message?.includes('RLS') || uploadError.message?.includes('policy')) {
+          throw new Error('Storage permission denied. Please contact support to configure storage permissions for your account.');
+        }
+        throw new Error(uploadError.message || 'Failed to upload logo. Please check storage permissions.');
       }
+
+      // Store the path (not the full URL) in the database
+      // The Edge Function will generate signed URLs when needed
+      await updateOrganizationWithLogo(uploadPath);
     } catch (error: any) {
       console.error('Error uploading logo:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to upload logo",
+        description: error.message || "Failed to upload logo. Please check storage permissions.",
         variant: "destructive",
       });
     } finally {
       setUploadingLogo(false);
     }
+  };
+
+  const updateOrganizationWithLogo = async (logoPath: string) => {
+    if (!organization) return;
+    
+    updateOrganization(
+      {
+        orgId: organization.id,
+        updates: { logo_url: logoPath }, // Store path, not full URL
+      },
+      {
+        onSuccess: async () => {
+          setLogoUrl(logoPath); // Store path for signed URL generation
+          setLogoError(false);
+          // Fetch new signed URL after update
+          const signedUrl = await getOrgLogoSignedUrl(organization.id, logoPath);
+          setSignedLogoUrl(signedUrl);
+          await refetchOrganization();
+          toast({ title: "Success", description: "Logo uploaded successfully!" });
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to update logo",
+            variant: "destructive",
+          });
+        },
+      }
+    );
   };
 
   const onSubmit = async (data: OrganizationFormData) => {
@@ -160,6 +233,29 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
     );
   };
 
+  // Use signed URL if available, otherwise fallback to legacy URL or path
+  const displayLogoUrl = signedLogoUrl || (logoUrl?.startsWith('http') ? logoUrl : null) || (organization?.logo_url?.startsWith('http') ? organization.logo_url : null);
+
+  // Handle case where orgId is not provided - render message (no early return after hooks)
+  if (!orgId) {
+    return (
+      <Card 
+        className="border-0"
+        style={{
+          background: '#EAE6E2',
+          boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+          borderRadius: '24px'
+        }}
+      >
+        <CardContent className="p-8 text-center">
+          <Building2 className="h-12 w-12 text-[#6B635B]/50 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-[#3A3530] mb-2">No Organization Selected</h3>
+          <p className="text-[#6B635B]">Please select an organization to manage.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="text-center py-8 text-[#6B635B]">Loading organization...</div>
@@ -172,17 +268,26 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
     );
   }
 
-  const displayLogoUrl = logoUrl || organization.logo_url;
-
   return (
-    <Card 
-      className="border-0"
-      style={{
-        background: '#EAE6E2',
-        boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
-        borderRadius: '24px'
-      }}
-    >
+    <>
+      {imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setImageToCrop(null)}
+          maxWidth={500}
+          maxHeight={500}
+          aspectRatio={1}
+        />
+      )}
+      <Card 
+        className="border-0"
+        style={{
+          background: '#EAE6E2',
+          boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+          borderRadius: '24px'
+        }}
+      >
       <CardHeader>
         <CardTitle className="text-[#3A3530] flex items-center gap-2">
           <Building2 className="h-5 w-5" />
@@ -199,12 +304,37 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Logo Upload */}
         <div className="flex items-center gap-6">
-          <Avatar className="h-24 w-24 rounded-xl">
-            <AvatarImage src={displayLogoUrl || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-2xl rounded-xl">
-              {organization.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative h-24 w-24 rounded-xl overflow-hidden flex items-center justify-center" style={{
+            background: '#F5F1ED',
+            boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+          }}>
+            {displayLogoUrl && !logoError ? (
+              <img 
+                src={displayLogoUrl} 
+                alt={`${organization?.name || 'Organization'} logo`}
+                className="w-full h-full object-cover rounded-xl"
+                key={displayLogoUrl} // Force re-render when URL changes
+                onError={(e) => {
+                  console.error('Failed to load logo image:', displayLogoUrl, e);
+                  setLogoError(true);
+                }}
+                onLoad={() => {
+                  console.log('Logo loaded successfully:', displayLogoUrl);
+                  setLogoError(false);
+                }}
+              />
+            ) : (
+              <div 
+                className="w-full h-full flex items-center justify-center text-3xl font-bold rounded-xl"
+                style={{
+                  background: 'linear-gradient(135deg, #D4A574 0%, #B8865A 100%)',
+                  color: '#FFFFFF',
+                }}
+              >
+                {organization?.name?.charAt(0).toUpperCase() || '?'}
+              </div>
+            )}
+          </div>
           <div className="flex-1">
             <label className="block text-sm font-medium text-[#3A3530] mb-2">
               Organization Logo
@@ -253,7 +383,7 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleLogoUpload}
+              onChange={handleFileSelect}
               className="hidden"
             />
           </div>
@@ -360,6 +490,7 @@ export function OrganizationProfileForm({ orgId, onSuccess, isReadOnly = false }
         </Form>
       </CardContent>
     </Card>
+    </>
   );
 }
 

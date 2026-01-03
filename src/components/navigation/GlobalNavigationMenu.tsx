@@ -104,15 +104,16 @@ export function GlobalNavigationMenu() {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <Brain 
-              className="w-6 h-6 sm:w-8 sm:h-8"
-              style={{ color: isLightBg ? PB_BLUE : 'var(--primary)' }}
+            <img 
+              src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
+              alt="Public Business - Creating Collaboration" 
+              className="h-8 sm:h-10 w-auto"
             />
             <span 
-              className="text-base sm:text-xl font-bold hidden xs:inline"
+              className="text-base sm:text-xl font-light hidden xs:inline"
               style={{ color: isLightBg ? '#3D3833' : 'white' }}
             >
-              PublicBusiness
+              Public Business
             </span>
           </div>
         </div>
