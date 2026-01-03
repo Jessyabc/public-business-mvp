@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { PostRelationType } from '@/types/post';
+import { logError } from '@/lib/errorLogger';
+import { toast } from 'sonner';
 
 /**
  * CANONICAL POST RELATIONS
@@ -58,8 +60,10 @@ export async function createPostRelation(params: CreateRelationParams): Promise<
   });
 
   if (error) {
-    console.error('Error creating post relation:', error);
-    throw new Error(error.message || 'Failed to create relation');
+    logError(error, { action: 'create_post_relation', parentPostId: params.parentPostId, childPostId: params.childPostId });
+    const errorMessage = error.message || 'Failed to create relation';
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 
@@ -79,8 +83,10 @@ export async function createSoftLinks(parentId: string, childIds: string[]): Pro
   });
 
   if (error) {
-    console.error('Error creating soft links:', error);
-    throw new Error(error.message || 'Failed to create soft links');
+    logError(error, { action: 'create_soft_links', parentId, childIds });
+    const errorMessage = error.message || 'Failed to create soft links';
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 
@@ -112,8 +118,10 @@ export async function deletePostRelation(relationId: string): Promise<void> {
     .eq('id', relationId);
 
   if (error) {
-    console.error('Error deleting post relation:', error);
-    throw new Error(error.message || 'Failed to delete relation');
+    logError(error, { action: 'delete_post_relation', relationId });
+    const errorMessage = error.message || 'Failed to delete relation';
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 
@@ -130,7 +138,8 @@ export async function fetchPostRelations(postId: string) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching post relations:', error);
+    logError(error, { action: 'fetch_post_relations', postId });
+    // Don't show toast for fetch errors - they're usually handled by UI loading states
     throw new Error(error.message || 'Failed to fetch relations');
   }
 
@@ -159,7 +168,8 @@ export async function fetchChildPosts(parentId: string, relationType?: PostRelat
   const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching child posts:', error);
+    logError(error, { action: 'fetch_child_posts', parentId });
+    // Don't show toast for fetch errors - they're usually handled by UI loading states
     throw new Error(error.message || 'Failed to fetch child posts');
   }
 

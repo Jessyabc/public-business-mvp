@@ -1,11 +1,9 @@
 export type PBPostType = 
-  | 'open_idea'
   | 'brainstorm'
   | 'brainstorm_continue'
   | 'insight'
   | 'insight_report'
   | 'insight_white_paper'
-  | 'video_open_idea'
   | 'video_brainstorm'
   | 'video_insight';
 

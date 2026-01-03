@@ -8,8 +8,6 @@ import { DiscussLensProvider } from '@/contexts/DiscussLensContext';
 
 // Lazy-loaded pages
 const Discuss = lazy(() => import('@/pages/Discuss'));
-const OpenIdeas = lazy(() => import('@/pages/OpenIdeas'));
-const OpenIdeaNew = lazy(() => import('@/pages/OpenIdeaNew'));
 const Admin = lazy(() => import('@/pages/Admin'));
 const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
@@ -33,6 +31,7 @@ import Explore from '@/pages/Explore';
 import Community from '@/pages/Community';
 import BusinessDashboard from '@/pages/BusinessDashboard';
 import BusinessMembership from '@/pages/BusinessMembership';
+import BusinessSettings from '@/pages/BusinessSettings';
 import CreateBusiness from '@/pages/CreateBusiness';
 import Notifications from '@/pages/Notifications';
 import AcceptInvite from '@/pages/AcceptInvite';
@@ -79,7 +78,6 @@ const legacyRedirects = [
   { from: '/public/feed', to: '/discuss' },
   { from: '/my-posts', to: '/profile' },
   { from: '/business-profile', to: '/settings?tab=business' },
-  { from: '/open-ideas', to: '/research?tab=open-ideas' },
 ].map(r => ({ path: r.from, element: <Navigate to={r.to} replace /> }));
 
 // Build routes array
@@ -100,15 +98,14 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   // === Organization Routes ===
   { path: '/org/new', element: withLayoutLazy(CreateOrganization) },
   { path: '/business-dashboard', element: withLayout(<BusinessDashboard />) },
+  { path: '/business-settings', element: withLayout(<BusinessSettings />) },
   { path: '/business-membership', element: withLayout(<BusinessMembership />) },
   { path: '/create-business', element: withLayout(<CreateBusiness />) },
   { path: '/accept-invite/:token', element: withLayout(<AcceptInvite />) },
   { path: '/app/insights', element: withLayoutLazyRequireOrg(Insights) },
   
-  // === Research & Ideas ===
+  // === Research ===
   { path: '/research', element: withLayout(<Research />) },
-  { path: '/trail/openideas', element: withLayoutLazy(OpenIdeas) },
-  { path: '/open-ideas/new', element: withLayoutLazy(OpenIdeaNew) },
   
   // === Admin & Dev ===
   { path: '/admin', element: withLayoutLazy(Admin) },

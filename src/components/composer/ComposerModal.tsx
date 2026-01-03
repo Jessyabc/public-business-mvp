@@ -9,7 +9,6 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { toast } from 'sonner';
 import { useAuth } from "@/contexts/AuthContext";
-import { sanitizeText } from "@/lib/sanitize";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,6 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [composerMode, setComposerMode] = useState<'post' | 'open-idea'>('post');
   
   // Workspace context banner state (sessionStorage - shows once per session)
   const [showWorkspaceBanner, setShowWorkspaceBanner] = useState(false);
@@ -58,7 +56,6 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   
   // Check if we're in continuation mode
   const isContinuationMode = context?.relationType === 'continuation' && context?.parentPostId;
-  const isFromOpenIdea = !!context?.originOpenIdeaId;
 
   // Check if we should show workspace banner (sessionStorage - once per session)
   useEffect(() => {
@@ -104,7 +101,6 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const handleClose = () => {
     setContent("");
     setTitle("");
-    setComposerMode('post');
     setShowLinkSelector(false);
     setLinkSearch("");
     setSelectedLinks([]);
@@ -141,7 +137,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       if (error) throw error;
       setAvailablePosts(data || []);
     } catch (err) {
-      console.error('Failed to load posts:', err);
+      // Error loading posts - non-critical, just show toast
       toast.error('Failed to load posts');
     } finally {
       setLoadingPosts(false);
@@ -191,9 +187,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           userId: user.id,
           content,
           title: undefined,
-          metadata: context?.originOpenIdeaId 
-            ? { origin_open_idea_id: context.originOpenIdeaId }
-            : undefined,
+          metadata: undefined,
         });
       } else {
         // Business Insight
@@ -228,7 +222,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         .single();
 
       if (error) {
-        console.error('Error creating post:', error);
+        // Error already logged by structured logger if used
         if (error.message.includes('org_id')) {
           toast.error('You must be a member of an organization to create business insights');
         } else {
@@ -242,7 +236,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
         try {
           await createHardLink(context.parentPostId, newPost.id);
         } catch (linkError) {
-          console.error('Error creating hard link:', linkError);
+          // Error logged by createHardLink, just show user-friendly message
           toast.warning('Post created but continuation link failed');
         }
       }
@@ -254,23 +248,8 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
           await createSoftLinks(newPost.id, allSoftLinks);
           clearRefs(); // Clear pending refs after successful creation
         } catch (linkError) {
-          console.error('Error creating soft links:', linkError);
+          // Error logged by createSoftLinks, just show user-friendly message
           toast.warning('Post created but some links failed');
-        }
-      }
-
-      // Create idea_link if sparked from open idea
-      if (isFromOpenIdea && context?.originOpenIdeaId && newPost?.id) {
-        try {
-          await supabase.from('idea_links').insert({
-            source_id: context.originOpenIdeaId,
-            source_type: 'open_idea',
-            target_id: newPost.id,
-            target_type: 'spark',
-            created_by: user.id
-          });
-        } catch (linkError) {
-          console.error('Error creating idea link:', linkError);
         }
       }
 
@@ -278,51 +257,8 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       clearDraft();
       handleClose();
     } catch (error: any) {
-      console.error('Error creating post:', error);
+      // Error already logged by structured logger if used
       toast.error(error?.message || 'Failed to create post');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCreateOpenIdea = async () => {
-    // Block authenticated users from creating open ideas
-    if (user) {
-      toast.error('Logged-in users should create Sparks instead of Open Ideas. Switch to the Brainstorm tab.');
-      return;
-    }
-    
-    if (!content.trim() || isSubmitting) return;
-    
-    // Sanitize and validate content
-    const sanitizedContent = sanitizeText(content.trim());
-    if (sanitizedContent.length < 10 || sanitizedContent.length > 500) {
-      toast.error('Open ideas must be between 10-500 characters');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const { data, error: functionError } = await supabase.functions.invoke('submit-open-idea', {
-        body: {
-          content: sanitizedContent,
-          email: null,
-          notify_on_interaction: false,
-          subscribe_newsletter: false
-        }
-      });
-
-      if (functionError) throw functionError;
-      if (!data?.success || !data?.id) {
-        throw new Error(data?.error || 'Failed to submit idea');
-      }
-
-      toast.success('Open idea created successfully');
-      clearDraft();
-      handleClose();
-    } catch (error: any) {
-      console.error('Error creating open idea:', error);
-      toast.error(error?.message || 'Failed to create open idea');
     } finally {
       setIsSubmitting(false);
     }
@@ -331,71 +267,6 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   const handleClearContext = () => {
     setContext(null);
   };
-
-  const renderOpenIdeaForm = () => (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center",
-          "bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/30"
-        )}>
-          <Brain className="w-5 h-5 text-[hsl(var(--accent))]" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground">New Open Idea</h3>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="open-idea-content" className="text-foreground/80">
-          What question can't you stop thinking about?
-        </Label>
-        <textarea
-          id="open-idea-content"
-          placeholder="Share your question or idea..."
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          rows={5}
-          maxLength={280}
-          className={cn(
-            "w-full rounded-xl px-4 py-3 resize-none",
-            "bg-white/5 border border-white/10",
-            "text-foreground placeholder:text-muted-foreground",
-            "focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]/50 focus:border-transparent",
-            "transition-all duration-200"
-          )}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{content.length < 10 ? `${10 - content.length} more needed` : 'Perfect length'}</span>
-          <span className={content.length > 250 ? 'text-red-400' : ''}>
-            {content.length} / 280
-          </span>
-        </div>
-      </div>
-
-      <div className="flex justify-between pt-2">
-        <Button
-          variant="ghost"
-          onClick={() => setComposerMode('post')}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          Back to {isPublicMode ? 'Brainstorm' : 'Insight'}
-        </Button>
-        <Button
-          onClick={handleCreateOpenIdea}
-          disabled={content.length < 10 || content.length > 280 || isSubmitting}
-          className={cn(
-            "bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90",
-            "text-white font-medium",
-            "shadow-[0_0_20px_rgba(72,159,227,0.3)]",
-            "hover:shadow-[0_0_30px_rgba(72,159,227,0.5)]",
-            "transition-all duration-300",
-            "disabled:opacity-50 disabled:shadow-none"
-          )}
-        >
-          {isSubmitting ? 'Creating...' : 'Create Open Idea'}
-        </Button>
-      </div>
-    </div>
-  );
 
   const renderPublicForm = () => (
     <div className="space-y-5">
@@ -415,7 +286,6 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       {/* Context banners */}
       <ContinuationBanner 
         parentPostId={context?.parentPostId}
-        originOpenIdeaId={context?.originOpenIdeaId}
         onClear={handleClearContext}
       />
       
@@ -566,15 +436,6 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
       </div>
 
       <div className="flex justify-between pt-2">
-        {!user && (
-          <Button
-            variant="ghost"
-            onClick={() => setComposerMode('open-idea')}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Submit Open Idea Instead
-          </Button>
-        )}
         <div className="flex-1" />
         <Button
           onClick={handleCreate}
@@ -617,17 +478,12 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-xl bg-background/95 backdrop-blur-xl border-white/10">
         <DialogHeader>
-          <DialogTitle className="sr-only">
-            {composerMode === 'open-idea' ? 'Create Open Idea' : 'Create Spark'}
-          </DialogTitle>
+          <DialogTitle className="sr-only">Create Spark</DialogTitle>
           <DialogDescription className="sr-only">
-            {composerMode === 'open-idea' 
-              ? 'Share a question or idea with the community'
-              : 'Share your thoughts and insights'
-            }
+            Share your thoughts and insights
           </DialogDescription>
         </DialogHeader>
-        {composerMode === 'open-idea' ? renderOpenIdeaForm() : renderPublicForm()}
+        {renderPublicForm()}
       </DialogContent>
     </Dialog>
   );

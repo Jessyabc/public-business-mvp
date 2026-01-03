@@ -28,13 +28,15 @@ export const secondaryNavItems: NavItem[] = [
   { title: "Settings", to: "/settings", icon: Settings2 },
   { title: "Notifications", to: "/notifications", icon: Bell },
   { title: "Research", to: "/research", icon: Search },
+  { title: "Discuss", to: "/discuss", icon: MessageCircle },
 ];
 
 // Business section navigation
 export const businessNavItems: NavItem[] = [
   { title: "Business Dashboard", to: "/business-dashboard", icon: Building2 },
+  { title: "Business Settings", to: "/business-settings", icon: Settings2 },
   { title: "Business Membership", to: "/business-membership", icon: Crown },
-  { title: "Create Business", to: "/create-business", icon: Building2 },
+  { title: "Create Organization", to: "/org/new", icon: Building2 },
   { title: "Business Members", to: "/members/business-members", icon: Crown },
 ];
 

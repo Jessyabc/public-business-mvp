@@ -2,6 +2,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from './use-mobile';
 import { useHaptic } from './useHaptic';
 
+/**
+ * Swipe Navigation Hook
+ * 
+ * Enables swipe gestures on mobile devices to navigate between main sections.
+ * Used in MainLayout via SwipeNavigationWrapper component.
+ * 
+ * Current sections:
+ * - '/' (index 0) - Main feed
+ * - '/my-posts' (index 2) - User's posts
+ * 
+ * Usage: Wrapped around main content in MainLayout.tsx
+ */
+
 interface SwipeSection {
   path: string;
   index: number;
@@ -9,7 +22,6 @@ interface SwipeSection {
 
 const MAIN_SECTIONS: SwipeSection[] = [
   { path: '/', index: 0 },
-  { path: '/open-ideas', index: 1 },
   { path: '/my-posts', index: 2 },
 ];
 

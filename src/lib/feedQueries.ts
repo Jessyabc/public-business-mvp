@@ -35,7 +35,8 @@ export async function fetchUniversalFeed(
   } else if (opts.mode === 'business') {
     query = query.eq('mode', 'business');
     // For business mode, include my_business and other_businesses visibility
-    // (draft posts are excluded by default since they're not published)
+    // Business insights must be published (have published_at set)
+    query = query.not('published_at', 'is', null);
     if (opts.org_id) {
       query = query.eq('org_id', opts.org_id).in('visibility', ['my_business', 'other_businesses', 'public']);
     } else {
@@ -76,10 +77,12 @@ export async function fetchCrossLinkedPosts(
 ): Promise<BasePost[]> {
   if (!opts.postId) return [];
 
-  // Get relations where this post is involved
+  // Get cross-link relations where this post is involved
+  // Only fetch 'cross_link' type, not 'origin' (continuations) which are shown in lineage
   const { data: relations, error: relError } = await sb
     .from('post_relations')
     .select('parent_post_id, child_post_id')
+    .eq('relation_type', 'cross_link')
     .or(`parent_post_id.eq.${opts.postId},child_post_id.eq.${opts.postId}`);
 
   if (relError || !relations || relations.length === 0) {

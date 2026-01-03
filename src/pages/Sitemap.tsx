@@ -12,9 +12,6 @@ const additionalRoutes = [
   { path: '/brainstorm', title: 'Brainstorm Feed', icon: Brain, description: 'Canonical brainstorm canvas', requiresAuth: true },
   { path: '/app/insights', title: 'Business Insights', icon: Building2, description: 'Business insights feed', requiresOrg: true },
   { path: '/org/new', title: 'Create Organization', icon: Building2, description: 'Create a new organization' },
-  { path: '/idea/:id', title: 'Idea Detail', icon: Brain, description: 'View open idea details', dynamic: true },
-  { path: '/open-ideas', title: 'Open Ideas', icon: Brain, description: 'Browse open ideas' },
-  { path: '/open-ideas/new', title: 'New Open Idea', icon: Brain, description: 'Create a new open idea' },
   { path: '/admin', title: 'Admin Panel', icon: Shield, description: 'Administration panel', requiresAdmin: true },
   { path: '/customize', title: 'Customize Theme', icon: Palette, description: 'Customize your theme' },
   { path: '/demo/cards', title: 'Demo Cards', icon: Layers, description: 'PostCard showcase' },
@@ -71,7 +68,6 @@ export default function Sitemap() {
       ...additionalRoutes.filter(r => r.path.includes('insights') || r.path.includes('org')).map(normalizeRoute),
     ],
     'Ideas & Brainstorms': [
-      ...additionalRoutes.filter(r => r.path.includes('idea') || r.path.includes('open-ideas')).map(normalizeRoute),
       ...navItems.filter(item => item.to.includes('research') || item.to.includes('explore')).map(normalizeRoute),
     ],
     'Community': navItems.filter(item => 

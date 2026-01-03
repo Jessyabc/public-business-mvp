@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { PREMIUM_FEATURES_ENABLED } from '@/adapters/constants';
 
 export default function PublicMembers() {
   const { user } = useAuth();
@@ -166,6 +167,7 @@ export default function PublicMembers() {
         </section>
 
         {/* Pricing Tiers */}
+        {PREMIUM_FEATURES_ENABLED && (
         <section>
           <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">Choose Your Experience</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -208,8 +210,10 @@ export default function PublicMembers() {
             ))}
           </div>
         </section>
+        )}
 
         {/* Premium Notification */}
+        {PREMIUM_FEATURES_ENABLED && (
         <section>
           <Card className="glass-card p-8 max-w-2xl mx-auto text-center">
             <Star className="w-12 h-12 text-primary mx-auto mb-4" />
@@ -234,8 +238,10 @@ export default function PublicMembers() {
             </form>
           </Card>
         </section>
+        )}
 
         {/* Feature Comparison */}
+        {PREMIUM_FEATURES_ENABLED && (
         <section>
           <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">Free vs Premium Features</h2>
           <Card className="glass-card p-8 max-w-4xl mx-auto">
@@ -262,6 +268,7 @@ export default function PublicMembers() {
             </div>
           </Card>
         </section>
+        )}
 
         {/* CTA Section */}
         <section className="text-center">

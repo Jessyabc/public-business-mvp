@@ -17,6 +17,8 @@ import type { Post } from '@/types/post';
 
 function DiscussContent() {
   const [searchParams, setSearchParams] = useSearchParams();
+  // Clear activePostId immediately on mount to prevent auto-opening modals
+  const [hasClearedOnMount, setHasClearedOnMount] = useState(false);
   const activePostId = useBrainstormExperienceStore(state => state.activePostId);
   const { openComposer, closeComposer, isOpen: composerOpen } = useComposerStore();
   const { lens, toggleLens } = useDiscussLens();
@@ -26,6 +28,12 @@ function DiscussContent() {
   const [refreshKey, setRefreshKey] = useState(0);
   const loadingRef = useRef(false);
   const [readerModalPost, setReaderModalPost] = useState<Post | null>(null);
+
+  // Clear activePostId synchronously on first render to prevent auto-opening
+  if (!hasClearedOnMount) {
+    useBrainstormExperienceStore.setState({ activePostId: null });
+    setHasClearedOnMount(true);
+  }
 
   const handleRefresh = async () => {
     setRefreshKey(prev => prev + 1);
@@ -44,9 +52,25 @@ function DiscussContent() {
     }
   }, [lens, closeComposer]);
 
+  // Clear all post-related state on mount for both public and business lenses
+  // This ensures no post card shows automatically when landing on either side
   useEffect(() => {
+    // Clear store state (redundant but ensures it's cleared)
+    useBrainstormExperienceStore.setState({ activePostId: null });
+    
+    // Clear local state
+    setReaderModalPost(null);
+    setSelectedPost(null);
+    setSelectedPostId(null);
+    
+    // Clear URL params if they exist (e.g., ?post=xxx)
+    const postIdParam = searchParams.get('post');
+    if (postIdParam) {
+      setSearchParams({}, { replace: true });
+    }
+    
     setIsInitialMount(false);
-  }, []);
+  }, []); // Run once on mount, regardless of lens
 
   const fetchPostById = useCallback(async (id: string): Promise<Post | null> => {
     if (loadingRef.current) return null;
@@ -135,26 +159,6 @@ function DiscussContent() {
 
   return (
     <>
-      {/* Ambient particles background - only for public lens */}
-      {isPublic && (
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-          <div className="absolute w-full h-full">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1 h-1 rounded-full bg-white/20 animate-particle"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 20}s`,
-                  animationDuration: `${20 + Math.random() * 20}s`
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Header with lens toggle and notifications */}
       <div className={cn(
         "relative z-10 flex items-center justify-between px-4 py-3 lg:px-6",
@@ -244,7 +248,7 @@ function DiscussContent() {
 
       <PullToRefresh onRefresh={handleRefresh}>
         <BrainstormLayoutShell
-          main={<FeedContainer mode={lens === 'business' ? 'business' : 'public'} activePostId={activePostId} key={`${refreshKey}-${lens}`} />}
+          main={<FeedContainer mode={lens === 'business' ? 'business' : 'public'} activePostId={null} key={`${refreshKey}-${lens}`} />}
           crossLinks={null}
           sidebar={<RightSidebar variant="feed" onSelectPost={handleSelectPost} />}
         />

@@ -47,16 +47,28 @@ export function useOrgMembership() {
       // Fetch org details separately to avoid type issues with RLS
       const memberships = (data || []) as OrgMembership[];
       if (memberships.length > 0) {
-        const orgIds = Array.from(new Set(memberships.map(m => m.org_id)));
+        // Deduplicate by org_id - keep the most recent membership per org
+        const orgMembershipMap = new Map<string, OrgMembership>();
+        memberships.forEach(m => {
+          const existing = orgMembershipMap.get(m.org_id);
+          if (!existing || new Date(m.created_at) > new Date(existing.created_at)) {
+            orgMembershipMap.set(m.org_id, m);
+          }
+        });
+        const uniqueMemberships = Array.from(orgMembershipMap.values());
+        
+        const orgIds = Array.from(new Set(uniqueMemberships.map(m => m.org_id)));
         const { data: orgs } = await supabase
           .from('orgs')
           .select('id, name, description, slug, logo_url, created_by, created_at, theme_version')
           .in('id', orgIds);
         
         const orgMap = new Map((orgs || []).map(o => [o.id, o]));
-        memberships.forEach(m => {
+        uniqueMemberships.forEach(m => {
           m.org = orgMap.get(m.org_id) as OrgMembership['org'];
         });
+        
+        return uniqueMemberships;
       }
       
       return memberships;

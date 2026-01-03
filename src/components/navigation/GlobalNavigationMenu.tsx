@@ -4,6 +4,7 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { Button } from '@/components/ui/button';
 import { User, Settings, LogOut, Shield, UserCheck, Brain, Building2, Plus, Palette, Map, Search } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -156,23 +157,28 @@ export function GlobalNavigationMenu() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
-              className="w-56 bg-popover/95 backdrop-blur-md border-border shadow-lg" 
+              className={cn(
+                "w-56 backdrop-blur-md border-border shadow-lg",
+                isLightBg 
+                  ? "bg-white/95 text-[#3A3530] border-[#D4CEC5]" 
+                  : "bg-popover/95 text-popover-foreground"
+              )} 
               align="end" 
               forceMount
               side="bottom"
               sideOffset={8}
             >
-              <DropdownMenuLabel className="font-normal">
+              <DropdownMenuLabel className={cn("font-normal", isLightBg && "text-[#3A3530]")}>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
+                  <p className={cn("text-sm font-medium leading-none", isLightBg ? "text-[#3A3530]" : "")}>
                     {profile?.display_name || 'User'}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground">
+                  <p className={cn("text-xs leading-none", isLightBg ? "text-[#6B635B]" : "text-muted-foreground")}>
                     {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className={isLightBg ? "bg-[#D4CEC5]" : ""} />
               
               {/* Role indicators */}
               {showDiscussOnlyUi && (
@@ -198,50 +204,104 @@ export function GlobalNavigationMenu() {
                 </div>
               )}
               
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className={isLightBg ? "bg-[#D4CEC5]" : ""} />
+              
+              <DropdownMenuItem 
+                onClick={() => navigate('/profile')}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem 
+                onClick={() => navigate('/discuss')}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
+                <Brain className="mr-2 h-4 w-4" />
+                <span>Discuss</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem 
+                onClick={() => navigate('/research')}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
+                <Search className="mr-2 h-4 w-4" />
+                <span>Research Hub</span>
+              </DropdownMenuItem>
+              
+              {isBusinessMember() && (
+                <>
+                  <DropdownMenuSeparator className={isLightBg ? "bg-[#D4CEC5]" : ""} />
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/business-dashboard')}
+                    className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+                  >
+                    <Building2 className="mr-2 h-4 w-4" />
+                    <span>Business Dashboard</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/business-settings')}
+                    className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Business Settings</span>
+                  </DropdownMenuItem>
+                </>
+              )}
               
               {!orgId && (
-                <DropdownMenuItem onClick={() => navigate('/org/new')}>
+                <DropdownMenuItem 
+                  onClick={() => navigate('/org/new')}
+                  className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+                >
                   <Building2 className="mr-2 h-4 w-4" />
                   <span>Create Organization</span>
                 </DropdownMenuItem>
               )}
               
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
+              <DropdownMenuSeparator className={isLightBg ? "bg-[#D4CEC5]" : ""} />
               
-              <DropdownMenuItem onClick={() => navigate('/research')}>
-                <Search className="mr-2 h-4 w-4" />
-                <span>Research Hub</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem 
+                onClick={() => navigate('/settings')}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </DropdownMenuItem>
               
-              <DropdownMenuItem onClick={() => navigate('/customize')}>
+              <DropdownMenuItem 
+                onClick={() => navigate('/customize')}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
                 <Palette className="mr-2 h-4 w-4" />
                 <span>Customize Theme</span>
               </DropdownMenuItem>
               
-              <DropdownMenuItem onClick={() => navigate('/sitemap')}>
+              <DropdownMenuItem 
+                onClick={() => navigate('/sitemap')}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
                 <Map className="mr-2 h-4 w-4" />
                 <span>Sitemap</span>
               </DropdownMenuItem>
               
               {isAdmin() && (
-                <DropdownMenuItem onClick={() => navigate('/admin')}>
+                <DropdownMenuItem 
+                  onClick={() => navigate('/admin')}
+                  className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+                >
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Admin Panel</span>
                 </DropdownMenuItem>
               )}
               
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className={isLightBg ? "bg-[#D4CEC5]" : ""} />
               
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem 
+                onClick={handleSignOut}
+                className={isLightBg ? "text-[#3A3530] focus:bg-[#F5F1ED] focus:text-[#3A3530]" : ""}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

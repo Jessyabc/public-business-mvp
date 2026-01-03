@@ -86,7 +86,7 @@ export function CreateBusiness() {
         description: "You are now a Business Member with admin privileges.",
       });
 
-      navigate('/business-profile');
+      navigate('/business-settings');
     } catch (error: unknown) {
       console.error('Error creating business:', error);
       let description = 'Failed to create business';

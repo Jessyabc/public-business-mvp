@@ -61,7 +61,7 @@ export function BusinessDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">Business Dashboard</h1>
+            <h1 className="text-3xl font-bold text-[#3A3530]">Business Dashboard</h1>
             {isOrgOwner && (
               <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
                 Owner
@@ -75,7 +75,7 @@ export function BusinessDashboard() {
             <BusinessMemberBadge />
           </div>
           {profile && (
-            <p className="text-muted-foreground">
+            <p className="text-[#6B635B]">
               Welcome back to {profile.company_name}
             </p>
           )}
@@ -104,14 +104,14 @@ export function BusinessDashboard() {
               <Building2 className="h-8 w-8 text-primary" />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-medium text-muted-foreground">Company</p>
+                  <p className="text-sm font-medium text-[#6B635B]">Company</p>
                   {isOrgOwner && (
                     <Badge variant="default" className="bg-primary/20 text-primary border-primary/30 text-xs">
                       Owner
                     </Badge>
                   )}
                 </div>
-                <p className="text-lg font-semibold">{profile?.company_name || 'N/A'}</p>
+                <p className="text-lg font-semibold text-[#3A3530]">{profile?.company_name || 'N/A'}</p>
               </div>
             </div>
           </CardContent>
@@ -129,8 +129,8 @@ export function BusinessDashboard() {
             <div className="flex items-center gap-2">
               <Users className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Team Size</p>
-                <p className="text-lg font-semibold">{profile?.company_size || 'N/A'}</p>
+                <p className="text-sm font-medium text-[#6B635B]">Team Size</p>
+                <p className="text-lg font-semibold text-[#3A3530]">{profile?.company_size || 'N/A'}</p>
               </div>
             </div>
           </CardContent>
@@ -148,8 +148,8 @@ export function BusinessDashboard() {
             <div className="flex items-center gap-2">
               <FileText className="h-8 w-8 text-green-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Insights Posted</p>
-                <p className="text-lg font-semibold">0</p>
+                <p className="text-sm font-medium text-[#6B635B]">Insights Posted</p>
+                <p className="text-lg font-semibold text-[#3A3530]">0</p>
               </div>
             </div>
           </CardContent>
@@ -167,8 +167,8 @@ export function BusinessDashboard() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-orange-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Views</p>
-                <p className="text-lg font-semibold">0</p>
+                <p className="text-sm font-medium text-[#6B635B]">Total Views</p>
+                <p className="text-lg font-semibold text-[#3A3530]">0</p>
               </div>
             </div>
           </CardContent>
@@ -196,13 +196,13 @@ export function BusinessDashboard() {
               }}
             >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-[#3A3530]">
                   <TrendingUp className="h-5 w-5" />
                   Recent Activity
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-center py-8">
+                <p className="text-[#6B635B] text-center py-8">
                   No recent activity to display
                 </p>
               </CardContent>
@@ -218,7 +218,7 @@ export function BusinessDashboard() {
               }}
             >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-[#3A3530]">
                   <Settings className="h-5 w-5" />
                   Quick Actions
                 </CardTitle>
@@ -233,9 +233,9 @@ export function BusinessDashboard() {
                   Create Business Insight
                 </Button>
                 <Button asChild className="w-full justify-start" variant="outline">
-                  <a href="/business-profile">
+                  <a href="/business-settings">
                     <Building2 className="h-4 w-4 mr-2" />
-                    Edit Business Profile
+                    Business Settings
                   </a>
                 </Button>
                 <Button asChild className="w-full justify-start" variant="outline">
@@ -258,7 +258,7 @@ export function BusinessDashboard() {
             }}
           >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-[#3A3530]">
                 <Crown className="h-5 w-5 text-yellow-500" />
                 Business Member Benefits
               </CardTitle>
@@ -266,11 +266,11 @@ export function BusinessDashboard() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold flex items-center gap-2">
+                  <h4 className="font-semibold flex items-center gap-2 text-[#3A3530]">
                     <Eye className="h-4 w-4" />
                     Content Creation
                   </h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
+                  <ul className="text-sm text-[#6B635B] space-y-1">
                     <li>• Post Business Insights with privacy controls</li>
                     <li>• Share industry reports and whitepapers</li>
                     <li>• Create webinars and video content</li>
@@ -278,11 +278,11 @@ export function BusinessDashboard() {
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-semibold flex items-center gap-2">
+                  <h4 className="font-semibold flex items-center gap-2 text-[#3A3530]">
                     <Users className="h-4 w-4" />
                     Team Management
                   </h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
+                  <ul className="text-sm text-[#6B635B] space-y-1">
                     <li>• Invite team members to your business</li>
                     <li>• Manage business member roles</li>
                     <li>• Control content permissions</li>
@@ -304,10 +304,10 @@ export function BusinessDashboard() {
             }}
           >
             <CardHeader>
-              <CardTitle>My Business Insights</CardTitle>
+              <CardTitle className="text-[#3A3530]">My Business Insights</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-center py-8">
+              <p className="text-[#6B635B] text-center py-8">
                 No business insights posted yet. 
                 <Button 
                   variant="link" 
@@ -335,12 +335,12 @@ export function BusinessDashboard() {
             }}
           >
             <CardHeader>
-              <CardTitle>Business Settings</CardTitle>
+              <CardTitle className="text-[#3A3530]">Business Settings</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <Button asChild variant="outline">
-                  <a href="/business-profile">Edit Business Profile</a>
+                  <a href="/business-settings">Business Settings</a>
                 </Button>
                 {isAdminRole && (
                   <div className="space-y-2">
@@ -348,7 +348,7 @@ export function BusinessDashboard() {
                       <Crown className="h-3 w-3 mr-1" />
                       Admin Privileges
                     </Badge>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-[#6B635B]">
                       As a business admin, you can approve posts and manage team members.
                     </p>
                   </div>
@@ -358,7 +358,7 @@ export function BusinessDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
-
+      </div>
     </div>
   );
 }

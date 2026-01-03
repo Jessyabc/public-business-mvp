@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, FileText, BarChart3, Users, Eye, Crown, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { PREMIUM_FEATURES_ENABLED } from '@/adapters/constants';
 export default function BusinessMembers() {
   const {
     user
@@ -30,7 +31,14 @@ export default function BusinessMembers() {
     description: 'Appear in "Discover Business Members" and compete for "Most Influential" recognition.',
     features: ['Premium placement', 'Industry filtering', 'Influence ranking', 'Networking opportunities']
   }];
-  const additionalFeatures = ['Ad-free environment - you control what\'s highlighted', 'Commissionable premium report program (coming soon)', 'AI-powered company voice alignment (optional add-on)', 'Professional profile pages with team showcase', 'Direct investor communication channels', 'Industry-specific networking tools'];
+  const additionalFeatures = [
+    'Ad-free environment - you control what\'s highlighted',
+    ...(PREMIUM_FEATURES_ENABLED ? ['Commissionable premium report program'] : []),
+    'AI-powered company voice alignment (optional add-on)',
+    'Professional profile pages with team showcase',
+    'Direct investor communication channels',
+    'Industry-specific networking tools'
+  ];
   const handleApplyClick = () => {
     if (user) {
       navigate('/join-now?type=business');

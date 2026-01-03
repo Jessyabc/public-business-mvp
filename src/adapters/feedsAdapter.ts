@@ -13,12 +13,6 @@ interface BusinessFeedRow {
   } | null;
 }
 
-interface OpenIdeaRow {
-  id: string;
-  content: string;
-  created_at: string;
-  source?: string;
-}
 
 interface FeedEventProperties {
   postId?: string | null;
@@ -34,7 +28,7 @@ interface HistoryEventRow {
 
 export interface FeedItem {
   id: string;
-  type: 'brainstorm' | 'business' | 'open_idea';
+  type: 'brainstorm' | 'business';
   title: string;
   content?: string;
   author?: string;
@@ -53,11 +47,6 @@ export interface HistoryItem {
 }
 
 export class FeedsAdapter {
-  // Brainstorm feed removed from sidebar - users should go to /brainstorm page
-  async getBrainstormFeed(): Promise<FeedItem[]> { 
-    return []; 
-  }
-
   async getBusinessFeed(): Promise<FeedItem[]> {
     try {
       const { data, error } = await supabase
@@ -97,39 +86,6 @@ export class FeedsAdapter {
       }));
     } catch (err) {
       console.warn(`Business feed error:`, err);
-      return [];
-    }
-  }
-
-  async getOpenIdeasFeed(): Promise<FeedItem[]> {
-    try {
-      const { data, error } = await supabase
-        .from('open_ideas_public_view')
-        .select('id, content, created_at')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) {
-        console.warn(`Failed to load open ideas from public view:`, error.message);
-        return [];
-      }
-
-      const ideas = (data ?? []) as OpenIdeaRow[];
-
-      return ideas.map((idea) => ({
-        id: idea.id,
-        type: 'open_idea' as const,
-        title: idea.content.substring(0, 60) + (idea.content.length > 60 ? '...' : ''),
-        content: idea.content.substring(0, 150),
-        author: 'Community',
-        created_at: idea.created_at,
-        stats: {
-          likes: 0,
-          comments: 0
-        }
-      }));
-    } catch (err) {
-      console.warn(`Open ideas public view not accessible:`, err);
       return [];
     }
   }

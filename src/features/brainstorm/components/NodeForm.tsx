@@ -166,7 +166,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
         .single();
 
       if (error) {
-        console.error('Insert error:', error);
+        // Error already shown via toast
         toast.error(error.message || 'Failed to create brainstorm');
         return;
       }
@@ -181,7 +181,7 @@ export function NodeForm({ open, onOpenChange, mode, parentId }: NodeFormProps) 
           .single();
 
         if (parentError) {
-          console.error('Error fetching parent post:', parentError);
+          // Error already shown via toast
           toast.error('Failed to verify parent post');
         } else if (parentPost) {
           // Build LineageNode objects

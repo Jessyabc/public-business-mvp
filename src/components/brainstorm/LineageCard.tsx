@@ -30,12 +30,14 @@ export function LineageCard({ postId, currentPost, onSelectPost }: LineageCardPr
     const fetchLineage = async () => {
       setIsLoading(true);
       try {
-        // Fetch all reply relations going backward from current post
+        // Fetch all continuation relations going backward from current post
+        // This shows the main thread lineage (direct continuations)
+        // Note: Continuations are stored as 'origin' relation_type in the database
         const { data: relations } = await supabase
           .from('post_relations')
           .select('*')
           .eq('child_post_id', postId)
-          .eq('relation_type', 'reply')
+          .eq('relation_type', 'origin')
           .order('created_at', { ascending: true });
 
         if (!relations || relations.length === 0) {

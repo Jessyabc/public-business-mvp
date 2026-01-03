@@ -248,35 +248,38 @@ export const SparkCard: React.FC<SparkCardProps> = ({
 
           {/* Actions - neumorphic buttons for business */}
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleGiveThought();
-              }}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
-                "transition-all duration-200",
-                !isBusiness && (hasGivenThought
-                  ? "bg-white/15 text-white border border-white/20"
-                  : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white")
-              )}
-              style={isBusiness ? (hasGivenThought ? {
-                background: `${PB_BLUE}20`,
-                color: PB_BLUE,
-                border: `1px solid ${PB_BLUE}40`,
-                boxShadow: `inset 2px 2px 4px rgba(74, 124, 155, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.5)`
-              } : {
-                background: '#E0DCD8',
-                color: '#4D4843',
-                border: 'none',
-                boxShadow: '3px 3px 6px rgba(166, 150, 130, 0.25), -3px -3px 6px rgba(255, 255, 255, 0.8)'
-              }) : undefined}
-            >
-              <span className="mr-1.5">✦</span>
-              <span className="hidden sm:inline">This made me think</span>
-              <span className="sm:hidden">Think</span>
-            </button>
+            {/* T-Score button - only for Sparks, not Business Insights */}
+            {!isBusinessInsight && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleGiveThought();
+                }}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
+                  "transition-all duration-200",
+                  !isBusiness && (hasGivenThought
+                    ? "bg-white/15 text-white border border-white/20"
+                    : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white")
+                )}
+                style={isBusiness ? (hasGivenThought ? {
+                  background: `${PB_BLUE}20`,
+                  color: PB_BLUE,
+                  border: `1px solid ${PB_BLUE}40`,
+                  boxShadow: `inset 2px 2px 4px rgba(74, 124, 155, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.5)`
+                } : {
+                  background: '#E0DCD8',
+                  color: '#4D4843',
+                  border: 'none',
+                  boxShadow: '3px 3px 6px rgba(166, 150, 130, 0.25), -3px -3px 6px rgba(255, 255, 255, 0.8)'
+                }) : undefined}
+              >
+                <span className="mr-1.5">✦</span>
+                <span className="hidden sm:inline">This made me think</span>
+                <span className="sm:hidden">Think</span>
+              </button>
+            )}
 
             <button
               type="button"

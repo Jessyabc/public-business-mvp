@@ -54,20 +54,23 @@ export function isBusinessInsight(node: LineageNode): boolean {
 /**
  * Determines if two nodes can be linked with the given relation type.
  *
- * Allowed relations (all semantic types supported):
- * - Spark ↔ Spark (all relation types)
- * - Spark ↔ Business Insight (all relation types)
- * - Business Insight ↔ Business Insight (all relation types)
+ * Relation types and their rules:
+ * - 'origin': Continuation (direct thread) - ONLY allowed between same types:
+ *   - Spark → Spark (continuation)
+ *   - Business Insight → Business Insight (continuation)
+ *   - NOT allowed: Spark ↔ Business Insight
+ * 
+ * - 'cross_link': Cross-reference (linking) - Allowed between any types:
+ *   - Spark ↔ Spark
+ *   - Spark ↔ Business Insight
+ *   - Business Insight ↔ Business Insight
  *
- * Relation types and their meanings:
- * - 'origin': Parent is the source/origin of child (e.g., idea → insight)
- * - 'reply': Child responds to parent (e.g., comment, continuation)
+ * - 'reply': Child responds to parent (e.g., comment)
  * - 'quote': Child quotes/references parent
- * - 'cross_link': Bidirectional association (replaced 'soft')
  *
  * Disallowed:
  * - Any relation where either side is not a Spark or Business Insight
- * - Open ideas use legacy idea_links table (being deprecated)
+ * - Continuations ('origin') between different types
  *
  * @param parent - The parent node
  * @param child - The child node
@@ -88,13 +91,27 @@ export function canLink(parent: LineageNode, child: LineageNode, relationType: R
     return false;
   }
 
-  // Allowed combinations:
+  // Special rule for continuations ('origin'): Only allowed between same types
+  if (relationType === 'origin') {
+    // Spark → Spark continuation: allowed
+    if (parentIsSpark && childIsSpark) {
+      return true;
+    }
+    // Business Insight → Business Insight continuation: allowed
+    if (parentIsBusinessInsight && childIsBusinessInsight) {
+      return true;
+    }
+    // Cross-type continuations: NOT allowed
+    return false;
+  }
+
+  // For all other relation types (cross_link, reply, quote): allow any combination
   // 1. Spark ↔ Spark
   if (parentIsSpark && childIsSpark) {
     return true;
   }
 
-  // 2. Spark ↔ Business Insight (or vice versa)
+  // 2. Spark ↔ Business Insight (or vice versa) - allowed for cross-links/references
   if ((parentIsSpark && childIsBusinessInsight) || (parentIsBusinessInsight && childIsSpark)) {
     return true;
   }

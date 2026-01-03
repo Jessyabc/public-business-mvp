@@ -238,13 +238,17 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
             </FormLabel>
             <Select value={selectedOrgId || ''} onValueChange={setSelectedOrgId}>
               <FormControl>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
                   <SelectValue placeholder="Select an organization..." />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="bg-[#1a1a1a] border-white/20 backdrop-blur-md">
                 {memberships.map((membership) => (
-                  <SelectItem key={membership.org_id} value={membership.org_id}>
+                  <SelectItem 
+                    key={membership.org_id} 
+                    value={membership.org_id}
+                    className="text-white focus:bg-white/20 focus:text-white"
+                  >
                     {membership.org?.name || 'Unnamed Organization'}
                     {membership.role === 'owner' && (
                       <Badge variant="secondary" className="ml-2 text-xs">Owner</Badge>
@@ -280,13 +284,17 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
               <FormLabel className="text-[var(--text-primary)]">Focus Area *</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
                     <SelectValue placeholder="Select focus area..." />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-[#1a1a1a] border-white/20 backdrop-blur-md">
                   {FOCUS_AREAS.map((area) => (
-                    <SelectItem key={area} value={area}>
+                    <SelectItem 
+                      key={area} 
+                      value={area}
+                      className="text-white focus:bg-white/20 focus:text-white"
+                    >
                       {area}
                     </SelectItem>
                   ))}
@@ -673,13 +681,17 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
               <FormLabel className="text-[var(--text-primary)]">Visibility *</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
                     <SelectValue placeholder="Select visibility..." />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-[#1a1a1a] border-white/20 backdrop-blur-md">
                   {VISIBILITY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem 
+                      key={option.value} 
+                      value={option.value}
+                      className="text-white focus:bg-white/20 focus:text-white"
+                    >
                       {option.label}
                     </SelectItem>
                   ))}

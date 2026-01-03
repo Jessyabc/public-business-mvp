@@ -11,7 +11,7 @@ interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
   id: string;
-  type: 'brainstorm' | 'business' | 'open_idea' | 'history';
+  type: 'brainstorm' | 'business' | 'history';
   title?: string;
   content: string;
   author?: string;
@@ -79,7 +79,6 @@ export function PostModal({
     switch (type) {
       case 'brainstorm': return 'bg-primary/20 text-primary border-primary/30';
       case 'business': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'open_idea': return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'history': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
       default: return 'bg-muted/20 text-muted-foreground border-muted/30';
     }

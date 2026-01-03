@@ -6,7 +6,7 @@ import { useFeedFilters } from './hooks/useFeedFilters';
 import { FeedList } from './FeedList';
 import { useOrgMembership } from '@/hooks/useOrgMembership';
 
-type FeedMode = 'public' | 'business' | 'brainstorm_main' | 'brainstorm_open_ideas' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
+type FeedMode = 'public' | 'business' | 'brainstorm_main' | 'brainstorm_cross_links' | 'brainstorm_last_seen';
 
 type Props = {
   mode: FeedMode;
@@ -26,7 +26,6 @@ const BUSINESS_KINDS: PostKind[] = ['BusinessInsight'];
  * - brainstorm_main: canonical public feed + filters
  * - brainstorm_last_seen: local history store
  * - brainstorm_cross_links: relation-driven feed
- * - brainstorm_open_ideas: spark-only list for the sidebar
  */
 
 export function FeedContainer({
@@ -46,7 +45,6 @@ export function FeedContainer({
   const resolvedKinds = React.useMemo(() => {
     if (initialKinds) return initialKinds;
     if (mode === 'business') return BUSINESS_KINDS;
-    if (mode === 'brainstorm_open_ideas') return ['Spark'] as PostKind[];
     return PUBLIC_KINDS;
   }, [initialKinds, mode]);
 

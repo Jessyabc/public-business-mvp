@@ -51,8 +51,38 @@ export class SpaceAdapter {
   /** Link counts for a set of post ids (for UI badges) */
   async linkCounts(ids: string[]): Promise<LinkCount[]> {
     if (!ids.length) return [];
-    // Return empty array for now since we don't have the proper RPC
-    return [];
+    
+    try {
+      // Query post_relations to count links for each post
+      // Count 'origin' (hard links/continuations) and 'cross_link' (soft links) where parent_post_id matches
+      const { data, error } = await supabase
+        .from('post_relations')
+        .select('parent_post_id, relation_type')
+        .in('parent_post_id', ids)
+        .in('relation_type', ['origin', 'cross_link']);
+      
+      if (error) {
+        console.error('Error fetching link counts:', error);
+        return ids.map(id => ({ id, link_count: 0 }));
+      }
+      
+      // Count links per post
+      const counts = new Map<string, number>();
+      ids.forEach(id => counts.set(id, 0));
+      
+      (data || []).forEach(relation => {
+        const current = counts.get(relation.parent_post_id) || 0;
+        counts.set(relation.parent_post_id, current + 1);
+      });
+      
+      return ids.map(id => ({
+        id,
+        link_count: counts.get(id) || 0
+      }));
+    } catch (error) {
+      console.error('Error in linkCounts:', error);
+      return ids.map(id => ({ id, link_count: 0 }));
+    }
   }
 
   /** Optional analytics event */

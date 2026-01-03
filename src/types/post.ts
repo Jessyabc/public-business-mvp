@@ -1,7 +1,7 @@
 export const POST_TYPES = ['brainstorm', 'insight', 'report', 'whitepaper', 'webinar', 'video'] as const;
 export type PostType = (typeof POST_TYPES)[number];
 
-export const POST_KINDS = ['Spark', 'BusinessInsight', 'Insight'] as const;
+export const POST_KINDS = ['Spark', 'BusinessInsight'] as const;
 export type PostKind = (typeof POST_KINDS)[number];
 
 export const POST_VISIBILITIES = ['public', 'my_business', 'other_businesses', 'draft'] as const;

@@ -5,6 +5,9 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessProfile } from '@/hooks/useBusinessProfile';
 import { useProfile } from '@/hooks/useProfile';
+import { useOrgAnalytics } from '@/hooks/useBusinessAnalytics';
+import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
+import { useNavigate } from 'react-router-dom';
 import { 
   Building2, 
   TrendingUp, 
@@ -17,7 +20,8 @@ import {
   BarChart3,
   DollarSign,
   Calendar,
-  Award
+  Award,
+  Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -25,6 +29,9 @@ export function BusinessMemberDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { profile: businessProfile } = useBusinessProfile();
+  const { data: orgId } = useUserOrgId();
+  const { data: orgAnalytics, isLoading: analyticsLoading } = useOrgAnalytics(orgId);
+  const navigate = useNavigate();
 
   // Initial default values - will be replaced with real data from posts
   const businessStats = {
@@ -237,13 +244,63 @@ export function BusinessMemberDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-4" />
-              <h3 className="text-lg font-medium text-muted-foreground mb-2">Analytics Coming Soon</h3>
-              <p className="text-sm text-muted-foreground">
-                Start posting to see your performance metrics here
-              </p>
-            </div>
+            {analyticsLoading ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-4 animate-pulse" />
+                <p className="text-sm text-muted-foreground">Loading analytics...</p>
+              </div>
+            ) : orgAnalytics && orgAnalytics.total_insights > 0 ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 rounded-lg bg-muted/50">
+                    <div className="text-2xl font-bold text-blue-600">{orgAnalytics.total_insights}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Total Insights</div>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-muted/50">
+                    <div className="text-2xl font-bold text-green-600">
+                      {orgAnalytics.avg_u_score?.toFixed(1) || '0.0'}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">Avg U-Score</div>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-muted/50">
+                    <div className="text-2xl font-bold text-purple-600">{orgAnalytics.total_continuations}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Continuations</div>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-muted/50">
+                    <div className="text-2xl font-bold text-orange-600">{orgAnalytics.total_views || 0}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Total Views</div>
+                  </div>
+                </div>
+                <div className="pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate('/business-dashboard')}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View Full Analytics
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">Start posting to see analytics</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create your first business insight to unlock performance metrics and analytics.
+                </p>
+                <Button 
+                  onClick={() => {
+                    // Open composer or navigate to create post
+                    const event = new CustomEvent('open-composer', { detail: { mode: 'business' } });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Insight
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

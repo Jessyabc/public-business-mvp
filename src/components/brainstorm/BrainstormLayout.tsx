@@ -1,5 +1,9 @@
-import { useState } from 'react';
 import { SparkCard } from './SparkCard';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { ChevronRight, Home } from 'lucide-react';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 
 export type Spark = {
   id: string;
@@ -24,17 +28,10 @@ export type PostSummary = {
   created_at: string;
 };
 
-export type OpenIdeaSummary = {
-  id: string;
-  excerpt: string;
-  created_at: string;
-};
-
 export type BrainstormLayoutProps = {
   lastSeenSparks: Spark[];
   currentSpark: Spark | null;
   referencedPosts: PostSummary[];
-  openIdeas: OpenIdeaSummary[];
   onSelectSpark?: (sparkId: string) => void;
 
   // new optional callbacks for the current Spark
@@ -44,20 +41,78 @@ export type BrainstormLayoutProps = {
   onViewSpark?: (sparkId: string) => Promise<void> | void;
 };
 
-type SidebarTab = 'breadcrumbs' | 'openIdeas';
+interface BreadcrumbItem {
+  id: string;
+  title: string | null;
+  excerpt: string;
+}
 
 export const BrainstormLayout = ({
   lastSeenSparks,
   currentSpark,
   referencedPosts,
-  openIdeas,
   onSelectSpark,
   onGiveThought,
   onContinueBrainstorm,
   onSaveReference,
   onViewSpark,
 }: BrainstormLayoutProps) => {
-  const [activeTab, setActiveTab] = useState<SidebarTab>('breadcrumbs');
+  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
+
+  // Build breadcrumb chain from current post to root
+  const { data: breadcrumbChain } = useQuery<BreadcrumbItem[]>({
+    queryKey: ['breadcrumbs', currentSpark?.id],
+    queryFn: async () => {
+      if (!currentSpark?.id) return [];
+      
+      const chain: BreadcrumbItem[] = [];
+      let currentPostId = currentSpark.id;
+      const visited = new Set<string>();
+      
+      // Build chain backwards to root
+      while (currentPostId && !visited.has(currentPostId)) {
+        visited.add(currentPostId);
+        
+        // Get current post details
+        const { data: post } = await supabase
+          .from('posts')
+          .select('id, title, content')
+          .eq('id', currentPostId)
+          .single();
+        
+        if (!post) break;
+        
+        chain.unshift({
+          id: post.id,
+          title: post.title,
+          excerpt: post.content?.slice(0, 60) || '',
+        });
+        
+        // Find parent via continuation relations ('origin' or 'reply' - both represent continuations)
+        const { data: parentRelation } = await supabase
+          .from('post_relations')
+          .select('parent_post_id')
+          .eq('child_post_id', currentPostId)
+          .in('relation_type', ['origin', 'reply'])
+          .maybeSingle();
+        
+        if (parentRelation?.parent_post_id) {
+          currentPostId = parentRelation.parent_post_id;
+        } else {
+          break; // Reached root
+        }
+      }
+      
+      return chain;
+    },
+    enabled: !!currentSpark?.id,
+  });
+
+  useEffect(() => {
+    if (breadcrumbChain) {
+      setBreadcrumbs(breadcrumbChain);
+    }
+  }, [breadcrumbChain]);
 
   const handleSelectSpark = (sparkId: string) => {
     onSelectSpark?.(sparkId);
@@ -134,43 +189,45 @@ export const BrainstormLayout = ({
       </div>
 
       <div className="pb-brainstorm-layout__column pb-brainstorm-layout__sidebar">
-        <div className="pb-brainstorm-sidebar__tabs">
-          <button
-            type="button"
-            className={`pb-brainstorm-sidebar__tab${
-              activeTab === 'breadcrumbs' ? ' is-active' : ''
-            }`}
-            onClick={() => setActiveTab('breadcrumbs')}
-          >
-            Breadcrumbs
-          </button>
-          <button
-            type="button"
-            className={`pb-brainstorm-sidebar__tab${
-              activeTab === 'openIdeas' ? ' is-active' : ''
-            }`}
-            onClick={() => setActiveTab('openIdeas')}
-          >
-            Open ideas
-          </button>
-        </div>
         <div className="pb-brainstorm-sidebar__content">
-          {activeTab === 'breadcrumbs' ? (
-            <div className="pb-brainstorm-sidebar__placeholder">
-              Breadcrumbs will go here
-            </div>
+          {currentSpark && breadcrumbs.length > 0 ? (
+            <GlassSurface className="p-4">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                Lineage
+              </h3>
+              <nav className="space-y-1" aria-label="Breadcrumb">
+                {breadcrumbs.map((crumb, index) => (
+                  <div key={crumb.id} className="flex items-center gap-1.5">
+                    {index > 0 && (
+                      <ChevronRight className="h-3 w-3 text-[var(--text-muted)] flex-shrink-0" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSpark(crumb.id)}
+                      className={`
+                        text-left text-xs truncate transition-colors
+                        ${index === breadcrumbs.length - 1
+                          ? 'text-[var(--text-primary)] font-medium'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }
+                      `}
+                      title={crumb.title || crumb.excerpt}
+                    >
+                      {crumb.title || crumb.excerpt || 'Untitled'}
+                    </button>
+                  </div>
+                ))}
+              </nav>
+            </GlassSurface>
+          ) : currentSpark ? (
+            <GlassSurface className="p-4">
+              <p className="text-xs text-[var(--text-muted)]">No lineage available</p>
+            </GlassSurface>
           ) : (
-            <ul className="pb-brainstorm-sidebar__open-ideas">
-              {openIdeas.map((idea) => (
-                <li key={idea.id} className="pb-brainstorm-sidebar__open-idea">
-                  <p className="pb-brainstorm-sidebar__open-idea-excerpt">{idea.excerpt}</p>
-                  <span className="pb-brainstorm-sidebar__open-idea-date">{idea.created_at}</span>
-                </li>
-              ))}
-              {openIdeas.length === 0 && (
-                <li className="pb-brainstorm-layout__empty">No open ideas yet</li>
-              )}
-            </ul>
+            <GlassSurface className="p-4">
+              <p className="text-xs text-[var(--text-muted)]">Select a post to see lineage</p>
+            </GlassSurface>
           )}
         </div>
       </div>

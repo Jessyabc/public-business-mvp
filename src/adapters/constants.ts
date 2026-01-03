@@ -4,9 +4,6 @@ export const TABLES = {
   BRAINSTORM_NODES: 'posts',
   BRAINSTORM_EDGES: 'post_relations',  // Using existing relations table
   
-  // Open ideas and related data  
-  OPEN_IDEAS: 'open_ideas',
-  
   // User activity tracking
   HISTORY: 'analytics_events',
   
@@ -25,3 +22,6 @@ export const BUSINESS_FILTERS = {
   MODE: 'business',
   STATUS: 'active'
 } as const;
+
+// Feature flags
+export const PREMIUM_FEATURES_ENABLED = false;

@@ -8,7 +8,6 @@ export function useUniversalFeed(params: {
     | 'public'
     | 'business'
     | 'brainstorm_main'
-    | 'brainstorm_open_ideas'
     | 'brainstorm_cross_links'
     | 'brainstorm_last_seen';
   kinds?: PostKind[];
@@ -50,7 +49,7 @@ export function useUniversalFeed(params: {
 
         // Map mode to feed query mode
         const feedMode =
-          params.mode === 'public' || params.mode === 'brainstorm_main' || params.mode === 'brainstorm_open_ideas'
+          params.mode === 'public' || params.mode === 'brainstorm_main'
             ? 'public'
             : params.mode === 'business'
             ? 'business'

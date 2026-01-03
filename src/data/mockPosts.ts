@@ -2,27 +2,6 @@ import { PBPost } from '@/types/pb';
 
 export const mockPosts: PBPost[] = [
   {
-    id: '1',
-    type: 'open_idea',
-    title: 'Revolutionary AI-Powered Urban Farming',
-    content: 'Imagine vertical farms that use AI to optimize crop yields while reducing water usage by 90%. This could transform food security in urban areas.',
-    author: {
-      id: 'user1',
-      name: 'Sarah Chen',
-      avatar: '/lovable-uploads/1a58e202-c32a-4b09-89d8-ff1eb22b437d.png',
-      verified: true
-    },
-    metrics: {
-      tScore: 87,
-      replies: 23,
-      shares: 156,
-      views: 2340
-    },
-    createdAt: '2024-01-15T10:30:00Z',
-    tags: ['AI', 'Agriculture', 'Sustainability'],
-    isPublic: true
-  },
-  {
     id: '2',
     type: 'brainstorm',
     title: 'Quantum Computing Applications in Climate Modeling',

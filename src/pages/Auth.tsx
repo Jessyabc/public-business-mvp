@@ -70,13 +70,14 @@ export default function Auth() {
       
       toast.success('Account created! Check your email to verify.');
     } catch (error: unknown) {
-      console.error('Failed to create account', error);
+      // Error already handled by toast above, just log for debugging
       const message =
         error instanceof Error
           ? error.message
           : error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string'
             ? (error as { message: string }).message
             : 'Failed to create account';
+      // Log for debugging but user already sees toast
       toast.error(message);
     } finally {
       setLoading(false);

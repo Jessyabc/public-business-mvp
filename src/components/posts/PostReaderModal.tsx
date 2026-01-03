@@ -183,14 +183,18 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
             {/* Post Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
               <div className="flex items-center space-x-6">
-                <div className="flex items-center gap-1.5 text-sm text-blue-500 font-semibold">
-                  <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
-                  <span>{averageScore?.toFixed(1) ?? '—'}</span>
-                  {ratingCount > 0 && (
-                    <span className="text-muted-foreground font-normal">({ratingCount})</span>
-                  )}
-                </div>
-                {displayPost.t_score && (
+                {/* U-Score - only for Business Insights */}
+                {displayPost.mode === 'business' && (
+                  <div className="flex items-center gap-1.5 text-sm text-blue-500 font-semibold">
+                    <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
+                    <span>{averageScore?.toFixed(1) ?? '—'}</span>
+                    {ratingCount > 0 && (
+                      <span className="text-muted-foreground font-normal">({ratingCount})</span>
+                    )}
+                  </div>
+                )}
+                {/* T-Score - only for Sparks (public mode) */}
+                {displayPost.mode === 'public' && displayPost.t_score && (
                   <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
                     <TrendingUp className="h-3.5 w-3.5" />
                     <span>T: {displayPost.t_score}</span>

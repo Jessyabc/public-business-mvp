@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { ZoomIn, ZoomOut, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PostReaderModal } from '@/components/posts/PostReaderModal';
+import type { Post } from '@/types/post';
 
 // Component for rendering connection lines using div rotation
 function ConnectionLine({ 
@@ -28,8 +30,8 @@ function ConnectionLine({
       className={cn(
         "absolute origin-left",
         type === 'hard' 
-          ? "h-0.5 bg-gradient-to-r from-purple-500 to-violet-500" 
-          : "h-px bg-gradient-to-r from-blue-500 to-indigo-500"
+          ? "h-0.5 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent))]/60" 
+          : "h-px bg-gradient-to-r from-[hsl(var(--accent))]/40 to-[hsl(var(--accent))]/20"
       )}
       style={{
         left: `calc(50% + ${from.x}px)`,
@@ -38,7 +40,7 @@ function ConnectionLine({
         transform: `rotate(${angle}deg)`,
         opacity: type === 'hard' ? 0.8 : 0.5,
         ...(type === 'soft' && {
-          backgroundImage: 'repeating-linear-gradient(90deg, #3b82f6, #3b82f6 6px, transparent 6px, transparent 10px)'
+          backgroundImage: `repeating-linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent)) 6px, transparent 6px, transparent 10px)`
         })
       }}
     />
@@ -78,6 +80,9 @@ export function ConstellationView({
   const [softLinks, setSoftLinks] = useState<{ parentId: string; childId: string }[]>([]);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -161,6 +166,60 @@ export function ConstellationView({
     fetchThread();
   }, [rootPostId, isOpen]);
 
+  // Fetch full post data when selected
+  useEffect(() => {
+    if (!selectedPostId) {
+      setSelectedPost(null);
+      return;
+    }
+
+    const fetchPost = async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', selectedPostId)
+        .single();
+
+      if (!error && data) {
+        setSelectedPost(data as Post);
+      }
+    };
+
+    fetchPost();
+  }, [selectedPostId]);
+
+  // Handle scroll to zoom
+  useEffect(() => {
+    if (!isOpen || !canvasRef.current) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+    };
+
+    const canvas = canvasRef.current;
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('wheel', handleWheel);
+    };
+  }, [isOpen]);
+
+  // Handle click on empty space to close
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    // Only close if clicking directly on the canvas background, not on nodes
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  // Handle node click - show post card
+  const handleNodeClick = (e: React.MouseEvent, nodeId: string) => {
+    e.stopPropagation();
+    setSelectedPostId(nodeId);
+  };
+
   // Calculate hard connections (continuations)
   const hardConnections = useMemo(() => {
     return nodes
@@ -201,26 +260,26 @@ export function ConstellationView({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl"
+        className="fixed inset-0 z-50 bg-[var(--background)]/95 backdrop-blur-xl"
       >
         {/* Header */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
-          <h2 className="text-lg font-medium text-white/80">Thread Constellation</h2>
+          <h2 className="text-lg font-medium text-[var(--text-primary)]">Thread Constellation</h2>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setZoom(z => Math.max(0.5, z - 0.2))}
-              className="text-white/60 hover:text-white"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             >
               <ZoomOut className="w-5 h-5" />
             </Button>
-            <span className="text-sm text-white/40">{Math.round(zoom * 100)}%</span>
+            <span className="text-sm text-[var(--text-tertiary)]">{Math.round(zoom * 100)}%</span>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setZoom(z => Math.min(2, z + 0.2))}
-              className="text-white/60 hover:text-white"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             >
               <ZoomIn className="w-5 h-5" />
             </Button>
@@ -228,7 +287,7 @@ export function ConstellationView({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-white/60 hover:text-white ml-4"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] ml-4"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -237,13 +296,16 @@ export function ConstellationView({
 
         {/* Canvas */}
         <motion.div
-          className="absolute inset-0 overflow-hidden"
+          ref={canvasRef}
+          className="absolute inset-0 overflow-hidden cursor-grab active:cursor-grabbing"
           drag
           dragMomentum={false}
+          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
           onDrag={(_, info) => setPan(p => ({ 
             x: p.x + info.delta.x, 
             y: p.y + info.delta.y 
           }))}
+          onClick={handleCanvasClick}
         >
           <motion.div
             style={{
@@ -278,7 +340,7 @@ export function ConstellationView({
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.05, type: 'spring' }}
-                onClick={() => onSelectPost?.(node.id)}
+                onClick={(e) => handleNodeClick(e, node.id)}
                 className={cn(
                   "absolute cursor-pointer transition-all duration-200",
                   "hover:z-10"
@@ -295,13 +357,20 @@ export function ConstellationView({
                     "border backdrop-blur-sm transition-all duration-200",
                     "hover:scale-110",
                     node.depth === 0 
-                      ? "w-24 h-24 bg-gradient-to-br from-[hsl(var(--accent)/0.3)] to-purple-500/20 border-[hsl(var(--accent)/0.5)] shadow-[0_0_30px_hsl(var(--accent)/0.3)]"
-                      : "w-16 h-16 bg-white/5 border-white/20 hover:border-white/40"
+                      ? "bg-[var(--glass-bg)] border-[hsl(var(--accent))/0.5] shadow-[0_0_30px_hsl(var(--accent))/0.3]"
+                      : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:border-[hsl(var(--accent))/0.4]"
                   )}
+                  style={{ 
+                    backdropFilter: 'blur(var(--glass-blur))',
+                    width: `${node.depth === 0 ? 96 : 64}px`,
+                    height: `${node.depth === 0 ? 96 : 64}px`,
+                    minWidth: `${node.depth === 0 ? 96 : 64}px`,
+                    minHeight: `${node.depth === 0 ? 96 : 64}px`,
+                  }}
                 >
                   <p className={cn(
                     "line-clamp-2",
-                    node.depth === 0 ? "text-xs text-white" : "text-[10px] text-white/70"
+                    node.depth === 0 ? "text-xs text-[var(--text-primary)]" : "text-[10px] text-[var(--text-secondary)]"
                   )}>
                     {node.title || node.content.slice(0, 40)}
                   </p>
@@ -309,52 +378,52 @@ export function ConstellationView({
 
                 {/* Depth indicator */}
                 {node.depth > 0 && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px] text-white/30">
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px] text-[var(--text-tertiary)]">
                     L{node.depth}
                   </div>
                 )}
               </motion.div>
             ))}
 
-            {/* Background stars */}
-            {[...Array(50)].map((_, i) => (
-              <motion.div
-                key={`star-${i}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: Math.random() * 0.5 + 0.1 }}
-                className="absolute w-1 h-1 rounded-full bg-white"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-              />
-            ))}
           </motion.div>
         </motion.div>
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-4 text-xs text-white/40">
+        <div className="absolute bottom-4 left-4 flex items-center gap-4 text-xs text-[var(--text-secondary)]">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-gradient-to-br from-[hsl(var(--accent))] to-purple-500" />
+            <div className="w-3 h-3 rounded-full bg-[hsl(var(--accent))] border border-[hsl(var(--accent))]/50" />
             <span>Root</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-white/20 border border-white/40" />
+            <div className="w-3 h-3 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)]" />
             <span>Reply</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-0.5 bg-gradient-to-r from-[hsl(var(--accent)/0.6)] to-purple-500/60" />
+            <div className="w-6 h-0.5 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent))]/60" />
             <span>Continuation</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-0.5 bg-blue-400/40" style={{ 
-              backgroundImage: 'repeating-linear-gradient(90deg, hsl(200 60% 50% / 0.4), hsl(200 60% 50% / 0.4) 6px, transparent 6px, transparent 10px)' 
+            <div className="w-6 h-0.5" style={{ 
+              backgroundImage: `repeating-linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent)) 6px, transparent 6px, transparent 10px)`,
+              opacity: 0.4
             }} />
             <span>Cross-link</span>
           </div>
-          <span className="text-white/20">|</span>
+          <span className="text-[var(--text-tertiary)]">|</span>
           <span>Drag to pan, scroll to zoom</span>
         </div>
+
+        {/* Post Card Modal - shown inside the map */}
+        {selectedPost && (
+          <PostReaderModal
+            isOpen={!!selectedPost}
+            onClose={() => {
+              setSelectedPost(null);
+              setSelectedPostId(null);
+            }}
+            post={selectedPost}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   );

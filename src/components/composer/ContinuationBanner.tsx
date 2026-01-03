@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Sparkles, Lightbulb, X, Link2 } from 'lucide-react';
+import { Sparkles, X, Link2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePendingReferencesStore } from '@/stores/pendingReferencesStore';
 
 interface ContinuationBannerProps {
   parentPostId?: string;
-  originOpenIdeaId?: string;
   onClear?: () => void;
 }
 
@@ -16,18 +15,11 @@ interface ParentPost {
   content: string;
 }
 
-interface OpenIdea {
-  id: string;
-  text: string;
-}
-
 export function ContinuationBanner({ 
   parentPostId, 
-  originOpenIdeaId,
   onClear 
 }: ContinuationBannerProps) {
   const [parentPost, setParentPost] = useState<ParentPost | null>(null);
-  const [openIdea, setOpenIdea] = useState<OpenIdea | null>(null);
   const { pendingRefs, clearRefs, removeRef } = usePendingReferencesStore();
   const [refTitles, setRefTitles] = useState<Record<string, string>>({});
 
@@ -53,40 +45,6 @@ export function ContinuationBanner({
     fetchParent();
   }, [parentPostId]);
 
-  // Fetch open idea if sparked by one
-  useEffect(() => {
-    if (!originOpenIdeaId) {
-      setOpenIdea(null);
-      return;
-    }
-
-    const fetchIdea = async () => {
-      // Try intake table first
-      const { data: intakeData } = await supabase
-        .from('open_ideas_intake')
-        .select('id, text')
-        .eq('id', originOpenIdeaId)
-        .single();
-      
-      if (intakeData) {
-        setOpenIdea(intakeData);
-        return;
-      }
-
-      // Try user table
-      const { data: userData } = await supabase
-        .from('open_ideas_user')
-        .select('id, text')
-        .eq('id', originOpenIdeaId)
-        .single();
-      
-      if (userData) {
-        setOpenIdea(userData);
-      }
-    };
-
-    fetchIdea();
-  }, [originOpenIdeaId]);
 
   // Fetch titles for pending references
   useEffect(() => {
@@ -113,7 +71,7 @@ export function ContinuationBanner({
     fetchTitles();
   }, [pendingRefs]);
 
-  const hasContext = parentPostId || originOpenIdeaId || pendingRefs.length > 0;
+  const hasContext = parentPostId || pendingRefs.length > 0;
   
   if (!hasContext) return null;
 
@@ -127,27 +85,6 @@ export function ContinuationBanner({
             <p className="text-xs font-medium text-[hsl(var(--accent))]">Continuing Spark</p>
             <p className="text-sm text-white/80 truncate">
               {parentPost.title || parentPost.content.slice(0, 60)}
-            </p>
-          </div>
-          {onClear && (
-            <button 
-              onClick={onClear}
-              className="text-white/40 hover:text-white/70 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Open Idea banner */}
-      {openIdea && (
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-          <Lightbulb className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-amber-400">Sparked by Open Idea</p>
-            <p className="text-sm text-white/80 truncate">
-              {openIdea.text.slice(0, 80)}
             </p>
           </div>
           {onClear && (

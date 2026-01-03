@@ -25,14 +25,6 @@ interface PostCardProps {
 
 const getPostTypeConfig = (type: PBPostType) => {
   const configs = {
-    open_idea: {
-      icon: Lightbulb,
-      label: 'Open Idea',
-      accent: 'accent-open',
-      bgAccent: 'bg-accent-open/10',
-      borderAccent: 'border-accent-open/20',
-      textAccent: 'text-accent-open'
-    },
     brainstorm: {
       icon: Brain,
       label: 'Brainstorm',
@@ -72,14 +64,6 @@ const getPostTypeConfig = (type: PBPostType) => {
       bgAccent: 'bg-accent-insight/10',
       borderAccent: 'border-accent-insight/20',
       textAccent: 'text-accent-insight'
-    },
-    video_open_idea: {
-      icon: Video,
-      label: 'Video Idea',
-      accent: 'accent-video',
-      bgAccent: 'bg-accent-video/10',
-      borderAccent: 'border-accent-video/20',
-      textAccent: 'text-accent-video'
     },
     video_brainstorm: {
       icon: Video,

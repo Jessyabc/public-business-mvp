@@ -34,7 +34,7 @@ export function LineagePreview({ postId, isHovered, position }: LineagePreviewPr
           .from('post_relations')
           .select(`${selectColumn}`)
           .eq(relationType, postId)
-          .eq('relation_type', 'reply')
+          .in('relation_type', ['reply', 'origin'])
           .limit(3);
 
         if (!relations?.length) {
@@ -111,7 +111,7 @@ export function LineagePreview({ postId, isHovered, position }: LineagePreviewPr
               transition={{ delay: index * 0.05 }}
               className={cn(
                 "p-3 rounded-xl",
-                "bg-white/5 backdrop-blur-md border border-white/10",
+                "bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)]",
                 "shadow-lg shadow-black/20"
               )}
               style={{ 
@@ -119,8 +119,8 @@ export function LineagePreview({ postId, isHovered, position }: LineagePreviewPr
                 marginLeft: `${index * 8}px`
               }}
             >
-              <p className="text-xs text-white/50 mb-1">{post.author_name}</p>
-              <p className="text-sm text-white/80 line-clamp-2">
+              <p className="text-xs text-[var(--text-secondary)] mb-1">{post.author_name}</p>
+              <p className="text-sm text-[var(--text-primary)] line-clamp-2">
                 {post.title || post.content.slice(0, 100)}
               </p>
             </motion.div>
@@ -130,7 +130,7 @@ export function LineagePreview({ postId, isHovered, position }: LineagePreviewPr
         {/* Glow effect */}
         <div className={cn(
           "absolute inset-0 rounded-xl opacity-30 blur-xl -z-10",
-          "bg-gradient-to-b from-[var(--accent)]/20 to-transparent"
+          "bg-gradient-to-b from-[hsl(var(--accent))]/20 to-transparent"
         )} />
       </motion.div>
     </AnimatePresence>

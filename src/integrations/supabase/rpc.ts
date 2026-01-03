@@ -43,7 +43,7 @@ export async function rpcTrackEvent(
 }
 
 export async function rpcCreatePost(
-  kind: 'Spark' | 'BusinessInsight' | 'Insight',
+  kind: 'Spark' | 'BusinessInsight',
   title: string,
   body: string,
   org_id?: string | null

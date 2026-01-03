@@ -58,7 +58,6 @@ export function Header({ className }: HeaderProps) {
 
   const navItems = [
     { to: '/', label: 'Home' },
-    { to: '/open-ideas', label: 'Open Ideas' },
     { to: '/about', label: 'About' },
     { to: '/features', label: 'Features' },
     { to: '/industries', label: 'Industries' },
