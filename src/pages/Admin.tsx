@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@/ui/components/GlassCard";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, TrendingUp, Lightbulb, Users, Link2, ArrowRight, CheckCircle2, Clock, Building, XCircle } from "lucide-react";
+import { Lock, TrendingUp, Lightbulb, Users, Link2, ArrowRight, CheckCircle2, Clock, Building, XCircle, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,8 @@ import { useUserOrgId } from "@/features/orgs/hooks/useUserOrgId";
 import { useAdminOrgRequests } from "@/hooks/useOrgRequests";
 import { useIsBusinessMember, useIsOrgOwner } from "@/hooks/useOrgMembership";
 import { Badge } from "@/components/ui/badge";
+import { useUserOrgs } from "@/features/orgs/hooks/useUserOrgs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Admin() {
   const { toast } = useToast();
@@ -21,7 +23,7 @@ export function Admin() {
   const { isBusinessMember } = useIsBusinessMember();
   const { isOrgOwner } = useIsOrgOwner();
   
-  const [sortBy, setSortBy] = useState<'u_score' | 't_score' | 'continuations' | 'crosslinks' | 'recent'>('u_score');
+  const [sortBy, setSortBy] = useState<'u_score' | 'continuations' | 'crosslinks' | 'recent'>('u_score');
 
   const isAdminUser = checkAdmin();
   const hasAccess = isAdminUser || isBusinessMember; // Allow admins and business members
@@ -37,6 +39,9 @@ export function Admin() {
 
   // Org requests management (only for admins)
   const { requests: orgRequests, loading: orgRequestsLoading, approveRequest, rejectRequest, refetch: refetchOrgRequests } = useAdminOrgRequests();
+  
+  // Fetch all user organizations
+  const { data: userOrgs, isLoading: orgsLoading } = useUserOrgs();
 
 
   // Show loading state
@@ -113,10 +118,100 @@ export function Admin() {
     >
       <div className="relative z-10 max-w-7xl mx-auto pt-20 pb-24 space-y-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 text-[#3A3530]">Business Admin Panel</h1>
-          <p className="text-[#6B635B]">Analytics dashboard for your organization</p>
+        <div className="flex items-center justify-between mb-12">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold mb-4 text-[#3A3530]">Business Admin Panel</h1>
+            <p className="text-[#6B635B]">Analytics dashboard for your organization</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/business-settings')}
+            className="text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '4px 4px 10px rgba(166, 150, 130, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.6)',
+            }}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Business Settings
+          </Button>
         </div>
+
+        {/* My Organizations */}
+        {userOrgs && userOrgs.length > 0 && (
+          <GlassCard 
+            className="border-0" 
+            padding="lg"
+            style={{
+              background: '#EAE6E2',
+              boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+              borderRadius: '24px'
+            }}
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-[#3A3530] mb-2">My Organizations</h2>
+              <p className="text-[#6B635B]">All organizations you're a member of</p>
+            </div>
+            
+            {orgsLoading ? (
+              <div className="text-center py-8 text-[#6B635B]">Loading organizations...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {userOrgs.map((org) => (
+                  <div
+                    key={org.id}
+                    onClick={() => navigate(`/business-settings?org=${org.id}`)}
+                    className="p-4 rounded-xl cursor-pointer transition-all hover:scale-[1.02]"
+                    style={{
+                      background: '#F5F1ED',
+                      boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.2), inset -2px -2px 5px rgba(255, 255, 255, 0.6)',
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-12 w-12 rounded-lg">
+                        <AvatarImage src={org.logo_url || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
+                          {org.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-[#3A3530] truncate">{org.name}</h3>
+                          <Badge 
+                            variant="secondary" 
+                            className={`text-xs ${
+                              org.role === 'owner' 
+                                ? 'bg-primary/20 text-primary border-primary/30' 
+                                : 'bg-[#D4CEC5]/50 text-[#6B635B]'
+                            }`}
+                          >
+                            {org.role === 'owner' ? 'Owner' : org.role === 'business_admin' ? 'Admin' : 'Member'}
+                          </Badge>
+                        </div>
+                        {org.description && (
+                          <p className="text-sm text-[#6B635B] line-clamp-2">{org.description}</p>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="mt-2 text-xs text-[#3A3530] hover:text-[#3A3530] hover:bg-[#EAE6E2]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/business-settings?org=${org.id}`);
+                          }}
+                        >
+                          <Settings className="w-3 h-3 mr-1" />
+                          Settings
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        )}
 
         {/* Organization Snapshot */}
         <GlassCard 
@@ -138,7 +233,7 @@ export function Admin() {
                   </Badge>
                 )}
                 {isAdminUser && !isOrgOwner && (
-                  <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  <Badge variant="secondary" className="bg-[#D4CEC5]/50 text-[#6B635B]">
                     Admin
                   </Badge>
                 )}
@@ -167,11 +262,11 @@ export function Admin() {
             </div>
           ) : !orgId ? (
             <div className="text-center py-12">
-              <Building className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <Building className="w-16 h-16 text-[#6B635B]/30 mx-auto mb-4" />
               <p className="text-[#6B635B]">No organization found. Analytics require organization membership.</p>
             </div>
           ) : orgAnalytics ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {/* Total Insights */}
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -203,17 +298,6 @@ export function Admin() {
                   {orgAnalytics.total_u_ratings}
                 </div>
                 <div className="text-sm text-[#6B635B]">U-ratings</div>
-              </div>
-
-              {/* Avg T-score */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-                  <TrendingUp className="w-8 h-8 text-purple-500" />
-                </div>
-                <div className="text-3xl font-bold text-purple-500 mb-1" style={{ textShadow: '0 0 20px rgba(168, 85, 247, 0.4)' }}>
-                  {orgAnalytics.avg_t_score?.toFixed(1) || '0.0'}
-                </div>
-                <div className="text-sm text-[#6B635B]">Avg T-score</div>
               </div>
 
               {/* Continuations */}
@@ -341,7 +425,15 @@ export function Admin() {
         )}
 
         {/* Top Insights */}
-        <GlassCard className="border-primary/20" padding="lg">
+        <GlassCard 
+          className="border-0" 
+          padding="lg"
+          style={{
+            background: '#EAE6E2',
+            boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
+            borderRadius: '24px'
+          }}
+        >
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold mb-2 text-[#3A3530]">Top Insights</h2>
@@ -354,20 +446,15 @@ export function Admin() {
                 variant={sortBy === 'u_score' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('u_score')}
+                className={sortBy !== 'u_score' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
               >
                 U-score
-              </Button>
-              <Button
-                variant={sortBy === 't_score' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSortBy('t_score')}
-              >
-                T-score
               </Button>
               <Button
                 variant={sortBy === 'continuations' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('continuations')}
+                className={sortBy !== 'continuations' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
               >
                 Continuations
               </Button>
@@ -375,8 +462,17 @@ export function Admin() {
                 variant={sortBy === 'crosslinks' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('crosslinks')}
+                className={sortBy !== 'crosslinks' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
               >
                 Cross-links
+              </Button>
+              <Button
+                variant={sortBy === 'recent' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSortBy('recent')}
+                className={sortBy !== 'recent' ? 'text-[#3A3530] border-[#D4CEC5] hover:bg-[#F5F1ED]' : ''}
+              >
+                Recent
               </Button>
             </div>
           </div>
@@ -391,7 +487,11 @@ export function Admin() {
               {topInsights.map((insight) => (
                 <div
                   key={insight.post_id}
-                  className="relative rounded-xl p-6 bg-background/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all"
+                  className="relative rounded-xl p-6 backdrop-blur-sm border border-[#D4CEC5] hover:border-primary/50 transition-all"
+                  style={{
+                    background: '#F5F1ED',
+                    boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
+                  }}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
@@ -404,11 +504,6 @@ export function Admin() {
                           <TrendingUp className="w-4 h-4 text-green-500" />
                           <span className="text-[#6B635B]">U-score:</span>
                           <span className="font-medium text-green-500">{insight.u_score_avg?.toFixed(1) || '—'}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <TrendingUp className="w-4 h-4 text-purple-500" />
-                          <span className="text-[#6B635B]">T-score:</span>
-                          <span className="font-medium text-purple-500">{insight.t_score?.toFixed(1) || '—'}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <ArrowRight className="w-4 h-4 text-orange-500" />
@@ -428,7 +523,7 @@ export function Admin() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Lightbulb className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <Lightbulb className="w-16 h-16 text-[#6B635B]/30 mx-auto mb-4" />
               <p className="text-[#6B635B]">No insights yet. Create your first business insight!</p>
             </div>
           )}

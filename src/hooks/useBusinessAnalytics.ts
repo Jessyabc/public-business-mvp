@@ -73,7 +73,7 @@ export function useOrgAnalytics(orgId?: string) {
 interface UseOrgTopInsightsOptions {
   orgId?: string;
   limit?: number;
-  sortBy?: 'u_score' | 't_score' | 'continuations' | 'crosslinks' | 'recent';
+  sortBy?: 'u_score' | 'continuations' | 'crosslinks' | 'recent';
 }
 
 export function useOrgTopInsights({
@@ -98,9 +98,6 @@ export function useOrgTopInsights({
           query = query
             .order('u_score_avg', { ascending: false })
             .order('u_score_count', { ascending: false });
-          break;
-        case 't_score':
-          query = query.order('t_score', { ascending: false });
           break;
         case 'continuations':
           query = query.order('continuations_count', { ascending: false });

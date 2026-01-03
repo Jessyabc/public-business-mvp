@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
+import { OrganizationProfileForm } from '@/features/orgs/components/OrganizationProfileForm';
 import { useIsOrgOwner } from '@/hooks/useOrgMembership';
 import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 import { useQuery } from '@tanstack/react-query';
@@ -182,35 +182,13 @@ export function BusinessSettings() {
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">
-              <Card 
-                className="border-0"
-                style={{
-                  background: '#EAE6E2',
-                  boxShadow: '8px 8px 20px rgba(166, 150, 130, 0.3), -8px -8px 20px rgba(255, 255, 255, 0.85)',
-                  borderRadius: '24px'
+              <OrganizationProfileForm
+                orgId={orgId || undefined}
+                isReadOnly={isReadOnly}
+                onSuccess={() => {
+                  // Optionally show success message or refresh data
                 }}
-              >
-                <CardHeader>
-                  <CardTitle className="text-[#3A3530] flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Organization Information
-                  </CardTitle>
-                  <CardDescription className="text-[#6B635B]">
-                    {isReadOnly 
-                      ? 'View your organization information (read-only)' 
-                      : 'Update your organization details and company information.'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <BusinessProfileForm 
-                    compact={false} 
-                    isReadOnly={isReadOnly}
-                    onSuccess={() => {
-                      // Optionally show success message or refresh data
-                    }}
-                  />
-                </CardContent>
-              </Card>
+              />
             </TabsContent>
 
             {/* Settings Tab */}
