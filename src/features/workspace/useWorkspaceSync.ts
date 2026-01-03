@@ -53,7 +53,7 @@ export function useWorkspaceSync() {
             user_id: row.user_id,
             content: row.content,
             // Preserve state from database (should be 'anchored' for persisted thoughts)
-            state: (row.state === 'active' ? 'active' : 'anchored') as const,
+            state: row.state === 'active' ? 'active' as const : 'anchored' as const,
             created_at: row.created_at,
             updated_at: row.updated_at,
             day_key: dayKey,
@@ -233,12 +233,12 @@ function mergeThoughts(
   }
   
   // Ensure all thoughts have valid day_key
-  for (const thought of merged.values()) {
+  Array.from(merged.values()).forEach((thought) => {
     if (!thought.day_key) {
       const dayKeySource = thought.anchored_at || thought.created_at;
       thought.day_key = dayKeySource.split('T')[0];
     }
-  }
+  });
   
   // Sort by updated_at descending
   return Array.from(merged.values()).sort(

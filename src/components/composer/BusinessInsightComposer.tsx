@@ -141,10 +141,11 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
   }, [whatHappened, insight1]);
 
   const canPublish = useMemo(() => {
+    const hasTitle = (title || '').trim().length >= 1;
     const hasWhatHappened = whatHappened.trim().length >= 1;
     const hasInsight1 = insight1.trim().length >= 1;
-    return hasWhatHappened && hasInsight1;
-  }, [whatHappened, insight1]);
+    return hasTitle && hasWhatHappened && hasInsight1;
+  }, [title, whatHappened, insight1]);
 
   const handleSaveDraft = async () => {
     if (!user) {
@@ -219,14 +220,27 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
     }
   };
 
-  const handlePublish = async () => {
+  const handlePublish = async (data?: MinimalBusinessInsightFormData) => {
     if (!user) {
       toast.error('Authentication required');
       return;
     }
 
+    // Use form data if provided (from handleSubmit), otherwise use watched values
+    const formData = data || form.getValues();
+    const formTitle = (formData.title || '').trim();
+    const formWhatHappened = (formData.whatHappened || '').trim();
+    const formInsight1 = (formData.insight1 || '').trim();
+
+    // Validate title is present
+    if (!formTitle || formTitle.length < 1) {
+      toast.error('Title is required to publish');
+      form.setError('title', { type: 'manual', message: 'Title is required' });
+      return;
+    }
+
     if (!canPublish) {
-      toast.error('Please add both "What happened" and "Insight 1" to publish');
+      toast.error('Please add Title, "What happened", and "Insight 1" to publish');
       return;
     }
 
@@ -249,8 +263,8 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
       const payload = buildBusinessInsightPayload({
         userId: user.id,
         orgId,
-        content: whatHappened.trim(),
-        title: title.trim(),
+        content: formWhatHappened,
+        title: formTitle,
         metadata,
       });
 
@@ -515,7 +529,7 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
             {/* Helper text for publish */}
             {!canPublish && (
               <p className="text-xs text-[#6B635B] text-center">
-                Add "What happened" and "Insight 1" to publish.
+                Add Title, "What happened", and "Insight 1" to publish.
               </p>
             )}
             
@@ -538,7 +552,7 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
               </Button>
               <Button
                 type="button"
-                onClick={handlePublish}
+                onClick={() => form.handleSubmit(handlePublish)()}
                 disabled={isSubmitting || !canPublish}
               >
                 {isSubmitting ? 'Publishing...' : 'Publish'}

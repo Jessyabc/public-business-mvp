@@ -32,7 +32,7 @@ export function LineageClusterCard({
     ? cluster.continuations.filter(c => c.depth === 3).slice(0, 5)
     : [];
 
-  const handleSelectPost = (post: BasePost) => {
+  const handleSparkSelect = (post: BasePost) => {
     // PostToSparkCard calls onSelect with the post, but parent expects postId
     onSelectPost(post.id);
   };
@@ -53,7 +53,7 @@ export function LineageClusterCard({
       <div className="relative z-10">
         <PostToSparkCard
           post={cluster.spark}
-          onSelect={handleSelectPost}
+          onSelect={handleSparkSelect}
         />
       </div>
 
@@ -65,7 +65,7 @@ export function LineageClusterCard({
               key={continuation.post.id}
               continuation={continuation}
               depth={1}
-              onSelect={handleSelectPost}
+              onSelect={onSelectPost}
             />
           ))}
 
@@ -78,7 +78,7 @@ export function LineageClusterCard({
                   continuation={continuation}
                   depth={2}
                   isExpanded={true}
-                  onSelect={handleSelectPost}
+                  onSelect={onSelectPost}
                 />
               ))}
             </div>
@@ -93,7 +93,7 @@ export function LineageClusterCard({
                   continuation={continuation}
                   depth={3}
                   isExpanded={true}
-                  onSelect={handleSelectPost}
+                  onSelect={onSelectPost}
                 />
               ))}
             </div>

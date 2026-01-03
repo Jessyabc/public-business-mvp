@@ -436,36 +436,7 @@ export type Database = {
           is_public?: boolean
           title?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_legacy"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_teaser"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       idea_interactions: {
         Row: {
@@ -492,36 +463,7 @@ export type Database = {
           type?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_legacy"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_teaser"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       idea_links: {
         Row: {
@@ -649,102 +591,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      open_ideas_intake: {
-        Row: {
-          created_at: string | null
-          id: string
-          ip_hash: string | null
-          status: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          ip_hash?: string | null
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          ip_hash?: string | null
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text?: string
-        }
-        Relationships: []
-      }
-      open_ideas_legacy: {
-        Row: {
-          content: string
-          created_at: string
-          email: string | null
-          id: string
-          ip_hash: string | null
-          is_curated: boolean
-          linked_brainstorms_count: number
-          notify_on_interaction: boolean | null
-          represented_org_id: string | null
-          status: string | null
-          subscribe_newsletter: boolean | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          ip_hash?: string | null
-          is_curated?: boolean
-          linked_brainstorms_count?: number
-          notify_on_interaction?: boolean | null
-          represented_org_id?: string | null
-          status?: string | null
-          subscribe_newsletter?: boolean | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          ip_hash?: string | null
-          is_curated?: boolean
-          linked_brainstorms_count?: number
-          notify_on_interaction?: boolean | null
-          represented_org_id?: string | null
-          status?: string | null
-          subscribe_newsletter?: boolean | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_user: {
-        Row: {
-          created_at: string | null
-          id: string
-          status: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text?: string
-          user_id?: string | null
-        }
-        Relationships: []
       }
       org_member_applications: {
         Row: {
@@ -1717,30 +1563,6 @@ export type Database = {
         }
         Relationships: []
       }
-      my_open_ideas_view: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          status: string | null
-          user_id: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          status?: never
-          user_id?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          status?: never
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       my_posts_view: {
         Row: {
           body: string | null
@@ -1837,90 +1659,6 @@ export type Database = {
             referencedColumns: ["org_id"]
           },
         ]
-      }
-      open_ideas_members: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          is_curated: boolean | null
-          linked_brainstorms_count: number | null
-          status: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_public: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          is_curated: boolean | null
-          linked_brainstorms_count: number | null
-          status: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_public_view: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          source: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_teaser: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          is_curated: boolean | null
-          preview: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          preview?: never
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          preview?: never
-        }
-        Relationships: []
       }
       org_approval_requests: {
         Row: {
@@ -2337,18 +2075,16 @@ export type Database = {
           token: string
         }[]
       }
-      create_org_and_owner:
-        | { Args: { p_description?: string; p_name: string }; Returns: string }
-        | {
-            Args: {
-              p_company_size?: string
-              p_description?: string
-              p_industry_id?: string
-              p_name: string
-              p_website?: string
-            }
-            Returns: string
-          }
+      create_org_and_owner: {
+        Args: {
+          p_company_size?: string
+          p_description?: string
+          p_industry_id?: string
+          p_name: string
+          p_website?: string
+        }
+        Returns: string
+      }
       create_post: {
         Args: {
           p_body: string
@@ -2379,6 +2115,7 @@ export type Database = {
         }
       }
       current_user_email: { Args: never; Returns: string }
+      decrement_post_likes: { Args: { p_post_id: string }; Returns: undefined }
       enforce_rate_limit: {
         Args: { limit_count: number; window_seconds: number }
         Returns: boolean
@@ -2477,7 +2214,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"
       open_idea_status: "pending" | "approved" | "spam" | "flagged"
-      post_kind: "Spark" | "BusinessInsight"
+      post_kind: "Spark" | "BusinessInsight" | "Insight"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2607,7 +2344,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "business_user", "public_user", "business_member"],
       open_idea_status: ["pending", "approved", "spam", "flagged"],
-      post_kind: ["Spark", "BusinessInsight"],
+      post_kind: ["Spark", "BusinessInsight", "Insight"],
     },
   },
 } as const
