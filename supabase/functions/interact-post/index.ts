@@ -119,8 +119,8 @@ serve(async (req) => {
           );
         }
 
-        // Decrement likes count
-        await supabaseClient.rpc('increment_post_likes', { p_post_id: post_id });
+        // Decrement likes count and t_score
+        await supabaseClient.rpc('decrement_post_likes', { p_post_id: post_id });
 
         return new Response(
           JSON.stringify({ action: 'unliked', message: 'Like removed successfully' }),

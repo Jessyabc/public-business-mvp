@@ -111,15 +111,21 @@ function DiscussContent() {
 
   useEffect(() => {
     const handleContinue = (event: CustomEvent) => {
-      const { parentId } = event.detail || {};
-      if (parentId) {
-        openComposer({ parentPostId: parentId, relationType: 'continuation' });
+      const { parentId, sparkId } = event.detail || {};
+      // Handle both event formats: pb:brainstorm:continue (parentId) and pb:spark:continue (sparkId)
+      const postId = parentId || sparkId;
+      if (postId) {
+        openComposer({ parentPostId: postId, relationType: 'continuation' });
       } else {
         openComposer();
       }
     };
     window.addEventListener('pb:brainstorm:continue', handleContinue as EventListener);
-    return () => window.removeEventListener('pb:brainstorm:continue', handleContinue as EventListener);
+    window.addEventListener('pb:spark:continue', handleContinue as EventListener);
+    return () => {
+      window.removeEventListener('pb:brainstorm:continue', handleContinue as EventListener);
+      window.removeEventListener('pb:spark:continue', handleContinue as EventListener);
+    };
   }, [openComposer]);
 
   useEffect(() => {
