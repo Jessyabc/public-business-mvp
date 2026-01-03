@@ -104,112 +104,6 @@ export type Database = {
         }
         Relationships: []
       }
-      brainstorms: {
-        Row: {
-          comments_count: number | null
-          content: string | null
-          created_at: string | null
-          id: string
-          likes_count: number | null
-          parent_id: string | null
-          parent_type: string | null
-          title: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      business_insights: {
-        Row: {
-          comments_count: number | null
-          content: string | null
-          created_at: string | null
-          id: string
-          likes_count: number | null
-          org_id: string | null
-          parent_id: string | null
-          parent_type: string | null
-          title: string | null
-          updated_at: string | null
-          user_id: string | null
-          visibility: string | null
-        }
-        Insert: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          org_id?: string | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          visibility?: string | null
-        }
-        Update: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          org_id?: string | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          visibility?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_insights_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "org_approval_requests"
-            referencedColumns: ["org_id"]
-          },
-          {
-            foreignKeyName: "business_insights_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "business_insights_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "view_business_org_analytics"
-            referencedColumns: ["org_id"]
-          },
-        ]
-      }
       business_invitations: {
         Row: {
           consumed_at: string | null
@@ -402,39 +296,6 @@ export type Database = {
           id?: string
           subscribed_to_news?: boolean | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      idea_brainstorms_archive: {
-        Row: {
-          author_display_name: string
-          author_user_id: string | null
-          content: string
-          created_at: string
-          id: string
-          idea_id: string | null
-          is_public: boolean
-          title: string
-        }
-        Insert: {
-          author_display_name?: string
-          author_user_id?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          idea_id?: string | null
-          is_public?: boolean
-          title: string
-        }
-        Update: {
-          author_display_name?: string
-          author_user_id?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          idea_id?: string | null
-          is_public?: boolean
-          title?: string
         }
         Relationships: []
       }
@@ -1048,30 +909,6 @@ export type Database = {
           },
         ]
       }
-      post_relations_backup_for_relation_type_fix: {
-        Row: {
-          child_post_id: string | null
-          created_at: string | null
-          id: string | null
-          parent_post_id: string | null
-          relation_type: string | null
-        }
-        Insert: {
-          child_post_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          parent_post_id?: string | null
-          relation_type?: string | null
-        }
-        Update: {
-          child_post_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          parent_post_id?: string | null
-          relation_type?: string | null
-        }
-        Relationships: []
-      }
       post_utility_ratings: {
         Row: {
           created_at: string
@@ -1397,14 +1234,6 @@ export type Database = {
       }
     }
     Views: {
-      brainstorm_stats: {
-        Row: {
-          brainstorm_id: string | null
-          comments_count: number | null
-          likes_count: number | null
-        }
-        Relationships: []
-      }
       business_posts_view: {
         Row: {
           body: string | null
