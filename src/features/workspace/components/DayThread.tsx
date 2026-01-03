@@ -15,6 +15,7 @@ import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
 import type { DayThread as DayThreadType } from '../types';
+import { registerDayScrollRef } from './ThoughtStack';
 
 interface DayThreadProps {
   thread: DayThreadType;
@@ -47,21 +48,35 @@ export function DayThread({ thread, isFirst = false }: DayThreadProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  const displayTitle = thread.display_label || formatDayHeader(thread.day_key);
-  const hasCustomTitle = !!thread.display_label;
+  const dayRef = useRef<HTMLDivElement>(null);
 
-  // Start editing title
+  // Register this day thread for scrolling
+  useEffect(() => {
+    if (dayRef.current) {
+      registerDayScrollRef(thread.day_key, dayRef.current);
+    }
+    return () => {
+      registerDayScrollRef(thread.day_key, null);
+    };
+  }, [thread.day_key]);
+  
+  // Display title: use custom label if set, otherwise use smart date formatting
+  const displayTitle = thread.display_label ? thread.display_label : formatDayHeader(thread.day_key);
+  const hasCustomTitle = !!thread.display_label && thread.display_label.trim() !== '';
+
+  // Start editing title - show current custom label or empty string
   const handleStartEdit = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    // If there's a custom label, show it; otherwise show empty to allow typing
     setTitleDraft(thread.display_label || '');
     setIsEditingTitle(true);
   }, [thread.display_label]);
 
-  // Save title
+  // Save title - if empty, set to null to revert to smart date formatting
   const handleSaveTitle = useCallback(() => {
     const trimmed = titleDraft.trim();
-    updateDayLabel(thread.day_key, trimmed || null);
+    // If empty string, set to null to use smart date formatting
+    updateDayLabel(thread.day_key, trimmed === '' ? null : trimmed);
     setIsEditingTitle(false);
   }, [titleDraft, thread.day_key, updateDayLabel]);
 
@@ -97,7 +112,7 @@ export function DayThread({ thread, isFirst = false }: DayThreadProps) {
   }, [thread.day_key, createThought, setActiveDayKey]);
 
   return (
-    <div className="day-thread">
+    <div ref={dayRef} className="day-thread" data-day-key={thread.day_key}>
       {/* Day header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

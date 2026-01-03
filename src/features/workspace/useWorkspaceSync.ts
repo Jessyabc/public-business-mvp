@@ -43,30 +43,38 @@ export function useWorkspaceSync() {
       if (error) throw error;
       
       if (data && isMountedRef.current) {
-        const loadedThoughts: ThoughtObject[] = data.map((row) => ({
-          id: row.id,
-          user_id: row.user_id,
-          content: row.content,
-          // Normalize all loaded thoughts to anchored state
-          state: 'anchored' as const,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          // Use stored day_key or derive from created_at
-          day_key: row.day_key || row.created_at.split('T')[0],
-          display_label: row.display_label || null,
-          anchored_at: row.anchored_at || null,
-        }));
+        const loadedThoughts: ThoughtObject[] = data.map((row) => {
+          // Derive day_key from anchored_at if available, otherwise created_at
+          const dayKeySource = row.anchored_at || row.created_at;
+          const dayKey = row.day_key || dayKeySource.split('T')[0];
+          
+          return {
+            id: row.id,
+            user_id: row.user_id,
+            content: row.content,
+            // Preserve state from database (should be 'anchored' for persisted thoughts)
+            state: (row.state === 'active' ? 'active' : 'anchored') as const,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            day_key: dayKey,
+            display_label: row.display_label || null,
+            anchored_at: row.anchored_at || null,
+          };
+        });
         
-        // Merge with local thoughts (prefer newer)
+        // Merge with local thoughts (prefer newer, preserve active state)
         const localThoughts = useWorkspaceStore.getState().thoughts;
-        const normalizedLocal = localThoughts.map(t => ({
-          ...t,
-          state: 'anchored' as const
-        }));
-        const mergedThoughts = mergeThoughts(normalizedLocal, loadedThoughts);
+        const mergedThoughts = mergeThoughts(localThoughts, loadedThoughts);
         
         setThoughts(mergedThoughts);
-        setActiveThought(null);
+        // Only clear active thought if it's not in the merged list or was anchored
+        const currentActiveId = useWorkspaceStore.getState().activeThoughtId;
+        if (currentActiveId) {
+          const activeThought = mergedThoughts.find(t => t.id === currentActiveId);
+          if (!activeThought || activeThought.state === 'anchored') {
+            setActiveThought(null);
+          }
+        }
         lastSyncedThoughtsRef.current = JSON.stringify(mergedThoughts);
         setLastSynced(new Date().toISOString());
       }
@@ -91,23 +99,32 @@ export function useWorkspaceSync() {
     
     setSyncing(true);
     try {
-      // Upsert all thoughts with new columns
-      const thoughtsWithUser = currentThoughts.map((t) => ({
-        id: t.id,
-        user_id: user.id,
-        content: t.content,
-        state: t.state,
-        created_at: t.created_at,
-        updated_at: t.updated_at,
-        day_key: t.day_key,
-        display_label: t.display_label || null,
-        anchored_at: t.anchored_at || null,
-      }));
+      // Ensure all thoughts have valid day_key before syncing
+      const thoughtsToSync = currentThoughts.map((t) => {
+        // Ensure day_key is set
+        let dayKey = t.day_key;
+        if (!dayKey) {
+          const dayKeySource = t.anchored_at || t.created_at;
+          dayKey = dayKeySource.split('T')[0];
+        }
+        
+        return {
+          id: t.id,
+          user_id: user.id,
+          content: t.content,
+          state: t.state,
+          created_at: t.created_at,
+          updated_at: t.updated_at,
+          day_key: dayKey,
+          display_label: t.display_label || null,
+          anchored_at: t.anchored_at || null,
+        };
+      });
 
-      if (thoughtsWithUser.length > 0) {
+      if (thoughtsToSync.length > 0) {
         const { error } = await supabase
           .from('workspace_thoughts')
-          .upsert(thoughtsWithUser, { onConflict: 'id' });
+          .upsert(thoughtsToSync, { onConflict: 'id' });
 
         if (error) throw error;
       }
@@ -182,22 +199,44 @@ export function useWorkspaceSync() {
 }
 
 // Merge local and remote thoughts, preferring newer versions
+// Preserves active thoughts and ensures proper day_key assignment
 function mergeThoughts(
   local: ThoughtObject[],
   remote: ThoughtObject[]
 ): ThoughtObject[] {
   const merged = new Map<string, ThoughtObject>();
   
-  // Add remote thoughts
+  // Add remote thoughts first
   for (const thought of remote) {
     merged.set(thought.id, thought);
   }
   
-  // Merge local thoughts (prefer newer)
+  // Merge local thoughts (prefer newer, but preserve active state if local is active)
   for (const thought of local) {
     const existing = merged.get(thought.id);
-    if (!existing || new Date(thought.updated_at) > new Date(existing.updated_at)) {
+    const localIsNewer = !existing || new Date(thought.updated_at) > new Date(existing.updated_at);
+    
+    if (localIsNewer) {
+      // Use local version
       merged.set(thought.id, thought);
+    } else if (existing && thought.state === 'active' && existing.state === 'anchored') {
+      // Preserve local active state even if remote is newer (user is currently editing)
+      merged.set(thought.id, { ...existing, state: 'active' });
+    }
+    
+    // Ensure day_key is set for all thoughts
+    const finalThought = merged.get(thought.id)!;
+    if (!finalThought.day_key) {
+      const dayKeySource = finalThought.anchored_at || finalThought.created_at;
+      finalThought.day_key = dayKeySource.split('T')[0];
+    }
+  }
+  
+  // Ensure all thoughts have valid day_key
+  for (const thought of merged.values()) {
+    if (!thought.day_key) {
+      const dayKeySource = thought.anchored_at || thought.created_at;
+      thought.day_key = dayKeySource.split('T')[0];
     }
   }
   

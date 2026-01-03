@@ -44,7 +44,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       createThought: (dayKey?: string, userId?: string) => {
         const id = generateId();
         const now = new Date().toISOString();
+        // Use provided dayKey, or activeDayKey, or today's date
         const targetDayKey = dayKey || get().activeDayKey || getTodayKey();
+        
+        // Ensure day_key is in correct format (YYYY-MM-DD)
+        const normalizedDayKey = targetDayKey.includes('T') 
+          ? getDayKey(targetDayKey) 
+          : targetDayKey;
         
         const newThought: ThoughtObject = {
           id,
@@ -53,13 +59,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           state: 'active',
           created_at: now,
           updated_at: now,
-          day_key: targetDayKey,
+          day_key: normalizedDayKey,
         };
         
         set((state) => ({
           thoughts: [newThought, ...state.thoughts],
           activeThoughtId: id,
-          activeDayKey: targetDayKey,
+          activeDayKey: normalizedDayKey,
         }));
         
         return id;
@@ -79,6 +85,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       // Anchor a thought (implicit transition, not "save" or "submit")
       anchorThought: (id) => {
         const now = new Date().toISOString();
+        const anchoredDayKey = getDayKey(now);
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
@@ -87,8 +94,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                   state: 'anchored', 
                   anchored_at: now, 
                   updated_at: now,
-                  // Ensure day_key is set based on when anchored
-                  day_key: t.day_key || getDayKey(now),
+                  // Set day_key based on when anchored (this determines which day thread it belongs to)
+                  day_key: anchoredDayKey,
                 }
               : t
           ),
@@ -122,11 +129,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       setActiveDayKey: (dayKey) => set({ activeDayKey: dayKey }),
 
       // Update display label for a day thread
+      // Stores label on all thoughts in the day for consistency (we use the first one for display)
+      // If label is null or empty string, it will revert to smart date formatting
       updateDayLabel: (dayKey, label) => {
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.day_key === dayKey
-              ? { ...t, display_label: label }
+              ? { ...t, display_label: (label && label.trim() !== '') ? label : null, updated_at: new Date().toISOString() }
               : t
           ),
         }));
@@ -165,6 +174,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         const dayMap = new Map<string, ThoughtObject[]>();
         
         for (const thought of anchored) {
+          // Ensure day_key is set (should always be set, but safety check)
           const key = thought.day_key || getDayKey(thought.anchored_at || thought.created_at);
           if (!dayMap.has(key)) {
             dayMap.set(key, []);
@@ -183,8 +193,9 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             return new Date(timeB).getTime() - new Date(timeA).getTime();
           });
           
-          // Get the display label from any thought in this day (they all share it)
-          const displayLabel = sorted[0]?.display_label || null;
+          // Get the display label from the first thought in this day (they all share it)
+          // Filter out null/empty labels to find the first non-null one
+          const displayLabel = sorted.find(t => t.display_label)?.display_label || null;
           
           threads.push({
             day_key: dayKey,

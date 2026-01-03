@@ -54,9 +54,14 @@ export function WorkspaceCanvas() {
   // Handle canvas click (tap anywhere empty to start writing)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
+    // Check if click is on an interactive element that should not trigger new thought
     const isOnThought = target.closest('.anchored-thought') || 
                         target.closest('.thinking-surface') ||
-                        target.closest('.day-thread');
+                        target.closest('.day-thread') ||
+                        target.closest('button') ||
+                        target.closest('input') ||
+                        target.closest('textarea') ||
+                        target.closest('a');
     
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);
@@ -113,6 +118,8 @@ export function WorkspaceCanvas() {
         </div>
       )}
 
+
+
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Breathing space / Active thinking area */}
         <section>
@@ -161,7 +168,7 @@ export function WorkspaceCanvas() {
 
         {/* Day Threads */}
         {hasAnchoredThoughts && (
-          <section onClick={(e) => e.stopPropagation()}>
+          <section>
             <ThoughtStack />
           </section>
         )}
