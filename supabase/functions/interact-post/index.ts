@@ -11,6 +11,10 @@ interface InteractRequest {
   type: 'branch' | 'reply' | 'like' | 'share' | 'view';
 }
 
+// Rate limit: 20 anonymous interactions per hour per IP (lowered from 100)
+const ANONYMOUS_RATE_LIMIT = 20;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
 serve(async (req) => {
   console.log('Post interaction function called');
 
@@ -32,6 +36,15 @@ serve(async (req) => {
     if (!post_id || !type) {
       return new Response(
         JSON.stringify({ error: 'Missing post_id or type' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate post_id is a valid UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(post_id)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid post_id format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -60,24 +73,43 @@ serve(async (req) => {
 
     console.log('Creating interaction for user:', actor_user_id || 'anonymous');
 
+    // Variables for anonymous tracking
+    let ipHash: string | null = null;
+
     // Rate limit anonymous interactions (view/share only)
     if (!actor_user_id && (type === 'view' || type === 'share')) {
-      const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
+      // Get client IP - use cf-connecting-ip first (Cloudflare), then x-forwarded-for
+      const clientIP = req.headers.get('cf-connecting-ip') || 
+                       (req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()) || 
+                       'unknown';
       
-      // Hash the IP for privacy
-      const { data: ipHashData } = await supabaseClient.rpc('hash_ip', { ip_address: clientIP });
-      const ipHash = ipHashData as string | null;
+      // Hash the IP for privacy using the database function
+      const { data: ipHashData, error: hashError } = await supabaseClient.rpc('hash_ip', { ip_address: clientIP });
+      
+      if (hashError) {
+        console.error('Error hashing IP:', hashError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to process request' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      ipHash = ipHashData as string | null;
       
       if (ipHash) {
-        // Check rate limit: 100 interactions per hour per IP
-        const { count } = await supabaseClient
+        // FIXED: Check rate limit per IP hash, not globally
+        const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+        const { count, error: countError } = await supabaseClient
           .from('post_interactions')
           .select('*', { count: 'exact', head: true })
           .is('user_id', null)
-          .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString());
+          .eq('ip_hash', ipHash)  // Filter by this specific IP
+          .gte('created_at', windowStart);
         
-        if (count && count >= 100) {
-          console.log('Rate limit exceeded for anonymous IP:', ipHash.substring(0, 8));
+        if (countError) {
+          console.error('Error checking rate limit:', countError);
+        } else if (count !== null && count >= ANONYMOUS_RATE_LIMIT) {
+          console.log('Rate limit exceeded for IP:', ipHash.substring(0, 8) + '...');
           return new Response(
             JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
             { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -129,14 +161,21 @@ serve(async (req) => {
       }
     }
 
-    // Create the interaction record (or do nothing if duplicate)
+    // Create the interaction record with ip_hash for anonymous users
+    const insertData: Record<string, unknown> = {
+      post_id,
+      kind: type,
+      user_id: actor_user_id,
+    };
+    
+    // Only store ip_hash for anonymous interactions
+    if (!actor_user_id && ipHash) {
+      insertData.ip_hash = ipHash;
+    }
+
     const { data: interaction, error: interactionError } = await supabaseClient
       .from('post_interactions')
-      .insert({
-        post_id,
-        kind: type,
-        user_id: actor_user_id,
-      })
+      .insert(insertData)
       .select()
       .maybeSingle();
 
@@ -155,7 +194,7 @@ serve(async (req) => {
       
       console.error('Error creating interaction:', interactionError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create interaction', details: interactionError.message }),
+        JSON.stringify({ error: 'Failed to create interaction' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -190,12 +229,9 @@ serve(async (req) => {
       }
     }
 
-    // TODO: Trigger notification emails for subscribed users
-    // This would be implemented in a separate notification service
-
     return new Response(
       JSON.stringify({ 
-        interaction_id: interaction.id,
+        interaction_id: interaction?.id,
         message: 'Interaction recorded successfully' 
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

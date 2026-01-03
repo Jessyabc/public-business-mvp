@@ -737,6 +737,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          ip_hash: string | null
           kind: string
           post_id: string | null
           user_id: string | null
@@ -744,6 +745,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          ip_hash?: string | null
           kind: string
           post_id?: string | null
           user_id?: string | null
@@ -751,6 +753,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          ip_hash?: string | null
           kind?: string
           post_id?: string | null
           user_id?: string | null
