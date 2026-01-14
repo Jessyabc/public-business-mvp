@@ -3,12 +3,15 @@
 
 /* 
  * Font Loading Strategy:
+ * - Fonts are loaded non-blocking via preload in index.html
  * - Using display=swap for better perceived performance (shows fallback font immediately)
  * - Inter: body text (400, 500, 600)
  * - Raleway: headings and display (600, 700, 800)
  * - Preconnect hints are in index.html for faster connection
+ * 
+ * NOTE: The @import url() was moved to index.html with preload strategy
+ * to avoid render-blocking. The fonts will be available when the CSS loads.
  */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Raleway:wght@600;700;800&display=swap');
 
 /* ========================================
    Design System Entry Point

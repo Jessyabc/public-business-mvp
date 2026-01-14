@@ -50,32 +50,78 @@ export default defineConfig(({ mode }) => ({
     noExternal: ['@supabase/supabase-js']
   },
   build: {
-    // Optimize chunk splitting for better caching
+    // Optimize chunk splitting for better caching and smaller initial bundle
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Core React libraries - rarely change, cached long-term
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // UI framework - stable, cached long-term
-          'vendor-ui': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'],
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/') || 
+              id.includes('node_modules/scheduler/')) {
+            return 'vendor-react';
+          }
+          // React Router - core navigation
+          if (id.includes('node_modules/react-router') || 
+              id.includes('node_modules/@remix-run/router')) {
+            return 'vendor-router';
+          }
+          // Framer Motion - animation library (large)
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-motion';
+          }
+          // Radix UI - component primitives (split into separate chunk)
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'vendor-radix';
+          }
           // Supabase - backend integration
-          'vendor-supabase': ['@supabase/supabase-js'],
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
           // TanStack Query - data fetching
-          'vendor-query': ['@tanstack/react-query'],
-          // Charts - only loaded when needed
-          'vendor-charts': ['recharts'],
+          if (id.includes('node_modules/@tanstack')) {
+            return 'vendor-query';
+          }
+          // Charts - only loaded when needed (large)
+          if (id.includes('node_modules/recharts') || 
+              id.includes('node_modules/d3-') ||
+              id.includes('node_modules/victory')) {
+            return 'vendor-charts';
+          }
+          // React Flow - graph visualization (large, lazy loaded)
+          if (id.includes('node_modules/@xyflow') || 
+              id.includes('node_modules/reactflow')) {
+            return 'vendor-flow';
+          }
+          // Date utilities
+          if (id.includes('node_modules/date-fns')) {
+            return 'vendor-date';
+          }
+          // Form handling
+          if (id.includes('node_modules/react-hook-form') || 
+              id.includes('node_modules/@hookform') ||
+              id.includes('node_modules/zod')) {
+            return 'vendor-forms';
+          }
+          // Lucide icons (tree-shaking should handle this but just in case)
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons';
+          }
         }
       }
     },
     // Increase chunk size warning limit (after optimization)
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 500,
     // Enable source maps for production debugging (optional)
     sourcemap: mode === 'development',
     // Target modern browsers for smaller bundles
     target: 'es2020',
-    // Minification settings
+    // Minification settings - use terser for better compression
     minify: 'esbuild',
     // CSS code splitting
     cssCodeSplit: true,
+    // Reduce chunk size by compressing more aggressively
+    cssMinify: true,
+    // Report compressed sizes
+    reportCompressedSize: true,
   }
 }));
