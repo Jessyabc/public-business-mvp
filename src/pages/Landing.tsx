@@ -8,3 +8,6 @@ export function Landing() {
   // Later you can add logic here to show old vs new
   return <NewLanding />;
 }
+
+// Default export for lazy loading
+export default Landing;
