@@ -37,12 +37,16 @@ export function NewLanding() {
         }}
       >
         <div className="max-w-5xl mx-auto text-center space-y-8 z-10">
-          {/* Logo - Big and wow */}
+          {/* Logo - Big and wow - LCP element with high priority loading */}
           <div className="mb-12 z-10">
             <img 
               src={pbLogoHero} 
               alt="Public Business" 
-              className="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[28rem] 2xl:h-[32rem] mx-auto drop-shadow-brand object-contain transition-all duration-500 hover:scale-105" 
+              className="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[28rem] 2xl:h-[32rem] mx-auto drop-shadow-brand object-contain transition-all duration-500 hover:scale-105"
+              fetchPriority="high"
+              decoding="async"
+              width="512"
+              height="512"
             />
           </div>
 

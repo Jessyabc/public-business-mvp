@@ -8,7 +8,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Landing } from './Landing';
+import { NewLanding } from './NewLanding';
 import { WorkspaceCanvas } from '@/features/workspace';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
@@ -34,7 +34,7 @@ const Index = () => {
 
   // Unauthenticated: show landing page
   if (!user) {
-    return <Landing />;
+    return <NewLanding />;
   }
 
   // Authenticated: show Individual Workspace (Pillar #1)

@@ -74,7 +74,14 @@ export function Header({ className }: HeaderProps) {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <NavLink to="/" className="flex items-center">
-              <img src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" alt="Public Business - Creating Collaboration" className="h-10 sm:h-12 md:h-14 lg:h-16 object-contain" />
+              <img 
+                src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
+                alt="Public Business - Creating Collaboration" 
+                className="h-10 sm:h-12 md:h-14 lg:h-16 object-contain"
+                width="160"
+                height="64"
+                decoding="async"
+              />
             </NavLink>
 
             {/* Desktop Navigation */}
