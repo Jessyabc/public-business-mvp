@@ -39,10 +39,43 @@ export default defineConfig(({ mode }) => ({
       '@supabase/supabase-js',
       '@supabase/postgrest-js',
       '@supabase/realtime-js',
-      '@supabase/storage-js'
+      '@supabase/storage-js',
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion'
     ]
   },
   ssr: {
     noExternal: ['@supabase/supabase-js']
+  },
+  build: {
+    // Optimize chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React libraries - rarely change, cached long-term
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // UI framework - stable, cached long-term
+          'vendor-ui': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'],
+          // Supabase - backend integration
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // TanStack Query - data fetching
+          'vendor-query': ['@tanstack/react-query'],
+          // Charts - only loaded when needed
+          'vendor-charts': ['recharts'],
+        }
+      }
+    },
+    // Increase chunk size warning limit (after optimization)
+    chunkSizeWarningLimit: 600,
+    // Enable source maps for production debugging (optional)
+    sourcemap: mode === 'development',
+    // Target modern browsers for smaller bundles
+    target: 'es2020',
+    // Minification settings
+    minify: 'esbuild',
+    // CSS code splitting
+    cssCodeSplit: true,
   }
 }));

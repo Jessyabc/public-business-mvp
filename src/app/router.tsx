@@ -6,52 +6,70 @@ import { LazyWrapper, NotFound } from './router-helpers';
 import { RequireOrg } from '@/features/orgs/components/RequireOrg';
 import { DiscussLensProvider } from '@/contexts/DiscussLensContext';
 
-// Lazy-loaded pages
+/**
+ * Performance Optimization: Lazy-load ALL pages except Index
+ * 
+ * This dramatically reduces the initial bundle size by code-splitting
+ * each page into its own chunk. Pages are only loaded when navigated to.
+ */
+
+// Core pages - lazy loaded
+const Landing = lazy(() => import('@/pages/Landing'));
 const Discuss = lazy(() => import('@/pages/Discuss'));
+
+// Auth pages - lazy loaded
+const Auth = lazy(() => import('@/pages/Auth'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+
+// Business pages - lazy loaded
+const BusinessDashboard = lazy(() => import('@/pages/BusinessDashboard'));
+const BusinessMembership = lazy(() => import('@/pages/BusinessMembership'));
+const BusinessProfile = lazy(() => import('@/pages/BusinessProfile'));
+const CreateBusiness = lazy(() => import('@/pages/CreateBusiness'));
+const AcceptInvite = lazy(() => import('@/pages/AcceptInvite'));
+const CreateOrganization = lazy(() => import('@/features/orgs/pages/CreateOrganization'));
+const Insights = lazy(() => import('@/pages/Insights'));
+
+// Marketing pages - lazy loaded
+const About = lazy(() => import('@/pages/About'));
+const Contact = lazy(() => import('@/pages/Contact'));
+const Features = lazy(() => import('@/pages/Features'));
+const HowItWorks = lazy(() => import('@/pages/HowItWorks'));
+const Explore = lazy(() => import('@/pages/Explore'));
+const Research = lazy(() => import('@/pages/Research'));
+const Careers = lazy(() => import('@/pages/Careers'));
+const Industries = lazy(() => import('@/pages/Industries'));
+
+// Community pages - lazy loaded
+const Community = lazy(() => import('@/pages/Community'));
+const BusinessMembers = lazy(() => import('@/pages/BusinessMembers'));
+const PublicMembers = lazy(() => import('@/pages/PublicMembers'));
+
+// Support pages - lazy loaded
+const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
+const FAQ = lazy(() => import('@/pages/FAQ'));
+const Blog = lazy(() => import('@/pages/Blog'));
+const SupportCommunity = lazy(() => import('@/pages/SupportCommunity'));
+
+// Legal pages - lazy loaded
+const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
+const CookiePolicy = lazy(() => import('@/pages/CookiePolicy'));
+
+// Admin/Dev pages - lazy loaded
 const Admin = lazy(() => import('@/pages/Admin'));
 const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 const Sitemap = lazy(() => import('@/pages/Sitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
-const Insights = lazy(() => import('@/pages/Insights'));
-const CreateOrganization = lazy(() => import('@/features/orgs/pages/CreateOrganization'));
+const FormsShowcase = lazy(() => import('@/pages/FormsShowcase'));
+const ComponentsShowcase = lazy(() => import('@/pages/ComponentsShowcase'));
 
-// Eager-loaded pages
-import { Landing } from '@/pages/Landing';
-import Auth from '@/pages/Auth';
-import Profile from '@/pages/Profile';
-import Settings from '@/pages/Settings';
-import ResetPassword from '@/pages/ResetPassword';
-import ForgotPassword from '@/pages/ForgotPassword';
-import About from '@/pages/About';
-import Contact from '@/pages/Contact';
-import Features from '@/pages/Features';
-import HowItWorks from '@/pages/HowItWorks';
-import Explore from '@/pages/Explore';
-import Community from '@/pages/Community';
-import BusinessDashboard from '@/pages/BusinessDashboard';
-import BusinessMembership from '@/pages/BusinessMembership';
-import BusinessProfile from '@/pages/BusinessProfile';
-import CreateBusiness from '@/pages/CreateBusiness';
-import Notifications from '@/pages/Notifications';
-import AcceptInvite from '@/pages/AcceptInvite';
-import Research from '@/pages/Research';
-import Careers from '@/pages/Careers';
-import BusinessMembers from '@/pages/BusinessMembers';
-import PublicMembers from '@/pages/PublicMembers';
-import HelpCenter from '@/pages/HelpCenter';
-import FAQ from '@/pages/FAQ';
-import Blog from '@/pages/Blog';
-import SupportCommunity from '@/pages/SupportCommunity';
-import PrivacyPolicy from '@/pages/PrivacyPolicy';
-import TermsOfService from '@/pages/TermsOfService';
-import CookiePolicy from '@/pages/CookiePolicy';
-import Industries from '@/pages/Industries';
-import FormsShowcase from '@/pages/FormsShowcase';
-import ComponentsShowcase from '@/pages/ComponentsShowcase';
-
-// Helper to wrap pages with MainLayout
-const withLayout = (element: React.ReactNode) => <MainLayout>{element}</MainLayout>;
+// Helper to wrap lazy-loaded pages with MainLayout and Suspense
 const withLayoutLazy = (Component: React.LazyExoticComponent<any>) => (
   <MainLayout><LazyWrapper><Component /></LazyWrapper></MainLayout>
 );
@@ -63,6 +81,9 @@ const withDiscussLayoutLazy = (Component: React.LazyExoticComponent<any>) => (
     <MainLayout><LazyWrapper><Component /></LazyWrapper></MainLayout>
   </DiscussLensProvider>
 );
+
+// Helper for eager-loaded components (only Index)
+const withLayout = (element: React.ReactNode) => <MainLayout>{element}</MainLayout>;
 
 // Legacy redirects consolidated - all social routes now go to /discuss
 const legacyRedirects = [
@@ -79,66 +100,66 @@ const legacyRedirects = [
   { from: '/my-posts', to: '/profile' },
 ].map(r => ({ path: r.from, element: <Navigate to={r.to} replace /> }));
 
-// Build routes array
+// Build routes array - all pages lazy-loaded except Index for fast initial load
 const routes: Parameters<typeof createBrowserRouter>[0] = [
   // === Core Routes (Think / Discuss) ===
   { path: '/', element: withLayout(<Index />) },
   { path: '/discuss', element: withDiscussLayoutLazy(Discuss) },
-  { path: '/landing', element: withLayout(<Landing />) },
+  { path: '/landing', element: withLayoutLazy(Landing) },
   
   // === Auth & Profile ===
-  { path: '/auth', element: withLayout(<Auth />) },
-  { path: '/profile', element: withLayout(<Profile />) },
-  { path: '/settings', element: withLayout(<Settings />) },
-  { path: '/notifications', element: withLayout(<Notifications />) },
-  { path: '/forgot-password', element: withLayout(<ForgotPassword />) },
-  { path: '/reset-password', element: withLayout(<ResetPassword />) },
+  { path: '/auth', element: withLayoutLazy(Auth) },
+  { path: '/profile', element: withLayoutLazy(Profile) },
+  { path: '/settings', element: withLayoutLazy(Settings) },
+  { path: '/notifications', element: withLayoutLazy(Notifications) },
+  { path: '/forgot-password', element: withLayoutLazy(ForgotPassword) },
+  { path: '/reset-password', element: withLayoutLazy(ResetPassword) },
   
   // === Organization Routes ===
   { path: '/org/new', element: withLayoutLazy(CreateOrganization) },
-  { path: '/business-dashboard', element: withLayout(<BusinessDashboard />) },
+  { path: '/business-dashboard', element: withLayoutLazy(BusinessDashboard) },
   { path: '/business-settings', element: <Navigate to="/business-dashboard?tab=settings" replace /> },
-  { path: '/business-membership', element: withLayout(<BusinessMembership />) },
+  { path: '/business-membership', element: withLayoutLazy(BusinessMembership) },
   { path: '/business-profile', element: <Navigate to="/settings?tab=business" replace /> },
-  { path: '/create-business', element: withLayout(<CreateBusiness />) },
-  { path: '/accept-invite/:token', element: withLayout(<AcceptInvite />) },
+  { path: '/create-business', element: withLayoutLazy(CreateBusiness) },
+  { path: '/accept-invite/:token', element: withLayoutLazy(AcceptInvite) },
   { path: '/app/insights', element: withLayoutLazyRequireOrg(Insights) },
   
   // === Research ===
-  { path: '/research', element: withLayout(<Research />) },
+  { path: '/research', element: withLayoutLazy(Research) },
   
   // === Admin & Dev ===
   { path: '/admin', element: withLayoutLazy(Admin) },
   { path: '/customize', element: withLayoutLazy(Customize) },
   { path: '/sitemap', element: withLayoutLazy(Sitemap) },
   { path: '/demo/cards', element: withLayoutLazy(DemoCards) },
-  { path: '/dev/forms', element: withLayout(<FormsShowcase />) },
-  { path: '/dev/components', element: withLayout(<ComponentsShowcase />) },
+  { path: '/dev/forms', element: withLayoutLazy(FormsShowcase) },
+  { path: '/dev/components', element: withLayoutLazy(ComponentsShowcase) },
   
   // === Marketing & Info ===
-  { path: '/about', element: withLayout(<About />) },
-  { path: '/contact', element: withLayout(<Contact />) },
-  { path: '/features', element: withLayout(<Features />) },
-  { path: '/how-it-works', element: withLayout(<HowItWorks />) },
-  { path: '/explore', element: withLayout(<Explore />) },
-  { path: '/careers', element: withLayout(<Careers />) },
-  { path: '/industries', element: withLayout(<Industries />) },
+  { path: '/about', element: withLayoutLazy(About) },
+  { path: '/contact', element: withLayoutLazy(Contact) },
+  { path: '/features', element: withLayoutLazy(Features) },
+  { path: '/how-it-works', element: withLayoutLazy(HowItWorks) },
+  { path: '/explore', element: withLayoutLazy(Explore) },
+  { path: '/careers', element: withLayoutLazy(Careers) },
+  { path: '/industries', element: withLayoutLazy(Industries) },
   
   // === Community & Members ===
-  { path: '/community', element: withLayout(<Community />) },
-  { path: '/members/business-members', element: withLayout(<BusinessMembers />) },
-  { path: '/members/public-members', element: withLayout(<PublicMembers />) },
+  { path: '/community', element: withLayoutLazy(Community) },
+  { path: '/members/business-members', element: withLayoutLazy(BusinessMembers) },
+  { path: '/members/public-members', element: withLayoutLazy(PublicMembers) },
   
   // === Support ===
-  { path: '/support/help-center', element: withLayout(<HelpCenter />) },
-  { path: '/support/faq', element: withLayout(<FAQ />) },
-  { path: '/support/blog', element: withLayout(<Blog />) },
-  { path: '/support/community', element: withLayout(<SupportCommunity />) },
+  { path: '/support/help-center', element: withLayoutLazy(HelpCenter) },
+  { path: '/support/faq', element: withLayoutLazy(FAQ) },
+  { path: '/support/blog', element: withLayoutLazy(Blog) },
+  { path: '/support/community', element: withLayoutLazy(SupportCommunity) },
   
   // === Legal ===
-  { path: '/legal/privacy-policy', element: withLayout(<PrivacyPolicy />) },
-  { path: '/legal/terms-of-service', element: withLayout(<TermsOfService />) },
-  { path: '/legal/cookie-policy', element: withLayout(<CookiePolicy />) },
+  { path: '/legal/privacy-policy', element: withLayoutLazy(PrivacyPolicy) },
+  { path: '/legal/terms-of-service', element: withLayoutLazy(TermsOfService) },
+  { path: '/legal/cookie-policy', element: withLayoutLazy(CookiePolicy) },
   
   // === Legacy Redirects ===
   ...legacyRedirects,
