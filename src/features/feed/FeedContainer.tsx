@@ -100,7 +100,7 @@ export function FeedContainer({
   }, [mode, feed.items, clusterFeed.clusters, onItemsChange, useClusterFeed]);
   
   if (mode === 'brainstorm_last_seen') {
-    const syntheticFeed: ReturnType<typeof useUniversalFeed> = {
+    const syntheticFeed: Omit<ReturnType<typeof useUniversalFeed>, 'authorMap'> = {
       items: lastSeen,
       loadMore: async () => {},
       loading: false,
@@ -108,7 +108,7 @@ export function FeedContainer({
       refresh: async () => {}
     };
     if (renderFeed) {
-      return <>{renderFeed(lastSeen, syntheticFeed)}</>;
+      return <>{renderFeed(lastSeen, { ...syntheticFeed, authorMap: new Map() })}</>;
     }
     return <div style={{
       flex: 1
@@ -149,7 +149,7 @@ export function FeedContainer({
     <div style={{
       flex: 1
     }}>
-      <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} onSelect={setActivePost} />
+      <FeedList items={feed.items} onEndReached={feed.loadMore} loading={feed.loading} onSelect={setActivePost} authorMap={feed.authorMap} />
     </div>
   );
 }

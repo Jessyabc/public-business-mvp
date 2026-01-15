@@ -13,6 +13,8 @@ type Props = {
   onEndReached: () => void;
   loading: boolean;
   onSelect?: (post: BasePost) => void;
+  /** Pre-fetched author map from batch lookup - keyed by user_id */
+  authorMap?: Map<string, string | null>;
 };
 
 const GlassCardWrapper = ({ 
@@ -99,7 +101,7 @@ const GlassCardWrapper = ({
   );
 };
 
-export const FeedList = memo(function FeedList({ items, onEndReached, loading, onSelect }: Props) {
+export const FeedList = memo(function FeedList({ items, onEndReached, loading, onSelect, authorMap }: Props) {
   const { lens } = useDiscussLensSafe();
   const isBusiness = lens === 'business';
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
@@ -220,7 +222,11 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
             postTitle={item.title || item.content?.slice(0, 40)}
             isBusiness={isBusiness}
           >
-            <PostToSparkCard post={item} onSelect={handlePostSelect} />
+            <PostToSparkCard 
+              post={item} 
+              onSelect={handlePostSelect} 
+              authorDisplayName={authorMap?.get(item.user_id ?? '')}
+            />
           </GlassCardWrapper>
         ))}
       </ul>

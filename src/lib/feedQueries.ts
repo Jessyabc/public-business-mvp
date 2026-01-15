@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BasePost, PostKind } from '@/types/post';
-import { buildCluster, type LineageCluster } from './clusterUtils';
+import { fetchClustersRpc, type LineageCluster } from './clusterUtils';
 
 type FeedQueryOpts = {
   mode: 'public' | 'business';
@@ -14,12 +14,38 @@ type FeedQueryOpts = {
 };
 
 /**
+ * Batch fetch author profiles for a list of posts
+ * Returns a Map of user_id -> display_name
+ */
+export async function batchFetchAuthors(
+  sb: SupabaseClient,
+  userIds: string[]
+): Promise<Map<string, string | null>> {
+  if (userIds.length === 0) return new Map();
+
+  const uniqueIds = Array.from(new Set(userIds.filter(Boolean)));
+  
+  const { data, error } = await sb
+    .from('profile_cards')
+    .select('id, display_name')
+    .in('id', uniqueIds);
+
+  if (error) {
+    console.error('Error fetching author profiles:', error);
+    return new Map();
+  }
+
+  return new Map((data || []).map(p => [p.id, p.display_name]));
+}
+
+/**
  * Minimal feed query - fetches from posts table using DB fields directly
+ * Now returns items with optional authorMap for batch author lookup
  */
 export async function fetchUniversalFeed(
   sb: SupabaseClient,
   opts: FeedQueryOpts
-): Promise<{ items: BasePost[]; nextCursor: string | null }> {
+): Promise<{ items: BasePost[]; nextCursor: string | null; authorMap?: Map<string, string | null> }> {
   const limit = opts.limit ?? 20;
   const before = opts.cursor ?? new Date().toISOString();
   
@@ -103,18 +129,11 @@ export async function fetchUniversalFeed(
         
         const nextCursor = sortedItems.length === limit ? sortedItems[sortedItems.length - 1].created_at : null;
         
-        // Debug logging
-        console.log('[fetchUniversalFeed] Business mode query result (combined):', {
-          itemsCount: sortedItems.length,
-          orgItemsCount: orgResult.data?.length || 0,
-          userItemsCount: userResult.data?.length || 0,
-          org_id: opts.org_id,
-          user_id: opts.user_id,
-          kinds: opts.kinds,
-          firstItem: sortedItems[0] ? { id: sortedItems[0].id, title: sortedItems[0].title, org_id: sortedItems[0].org_id, user_id: sortedItems[0].user_id } : null
-        });
+        // Batch fetch authors
+        const userIds = sortedItems.map(p => p.user_id).filter(Boolean) as string[];
+        const authorMap = await batchFetchAuthors(sb, userIds);
         
-        return { items: sortedItems, nextCursor };
+        return { items: sortedItems, nextCursor, authorMap };
       } else {
         // Fallback: just org posts with appropriate visibility
         query = query.eq('org_id', opts.org_id).in('visibility', ['my_business', 'other_businesses', 'public']);
@@ -149,18 +168,11 @@ export async function fetchUniversalFeed(
   const items = (data || []) as BasePost[];
   const nextCursor = items.length === limit ? items[items.length - 1].created_at : null;
 
-  // Debug logging for business mode
-  if (opts.mode === 'business') {
-    console.log('[fetchUniversalFeed] Business mode query result:', {
-      itemsCount: items.length,
-      org_id: opts.org_id,
-      user_id: opts.user_id,
-      kinds: opts.kinds,
-      firstItem: items[0] ? { id: items[0].id, title: items[0].title, org_id: items[0].org_id, user_id: items[0].user_id } : null
-    });
-  }
+  // Batch fetch authors for non-business mode (business mode handled above)
+  const userIds = items.map(p => p.user_id).filter(Boolean) as string[];
+  const authorMap = await batchFetchAuthors(sb, userIds);
 
-  return { items, nextCursor };
+  return { items, nextCursor, authorMap };
 }
 
 /**
@@ -212,91 +224,18 @@ export async function fetchCrossLinkedPosts(
 
 /**
  * Fetch lineage cluster feed - clusters ordered by latest activity
+ * Now uses optimized RPC function (single query instead of N+1)
  */
 export async function fetchLineageClusterFeed(
   sb: SupabaseClient,
   opts: FeedQueryOpts
 ): Promise<{ clusters: LineageCluster[]; nextCursor: string | null }> {
-  const limit = opts.limit ?? 20;
-  
-  // Find root Sparks (posts with no parent 'reply' relation, kind='Spark', status='active')
-  // First, get all posts that ARE children (have a parent)
-  const { data: childPosts, error: childError } = await sb
-    .from('post_relations')
-    .select('child_post_id')
-    .eq('relation_type', 'reply');
-
-  if (childError) {
-    console.error('Error fetching child posts:', childError);
-    return { clusters: [], nextCursor: null };
-  }
-
-  const childPostIds = new Set((childPosts || []).map(p => p.child_post_id));
-
-  // Build query for root Sparks
-  let query = sb
-    .from('posts')
-    .select('*')
-    .eq('status', 'active')
-    .eq('kind', 'Spark');
-
-  // Filter by mode and visibility
-  if (opts.mode === 'public') {
-    query = query.eq('mode', 'public').eq('visibility', 'public');
-  } else if (opts.mode === 'business') {
-    query = query.eq('mode', 'business');
-    query = query.not('published_at', 'is', null);
-    if (opts.org_id) {
-      query = query.eq('org_id', opts.org_id).in('visibility', ['my_business', 'other_businesses', 'public']);
-    } else {
-      query = query.eq('visibility', 'public');
-    }
-  }
-
-  // Filter by kinds if specified (though we're already filtering by kind='Spark')
-  if (opts.kinds && opts.kinds.length > 0) {
-    query = query.in('kind', opts.kinds);
-  }
-
-  // Search filter
-  if (opts.search) {
-    query = query.or(`title.ilike.%${opts.search}%,content.ilike.%${opts.search}%`);
-  }
-
-  const { data: allPosts, error: postsError } = await query;
-
-  if (postsError || !allPosts) {
-    console.error('Error fetching posts:', postsError);
-    return { clusters: [], nextCursor: null };
-  }
-
-  // Filter to only root Sparks (not in childPostIds)
-  const rootSparks = (allPosts as BasePost[]).filter(p => !childPostIds.has(p.id));
-
-  // Build clusters for each root Spark
-  const clusters: LineageCluster[] = [];
-  for (const spark of rootSparks) {
-    try {
-      const cluster = await buildCluster(sb, spark);
-      clusters.push(cluster);
-    } catch (err) {
-      console.error(`Error building cluster for spark ${spark.id}:`, err);
-      // Continue with other clusters
-    }
-  }
-
-  // Sort by latestActivityAt DESC (most recent activity first)
-  clusters.sort((a, b) => {
-    const dateA = new Date(a.latestActivityAt).getTime();
-    const dateB = new Date(b.latestActivityAt).getTime();
-    return dateB - dateA;
+  return fetchClustersRpc(sb, {
+    mode: opts.mode,
+    limit: opts.limit ?? 20,
+    cursor: opts.cursor,
+    kinds: opts.kinds ?? null,
+    search: opts.search,
+    org_id: opts.org_id,
   });
-
-  // Paginate
-  const paginatedClusters = clusters.slice(0, limit);
-  const nextCursor = clusters.length > limit 
-    ? paginatedClusters[paginatedClusters.length - 1].latestActivityAt 
-    : null;
-
-  return { clusters: paginatedClusters, nextCursor };
 }

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface LineagePreviewProps {
   postId: string;
@@ -17,63 +19,63 @@ interface PreviewPost {
   author_name: string | null;
 }
 
+async function fetchLineagePreview(
+  postId: string,
+  position: 'above' | 'below'
+): Promise<PreviewPost[]> {
+  const relationType = position === 'above' ? 'child_post_id' : 'parent_post_id';
+  const selectColumn = position === 'above' ? 'parent_post_id' : 'child_post_id';
+
+  const { data: relations } = await supabase
+    .from('post_relations')
+    .select(`${selectColumn}`)
+    .eq(relationType, postId)
+    .in('relation_type', ['reply', 'origin'])
+    .limit(3);
+
+  if (!relations?.length) {
+    return [];
+  }
+
+  const postIds = relations.map(r => r[selectColumn as keyof typeof r]);
+
+  const { data: postsData } = await supabase
+    .from('posts')
+    .select('id, title, content, user_id')
+    .in('id', postIds);
+
+  if (!postsData) {
+    return [];
+  }
+
+  const userIds = postsData.map(p => p.user_id).filter(Boolean);
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, display_name')
+    .in('id', userIds);
+
+  const profileMap = new Map(profiles?.map(p => [p.id, p.display_name]) || []);
+
+  return postsData.map(p => ({
+    id: p.id,
+    title: p.title,
+    content: p.content,
+    author_name: profileMap.get(p.user_id) || 'Anonymous'
+  }));
+}
+
 export function LineagePreview({ postId, isHovered, position }: LineagePreviewProps) {
-  const [posts, setPosts] = useState<PreviewPost[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Debounce the hover state to prevent immediate fetching
+  const debouncedIsHovered = useDebounce(isHovered, 300);
 
-  useEffect(() => {
-    if (!isHovered) return;
-
-    const fetchLineage = async () => {
-      setLoading(true);
-      try {
-        const relationType = position === 'above' ? 'child_post_id' : 'parent_post_id';
-        const selectColumn = position === 'above' ? 'parent_post_id' : 'child_post_id';
-        
-        const { data: relations } = await supabase
-          .from('post_relations')
-          .select(`${selectColumn}`)
-          .eq(relationType, postId)
-          .in('relation_type', ['reply', 'origin'])
-          .limit(3);
-
-        if (!relations?.length) {
-          setPosts([]);
-          return;
-        }
-
-        const postIds = relations.map(r => r[selectColumn as keyof typeof r]);
-        
-        const { data: postsData } = await supabase
-          .from('posts')
-          .select('id, title, content, user_id')
-          .in('id', postIds);
-
-        if (postsData) {
-          const userIds = postsData.map(p => p.user_id).filter(Boolean);
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, display_name')
-            .in('id', userIds);
-
-          const profileMap = new Map(profiles?.map(p => [p.id, p.display_name]) || []);
-          
-          setPosts(postsData.map(p => ({
-            id: p.id,
-            title: p.title,
-            content: p.content,
-            author_name: profileMap.get(p.user_id) || 'Anonymous'
-          })));
-        }
-      } catch (err) {
-        console.error('Error fetching lineage:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLineage();
-  }, [postId, isHovered, position]);
+  // Use React Query for caching and deduplication
+  const { data: posts = [] } = useQuery({
+    queryKey: ['lineage-preview', postId, position],
+    queryFn: () => fetchLineagePreview(postId, position),
+    enabled: debouncedIsHovered, // Only fetch when debounced hover is true
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in garbage collection for 10 minutes
+  });
 
   if (!isHovered || posts.length === 0) return null;
 
