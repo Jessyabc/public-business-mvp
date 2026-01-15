@@ -51,9 +51,21 @@ class AnalyticsService {
   private isDev: boolean;
 
   constructor() {
-    this.sessionId = sessionStorage.getItem('analytics_session_id') || this.generateSessionId();
-    sessionStorage.setItem('analytics_session_id', this.sessionId);
+    const storage = this.getSafeSessionStorage();
+    this.sessionId = storage?.getItem('analytics_session_id') || this.generateSessionId();
+    if (storage) {
+      storage.setItem('analytics_session_id', this.sessionId);
+    }
     this.isDev = import.meta.env.DEV;
+  }
+
+  private getSafeSessionStorage(): Storage | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      return window.sessionStorage;
+    } catch {
+      return null;
+    }
   }
 
   private generateSessionId(): string {
