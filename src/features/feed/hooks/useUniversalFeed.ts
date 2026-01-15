@@ -24,6 +24,9 @@ export function useUniversalFeed(params: {
   const [loading, setLoading] = useState(false);
   const [eof, setEof] = useState(false);
   const loadingRef = useRef(false);
+  
+  // Batch author map for performance optimization
+  const [authorMap, setAuthorMap] = useState<Map<string, string | null>>(new Map());
 
   const load = useCallback(async (reset = false): Promise<void> => {
     if (loadingRef.current) return;
@@ -57,13 +60,13 @@ export function useUniversalFeed(params: {
             ? 'business'
             : 'public';
 
-        const { items: chunk, nextCursor } = await fetchUniversalFeed(supabase, {
+        const { items: chunk, nextCursor, authorMap: newAuthorMap } = await fetchUniversalFeed(supabase, {
           mode: feedMode,
           kinds: params.kinds,
           sort: params.sort,
           search: params.search,
           org_id: feedMode === 'business' ? params.org_id : null,
-          user_id: feedMode === 'business' ? user?.id || null : null, // Pass user_id to allow seeing own posts across orgs
+          user_id: feedMode === 'business' ? user?.id || null : null,
           cursor: reset ? null : cursor,
           limit: params.pageSize ?? 20,
         });
@@ -71,6 +74,15 @@ export function useUniversalFeed(params: {
         setItems((prev) => (reset ? chunk : [...prev, ...chunk]));
         setCursor(nextCursor);
         setEof(!nextCursor);
+        
+        // Merge new author data into existing map
+        if (newAuthorMap) {
+          setAuthorMap((prev) => {
+            const merged = new Map(prev);
+            newAuthorMap.forEach((value, key) => merged.set(key, value));
+            return merged;
+          });
+        }
       } catch (error) {
         console.error('Failed to load feed:', error);
         setEof(true);
@@ -83,10 +95,17 @@ export function useUniversalFeed(params: {
   useEffect(() => {
     setCursor(null);
     setEof(false);
+    setAuthorMap(new Map()); // Reset author map on mode change
     load(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.mode, JSON.stringify(params.kinds), params.sort, params.search, params.org_id, params.activePostId]);
 
-  return { items, loadMore: () => !eof && load(false), loading, eof, refresh: () => load(true) };
+  return { 
+    items, 
+    loadMore: () => !eof && load(false), 
+    loading, 
+    eof, 
+    refresh: () => load(true),
+    authorMap, // Expose author map for components to use
+  };
 }
-

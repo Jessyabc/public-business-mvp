@@ -987,6 +987,7 @@ export type Database = {
           body: string | null
           comments_count: number | null
           content: string
+          continuation_count: number | null
           created_at: string
           department_id: string | null
           id: string
@@ -1012,6 +1013,7 @@ export type Database = {
           body?: string | null
           comments_count?: number | null
           content: string
+          continuation_count?: number | null
           created_at?: string
           department_id?: string | null
           id?: string
@@ -1037,6 +1039,7 @@ export type Database = {
           body?: string | null
           comments_count?: number | null
           content?: string
+          continuation_count?: number | null
           created_at?: string
           department_id?: string | null
           id?: string
@@ -1962,6 +1965,23 @@ export type Database = {
           source_type: string
           target_id: string
           target_type: string
+        }[]
+      }
+      get_lineage_clusters: {
+        Args: {
+          p_cursor?: string
+          p_kinds?: string[]
+          p_limit?: number
+          p_mode?: string
+          p_org_id?: string
+          p_search?: string
+        }
+        Returns: {
+          continuations: Json
+          latest_activity_at: string
+          spark_data: Json
+          spark_id: string
+          total_continuations: number
         }[]
       }
       get_my_roles: {

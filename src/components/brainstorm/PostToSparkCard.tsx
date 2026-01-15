@@ -4,8 +4,6 @@ import { SparkCard } from './SparkCard';
 import type { Spark } from './BrainstormLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/experience';
-import { buildSparkPayload } from '@/lib/posts';
-import { createHardLink } from '@/lib/posts';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -20,13 +18,13 @@ function convertPostToSpark(post: BasePost, authorDisplayName?: string | null, a
     created_at: post.created_at,
     author_display_name: authorDisplayName || null,
     author_avatar_url: authorAvatarUrl || null,
-    is_anonymous: false, // BasePost doesn't have anonymous flag, default to false
+    is_anonymous: false,
     t_score: post.t_score || 0,
-    u_score: post.u_score || null, // Add u_score for business insights
-    kind: post.kind, // Add kind to determine which score to show
-    mode: post.mode, // Add mode to determine which score to show
+    u_score: post.u_score || null,
+    kind: post.kind,
+    mode: post.mode,
     view_count: post.views_count || 0,
-    has_given_thought: false, // Would need to check user's interactions
+    has_given_thought: false,
   };
 }
 
@@ -36,11 +34,16 @@ interface PostToSparkCardProps {
   showActions?: boolean;
   metaLabel?: string;
   onSelect?: (post: BasePost) => void;
+  /** Pre-fetched author display name (from batch lookup) */
+  authorDisplayName?: string | null;
 }
 
 /**
  * Wrapper component that converts BasePost to Spark and renders SparkCard
  * This replaces BrainstormPostCard to use the canonical SparkCard component
+ * 
+ * Performance optimization: Pass authorDisplayName prop from parent to avoid
+ * individual profile lookups per card.
  */
 export function PostToSparkCard({
   post,
@@ -48,14 +51,21 @@ export function PostToSparkCard({
   showActions = true,
   metaLabel,
   onSelect,
+  authorDisplayName: preloadedAuthorName,
 }: PostToSparkCardProps) {
-  const [authorDisplayName, setAuthorDisplayName] = useState<string | null>(null);
+  const [authorDisplayName, setAuthorDisplayName] = useState<string | null>(preloadedAuthorName ?? null);
   const [authorAvatarUrl, setAuthorAvatarUrl] = useState<string | null>(null);
   const setActivePost = useBrainstormExperienceStore((state) => state.setActivePost);
   const { user } = useAuth();
   
-  // Fetch author profile using profile_cards view for safer public access
+  // Only fetch author profile if not provided as prop
   useEffect(() => {
+    // Skip if we already have the name from props
+    if (preloadedAuthorName !== undefined) {
+      setAuthorDisplayName(preloadedAuthorName);
+      return;
+    }
+    
     const fetchAuthor = async () => {
       if (!post.user_id) return;
 
@@ -67,19 +77,17 @@ export function PostToSparkCard({
 
       if (data) {
         setAuthorDisplayName(data.display_name);
-        // Note: profile_cards doesn't expose avatar_url for privacy - leave as null
       }
     };
 
     fetchAuthor();
-  }, [post.user_id]);
+  }, [post.user_id, preloadedAuthorName]);
 
   // Listen for spark interaction events from SparkCard
   useEffect(() => {
     const handleThought = async (event: CustomEvent) => {
       if (event.detail.sparkId !== post.id) return;
       
-      // Record interaction
       await supabase.functions.invoke('interact-post', {
         body: {
           post_id: post.id,
@@ -91,7 +99,6 @@ export function PostToSparkCard({
     const handleView = async (event: CustomEvent) => {
       if (event.detail.sparkId !== post.id) return;
       
-      // Record view interaction
       await supabase.functions.invoke('interact-post', {
         body: {
           post_id: post.id,
@@ -121,7 +128,6 @@ export function PostToSparkCard({
       return;
     }
 
-    // Open composer with parent context
     window.dispatchEvent(
       new CustomEvent('pb:brainstorm:continue', {
         detail: { 
@@ -137,7 +143,6 @@ export function PostToSparkCard({
       onSelect(post);
     } else {
       setActivePost(post);
-      // Dispatch event to open PostReaderModal
       window.dispatchEvent(
         new CustomEvent('pb:brainstorm:show-thread', {
           detail: { post, postId: post.id },
@@ -146,8 +151,6 @@ export function PostToSparkCard({
     }
   };
 
-  // For compact variant, we might want to adjust styling
-  // SparkCard doesn't have a variant prop, so we'll handle it via CSS if needed
   return (
     <div className={variant === 'compact' ? 'compact-spark-card' : ''}>
       <SparkCard
@@ -161,4 +164,3 @@ export function PostToSparkCard({
     </div>
   );
 }
-
