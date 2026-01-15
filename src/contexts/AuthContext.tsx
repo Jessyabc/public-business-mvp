@@ -4,6 +4,7 @@ type ReactNode = React.ReactNode;
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { safeSessionStorage } from '@/lib/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -54,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // After user signs in, if we stored an invite token before sign-in, consume it here once.
         setTimeout(async () => {
-          const pending = sessionStorage.getItem("pending_invite_token");
+          const pending = safeSessionStorage.getItem("pending_invite_token");
           if (pending) {
-            sessionStorage.removeItem("pending_invite_token");
+            safeSessionStorage.removeItem("pending_invite_token");
             try {
               const { rpcConsumeInvite } = await import("@/integrations/supabase/rpc");
               const { error } = await rpcConsumeInvite(pending);
@@ -89,9 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           // Check for pending token after sign-in
           setTimeout(async () => {
-            const pending = sessionStorage.getItem("pending_invite_token");
+            const pending = safeSessionStorage.getItem("pending_invite_token");
             if (pending) {
-              sessionStorage.removeItem("pending_invite_token");
+              safeSessionStorage.removeItem("pending_invite_token");
               try {
                 const { rpcConsumeInvite } = await import("@/integrations/supabase/rpc");
                 const { error } = await rpcConsumeInvite(pending);

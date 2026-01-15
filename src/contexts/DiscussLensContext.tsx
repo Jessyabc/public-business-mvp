@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { safeLocalStorage } from '@/lib/storage';
 const { createContext, useContext, useState } = React;
 type ReactNode = React.ReactNode;
 
@@ -19,17 +20,17 @@ export function DiscussLensProvider({ children }: { children: ReactNode }) {
     const params = new URLSearchParams(window.location.search);
     const fromQuery = params.get('lens');
     if (fromQuery === 'public' || fromQuery === 'business') {
-      localStorage.setItem('pb-discuss-lens', fromQuery);
+      safeLocalStorage.setItem('pb-discuss-lens', fromQuery);
       return fromQuery;
     }
 
-    const stored = localStorage.getItem('pb-discuss-lens');
+    const stored = safeLocalStorage.getItem('pb-discuss-lens');
     return (stored === 'public' || stored === 'business') ? stored : 'public';
   });
 
   const handleSetLens = (newLens: DiscussLens) => {
     setLens(newLens);
-    localStorage.setItem('pb-discuss-lens', newLens);
+    safeLocalStorage.setItem('pb-discuss-lens', newLens);
   };
 
   const toggleLens = () => {

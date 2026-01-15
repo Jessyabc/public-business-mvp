@@ -58,6 +58,35 @@
       <!-- Initial loading state shown before JS hydrates -->
       <div class="loading-fallback">Loading...</div>
     </div>
+    <script>
+      window.__PB_APP_READY__ = false;
+      window.setTimeout(function () {
+        if (window.__PB_APP_READY__) return;
+        var fallback = document.querySelector('#root .loading-fallback');
+        if (!fallback) return;
+        fallback.textContent = '';
+        var message = document.createElement('div');
+        message.textContent = 'Still loading...';
+        message.style.marginBottom = '8px';
+        var hint = document.createElement('div');
+        hint.textContent = 'Try reloading or clearing cache.';
+        hint.style.fontSize = '0.9rem';
+        hint.style.opacity = '0.8';
+        var button = document.createElement('button');
+        button.textContent = 'Reload';
+        button.style.marginTop = '12px';
+        button.style.padding = '6px 12px';
+        button.style.border = '1px solid rgba(255,255,255,0.3)';
+        button.style.background = 'transparent';
+        button.style.color = 'inherit';
+        button.style.borderRadius = '8px';
+        button.style.cursor = 'pointer';
+        button.onclick = function () { window.location.reload(); };
+        fallback.appendChild(message);
+        fallback.appendChild(hint);
+        fallback.appendChild(button);
+      }, 12000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

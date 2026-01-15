@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { resolveTheme } from './theme';
+import { safeJsonParse, safeLocalStorage } from '@/lib/storage';
 import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 
 /**
@@ -41,8 +42,8 @@ export function ThemeInjector() {
 
   useEffect(() => {
     // Load custom theme from localStorage
-    const stored = localStorage.getItem('theme-customization');
-    const customSettings = stored ? JSON.parse(stored) as ModeThemeSettings : null;
+    const stored = safeLocalStorage.getItem('theme-customization');
+    const customSettings = safeJsonParse<ModeThemeSettings | null>(stored, null);
     const customTheme = customSettings?.[currentTheme] || {};
 
     // Resolve default theme for current mode

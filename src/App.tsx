@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,21 +10,27 @@ import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <div className="page-shell">
-          <main className="page-content">
-            <RouterProvider router={router} />
-          </main>
-        </div>
-        {import.meta.env.DEV && <DeveloperPanel />}
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    window.__PB_APP_READY__ = true;
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <div className="page-shell">
+            <main className="page-content">
+              <RouterProvider router={router} />
+            </main>
+          </div>
+          {import.meta.env.DEV && <DeveloperPanel />}
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
