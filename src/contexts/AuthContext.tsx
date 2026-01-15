@@ -25,6 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    let isMounted = true;
+    const loadingTimeoutId = window.setTimeout(() => {
+      if (!isMounted) return;
+      console.warn('Auth initialization timed out. Falling back to unauth state.');
+      setLoading(false);
+    }, 8000);
+
+    const finishLoading = () => {
+      if (!isMounted) return;
+      setLoading(false);
+      window.clearTimeout(loadingTimeoutId);
+    };
+
     // Get initial session with error handling
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -57,10 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // User logged out - clear org membership queries
         queryClient.invalidateQueries({ queryKey: ['org_membership'] });
       }
-      setLoading(false);
+      finishLoading();
     }).catch((error) => {
       console.error('Auth initialization error:', error);
-      setLoading(false);
+      finishLoading();
     });
 
     // Listen for auth changes
@@ -93,11 +106,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // User logged out - clear org membership queries
           queryClient.invalidateQueries({ queryKey: ['org_membership'] });
         }
-        setLoading(false);
+        finishLoading();
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      window.clearTimeout(loadingTimeoutId);
+      subscription.unsubscribe();
+    };
   }, [queryClient]);
 
   // Remove consumeInvitationToken - now handled by AcceptInvite page
