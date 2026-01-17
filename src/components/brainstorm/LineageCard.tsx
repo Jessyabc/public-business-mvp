@@ -37,7 +37,7 @@ export function LineageCard({ postId, currentPost, onSelectPost }: LineageCardPr
           .from('post_relations')
           .select('*')
           .eq('child_post_id', postId)
-          .eq('relation_type', 'origin')
+          .in('relation_type', ['origin', 'reply'])
           .order('created_at', { ascending: true });
 
         if (!relations || relations.length === 0) {

@@ -43,6 +43,7 @@ export async function fetchClustersRpc(
     kinds?: string[] | null;
     search?: string | null;
     org_id?: string | null;
+    user_id?: string | null;
   }
 ): Promise<{ clusters: LineageCluster[]; nextCursor: string | null }> {
   const { data, error } = await sb.rpc('get_lineage_clusters', {
@@ -52,6 +53,7 @@ export async function fetchClustersRpc(
     p_kinds: opts.kinds ?? null,
     p_search: opts.search ?? null,
     p_org_id: opts.org_id ?? null,
+    p_user_id: opts.user_id ?? null,
   });
 
   if (error) {

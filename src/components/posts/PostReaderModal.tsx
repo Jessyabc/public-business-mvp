@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GlassSurface } from "@/components/ui/GlassSurface";
-import { Share2, Bookmark, Eye, Calendar, User, Reply, TrendingUp } from "lucide-react";
+import { Share2, Bookmark, Eye, Calendar, User, Reply, TrendingUp, Sparkles } from "lucide-react";
 import type { Post } from "@/types/post";
 import { useComposerStore } from "@/hooks/useComposerStore";
 import { LineageCard } from "@/components/brainstorm/LineageCard";
@@ -37,6 +37,8 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
   const { userRating, averageScore, ratingCount, submitRating } = usePostRating(post?.id ?? '');
   const [authorInfo, setAuthorInfo] = useState<AuthorInfo | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [hasGivenThought, setHasGivenThought] = useState(false);
+  const [tScore, setTScore] = useState(0);
   const location = useLocation();
 
   // Use selectedPost if available, otherwise use the prop post
@@ -81,10 +83,72 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
   useEffect(() => {
     if (!isOpen) {
       setSelectedPost(null);
+      setHasGivenThought(false);
     }
   }, [isOpen]);
 
-  // Handler for when a cross-link or lineage card is clicked
+  // Fetch user's existing thought interaction and set initial t_score
+  useEffect(() => {
+    if (!displayPost?.id) return;
+    
+    setTScore(displayPost.t_score || 0);
+    
+    if (!user) {
+      setHasGivenThought(false);
+      return;
+    }
+
+    const checkExistingThought = async () => {
+      const { data } = await supabase
+        .from('post_interactions')
+        .select('id')
+        .eq('post_id', displayPost.id)
+        .eq('user_id', user.id)
+        .eq('kind', 'like')
+        .maybeSingle();
+      
+      setHasGivenThought(!!data);
+    };
+
+    checkExistingThought();
+  }, [displayPost?.id, user]);
+
+  // Handler for T-Score "This Made Me Think" button
+  const handleGiveThought = async () => {
+    if (!displayPost || !user) {
+      toast.error('Please sign in to give thoughts');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('interact-post', {
+        body: {
+          post_id: displayPost.id,
+          type: 'like'
+        }
+      });
+
+      if (error) {
+        console.error('Error giving thought:', error);
+        toast.error('Failed to record your thought');
+        return;
+      }
+
+      // Toggle state based on response
+      if (data?.action === 'unliked') {
+        setHasGivenThought(false);
+        setTScore(prev => Math.max(0, prev - 1));
+        toast.success('Thought removed');
+      } else {
+        setHasGivenThought(true);
+        setTScore(prev => prev + 1);
+        toast.success('Thought given!');
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      toast.error('Failed to record your thought');
+    }
+  };
   const handleSelectPost = (newPost: Post) => {
     setSelectedPost(newPost);
     setAuthorInfo(null); // Reset author info to trigger refetch
@@ -241,12 +305,19 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                       )}
                     </div>
                   )}
-                  {/* T-Score - only for Sparks (public mode) */}
-                  {displayPost.mode === 'public' && displayPost.t_score && (
-                    <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
-                      <TrendingUp className="h-3.5 w-3.5" />
-                      <span>T: {displayPost.t_score}</span>
-                    </div>
+                  {/* T-Score Button - only for Sparks (public mode) */}
+                  {displayPost.mode === 'public' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleGiveThought}
+                      disabled={!user}
+                      className={`${hasGivenThought ? 'text-purple-500' : 'text-[#6B635B]'} hover:text-purple-500`}
+                    >
+                      <Sparkles className={`h-4 w-4 mr-2 ${hasGivenThought ? 'fill-current' : ''}`} />
+                      {hasGivenThought ? 'Thought given' : 'This made me think'}
+                      <span className="ml-2 font-semibold">({tScore})</span>
+                    </Button>
                   )}
                   <Button
                     variant="ghost"
@@ -372,12 +443,19 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
                       )}
                     </div>
                   )}
-                  {/* T-Score - only for Sparks (public mode) */}
-                  {displayPost.mode === 'public' && displayPost.t_score && (
-                    <div className="flex items-center gap-1 text-sm text-purple-500 font-semibold">
-                      <TrendingUp className="h-3.5 w-3.5" />
-                      <span>T: {displayPost.t_score}</span>
-                    </div>
+                  {/* T-Score Button - only for Sparks (public mode) */}
+                  {displayPost.mode === 'public' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleGiveThought}
+                      disabled={!user}
+                      className={`${hasGivenThought ? 'text-purple-500' : 'text-[var(--text-secondary)]'} hover:text-purple-500`}
+                    >
+                      <Sparkles className={`h-4 w-4 mr-2 ${hasGivenThought ? 'fill-current' : ''}`} />
+                      {hasGivenThought ? 'Thought given' : 'This made me think'}
+                      <span className="ml-2 font-semibold">({tScore})</span>
+                    </Button>
                   )}
                   <Button
                     variant="ghost"
