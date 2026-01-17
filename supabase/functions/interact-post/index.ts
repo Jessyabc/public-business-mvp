@@ -152,7 +152,10 @@ serve(async (req) => {
         }
 
         // Decrement likes count and t_score
-        await supabaseClient.rpc('decrement_post_likes', { p_post_id: post_id });
+        await supabaseClient.rpc('decrement_post_likes', { 
+          p_post_id: post_id,
+          p_user_id: actor_user_id 
+        });
 
         return new Response(
           JSON.stringify({ action: 'unliked', message: 'Like removed successfully' }),
@@ -204,7 +207,11 @@ serve(async (req) => {
     // Update post engagement counters based on interaction type
     switch (type) {
       case 'like': {
-        const { error: likeError } = await supabaseClient.rpc('increment_post_likes', { p_post_id: post_id });
+        // Pass user_id to the RPC function (works even if null for edge function context)
+        const { error: likeError } = await supabaseClient.rpc('increment_post_likes', { 
+          p_post_id: post_id,
+          p_user_id: actor_user_id 
+        });
         if (likeError) console.error('Error updating likes:', likeError);
         break;
       }

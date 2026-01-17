@@ -3,6 +3,7 @@ import { fetchLineageClusterFeed } from '@/lib/feedQueries';
 import { supabase } from '@/integrations/supabase/client';
 import type { LineageCluster } from '@/lib/clusterUtils';
 import { PostKind } from '@/types/post';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useLineageClusterFeed(params: {
   mode: 'public' | 'business';
@@ -11,6 +12,7 @@ export function useLineageClusterFeed(params: {
   org_id?: string | null;
   pageSize?: number;
 }) {
+  const { user } = useAuth();
   const [clusters, setClusters] = useState<LineageCluster[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,7 @@ export function useLineageClusterFeed(params: {
         org_id: params.org_id,
         cursor: reset ? null : cursor,
         limit: params.pageSize ?? 20,
+        user_id: user?.id ?? null,
       });
 
       setClusters((prev) => (reset ? chunk : [...prev, ...chunk]));
@@ -43,7 +46,7 @@ export function useLineageClusterFeed(params: {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [params.mode, params.kinds, params.search, params.org_id, params.pageSize, cursor]);
+  }, [params.mode, params.kinds, params.search, params.org_id, params.pageSize, cursor, user?.id]);
 
   useEffect(() => {
     setCursor(null);

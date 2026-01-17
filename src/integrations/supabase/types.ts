@@ -1950,7 +1950,12 @@ export type Database = {
         }
       }
       current_user_email: { Args: never; Returns: string }
-      decrement_post_likes: { Args: { p_post_id: string }; Returns: undefined }
+      decrement_post_likes:
+        | { Args: { p_post_id: string }; Returns: undefined }
+        | {
+            Args: { p_post_id: string; p_user_id?: string }
+            Returns: undefined
+          }
       enforce_rate_limit: {
         Args: { limit_count: number; window_seconds: number }
         Returns: boolean
@@ -1967,23 +1972,42 @@ export type Database = {
           target_type: string
         }[]
       }
-      get_lineage_clusters: {
-        Args: {
-          p_cursor?: string
-          p_kinds?: string[]
-          p_limit?: number
-          p_mode?: string
-          p_org_id?: string
-          p_search?: string
-        }
-        Returns: {
-          continuations: Json
-          latest_activity_at: string
-          spark_data: Json
-          spark_id: string
-          total_continuations: number
-        }[]
-      }
+      get_lineage_clusters:
+        | {
+            Args: {
+              p_cursor?: string
+              p_kinds?: string[]
+              p_limit?: number
+              p_mode?: string
+              p_org_id?: string
+              p_search?: string
+            }
+            Returns: {
+              continuations: Json
+              latest_activity_at: string
+              spark_data: Json
+              spark_id: string
+              total_continuations: number
+            }[]
+          }
+        | {
+            Args: {
+              p_cursor?: string
+              p_kinds?: string[]
+              p_limit?: number
+              p_mode?: string
+              p_org_id?: string
+              p_search?: string
+              p_user_id?: string
+            }
+            Returns: {
+              continuations: Json
+              latest_activity_at: string
+              spark_data: Json
+              spark_id: string
+              total_continuations: number
+            }[]
+          }
       get_my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -2025,7 +2049,12 @@ export type Database = {
       }
       hash_ip: { Args: { ip_address: string }; Returns: string }
       increment_post_comments: { Args: { post_id: string }; Returns: undefined }
-      increment_post_likes: { Args: { p_post_id: string }; Returns: undefined }
+      increment_post_likes:
+        | { Args: { p_post_id: string }; Returns: undefined }
+        | {
+            Args: { p_post_id: string; p_user_id?: string }
+            Returns: undefined
+          }
       increment_post_shares: { Args: { p_post_id: string }; Returns: undefined }
       increment_post_views: { Args: { p_post_id: string }; Returns: undefined }
       invite_to_org: {

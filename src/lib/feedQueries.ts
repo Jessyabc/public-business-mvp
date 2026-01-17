@@ -237,5 +237,6 @@ export async function fetchLineageClusterFeed(
     kinds: opts.kinds ?? null,
     search: opts.search,
     org_id: opts.org_id,
+    user_id: opts.user_id ?? null,
   });
 }

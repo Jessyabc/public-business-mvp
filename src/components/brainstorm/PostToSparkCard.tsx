@@ -23,8 +23,8 @@ function convertPostToSpark(post: BasePost, authorDisplayName?: string | null, a
     u_score: post.u_score || null,
     kind: post.kind,
     mode: post.mode,
-    view_count: post.views_count || 0,
-    has_given_thought: false,
+    view_count: (post as BasePost & { views_count?: number }).views_count || 0,
+    has_given_thought: (post as BasePost & { has_given_thought?: boolean }).has_given_thought ?? false,
   };
 }
 
