@@ -18,6 +18,9 @@ import { buildBusinessInsightPayload } from '@/lib/posts';
 import { generateSuggestedTitle } from '@/lib/utils/generateTitle';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import { useComposerStore } from '@/hooks/useComposerStore';
+import { ContinuationBanner } from './ContinuationBanner';
+import { createHardLink } from '@/lib/posts/relations';
 
 // Minimal schema for the refactored form
 const minimalBusinessInsightSchema = z.object({
@@ -43,12 +46,16 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: memberships, isLoading: isLoadingMemberships } = useOrgMembership();
+  const { context, setContext } = useComposerStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSparkSelector, setShowSparkSelector] = useState(false);
   const [availableSparks, setAvailableSparks] = useState<any[]>([]);
   const [sparkSearchQuery, setSparkSearchQuery] = useState('');
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [hasManuallyEditedTitle, setHasManuallyEditedTitle] = useState(false);
+
+  // Check if we're in continuation mode (continuing another Business Insight)
+  const isContinuationMode = context?.relationType === 'continuation' && context?.parentPostId;
 
   // Determine org_id: use selected, or first membership if single, or null
   const orgId = useMemo(() => {
@@ -197,6 +204,16 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
 
       if (error) throw error;
 
+      // Create hard link if continuing another Business Insight
+      if (isContinuationMode && context?.parentPostId && newPost?.id) {
+        try {
+          await createHardLink(context.parentPostId, newPost.id);
+        } catch (linkError) {
+          console.error('Failed to create continuation link:', linkError);
+          toast.warning('Draft saved but continuation link failed');
+        }
+      }
+
       // Create cross_link relations for Sparks
       if (relatedSparks && relatedSparks.length > 0 && newPost?.id) {
         const relationPromises = relatedSparks.map((sparkId) =>
@@ -279,6 +296,16 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
 
       if (error) throw error;
 
+      // Create hard link if continuing another Business Insight
+      if (isContinuationMode && context?.parentPostId && newPost?.id) {
+        try {
+          await createHardLink(context.parentPostId, newPost.id);
+        } catch (linkError) {
+          console.error('Failed to create continuation link:', linkError);
+          toast.warning('Insight published but continuation link failed');
+        }
+      }
+
       // Create cross_link relations for Sparks
       if (relatedSparks && relatedSparks.length > 0 && newPost?.id) {
         const relationPromises = relatedSparks.map((sparkId) =>
@@ -323,7 +350,9 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FileText className="w-5 h-5 text-[#3A3530]" />
-              <h3 className="text-lg font-semibold text-[#3A3530]">New Business Insight</h3>
+              <h3 className="text-lg font-semibold text-[#3A3530]">
+                {isContinuationMode ? 'Continue Business Insight' : 'New Business Insight'}
+              </h3>
             </div>
           </div>
         </div>
@@ -331,6 +360,14 @@ export function BusinessInsightComposer({ onClose }: BusinessInsightComposerProp
         {/* Scrollable Content */}
         <ScrollArea className="flex-1">
           <div className="space-y-6 p-6">
+            {/* Continuation Banner - show when continuing another Business Insight */}
+            {isContinuationMode && (
+              <ContinuationBanner 
+                parentPostId={context?.parentPostId}
+                onClear={() => setContext(null)}
+              />
+            )}
+            
             {/* Title */}
             <FormField
               control={form.control}
