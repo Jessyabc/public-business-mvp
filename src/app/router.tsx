@@ -62,7 +62,6 @@ const CookiePolicy = lazy(() => import('@/pages/CookiePolicy'));
 
 // Admin/Dev pages - lazy loaded
 const Admin = lazy(() => import('@/pages/Admin'));
-const DemoCards = lazy(() => import('@/pages/DemoCards'));
 const DevSitemap = lazy(() => import('@/pages/DevSitemap'));
 const Sitemap = lazy(() => import('@/pages/Sitemap'));
 const Customize = lazy(() => import('@/pages/Customize'));
@@ -132,7 +131,6 @@ const routes: Parameters<typeof createBrowserRouter>[0] = [
   { path: '/admin', element: withLayoutLazy(Admin) },
   { path: '/customize', element: withLayoutLazy(Customize) },
   { path: '/sitemap', element: withLayoutLazy(Sitemap) },
-  { path: '/demo/cards', element: withLayoutLazy(DemoCards) },
   { path: '/dev/forms', element: withLayoutLazy(FormsShowcase) },
   { path: '/dev/components', element: withLayoutLazy(ComponentsShowcase) },
   

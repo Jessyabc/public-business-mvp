@@ -74,12 +74,12 @@ class AnalyticsService {
 
   /**
    * Main tracking method - persists to DB and logs in dev
+   * Fire-and-forget: never blocks UI rendering
    */
-  async track(event_name: TrackingEvent | string, properties: TrackingPayload = {}): Promise<void> {
-    const timestamp = new Date().toISOString();
+  track(event_name: TrackingEvent | string, properties: TrackingPayload = {}): void {
     const trackingData = {
       event: event_name,
-      timestamp,
+      timestamp: new Date().toISOString(),
       session_id: this.sessionId,
       ...properties,
     };
@@ -94,26 +94,27 @@ class AnalyticsService {
       );
     }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('analytics_events').insert([{
-        event_name,
-        user_id: user?.id || null,
-        session_id: this.sessionId,
-        properties: properties as Json,
-      }]);
+    // Fire-and-forget: async but don't await - never block UI
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        // Don't await - fire and forget
+        void supabase.from('analytics_events').insert([{
+          event_name,
+          user_id: user?.id || null,
+          session_id: this.sessionId,
+          properties: properties as Json,
+        }]);
 
-      // Also send to gtag if available
-      if (typeof window !== 'undefined' && (window as unknown as { gtag?: Function }).gtag) {
-        (window as unknown as { gtag: Function }).gtag('event', event_name, properties);
+        // Also send to gtag if available
+        if (typeof window !== 'undefined' && (window as unknown as { gtag?: Function }).gtag) {
+          (window as unknown as { gtag: Function }).gtag('event', event_name, properties);
+        }
+      } catch {
+        // Silently fail - analytics should never break the app
       }
-    } catch (error) {
-      // Silently fail in production, log in dev
-      if (this.isDev) {
-        console.error('Analytics tracking error:', error);
-      }
-    }
+    })();
   }
 
   // =========================================================================
