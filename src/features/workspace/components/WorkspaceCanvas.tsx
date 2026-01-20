@@ -18,6 +18,9 @@ import { EmptyWorkspace } from './EmptyWorkspace';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
+// Safety timeout for workspace loading (in case sync gets stuck)
+const LOADING_TIMEOUT_MS = 15000;
+
 export function WorkspaceCanvas() {
   const { user } = useAuth();
   const { 
@@ -28,7 +31,27 @@ export function WorkspaceCanvas() {
     getActiveThought,
     activeDayKey,
     setActiveDayKey,
+    setLoading,
   } = useWorkspaceStore();
+  
+  // Safety timeout for loading state
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    
+    const timeoutId = window.setTimeout(() => {
+      console.warn('WorkspaceCanvas: Loading timed out, forcing render');
+      setLoadingTimedOut(true);
+      // Also force the store to reset loading
+      setLoading(false);
+    }, LOADING_TIMEOUT_MS);
+    
+    return () => window.clearTimeout(timeoutId);
+  }, [isLoading, setLoading]);
   
   // Track if user deliberately started thinking (for auto-focus)
   const [userInitiated, setUserInitiated] = useState(false);
@@ -91,7 +114,8 @@ export function WorkspaceCanvas() {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [activeThought, createThought, setActiveDayKey, user?.id]);
 
-  if (isLoading) {
+  // Show loading only if we're actually loading and haven't timed out
+  if (isLoading && !loadingTimedOut) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-[var(--text-tertiary)] opacity-60">...</div>

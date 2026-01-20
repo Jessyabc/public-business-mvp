@@ -7,14 +7,33 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NewLanding } from './NewLanding';
 import { WorkspaceCanvas } from '@/features/workspace';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
+// Safety timeout for loading state (in case auth gets stuck)
+const LOADING_TIMEOUT_MS = 12000;
+
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+
+  // Safety timeout - if loading takes too long, show landing page
+  useEffect(() => {
+    if (!loading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    
+    const timeoutId = window.setTimeout(() => {
+      console.warn('Index page: Auth loading timed out, showing landing page');
+      setLoadingTimedOut(true);
+    }, LOADING_TIMEOUT_MS);
+    
+    return () => window.clearTimeout(timeoutId);
+  }, [loading]);
 
   // Redirect to profile only after signup, not regular login
   useEffect(() => {
@@ -24,7 +43,8 @@ const Index = () => {
     }
   }, [user, navigate]);
 
-  if (loading) {
+  // If loading timed out, treat as unauthenticated
+  if (loading && !loadingTimedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-[var(--text-secondary)]">Loading...</div>
@@ -32,7 +52,7 @@ const Index = () => {
     );
   }
 
-  // Unauthenticated: show landing page
+  // Unauthenticated (or loading timed out): show landing page
   if (!user) {
     return <NewLanding />;
   }

@@ -12,6 +12,7 @@ import { useWorkspaceStore } from './useWorkspaceStore';
 import type { ThoughtObject } from './types';
 
 const SYNC_DEBOUNCE_MS = 1500;
+const LOAD_TIMEOUT_MS = 10000; // 10 second timeout for loading
 
 export function useWorkspaceSync() {
   const { user } = useAuth();
@@ -27,12 +28,30 @@ export function useWorkspaceSync() {
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
   const lastSyncedThoughtsRef = useRef<string>('');
+  const loadAbortRef = useRef<AbortController | null>(null);
 
   // Load thoughts from Supabase on mount
   const loadThoughts = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      // No user - ensure loading is false
+      setLoading(false);
+      return;
+    }
+    
+    // Cancel any previous load operation
+    if (loadAbortRef.current) {
+      loadAbortRef.current.abort();
+    }
+    loadAbortRef.current = new AbortController();
     
     setLoading(true);
+    
+    // Set up a timeout to prevent infinite loading
+    const timeoutId = window.setTimeout(() => {
+      console.warn('Workspace loading timed out after', LOAD_TIMEOUT_MS, 'ms');
+      setLoading(false);
+    }, LOAD_TIMEOUT_MS);
+    
     try {
       const { data, error } = await supabase
         .from('workspace_thoughts')
@@ -40,6 +59,9 @@ export function useWorkspaceSync() {
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
+      // Clear timeout since we got a response
+      window.clearTimeout(timeoutId);
+      
       if (error) throw error;
       
       if (data && isMountedRef.current) {
@@ -80,10 +102,11 @@ export function useWorkspaceSync() {
       }
     } catch (err) {
       console.error('Failed to load workspace thoughts:', err);
+      // Clear timeout on error too
+      window.clearTimeout(timeoutId);
     } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
+      // Always set loading to false, even if unmounted (Zustand handles this safely)
+      setLoading(false);
     }
   }, [user, setThoughts, setActiveThought, setLoading, setLastSynced]);
 
@@ -148,18 +171,29 @@ export function useWorkspaceSync() {
     syncTimeoutRef.current = setTimeout(syncThoughts, SYNC_DEBOUNCE_MS);
   }, [syncThoughts]);
 
-  // Load on mount
+  // Load on mount - with proper cleanup
   useEffect(() => {
     isMountedRef.current = true;
-    loadThoughts();
+    
+    // Only load if we have a user
+    if (user) {
+      loadThoughts();
+    } else {
+      // Ensure loading is false when there's no user
+      setLoading(false);
+    }
     
     return () => {
       isMountedRef.current = false;
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
+      // Abort any pending load operation
+      if (loadAbortRef.current) {
+        loadAbortRef.current.abort();
+      }
     };
-  }, [loadThoughts]);
+  }, [user, loadThoughts, setLoading]);
 
   // Auto-sync when thoughts change (including when first thought is created)
   useEffect(() => {
