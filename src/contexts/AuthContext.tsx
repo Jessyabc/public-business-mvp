@@ -26,22 +26,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    let hasFinished = false;
+    
     const loadingTimeoutId = window.setTimeout(() => {
-      if (!isMounted) return;
+      if (hasFinished) return;
       console.warn('Auth initialization timed out. Falling back to unauth state.');
+      hasFinished = true;
+      // Always set loading to false on timeout, regardless of mount state
+      // React will ignore updates to unmounted components safely
       setLoading(false);
     }, 8000);
 
     const finishLoading = () => {
-      if (!isMounted) return;
-      setLoading(false);
+      if (hasFinished) return;
+      hasFinished = true;
       window.clearTimeout(loadingTimeoutId);
+      // Only update state if still mounted
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     // Get initial session with error handling
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error('Auth session error:', error);
+      }
+      if (!isMounted) {
+        finishLoading();
+        return;
       }
       setSession(session);
       setUser(session?.user ?? null);

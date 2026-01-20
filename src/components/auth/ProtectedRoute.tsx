@@ -1,9 +1,12 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lock, LogIn } from 'lucide-react';
+
+// Safety timeout for loading state
+const LOADING_TIMEOUT_MS = 12000;
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,6 +16,22 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+
+  // Safety timeout for loading
+  useEffect(() => {
+    if (!loading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    
+    const timeoutId = window.setTimeout(() => {
+      console.warn('ProtectedRoute: Auth loading timed out');
+      setLoadingTimedOut(true);
+    }, LOADING_TIMEOUT_MS);
+    
+    return () => window.clearTimeout(timeoutId);
+  }, [loading]);
 
   useEffect(() => {
     if (!loading && requireAuth && !user) {
@@ -20,7 +39,8 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
     }
   }, [user, loading, requireAuth]);
 
-  if (loading) {
+  // Only show loading if we haven't timed out
+  if (loading && !loadingTimedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
