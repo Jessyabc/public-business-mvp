@@ -59,7 +59,12 @@
       <div class="loading-fallback">Loading...</div>
     </div>
     <noscript>
-      <div class="loading-fallback">
+      <style>
+        #root .loading-fallback {
+          display: none !important;
+        }
+      </style>
+      <div class="noscript-message">
         JavaScript is required to run this app. Please enable JavaScript and refresh.
       </div>
     </noscript>
