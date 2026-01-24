@@ -13,7 +13,7 @@ import { WorkspaceCanvas } from '@/features/workspace';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Safety timeout for loading state (in case auth gets stuck)
-const LOADING_TIMEOUT_MS = 12000;
+const LOADING_TIMEOUT_MS = 8000;
 
 const Index = () => {
   const { user, loading } = useAuth();
