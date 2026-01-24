@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Always set loading to false on timeout, regardless of mount state
       // React will ignore updates to unmounted components safely
       setLoading(false);
-    }, 8000);
+    }, 5000);
 
     const finishLoading = () => {
       if (hasFinished) return;
