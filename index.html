@@ -58,6 +58,22 @@
       <!-- Initial loading state shown before JS hydrates -->
       <div class="loading-fallback">Loading...</div>
     </div>
+    <noscript>
+      <div class="loading-fallback">
+        JavaScript is required to run this app. Please enable JavaScript and refresh.
+      </div>
+    </noscript>
+    <script>
+      window.setTimeout(() => {
+        const root = document.getElementById('root');
+        if (!root) return;
+        const fallback = root.querySelector('.loading-fallback');
+        if (!fallback) return;
+        fallback.innerHTML =
+          'Still loading? This usually means the production build was not served from <code>dist/</code>. ' +
+          'Ensure your host runs <code>npm run build</code> and serves the generated <code>dist/</code> output.';
+      }, 8000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
