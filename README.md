@@ -83,6 +83,15 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 | `npm run preview` | Preview production build |
 | `npm run lint` | Run ESLint |
 
+## Deployment
+
+- Run `npm run build` for production builds.
+- Serve the generated `dist/` directory as the site root (do **not** serve the repository root).
+- Ensure your host rewrites all non-asset routes to `dist/index.html` so React Router routes resolve.
+- Serving the repo root `index.html` in production will leave `/src/main.tsx` unresolved because it expects the Vite build output in `dist/`.
+
+The included `netlify.toml` encodes the build command, output folder, and SPA rewrite rules for Netlify deployments.
+
 ## Project Structure
 
 ```
