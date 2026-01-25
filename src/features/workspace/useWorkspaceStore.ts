@@ -117,12 +117,18 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }));
       },
 
-      // Delete a thought
+      // Delete a thought (also marks it for deletion from Supabase)
       deleteThought: (id) => {
+        // Get the thought before removing it so we can delete from Supabase
+        const thoughtToDelete = get().thoughts.find(t => t.id === id);
+        
         set((state) => ({
           thoughts: state.thoughts.filter((t) => t.id !== id),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
         }));
+        
+        // Return the deleted thought ID for sync handling
+        return thoughtToDelete?.id ?? null;
       },
 
       // Set which day thread to add to
