@@ -9,7 +9,7 @@
  * Open previous days to continue adding thoughts.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useWorkspaceSync } from '../useWorkspaceSync';
 import { ThinkingSurface } from './ThinkingSurface';
@@ -33,6 +33,9 @@ export function WorkspaceCanvas() {
     setActiveDayKey,
     setLoading,
   } = useWorkspaceStore();
+  
+  // Prevent immediate re-open after blur closes the thought
+  const justAnchoredRef = useRef(false);
   
   // Safety timeout for loading state
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
@@ -69,13 +72,23 @@ export function WorkspaceCanvas() {
     createThought(undefined, user?.id);
   }, [createThought, setActiveDayKey, user?.id]);
 
-  // Reset user-initiated flag when thought is anchored
+  // Reset user-initiated flag when thought is anchored and prevent immediate re-open
   const handleAnchor = useCallback(() => {
     setUserInitiated(false);
+    justAnchoredRef.current = true;
+    // Reset after a short delay to allow click events to complete
+    setTimeout(() => {
+      justAnchoredRef.current = false;
+    }, 100);
   }, []);
 
   // Handle canvas click (tap anywhere empty to start writing)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    // Prevent re-opening immediately after blur closed the thought
+    if (justAnchoredRef.current) {
+      return;
+    }
+    
     const target = e.target as HTMLElement;
     // Check if click is on an interactive element that should not trigger new thought
     const isOnThought = target.closest('.anchored-thought') || 
