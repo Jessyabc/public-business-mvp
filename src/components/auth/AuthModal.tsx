@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { GlassInput } from '@/components/ui/GlassInput';
-import { GlassSurface } from '@/components/ui/GlassSurface';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,7 +80,7 @@ export function AuthModal({
           <img 
             alt="Public Business Logo" 
             src="/lovable-uploads/ed5d63eb-6f9b-49cf-93a9-6da7cef3b358.png" 
-            className="h-12 w-auto object-contain" 
+            className="h-16 w-auto object-contain" 
           />
           <DialogTitle className="sr-only">Sign in or create account</DialogTitle>
         </DialogHeader>
