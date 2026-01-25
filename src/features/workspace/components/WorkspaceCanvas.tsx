@@ -128,7 +128,7 @@ export function WorkspaceCanvas() {
       className={cn(
         "workspace-canvas",
         "w-full min-h-screen",
-        "px-4 py-8 md:px-8 md:py-12",
+        "px-4 pt-8 pb-32 md:px-8 md:pt-12 md:pb-36",
         !activeThought && hasThoughts && "cursor-text"
       )}
       onClick={handleCanvasClick}

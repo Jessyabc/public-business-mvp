@@ -76,22 +76,20 @@ export function AuthModal({
     // userType is always 'public' - no need to reset
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-border/20 bg-background/95 backdrop-blur-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-8">
-        <DialogHeader className="flex flex-col items-center space-y-4">
-          <img alt="Public Business Logo" src="/lovable-uploads/ed5d63eb-6f9b-49cf-93a9-6da7cef3b358.png" className="object-fill backdrop-brightness-100" />
-          <DialogTitle className="text-2xl font-bold text-center text-foreground">
-            Welcome to Public Business
-          </DialogTitle>
+      <DialogContent className="sm:max-w-md border-border/20 bg-background/95 backdrop-blur-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6">
+        <DialogHeader className="flex flex-col items-center space-y-2">
+          <img 
+            alt="Public Business Logo" 
+            src="/lovable-uploads/ed5d63eb-6f9b-49cf-93a9-6da7cef3b358.png" 
+            className="h-12 w-auto object-contain" 
+          />
+          <DialogTitle className="sr-only">Sign in or create account</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="signin" className="w-full mt-6">
+        <Tabs defaultValue="signin" className="w-full mt-4">
           <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-            <TabsTrigger value="signin">
-              Sign In
-            </TabsTrigger>
-            <TabsTrigger value="signup">
-              Sign Up
-            </TabsTrigger>
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4 mt-6">

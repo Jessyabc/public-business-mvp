@@ -8,6 +8,8 @@
 
 import { useCallback } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
@@ -26,6 +28,7 @@ function formatTime(isoString: string): string {
 
 export function AnchoredThought({ thoughtId, depth = 0 }: AnchoredThoughtProps) {
   const { thoughts, reactivateThought, deleteThought } = useWorkspaceStore();
+  const { user } = useAuth();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
 
@@ -33,10 +36,25 @@ export function AnchoredThought({ thoughtId, depth = 0 }: AnchoredThoughtProps) 
     reactivateThought(thoughtId);
   }, [thoughtId, reactivateThought]);
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
+  const handleDelete = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Delete from local store first (optimistic)
     deleteThought(thoughtId);
-  }, [thoughtId, deleteThought]);
+    
+    // Delete from Supabase
+    if (user) {
+      try {
+        await supabase
+          .from('workspace_thoughts')
+          .delete()
+          .eq('id', thoughtId)
+          .eq('user_id', user.id);
+      } catch (err) {
+        console.error('Failed to delete thought from database:', err);
+      }
+    }
+  }, [thoughtId, deleteThought, user]);
 
   if (!thought) return null;
 

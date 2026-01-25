@@ -2,6 +2,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { PenTool, Plus, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { useWorkspaceStore } from '@/features/workspace/useWorkspaceStore';
 import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -13,6 +14,7 @@ const PB_BLUE = '#4A7C9B';
 
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
+  const { createThought, getActiveThought } = useWorkspaceStore();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,6 +27,19 @@ export function BottomNavigation() {
   const isThinkActive = isThinkPage;
   const isDiscussActive = isDiscussPage;
   const isProfileActive = location.pathname === '/profile';
+  
+  // Handle Think button click - navigate or open new thought
+  const handleThinkClick = () => {
+    if (isThinkActive) {
+      // Already on Think page - create new thought if none active
+      const activeThought = getActiveThought();
+      if (!activeThought) {
+        createThought(undefined, user?.id);
+      }
+    } else {
+      navigate('/');
+    }
+  };
   
   // Route-aware tooltip text for composer button
   const composerTooltip = isThinkActive ? 'Share to Discuss' : 'Create post';
@@ -63,9 +78,9 @@ export function BottomNavigation() {
           className="flex items-center gap-2 px-6 py-4 rounded-full transition-all duration-300"
           style={glassStyle}
         >
-          {/* Think Link */}
-          <NavLink
-            to="/"
+          {/* Think Button */}
+          <button
+            onClick={handleThinkClick}
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
               "transition-all duration-200 relative group"
@@ -85,7 +100,7 @@ export function BottomNavigation() {
                 style={{ background: textActive }}
               />
             )}
-          </NavLink>
+          </button>
 
           {/* Centered Composer Button */}
           <Tooltip>
@@ -173,8 +188,8 @@ export function BottomNavigation() {
           style={glassStyle}
         >
           {/* Think */}
-          <NavLink
-            to="/"
+          <button
+            onClick={handleThinkClick}
             className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
             style={{ color: isThinkActive ? textActive : textInactive }}
           >
@@ -185,7 +200,7 @@ export function BottomNavigation() {
                 style={{ background: textActive }}
               />
             )}
-          </NavLink>
+          </button>
 
           {/* Discuss */}
           <button

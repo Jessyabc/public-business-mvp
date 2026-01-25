@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isToday } from 'date-fns';
@@ -25,13 +26,20 @@ interface ThinkingSurfaceProps {
 export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: ThinkingSurfaceProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const { thoughts, updateThought, anchorThought, activeDayKey } = useWorkspaceStore();
+  const [enterCount, setEnterCount] = useState(0);
+  const isMobile = useIsMobile();
+  const { thoughts, updateThought, anchorThought, deleteThought, activeDayKey } = useWorkspaceStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
   
   // Show which day we're adding to (only if not today)
   const showDayLabel = activeDayKey && !isToday(parseISO(activeDayKey));
   const dayLabel = activeDayKey ? format(parseISO(activeDayKey), 'MMMM d') : null;
+  
+  // Reset enter count when content changes
+  useEffect(() => {
+    setEnterCount(0);
+  }, [thought?.content]);
   
   // Only auto-focus when user deliberately initiated thinking
   useEffect(() => {
@@ -56,15 +64,23 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
     handleInput();
   }, [thoughtId, updateThought, handleInput]);
 
-  // Implicit anchoring: blur with content = anchor
+  // Implicit anchoring: blur with content = anchor, dismiss if empty
   const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    setEnterCount(0);
+    
     if (thought?.content.trim()) {
       anchorThought(thoughtId);
       onAnchor?.();
+    } else {
+      // Empty content - delete the active thought to show "tap to think"
+      deleteThought(thoughtId);
+      onAnchor?.();
     }
-  }, [thought, thoughtId, anchorThought, onAnchor]);
+  }, [thought, thoughtId, anchorThought, deleteThought, onAnchor]);
 
   // Cmd+Enter (or Ctrl+Enter) to anchor immediately
+  // On mobile: double Enter with empty content = dismiss
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
@@ -73,8 +89,22 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
         onAnchor?.();
         textareaRef.current?.blur();
       }
+      return;
     }
-  }, [thought, thoughtId, anchorThought, onAnchor]);
+    
+    // Mobile: double Enter on empty content = dismiss keyboard and surface
+    if (isMobile && e.key === 'Enter' && !thought?.content.trim()) {
+      const newCount = enterCount + 1;
+      setEnterCount(newCount);
+      
+      if (newCount >= 2) {
+        e.preventDefault();
+        textareaRef.current?.blur();
+        deleteThought(thoughtId);
+        onAnchor?.();
+      }
+    }
+  }, [thought, thoughtId, anchorThought, deleteThought, onAnchor, isMobile, enterCount]);
 
   // Initial resize
   useEffect(() => {
@@ -129,10 +159,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
           value={thought.content}
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
-          onBlur={(e) => {
-            setIsFocused(false);
-            handleBlur();
-          }}
+          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           placeholder="What's on your mind..."
           className={cn(
