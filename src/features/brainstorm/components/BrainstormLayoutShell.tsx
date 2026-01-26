@@ -24,14 +24,15 @@ export function BrainstormLayoutShell({
 
   return (
     <div className={cn('flex h-full flex-col', className)}>
-      {/* Mobile Tabs - Polished */}
-      <div className="lg:hidden px-4 pt-2">
-        <div className="relative rounded-full bg-white/5 backdrop-blur-sm p-1 border border-white/10">
+      {/* Mobile Tabs - Enhanced visibility */}
+      <div className="lg:hidden px-4 pt-3 pb-2">
+        <div className="relative rounded-2xl bg-white/10 backdrop-blur-md p-1.5 border border-white/20 shadow-lg">
           {/* Sliding indicator */}
           <div 
             className={cn(
-              "absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-white/15 backdrop-blur transition-transform duration-300 ease-out",
-              activeTab === 'sidebar' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+              "absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-white/20 backdrop-blur transition-transform duration-300 ease-out",
+              "shadow-[0_0_15px_rgba(72,159,227,0.3)]",
+              activeTab === 'sidebar' ? 'translate-x-[calc(100%+6px)]' : 'translate-x-0'
             )}
           />
           
@@ -46,14 +47,14 @@ export function BrainstormLayoutShell({
                   type="button" 
                   onClick={() => setActiveTab(tab.id)} 
                   className={cn(
-                    "relative z-10 flex items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-colors duration-200",
+                    "relative z-10 flex items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200",
                     isActive 
                       ? "text-white" 
                       : "text-white/50 hover:text-white/70"
                   )}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="uppercase tracking-[0.2em]">{tab.label}</span>
+                  <Icon className={cn("w-4 h-4", isActive && "drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]")} />
+                  <span className="uppercase tracking-[0.15em]">{tab.label}</span>
                 </button>
               );
             })}
@@ -62,7 +63,7 @@ export function BrainstormLayoutShell({
       </div>
 
       {/* Desktop: 2-column layout */}
-      <div className="hidden h-full min-h-0 gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(200px,260px)] px-[10px] py-[10px]">
+      <div className="hidden h-full min-h-0 gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] px-4 py-4">
         <div className="min-h-0">{main}</div>
         <div className="min-h-0">{sidebar}</div>
       </div>

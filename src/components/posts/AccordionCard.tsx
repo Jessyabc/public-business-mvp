@@ -15,15 +15,18 @@ type AccordionPost = Pick<
   'id' | 'title' | 'content' | 't_score' | 'u_score' | 'views_count' | 'created_at' | 'mode'
 >;
 
+type DepthVariant = 'big' | 'medium' | 'small';
+
 interface AccordionCardProps {
   post: AccordionPost;
+  depth?: DepthVariant;
   onView?: (postId: string) => void;
   onSave?: (postId: string) => void;
   onShare?: (postId: string) => void;
   className?: string;
 }
 
-export const AccordionCard = memo(({ post, onView, onSave, onShare, className }: AccordionCardProps) => {
+export const AccordionCard = memo(({ post, depth = 'medium', onView, onSave, onShare, className }: AccordionCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { userRating, averageScore, ratingCount, submitRating, refetch } = usePostRating(post.id);
 
@@ -52,12 +55,42 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
     }
   };
 
+  // Depth-based styling
+  const depthStyles = {
+    big: {
+      padding: 'p-8',
+      titleSize: 'text-xl',
+      contentSize: 'text-base',
+      shadow: 'shadow-[var(--elevation-16)]',
+      hoverShadow: 'hover:shadow-[var(--elevation-24)]',
+    },
+    medium: {
+      padding: 'p-6',
+      titleSize: 'text-lg',
+      contentSize: 'text-sm',
+      shadow: 'shadow-[var(--elevation-8)]',
+      hoverShadow: 'hover:shadow-[var(--elevation-16)]',
+    },
+    small: {
+      padding: 'p-4',
+      titleSize: 'text-base',
+      contentSize: 'text-xs',
+      shadow: 'shadow-[var(--elevation-4)]',
+      hoverShadow: 'hover:shadow-[var(--elevation-8)]',
+    },
+  };
+
+  const styles = depthStyles[depth];
+
   return (
     <motion.div
       className={cn(
-        'glass-low rounded-2xl overflow-hidden transition-all duration-300',
-        'border border-[var(--card-border)] shadow-[var(--elevation-8)]',
-        'hover:shadow-[var(--elevation-16)] focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2',
+        'rounded-2xl overflow-hidden transition-all duration-300',
+        'border border-[var(--card-border)]',
+        'bg-[var(--glass-bg)] backdrop-blur-xl',
+        styles.shadow,
+        styles.hoverShadow,
+        'focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2',
         className
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -65,9 +98,8 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
       transition={{ duration: 0.3 }}
       layout
     >
-      {/* Collapsed Preview */}
       <div
-        className="p-6 select-none cursor-pointer"
+        className={cn(styles.padding, "select-none cursor-pointer")}
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -80,15 +112,15 @@ export const AccordionCard = memo(({ post, onView, onSave, onShare, className }:
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            {/* Title or content preview */}
             {post.title && (
-              <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-1">
+              <h3 className={cn(styles.titleSize, "font-semibold text-foreground mb-2 line-clamp-1")}>
                 {post.title}
               </h3>
             )}
             
             <motion.p
               className={cn(
+                styles.contentSize,
                 'text-muted-foreground transition-all',
                 isExpanded ? '' : 'line-clamp-2'
               )}

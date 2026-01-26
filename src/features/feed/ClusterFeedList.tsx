@@ -130,7 +130,7 @@ export const ClusterFeedList = memo(function ClusterFeedList({
 
   return (
     <>
-      <ul className="mx-auto w-full max-w-3xl px-4 space-y-8 pb-20 relative">
+      <ul className="mx-auto w-full max-w-3xl px-4 space-y-10 pb-20 relative">
         {clusters.map((cluster, index) => (
           <li 
             key={cluster.spark.id}

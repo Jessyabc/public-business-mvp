@@ -107,17 +107,13 @@ export const SparkCard: React.FC<SparkCardProps> = ({
     <article
       onClick={() => onView?.(spark.id)}
       className={cn(
-        "relative w-full rounded-3xl px-6 py-5",
+        "relative w-full px-6 py-5",
         "transition-all duration-300",
         onView ? "cursor-pointer" : "",
-        // Public lens: dark glass aesthetic
+        // Public lens: dark glass aesthetic - removed duplicate border-radius to fix double corner issue
         !isBusiness && [
           "bg-transparent",
           "backdrop-blur-xl",
-          "border border-white/10",
-          "shadow-[0_18px_60px_rgba(0,0,0,0.45)]",
-          "hover:shadow-[0_20px_70px_rgba(0,0,0,0.5)]",
-          "hover:scale-[1.01]",
         ],
         // Business lens: clean, let wrapper handle neumorphic
         isBusiness && [
@@ -125,10 +121,10 @@ export const SparkCard: React.FC<SparkCardProps> = ({
         ]
       )}
     >
-      {/* Gradient overlay - only for public lens */}
+      {/* Gradient overlay - only for public lens - removed rounded-3xl to fix double corner */}
       {!isBusiness && (
         <div
-          className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/6 via-transparent to-[#489FE3]/12 opacity-70"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/6 via-transparent to-[#489FE3]/12 opacity-70"
         />
       )}
 
