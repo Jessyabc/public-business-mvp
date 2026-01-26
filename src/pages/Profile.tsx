@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
-import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, User } from "lucide-react";
+import { Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, User } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePosts } from "@/hooks/usePosts";
@@ -58,13 +58,11 @@ export default function Profile() {
               <p className="text-muted-foreground">Manage your profile and view your content</p>
             </div>
 
-            {/* Quick Actions - Inline buttons */}
+            {/* Quick Actions - Inline buttons (removed business dashboard button - now accessible via swipe) */}
             <div className={`grid gap-4 mb-6 ${
-              (isBusinessMember() || isAdmin()) 
+              !orgId 
                 ? 'grid-cols-1 md:grid-cols-3' 
-                : !orgId 
-                  ? 'grid-cols-1 md:grid-cols-3' 
-                  : 'grid-cols-1 md:grid-cols-2'
+                : 'grid-cols-1 md:grid-cols-2'
             }`}>
               <Button 
                 onClick={() => setShowComposer(true)}
@@ -88,20 +86,6 @@ export default function Profile() {
                   <div>
                     <div className="font-medium">Create Organization</div>
                     <div className="text-xs text-muted-foreground">Set up your business</div>
-                  </div>
-                </Button>
-              )}
-
-              {(isBusinessMember() || isAdmin()) && (
-                <Button 
-                  onClick={() => navigate("/business-dashboard")}
-                  className="glass-ios-triple h-16 text-left justify-start"
-                  variant="outline"
-                >
-                  <Building2 className="h-5 w-5 mr-2" />
-                  <div>
-                    <div className="font-medium">Business</div>
-                    <div className="text-xs text-muted-foreground">Dashboard & tools</div>
                   </div>
                 </Button>
               )}

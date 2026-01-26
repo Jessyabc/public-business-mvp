@@ -208,7 +208,7 @@ export const FeedList = memo(function FeedList({ items, onEndReached, loading, o
 
   return (
     <>
-      <ul className="mx-auto w-full max-w-3xl px-4 space-y-6 pb-20 relative">
+      <ul className="mx-auto w-full max-w-3xl px-4 space-y-8 pb-20 relative">
         {/* Thread connection line overlay - only for public lens */}
         {!isBusiness && (
           <div className="absolute left-8 top-0 bottom-20 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />

@@ -172,10 +172,10 @@ export function BusinessFeed() {
         </div>
       </header>
 
-      {/* Scrollable Feed Content */}
       <div className="flex-1 overflow-y-auto px-6 pb-32">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-4">
+          {/* Increased spacing between cards */}
+          <div className="space-y-6">
             {loading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <div key={index} className="glass-business-card p-6 animate-pulse">
@@ -218,19 +218,25 @@ export function BusinessFeed() {
               </div>
             ) : (
               <>
-                {filteredPosts.map((post, index) => (
-                  <div 
-                    key={post.id}
-                    ref={index === filteredPosts.length - 1 ? lastPostRef : undefined}
-                  >
-                    <AccordionCard
-                      post={post}
-                      onView={handleViewPost}
-                      onSave={handleSavePost}
-                      onShare={(postId) => console.log("Share post:", postId)}
-                    />
-                  </div>
-                ))}
+                {filteredPosts.map((post, index) => {
+                  // Assign depth based on position
+                  const depth = index < 2 ? 'big' : index < 7 ? 'medium' : 'small';
+                  
+                  return (
+                    <div 
+                      key={post.id}
+                      ref={index === filteredPosts.length - 1 ? lastPostRef : undefined}
+                    >
+                      <AccordionCard
+                        post={post}
+                        depth={depth}
+                        onView={handleViewPost}
+                        onSave={handleSavePost}
+                        onShare={(postId) => console.log("Share post:", postId)}
+                      />
+                    </div>
+                  );
+                })}
                 
                 {/* Loading more indicator */}
                 {isLoadingMore && (

@@ -1,69 +1,40 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { ArrowRight } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useTrailStore, type TrailItem } from '@/stores/trailStore';
 
 interface RightSidebarProps {
   variant?: 'default' | 'feed';
   onSelectPost?: (postId: string) => void;
 }
 
-interface SidebarBrainstorm {
-  id: string;
-  title: string | null;
-  content: string;
-  created_at: string;
-}
-
 export function RightSidebar({
   variant = 'default',
   onSelectPost
 }: RightSidebarProps) {
-  const [recentBrainstorms, setRecentBrainstorms] = useState<SidebarBrainstorm[]>([]);
+  const { trail, addToTrail, clearTrail } = useTrailStore();
 
+  // Listen for post view events to add to trail
   useEffect(() => {
-    if (variant === 'feed') {
-      fetchFeeds();
+    const handleShowThread = (e: CustomEvent<{ post?: { id: string; title?: string; content: string }; postId?: string }>) => {
+      if (e.detail.post) {
+        addToTrail({
+          id: e.detail.post.id,
+          title: e.detail.post.title || null,
+          content: e.detail.post.content,
+        });
+      }
+    };
 
-      // Sidebar always subscribes to public Sparks
-      const channel = supabase.channel('sidebar-changes').on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'posts',
-        filter: 'type=eq.brainstorm&mode=eq.public&visibility=eq.public'
-      }, () => {
-        fetchFeeds();
-      }).subscribe();
-      
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [variant]);
-
-  const fetchFeeds = async () => {
-    try {
-      // Sidebar always shows public Sparks, regardless of mode
-      // The feed (main content) shows the mode-specific content
-      const { data: brainstorms } = await supabase
-        .from('posts')
-        .select('id, title, content, created_at')
-        .eq('type', 'brainstorm')
-        .eq('kind', 'Spark')
-        .eq('mode', 'public')
-        .eq('visibility', 'public')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      setRecentBrainstorms((brainstorms || []) as SidebarBrainstorm[]);
-    } catch (error) {
-      console.error('Error fetching sidebar feeds:', error);
-    }
-  };
+    window.addEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
+    return () => {
+      window.removeEventListener('pb:brainstorm:show-thread', handleShowThread as EventListener);
+    };
+  }, [addToTrail]);
 
   if (variant === 'feed') {
-    if (recentBrainstorms.length === 0) {
+    if (trail.length === 0) {
       return (
         <div className={cn(
           "h-full overflow-y-auto rounded-2xl p-4",
@@ -71,7 +42,14 @@ export function RightSidebar({
           "border border-white/10",
           "shadow-[inset_0_0_30px_rgba(72,159,227,0.05)]"
         )}>
-          <p className="text-sm text-white/50 text-center py-8">No breadcrumbs yet.</p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider">
+              Your Trail
+            </h3>
+          </div>
+          <p className="text-sm text-white/50 text-center py-8">
+            Posts you view will appear here as breadcrumbs.
+          </p>
         </div>
       );
     }
@@ -83,8 +61,23 @@ export function RightSidebar({
         "border border-white/10",
         "shadow-[inset_0_0_30px_rgba(72,159,227,0.05)]"
       )}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider">
+            Your Trail
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearTrail}
+            className="text-white/40 hover:text-white/70 h-6 px-2"
+          >
+            <Trash2 className="w-3 h-3 mr-1" />
+            Clear
+          </Button>
+        </div>
+        
         <ol className="space-y-3">
-          {recentBrainstorms.map((item, index) => (
+          {trail.map((item, index) => (
             <li key={item.id} className="flex items-start gap-3 text-left group">
               {/* Numbered indicator with glow */}
               <span className={cn(
@@ -118,7 +111,7 @@ export function RightSidebar({
                   )}
                   <p className="text-xs text-white/60 line-clamp-2">{item.content}</p>
                   <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/40">
-                    {new Date(item.created_at).toLocaleDateString()}
+                    {new Date(item.visitedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </button>

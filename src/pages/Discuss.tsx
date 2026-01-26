@@ -8,7 +8,7 @@ import { useBrainstormExperienceStore } from '@/features/brainstorm/stores/exper
 import { PostReaderModal } from '@/components/posts/PostReaderModal';
 import { PullToRefresh } from '@/components/layout/PullToRefresh';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Plus, Brain, Building2 } from 'lucide-react';
+import { Bell, Brain, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useComposerStore } from '@/hooks/useComposerStore';
@@ -262,18 +262,7 @@ function DiscussContent() {
               )} />
             </Button>
           </Link>
-          <Button
-            onClick={() => openComposer()}
-            size="icon"
-            className={cn(
-              "w-10 h-10 rounded-full transition-all duration-200",
-              isPublic
-                ? "bg-[var(--accent)]/20 hover:bg-[var(--accent)]/30 border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 text-[var(--accent)] hover:text-white shadow-[0_0_15px_rgba(72,159,227,0.3)] hover:shadow-[0_0_25px_rgba(72,159,227,0.5)]"
-                : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
-            )}
-          >
-            <Plus className="w-5 h-5" />
-          </Button>
+          {/* Removed redundant Plus button - header Plus is sufficient */}
         </div>
       </div>
 

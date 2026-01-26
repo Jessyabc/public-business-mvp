@@ -84,9 +84,9 @@ export async function fetchClustersRpc(
 }
 
 /**
- * Get top continuations for display (top 3, max depth 2)
+ * Get top continuations for display (top 5, max depth 2)
  */
-export function getTopContinuations(cluster: LineageCluster, maxCount: number = 3): ContinuationNode[] {
+export function getTopContinuations(cluster: LineageCluster, maxCount: number = 5): ContinuationNode[] {
   // Filter to depth 1 (direct continuations only)
   const depth1Continuations = cluster.continuations.filter(c => c.depth === 1);
   
@@ -94,6 +94,20 @@ export function getTopContinuations(cluster: LineageCluster, maxCount: number = 
   return depth1Continuations
     .sort((a, b) => b.score - a.score)
     .slice(0, maxCount);
+}
+
+/**
+ * Get all continuations for fading display (for items 6-15)
+ */
+export function getAllContinuationsWithFade(cluster: LineageCluster, visibleCount: number = 5): Array<ContinuationNode & { fadeOpacity: number }> {
+  const depth1Continuations = cluster.continuations
+    .filter(c => c.depth === 1)
+    .sort((a, b) => b.score - a.score);
+  
+  return depth1Continuations.map((c, index) => ({
+    ...c,
+    fadeOpacity: index < visibleCount ? 1 : Math.max(0.3, 1 - ((index - visibleCount) * 0.15))
+  }));
 }
 
 /**
