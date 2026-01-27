@@ -1,0 +1,1 @@
+import{j as r}from"./index-DdiXzYE2.js";import{B as o}from"./BusinessProfileForm-DiOyi_vr.js";import"./select-ZkE_QomC.js";import"./index-Bzy6S3eG.js";import"./chevron-down-DsrBl0uX.js";import"./card-CVxPj8sa.js";import"./useBusinessProfile-CX-pLqdA.js";function n(){return r.jsx(o,{})}export{n as BusinessProfile,n as default};
