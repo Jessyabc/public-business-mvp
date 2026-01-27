@@ -377,6 +377,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lens_chains: {
+        Row: {
+          added_at: string
+          chain_id: string
+          id: string
+          lens_id: string
+        }
+        Insert: {
+          added_at?: string
+          chain_id: string
+          id?: string
+          lens_id: string
+        }
+        Update: {
+          added_at?: string
+          chain_id?: string
+          id?: string
+          lens_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lens_chains_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lens_chains_lens_id_fkey"
+            columns: ["lens_id"]
+            isOneToOne: false
+            referencedRelation: "thought_lenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nods_page: {
         Row: {
           checksum: string | null
@@ -1133,6 +1169,57 @@ export type Database = {
         }
         Relationships: []
       }
+      thought_chains: {
+        Row: {
+          created_at: string
+          display_label: string | null
+          first_thought_at: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_label?: string | null
+          first_thought_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_label?: string | null
+          first_thought_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      thought_lenses: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_consent: {
         Row: {
           consent_type: string
@@ -1205,6 +1292,7 @@ export type Database = {
       workspace_thoughts: {
         Row: {
           anchored_at: string | null
+          chain_id: string | null
           content: string
           created_at: string
           day_key: string
@@ -1216,6 +1304,7 @@ export type Database = {
         }
         Insert: {
           anchored_at?: string | null
+          chain_id?: string | null
           content?: string
           created_at?: string
           day_key?: string
@@ -1227,6 +1316,7 @@ export type Database = {
         }
         Update: {
           anchored_at?: string | null
+          chain_id?: string | null
           content?: string
           created_at?: string
           day_key?: string
@@ -1236,7 +1326,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workspace_thoughts_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
