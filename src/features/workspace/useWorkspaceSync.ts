@@ -81,6 +81,7 @@ export function useWorkspaceSync() {
             day_key: dayKey,
             display_label: row.display_label || null,
             anchored_at: row.anchored_at || null,
+            chain_id: row.chain_id || null,
           };
         });
         
@@ -141,6 +142,7 @@ export function useWorkspaceSync() {
           day_key: dayKey,
           display_label: t.display_label || null,
           anchored_at: t.anchored_at || null,
+          chain_id: t.chain_id || null,
         };
       });
 

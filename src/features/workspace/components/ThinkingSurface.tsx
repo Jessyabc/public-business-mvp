@@ -11,6 +11,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
+import { useChainStore } from '../stores/chainStore';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isToday } from 'date-fns';
 
@@ -29,12 +30,17 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const [enterCount, setEnterCount] = useState(0);
   const isMobile = useIsMobile();
   const { thoughts, updateThought, anchorThought, deleteThought, activeDayKey } = useWorkspaceStore();
+  const { activeChainId, getChainById } = useChainStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
+  const activeChain = activeChainId ? getChainById(activeChainId) : null;
   
-  // Show which day we're adding to (only if not today)
+  // Show which day/chain we're adding to
   const showDayLabel = activeDayKey && !isToday(parseISO(activeDayKey));
   const dayLabel = activeDayKey ? format(parseISO(activeDayKey), 'MMMM d') : null;
+  
+  // Chain indicator - shows which chain we're writing to
+  const chainLabel = activeChain?.display_label || (activeChain ? 'Current chain' : null);
   
   // Reset enter count when content changes
   useEffect(() => {
@@ -176,14 +182,29 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
         />
       </div>
       
-      {/* Day indicator when adding to a previous day */}
-      {showDayLabel && dayLabel && (
-        <p 
-          className="text-center text-xs mt-3 opacity-60"
-          style={{ color: '#9A8F85' }}
-        >
-          Adding to {dayLabel}
-        </p>
+      {/* Day/Chain indicator when adding to a previous day or specific chain */}
+      {(showDayLabel || chainLabel) && (
+        <div className="flex items-center justify-center gap-2 mt-3">
+          {chainLabel && (
+            <span 
+              className="text-xs px-2 py-0.5 rounded-full opacity-60"
+              style={{ 
+                color: PB_BLUE,
+                background: `${PB_BLUE}15`,
+              }}
+            >
+              Writing to: {chainLabel}
+            </span>
+          )}
+          {showDayLabel && dayLabel && (
+            <span 
+              className="text-xs opacity-60"
+              style={{ color: '#9A8F85' }}
+            >
+              {chainLabel ? '·' : ''} Adding to {dayLabel}
+            </span>
+          )}
+        </div>
       )}
       
       {/* Gentle hint - only show when empty */}

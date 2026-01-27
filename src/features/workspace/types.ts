@@ -20,6 +20,9 @@ export interface ThoughtEntry {
   updated_at: string;
 }
 
+/** Chain ID type alias for clarity */
+export type ChainId = string;
+
 export interface ThoughtObject {
   id: string;
   user_id: string;
@@ -33,6 +36,8 @@ export interface ThoughtObject {
   day_key: string;
   /** Optional user-provided label (replaces date header in display) */
   display_label?: string | null;
+  /** Chain ID this thought belongs to (Pull-the-Thread system) */
+  chain_id?: ChainId | null;
 }
 
 /** A day's worth of thoughts, grouped together */

@@ -60,6 +60,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           created_at: now,
           updated_at: now,
           day_key: normalizedDayKey,
+          chain_id: null, // Will be set when assigned to a chain
         };
         
         set((state) => ({

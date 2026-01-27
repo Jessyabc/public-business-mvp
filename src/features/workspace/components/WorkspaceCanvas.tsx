@@ -12,6 +12,8 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useWorkspaceSync } from '../useWorkspaceSync';
+import { useChainStore } from '../stores/chainStore';
+import { useChainSync } from '../useChainSync';
 import { ThinkingSurface } from './ThinkingSurface';
 import { ThoughtStack } from './ThoughtStack';
 import { EmptyWorkspace } from './EmptyWorkspace';
@@ -59,8 +61,9 @@ export function WorkspaceCanvas() {
   // Track if user deliberately started thinking (for auto-focus)
   const [userInitiated, setUserInitiated] = useState(false);
   
-  // Initialize sync
+  // Initialize sync for thoughts and chains
   useWorkspaceSync();
+  useChainSync();
   
   const activeThought = getActiveThought();
   const hasThoughts = thoughts.length > 0;
