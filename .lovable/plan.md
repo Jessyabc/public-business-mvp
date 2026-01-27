@@ -1,239 +1,390 @@
 
-
-## Comprehensive UI/UX Enhancement Plan
-
-This plan addresses multiple interconnected features: bottom navigation swipe gestures, profile access, spark continuations visualization, business feed improvements, and insights depth display.
-
----
-
-## Overview
-
-The changes are organized into 6 main work areas:
-
-1. **Bottom Navigation Restructure** - Reduce to 3 visible items with swipe-based profile/business access
-2. **Swipe Gesture Navigation** - Mobile swipe gestures on bottom nav bar
-3. **Spark Continuations Enhancement** - Up to 5 visible, fading effects, thread hierarchy
-4. **Insights Depth UI** - 3-level visual hierarchy (big/medium/small)
-5. **Business Feed Fixes** - Trail persistence, tab visibility, redundant button removal, spacing
-6. **Feed Spacing & Corner Fixes** - Address cramped layout and double-corner issues
-
----
-
-## 1. Bottom Navigation Restructure
-
-**Current state:** 4 visible items (Think, Discuss, Plus, Profile)
-
-**Target state:** 3 visible items (Think, Plus, Discuss) with profile accessed via swipe
-
-### Changes to `src/components/navigation/BottomNavigation.tsx`
-
-- Remove the Profile NavLink from the visible mobile navigation
-- Keep the Plus button centered
-- Show only Think and Discuss as the two main navigation items
-- Add a visual indicator (small arrow or dots) suggesting swipe availability
-- Desktop navigation remains unchanged (profile icon stays visible)
-
----
-
-## 2. Swipe Gesture Navigation System
-
-**Behavior:**
-- Swipe left-to-right on bottom nav bar opens Profile panel
-- Swipe right-to-left returns to previous screen
-- For business members: second left-to-right swipe opens Business Dashboard
-- Swipe must occur on the bottom menu bar area (not full screen)
-- Profile picture in header remains a fallback to access full menu
-
-### New files and changes
-
-1. **Create `src/hooks/useBottomNavSwipe.ts`** - Custom hook for swipe detection
-   - Track swipe direction and position
-   - Detect if swipe occurred on bottom nav bar
-   - Maintain swipe state (prevent consecutive same-direction swipes)
-   - Expose navigation callbacks for profile and business panels
-
-2. **Create `src/components/navigation/ProfileSlidePanel.tsx`** - Sliding profile panel
-   - Slide-in panel from right side
-   - Contains profile sections currently in Profile.tsx
-   - Remove "Business Dashboard & Tools" button (move to swipe)
-   - Animated entry/exit with framer-motion
-
-3. **Create `src/components/navigation/BusinessSlidePanel.tsx`** - Business interface panel
-   - Only visible for business members
-   - Contains business dashboard quick actions
-   - Accessible via second right swipe from profile panel
-
-4. **Modify `src/components/navigation/BottomNavigation.tsx`**
-   - Integrate swipe hook
-   - Add touch event handlers for swipe area
-   - Render ProfileSlidePanel and BusinessSlidePanel conditionally
-   - Track navigation history for "back" swipe functionality
-
----
-
-## 3. Spark Continuations Enhancement
-
-**Current state:** Shows 3 continuations at depth 1, basic indentation
-
-**Target state:** 
-- Up to 5 visible continuations
-- Fading effect for 10-15 continuations
-- First post of thread is larger/semi-opened (anchor node)
-- Swipe up shows continuation with most sparks
-- Swipe left shows next second-level continuation
-
-### Changes
-
-1. **Modify `src/features/feed/LineageClusterCard.tsx`**
-   - Increase `getTopContinuations` call from 3 to 5
-   - Add fade-out effect for items 6-15 (gradual opacity reduction)
-   - Make anchor spark card larger with semi-expanded state
-   - Add swipe gesture detection for navigation within thread
-
-2. **Modify `src/features/feed/ContinuationCard.tsx`**
-   - Add opacity prop for fade effect (controlled by parent)
-   - Add size variant (normal/faded) based on position
-   - Synchronize expansion animation with scroll speed
-
-3. **Modify `src/lib/clusterUtils.ts`**
-   - Update `getTopContinuations` to support up to 5 items
-   - Add helper for weighted continuation ordering by t_score
-
-4. **Create `src/components/brainstorm/ThreadSwipeHandler.tsx`**
-   - Swipe up: navigate to highest-scoring continuation
-   - Swipe left: navigate to next sibling continuation
-   - Wrap spark viewer content
-
----
-
-## 4. Insights Depth UI (3 Levels)
-
-**Current state:** AccordionCard shows uniform sizing
-
-**Target state:** 
-- Big: Featured/top insights (full width, expanded preview)
-- Medium: Standard insights (normal card)
-- Small: Lower priority (compact view)
-
-### Changes
-
-1. **Modify `src/components/posts/AccordionCard.tsx`**
-   - Add `depth` prop: 'big' | 'medium' | 'small'
-   - Big: larger title, expanded content preview, prominent metrics
-   - Medium: current styling (default)
-   - Small: compact layout, smaller text, condensed actions
-   - Fix double-corner issue (nested border-radius causing artifacts)
-
-2. **Modify `src/components/feeds/BusinessFeed.tsx`**
-   - Assign depth based on post score/position in feed
-   - First 2 posts: 'big'
-   - Next 5 posts: 'medium'
-   - Remaining: 'small'
-
-3. **CSS fix for double-corner issue**
-   - Review `.glass-low` and `.rounded-*` nesting
-   - Ensure inner content doesn't have conflicting border-radius
-   - Add `overflow: hidden` where needed
-
----
-
-## 5. Business Feed Fixes
-
-### 5.1 Remove Redundant Plus Button
-
-**File: `src/pages/Discuss.tsx`** (line 265-277)
-- The header already has a Plus button next to profile avatar
-- Remove the redundant Plus button from business feed header
-- Keep only header Plus button
-
-### 5.2 Feed/Trail Tab Visibility
-
-**File: `src/features/brainstorm/components/BrainstormLayoutShell.tsx`**
-- Increase tab button size and contrast
-- Add border or stronger background for visibility
-- Make "FEED" and "TRAIL" text larger (from `text-xs` to `text-sm`)
-- Add subtle glow/shadow for better visibility on both lenses
-
-### 5.3 Trail Persistence Fix
-
-**Current issue:** RightSidebar fetches recent public sparks, doesn't track user's path
-
-**Solution:**
-1. **Create `src/stores/trailStore.ts`** - Zustand store for trail
-   - Store visited post IDs with timestamps
-   - Persist to localStorage
-   - Limit to last 20 posts
-
-2. **Modify `src/components/layout/RightSidebar.tsx`**
-   - Use trailStore instead of fetching recent brainstorms
-   - Display user's actual navigation path
-   - Add "Clear Trail" button
-   - Show posts in order visited
-
-3. **Track navigation events**
-   - Listen for `pb:brainstorm:show-thread` events
-   - Add post to trail when viewed
-   - Update on navigation
-
-### 5.4 Business Feed Spacing
-
-**File: `src/features/feed/FeedList.tsx` and `src/components/feeds/BusinessFeed.tsx`**
-- Increase `space-y-6` to `space-y-8` for feed items
-- Add more padding around cards (`p-6` to `p-8`)
-- Increase margin between sections
-
----
-
-## 6. General Feed Spacing & Corner Fixes
-
-### Spacing improvements
-
-**Files affected:**
-- `src/features/feed/FeedList.tsx`: Increase `space-y-6` to `space-y-8`
-- `src/features/feed/ClusterFeedList.tsx`: Increase `space-y-8` to `space-y-10`
-- `src/components/posts/AccordionCard.tsx`: Add more internal padding
-
-### Double-corner fix
-
-**Issue visible in screenshots:** Nested rounded corners creating visual artifacts
-
-**Fix in `src/components/brainstorm/SparkCard.tsx` and `AccordionCard.tsx`:**
-- Remove inner border-radius where outer container already has it
-- Add `overflow: hidden` to parent containers
-- Ensure glass effects don't stack border-radius
-
----
-
-## Technical Details
-
-### File Changes Summary
-
-| File | Action | Purpose |
-|------|--------|---------|
-| `src/components/navigation/BottomNavigation.tsx` | Modify | Reduce to 3 items, add swipe detection |
-| `src/hooks/useBottomNavSwipe.ts` | Create | Swipe gesture handling |
-| `src/components/navigation/ProfileSlidePanel.tsx` | Create | Sliding profile panel |
-| `src/components/navigation/BusinessSlidePanel.tsx` | Create | Sliding business panel |
-| `src/stores/trailStore.ts` | Create | Trail persistence store |
-| `src/components/layout/RightSidebar.tsx` | Modify | Use trail store |
-| `src/features/brainstorm/components/BrainstormLayoutShell.tsx` | Modify | Improve tab visibility |
-| `src/features/feed/LineageClusterCard.tsx` | Modify | 5 continuations, fading |
-| `src/features/feed/ContinuationCard.tsx` | Modify | Opacity/fade support |
-| `src/components/posts/AccordionCard.tsx` | Modify | Depth variants, corner fix |
-| `src/components/feeds/BusinessFeed.tsx` | Modify | Depth assignment |
-| `src/components/brainstorm/SparkCard.tsx` | Modify | Corner fix |
-| `src/pages/Profile.tsx` | Modify | Remove business dashboard button |
-| `src/pages/Discuss.tsx` | Modify | Remove redundant Plus button |
-
-### Dependencies
-
-- framer-motion (existing) for slide animations
-- zustand (existing) for trail persistence store
-
-### Important Considerations
-
-- React Hook Order: All new hooks will be appended at end of hook lists
-- Swipe gestures constrained to bottom nav area to prevent conflicts
-- Business features only visible to users with appropriate roles
-- Trail data persisted to localStorage for session continuity
-
+# Think Space: Pull-the-Thread System — Implementation Plan
+
+## Executive Summary
+
+Think Space: Pull-the-Thread System — Implementation Plan
+Executive Summary
+
+This plan transforms the existing Think Space from a simple "day-grouped thoughts" system into a continuity-of-thought system with raw chains, merged lenses, and gesture-based threading. The philosophy is preserved: raw chains are the source of truth, merged lenses are views, and user intent drives all structural decisions.
+
+Part 1: System Analysis
+Current State Assessment
+
+The existing architecture provides a solid foundation:
+
+Component	Current State	Gap vs Vision
+Thoughts	workspace_thoughts table with day_key, state, anchored_at	Missing chain_id — thoughts aren't explicitly linked to chains
+Threading	Day-based grouping (getDayThreads())	Implicit by date, not explicit user-defined chains
+Relations	post_relations table with hard/soft types	Exists for posts, not for workspace thoughts
+Chain Walking	api_space_chain_hard, walkForward(), backtrackToRoot()	Only for public posts, not for private thoughts
+Gestures	Tap to write, blur to anchor	Missing: pull-to-break, long-press merge
+Search	Posts FTS exists	No thought-specific search
+UI	Vertical timeline, day separators	Missing: open circle continuation indicator, thread visualization
+Key Entities Identified
+┌─────────────────────────────────────────────────────────────────┐
+│  THOUGHT (workspace_thoughts)                                    │
+│  - id, user_id, content, created_at, anchored_at                │
+│  - chain_id (NEW) → links to RAW CHAIN                          │
+│  Source of truth is event time (anchored_at/created_at).         │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  RAW CHAIN (thought_chains - NEW TABLE)                          │
+│  - id, user_id, created_at                                       │
+│  - first_thought_at → temporal identity                          │
+│  - display_label (optional)                                      │
+│  Source of truth. Linear. Immutable ownership.                   │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  MERGED LENS (thought_lenses - NEW TABLE)                        │
+│  - id, user_id, created_at, label (optional)                     │
+│  A view over multiple raw chains.                                │
+│  NOT the source of truth.                                        │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  LENS MEMBERSHIP (lens_chains - NEW JOIN TABLE)                  │
+│  - lens_id, chain_id                                             │
+│  Many-to-many: a chain can belong to multiple lenses.            │
+└─────────────────────────────────────────────────────────────────┘
+
+Part 2: Edge Cases & Risks
+Edge Cases
+Scenario	Resolution
+Empty chain	Allowed. Represents an intentional break even before the next thought is written. May be collapsed visually. Optional cleanup only if user navigates away and the chain remains empty.
+Single-thought chain	Valid — represents an isolated idea
+Chain deletion	Only lens associations deleted; raw chain persists
+Merge creates duplicate order	Timeline Integrity Rule: global anchored_at sorting across chains with stable tie-breakers (see Part 4)
+User closes app mid-gesture	Debounced sync ensures partial state is saved
+Offline merging	Queued actions with conflict resolution on reconnect
+Gesture Conflicts
+Conflict	Resolution
+Scroll vs Pull (break chain)	Pull gesture requires: (1) touch on open circle only, (2) drag within bottom 180°, (3) minimum 60px distance with resistance
+Tap vs Long-press (merge)	Long-press delay = 500ms; tap triggers continue
+Double-tap vs scroll	No double-tap actions to avoid conflict
+Right-click context menu	Desktop-only; mobile uses long-press
+Performance Concerns
+Concern	Mitigation
+Merged lens with 10+ chains	Virtual scrolling, paginate to 50 thoughts max per render
+Search latency	PostgreSQL full-text search with tsvector index on content
+Gesture lag	60fps gesture animations using framer-motion transforms only (no layout changes during drag)
+Sync storms	Debounced sync (1500ms), batch upserts
+Mobile vs Desktop Differences
+Feature	Mobile	Desktop
+Break chain	Drag down on circle	Drag down on circle
+Merge chains	Long-press (500ms)	Right-click OR click-hold (500ms)
+Continue chain	Tap input area	Click input area
+Keyboard dismiss	Double-enter on empty OR blur	N/A
+Open circle size	48px touch target	32px
+Part 3: UX States & Navigation Flows
+State Machine
+┌─────────────┐
+│   IDLE      │◄─────────────────────────────────┐
+│ (tap to     │                                   │
+│  think)     │                                   │
+└──────┬──────┘                                   │
+       │ tap canvas / tap "open circle"           │
+       ▼                                          │
+┌─────────────┐                                   │
+│  ACTIVE     │───blur with content──────────────►│ ANCHORED
+│  WRITING    │                                   │ (thought
+└──────┬──────┘                                   │  added to
+       │ pull down on circle                      │  chain)
+       ▼                                          │
+┌─────────────┐                                   │
+│  BREAKING   │───snap complete─────► NEW CHAIN   │
+│  CHAIN      │   (next thought                   │
+│ (resistance)│    goes to new chain)             │
+└──────┬──────┘                                   │
+       │ cancel (drag back)                       │
+       ▼                                          │
+   Back to ACTIVE                                 │
+                                                  │
+┌─────────────┐                                   │
+│ LONG-PRESS  │───select target───► MERGED LENS   │
+│  (merge)    │   from search                     │
+└─────────────┘                                   │
+                                                  │
+                          ┌───────────────────────┘
+                          │
+                          ▼
+                    ┌───────────┐
+                    │  ANCHORED │
+                    │  (chain   │
+                    │   grows)  │
+                    └───────────┘
+
+View Modes
+
+Raw Chain View (default) — Shows a single chain's thoughts in chronological order
+
+Merged Lens View — Shows multiple chains interleaved by anchored_at (Timeline Integrity)
+
+All Chains View — Sidebar list of all user's chains with previews
+
+(Optional UX weighting) In merged lens view, the UI should communicate that this lens is the user’s current “mental space,” while raw chains remain accessible as origins.
+
+Part 4: Data Structures (High-Level)
+New Database Tables
+thought_chains
+├── id: UUID (PK)
+├── user_id: UUID (FK → auth.users)
+├── created_at: TIMESTAMPTZ
+├── first_thought_at: TIMESTAMPTZ (computed from first thought)
+├── display_label: TEXT (optional user title)
+└── CONSTRAINT: user_id matches RLS
+
+thought_lenses
+├── id: UUID (PK)
+├── user_id: UUID (FK → auth.users)
+├── created_at: TIMESTAMPTZ
+├── label: TEXT (optional; no forced structure at creation)
+└── CONSTRAINT: user_id matches RLS
+
+lens_chains (join table)
+├── id: UUID (PK)
+├── lens_id: UUID (FK → thought_lenses)
+├── chain_id: UUID (FK → thought_chains)
+├── added_at: TIMESTAMPTZ
+└── UNIQUE(lens_id, chain_id)
+
+Modifications to workspace_thoughts
+workspace_thoughts (existing)
+├── ... existing columns ...
+├── chain_id: UUID (FK → thought_chains) [NEW]
+└── (No position_in_chain in V1; ordering is event-time-based)
+
+Stable Ordering / Tie-breakers (Timeline Integrity)
+
+Merged lenses must order by:
+
+anchored_at ascending (preferred, if present)
+
+fallback: created_at ascending
+
+tie-breaker: id ascending
+
+(Optional future enhancement: add client_sequence per device/session to stabilize same-timestamp collisions.)
+
+TypeScript Types
+interface ThoughtChain {
+  id: string;
+  user_id: string;
+  created_at: string;
+  first_thought_at: string;
+  display_label: string | null;
+  thoughts: ThoughtObject[]; // Populated via join
+}
+
+interface ThoughtLens {
+  id: string;
+  user_id: string;
+  created_at: string;
+  label: string | null;
+  chain_ids: string[]; // References to chains in this lens
+}
+
+// Updated ThoughtObject
+interface ThoughtObject {
+  // ... existing fields ...
+  chain_id: string; // NEW - required
+}
+
+Part 5: Gesture Handling Logic
+Pull-to-Break Gesture
+GestureState:
+  - startY: number
+  - currentY: number
+  - resistance: number (0-1)
+  - isActive: boolean
+  - didSnap: boolean
+
+onTouchStart (on open circle only):
+  if (target === openCircle):
+    gestureState.startY = touch.clientY
+    gestureState.isActive = true
+
+onTouchMove:
+  if (!gestureState.isActive) return
+  
+  deltaY = touch.clientY - gestureState.startY
+  
+  // Only allow downward drag (break gesture is "pull down")
+  if (deltaY > 0 && isWithinBottomHemisphere(touch)):
+    // Apply resistance curve: starts easy, gets harder
+    resistance = Math.min(1, deltaY / 120)
+    visualOffset = easeOutQuad(deltaY, 0, 80, 120)
+    
+    // Visual feedback: thread stretches
+    updateThreadVisual(visualOffset)
+    
+    // Haptic at threshold
+    if (resistance > 0.7 && !didHaptic):
+      hapticFeedback('medium')
+      didHaptic = true
+
+onTouchEnd:
+  if (gestureState.resistance > 0.8):
+    // SNAP — create new chain (empty chain allowed)
+    hapticFeedback('heavy')
+    createNewChain()
+  else:
+    // Cancel — spring back
+    animateSpringBack()
+  
+  resetGestureState()
+
+Long-Press to Merge
+Timer: null
+LONG_PRESS_DURATION = 500ms
+
+onTouchStart (on open circle):
+  timer = setTimeout(() => {
+    hapticFeedback('light')
+    openMergeModal()
+  }, LONG_PRESS_DURATION)
+
+onTouchMove:
+  if (movedMoreThan(10px)):
+    clearTimeout(timer) // Abort — user is dragging
+
+onTouchEnd:
+  clearTimeout(timer)
+
+Part 6: Search Integration
+Search Architecture
+┌─────────────────┐     ┌─────────────────┐
+│ Search Input    │────►│ Debounce 300ms  │
+└─────────────────┘     └────────┬────────┘
+                                 │
+                                 ▼
+                   ┌─────────────────────────┐
+                   │ PostgreSQL FTS Query    │
+                   │ ts_rank(content, query) │
+                   │ + continuity boost      │
+                   │ + recency boost         │
+                   └────────────┬────────────┘
+                                │
+                                ▼
+                   ┌─────────────────────────┐
+                   │ Results:                │
+                   │ - Chain previews        │
+                   │ - Matching thoughts     │
+                   │ - Snippet highlights    │
+                   └─────────────────────────┘
+
+Search Ranking Formula
+score = ts_rank(content_tsv, plainto_tsquery(input))
+      + (chain_thought_count > 3 ? 0.3 : 0)                      -- continuity bonus (recall-friendly)
+      + (1 / (1 + EXTRACT(DAY FROM now() - anchored_at))) * 0.2  -- recency
+
+Part 7: Implementation Scope
+V1 Scope (Ship First)
+
+Must ship for the system to be functional:
+
+Feature	Priority	Effort
+Chain data model	Critical	Medium
+Database migration for thought_chains, chain_id column		
+Continue chain gesture	Critical	Low
+Tap open circle → append thought to current chain		
+Break chain gesture	Critical	High
+Pull-down gesture with resistance and snap		
+Visual thread indicator	Critical	Medium
+Open circle at chain end, subtle line connecting thoughts		
+Chain-aware writing indicator	High	Low
+"Writing to: [chain preview]" shown during active writing		
+Basic chain selector	High	Medium
+UI to switch between chains (not lenses yet)		
+Migration for existing thoughts	Critical	Medium
+Assign all current thoughts to a single "legacy" chain per user		
+V2 Scope (Can Wait)
+
+Enhances but not required for core experience:
+
+Feature	Priority	Effort
+Merged Lens creation	High	High
+Long-press → search → merge UI		
+Lens view	High	High
+Interleaved timeline with Timeline Integrity		
+Chain search	Medium	Medium
+FTS for finding chains to merge		
+Unmerge / lens deletion	Medium	Low
+Safe deletion (raw chains preserved)		
+Multi-lens membership	Low	Low
+Chain can belong to N lenses		
+Lens labels & organization	Low	Medium
+User-defined lens names and ordering		
+(Optional) Ghost interleave preview during merge selection	Low	Medium
+Part 8: File Changes Summary
+New Files
+File	Purpose
+src/features/workspace/types/chain.ts	TypeScript types for chains and lenses
+src/features/workspace/stores/chainStore.ts	Zustand store for chain state
+src/features/workspace/hooks/useChainGestures.ts	Gesture handling for pull-to-break, long-press
+src/features/workspace/components/ChainThread.tsx	Visual thread with open circle
+src/features/workspace/components/OpenCircle.tsx	Gesture-aware continuation indicator
+src/features/workspace/components/MergeModal.tsx	Search and select chains to merge (V2)
+supabase/migrations/YYYYMMDD_thought_chains.sql	Database migration for new tables
+Modified Files
+File	Changes
+src/features/workspace/types.ts	Add chain_id to ThoughtObject
+src/features/workspace/useWorkspaceStore.ts	Add chain-aware actions: createChain, breakChain, setActiveChain
+src/features/workspace/useWorkspaceSync.ts	Sync chains alongside thoughts
+src/features/workspace/components/WorkspaceCanvas.tsx	Replace day-based grouping with chain-based
+src/features/workspace/components/ThinkingSurface.tsx	Add "Writing to: [chain]" indicator
+src/features/workspace/components/ThoughtStack.tsx	Render chains instead of day threads
+src/features/workspace/components/AnchoredThought.tsx	Add subtle thread line connector
+Part 9: UI Design Principles (Preserved)
+
+The implementation must maintain:
+
+Vertical timeline — Thoughts flow down, newest at top
+
+Visible thread — Subtle line connecting thoughts in a chain
+
+Open circle — Continuation point at chain end (gestures trigger here)
+
+Minimal chrome — No forced titles, categories, or structure
+
+Calm, private, forgiving — No gamification, no pressure
+
+Subtle day separators — Temporal seams (not headers) between days
+
+Visual Specifications
+Open Circle:
+  - Size: 48px (mobile), 32px (desktop)
+  - Color: rgba(72, 159, 227, 0.3) → #489FE3 (PB Blue, faded)
+  - Animation: Subtle pulse (1.5s ease-in-out infinite)
+  - Position: Centered below last anchored thought
+
+Thread Line:
+  - Width: 1px
+  - Color: rgba(72, 159, 227, 0.15)
+  - Style: Solid (raw chain), Dashed (across chain boundary in lens view)
+  - Length: Extends from bottom of one thought to top of next
+
+Part 10: Critical Constraints (Non-Negotiable)
+
+These constraints are locked and must not be simplified away:
+
+Raw thoughts are immutable in ownership — A thought cannot move between chains
+
+Merged chains are views, not containers — Lenses never own thoughts
+
+A raw chain can belong to multiple lenses — Many-to-many relationship
+
+No AI auto-merging or auto-splitting — User gesture = explicit intent
+
+Timeline Integrity — Merged views always sort by global anchored_at with stable tie-breakers
+
+Gesture is the decision — No confirmation modals for break/continue
+
+No forced naming — Lens labels are optional at creation; meaning is allowed to emerge later
+
+This plan provides the complete architectural foundation for the Pull-the-Thread system while preserving the thinking-continuity philosophy. V1 focuses on the raw chain mechanics; V2 adds the lens/merge layer.
