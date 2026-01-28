@@ -1,0 +1,403 @@
+// src/components/profile/ProfileForm.tsx
+import { useEffect, useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { GlassInput } from "@/components/ui/GlassInput";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { User, Building, MapPin, Globe, Save, Users, Mail, Camera, Loader2 } from "lucide-react";
+import { DisconnectButton } from "./DisconnectButton";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { BusinessMemberBadge } from "@/components/business/BusinessMemberBadge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useProfile, Profile as ProfileType } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+export function ProfileForm() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const { userRoles, refetch: refetchRoles } = useUserRoles();
+  const navigate = useNavigate();
+
+  // ⬇️ consomme le hook unifié
+  const { profile, loading, fetchProfile, updateProfile } = useProfile();
+
+  // état local d'édition (découplé du store du hook)
+  const [form, setForm] = useState<ProfileType | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [inviteToken, setInviteToken] = useState("");
+  const [acceptingInvite, setAcceptingInvite] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isBusiness = userRoles.includes("business_member") || userRoles.includes("admin");
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Error", description: "Please upload an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image must be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update form state
+      if (form) {
+        setForm({ ...form, avatar_url: publicUrl });
+        setHasChanges(true);
+      }
+
+      toast({ title: "Success", description: "Avatar uploaded! Click Save to apply." });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({ title: "Error", description: "Failed to upload avatar", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  useEffect(() => {
+    if (profile) setForm(profile);
+  }, [profile]);
+
+  const updateField = (field: keyof ProfileType, value: string | null) => {
+    if (!form) return;
+    setForm({ ...form, [field]: value });
+    setHasChanges(true);
+  };
+
+  const handleSave = async () => {
+    if (!form) return;
+    setSaving(true);
+    const { error } = await updateProfile({
+      display_name: form.display_name,
+      avatar_url: form.avatar_url,
+      bio: form.bio,
+      website: form.website,
+      company: form.company,
+      location: form.location,
+      is_completed: true,
+    });
+    setSaving(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message ?? "Failed to update profile",
+        variant: "destructive",
+      });
+    } else {
+      setHasChanges(false);
+      toast({ title: "Success", description: "Profile updated successfully!" });
+      await fetchProfile();
+    }
+  };
+
+  const handleAcceptInvite = async () => {
+    if (!inviteToken.trim()) {
+      toast({ title: "Error", description: "Please enter an invite token", variant: "destructive" });
+      return;
+    }
+    setAcceptingInvite(true);
+    try {
+      const { error } = await supabase.rpc("consume_invite", { p_token: inviteToken.trim() });
+      if (error) throw error;
+      toast({
+        title: "Success!",
+        description: "Welcome to Business Membership! You now have access to business features.",
+      });
+      setInviteToken("");
+      await refetchRoles();
+    } catch (error: unknown) {
+      console.error("Failed to accept invite", error);
+      let description = "Failed to accept invite. Please check your token.";
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (error && typeof error === "object" && "message" in error && typeof (error as { message?: unknown }).message === "string") {
+        description = (error as { message: string }).message;
+      }
+      toast({
+        title: "Error",
+        description,
+        variant: "destructive",
+      });
+    } finally {
+      setAcceptingInvite(false);
+    }
+  };
+
+  if (loading || !form) {
+    return (
+      <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
+        <CardContent className="p-6">
+          <div className="text-center text-[var(--text-primary)]">
+            Loading profile...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
+          <User className="w-5 h-5 text-[var(--text-secondary)]" />
+          Profile Settings
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* Avatar + Display name */}
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <Avatar className="w-20 h-20">
+              <AvatarImage src={form.avatar_url ?? undefined} />
+              <AvatarFallback className="text-lg bg-primary/20 text-primary">
+                {form.display_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            
+            {/* Upload overlay */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className={cn(
+                "absolute inset-0 flex items-center justify-center rounded-full",
+                "bg-black/50 opacity-0 group-hover:opacity-100",
+                "transition-opacity duration-200 cursor-pointer",
+                uploadingAvatar && "opacity-100"
+              )}
+            >
+              {uploadingAvatar ? (
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              ) : (
+                <Camera className="w-6 h-6 text-white" />
+              )}
+            </button>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
+
+          <div className="flex-1">
+            <Label htmlFor="display_name" className="text-[var(--text-primary)]">
+              Display Name
+            </Label>
+            <GlassInput
+              id="display_name"
+              value={form.display_name ?? ""}
+              onChange={(e) => updateField("display_name", e.target.value)}
+              placeholder="Your display name"
+            />
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div className="space-y-2">
+          <Label htmlFor="bio" className="text-[var(--text-primary)]">
+            Bio
+          </Label>
+          <GlassInput
+            as="textarea"
+            id="bio"
+            value={form.bio ?? ""}
+            onChange={(e) => updateField("bio", e.target.value)}
+            placeholder="Tell us about yourself..."
+          />
+        </div>
+
+        {/* Company */}
+        <div className="space-y-2">
+          <Label htmlFor="company" className="flex items-center gap-2 text-[var(--text-primary)]">
+            <Building className="w-4 h-4 text-[var(--text-secondary)]" />
+            Company
+          </Label>
+          <GlassInput
+            id="company"
+            value={form.company ?? ""}
+            onChange={(e) => updateField("company", e.target.value)}
+            placeholder="Your company"
+          />
+        </div>
+
+        {/* Location */}
+        <div className="space-y-2">
+          <Label htmlFor="location" className="flex items-center gap-2 text-[var(--text-primary)]">
+            <MapPin className="w-4 h-4 text-[var(--text-secondary)]" />
+            Location
+          </Label>
+          <GlassInput
+            id="location"
+            value={form.location ?? ""}
+            onChange={(e) => updateField("location", e.target.value)}
+            placeholder="Your location"
+          />
+        </div>
+
+        {/* Links */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="website" className="flex items-center gap-2 text-[var(--text-primary)]">
+              <Globe className="w-4 h-4 text-[var(--text-secondary)]" />
+              Website / Social Link
+            </Label>
+            <GlassInput
+              id="website"
+              value={form.website ?? ""}
+              onChange={(e) => updateField("website", e.target.value)}
+              placeholder="https://yourwebsite.com or social profile"
+            />
+            <p className="text-xs text-muted-foreground">
+              Add your website, portfolio, or any social profile link
+            </p>
+          </div>
+        </div>
+
+        {/* Save / Reset */}
+        <div className="flex gap-3">
+          <Button
+            onClick={handleSave}
+            disabled={saving || !hasChanges}
+            className="flex-1 transition-all duration-300 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20 disabled:opacity-50"
+          >
+            {saving ? (
+              <>
+                <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                {hasChanges ? "Save Changes" : "No Changes"}
+              </>
+            )}
+          </Button>
+
+          {hasChanges && (
+            <Button
+              variant="outline"
+              onClick={fetchProfile}
+              className="transition-all duration-300 border-white/20 text-foreground hover:bg-white/10"
+            >
+              Reset
+            </Button>
+          )}
+        </div>
+
+        {/* Business membership */}
+        <Collapsible>
+          <CollapsibleTrigger className="w-full flex items-center justify-between p-4 rounded-lg transition-all duration-300 bg-white/5 border border-white/20 text-foreground hover:bg-white/10">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              <span className="font-medium">Business Membership</span>
+              {isBusiness && <BusinessMemberBadge />}
+            </div>
+            <div className={`text-xs px-2 py-1 rounded ${
+              isBusiness ? "bg-green-500/20 text-green-600" : "bg-yellow-500/20 text-yellow-600"
+            }`}>
+              {isBusiness ? "Active" : "Invite-Only"}
+            </div>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-4 space-y-4">
+            {isBusiness ? (
+              <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <BusinessMemberBadge />
+                  <span className="text-sm font-medium text-green-400">
+                    Business Member Active
+                  </span>
+                </div>
+                <p className="text-sm text-green-300">
+                  You have access to business features, can create business posts, and send invitations to other users.
+                </p>
+                <Button
+                  onClick={() => navigate("/settings?tab=business")}
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 border-green-400/20 text-green-400 hover:bg-green-400/10"
+                >
+                  <Building className="w-4 h-4 mr-2" />
+                  Edit Business Profile
+                </Button>
+              </div>
+            ) : (
+              <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <h4 className="font-medium mb-2 text-yellow-400">
+                  Business Membership (Invite-Only)
+                </h4>
+                <p className="text-sm mb-4 text-yellow-300">
+                  Business membership is invite-only. If you have an invite token, paste it below to upgrade your account.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <GlassInput
+                      value={inviteToken}
+                      onChange={(e) => setInviteToken(e.target.value)}
+                      placeholder="Paste your invite token here..."
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleAcceptInvite}
+                      disabled={acceptingInvite || !inviteToken.trim()}
+                      className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/20"
+                    >
+                      {acceptingInvite ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Mail className="w-4 h-4 mr-2" />
+                          Accept
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-yellow-300/80">
+                    Need an invite? Ask an existing business member or admin to send you one.
+                  </p>
+                </div>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+
+        <DisconnectButton />
+      </CardContent>
+    </Card>
+  );
+}
