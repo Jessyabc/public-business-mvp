@@ -1,0 +1,36 @@
+/**
+ * Reduced Motion Support
+ * Respects user's preference for reduced motion
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Reduce animation distances */
+  [data-motion] {
+    --motion-scale: 0.5;
+  }
+  
+  /* Disable parallax and transform effects */
+  .parallax,
+  [data-parallax] {
+    transform: none !important;
+  }
+  
+  /* Reduce blur and scale animations */
+  [class*="animate-"] {
+    animation-duration: 0.1s !important;
+  }
+  
+  /* Framer Motion specific */
+  [data-framer-appear-animation] {
+    --appear-animation-duration: 0.1s !important;
+  }
+}

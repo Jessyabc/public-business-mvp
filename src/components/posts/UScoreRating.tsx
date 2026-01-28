@@ -1,0 +1,167 @@
+import { useState, memo } from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import uScoreIcon from '@/assets/u-score-icon.png';
+
+interface UScoreRatingProps {
+  postId: string;
+  currentScore?: number | null;
+  ratingCount?: number;
+  userRating?: number | null;
+  onRate?: (rating: number) => Promise<void>;
+  compact?: boolean;
+  className?: string;
+  disabled?: boolean;
+}
+
+export const UScoreRating = memo(({
+  postId,
+  currentScore,
+  ratingCount = 0,
+  userRating,
+  onRate,
+  compact = false,
+  className,
+  disabled = false
+}: UScoreRatingProps) => {
+  const { user } = useAuth();
+  const [hoveredValue, setHoveredValue] = useState<number | null>(null);
+  const [selectedValue, setSelectedValue] = useState<number | null>(userRating ?? null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleRate = async (value: number) => {
+    if (disabled) return;
+    
+    if (!user) {
+      toast.error('Please sign in to rate posts');
+      return;
+    }
+
+    if (isSubmitting) return;
+
+    // Toggle: if clicking the same value, reset to 0 (no rating)
+    const newValue = selectedValue === value ? 0 : value;
+
+    setIsSubmitting(true);
+    setSelectedValue(newValue === 0 ? null : newValue);
+
+    try {
+      if (onRate) {
+        await onRate(newValue);
+      }
+      if (newValue === 0) {
+        toast.success('Rating removed');
+      } else {
+        toast.success(`Rated ${newValue}/5`);
+      }
+      // Dispatch event so other components can sync
+      window.dispatchEvent(new CustomEvent('pb:rating:changed', { detail: { postId } }));
+    } catch (error) {
+      console.error('Failed to submit rating:', error);
+      toast.error('Failed to submit rating');
+      setSelectedValue(userRating ?? null);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const displayValue = hoveredValue ?? selectedValue ?? currentScore;
+
+  if (compact) {
+    return (
+      <div className={cn('flex items-center gap-1.5', className)}>
+        <img src={uScoreIcon} alt="U-Score" className="w-4 h-4 object-contain" />
+        <span className="text-sm font-semibold text-blue-500">
+          {currentScore?.toFixed(1) ?? '—'}
+        </span>
+        {ratingCount > 0 && (
+          <span className="text-xs text-muted-foreground">
+            ({ratingCount})
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn('space-y-3', className)}>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <img src={uScoreIcon} alt="U-Score" className="w-5 h-5 object-contain" />
+          <span className="text-sm font-medium text-foreground">Rate Utility</span>
+          {ratingCount > 0 && (
+            <span className="text-xs text-muted-foreground">
+              ({ratingCount} {ratingCount === 1 ? 'rating' : 'ratings'})
+            </span>
+          )}
+        </div>
+        {displayValue && (
+          <motion.span
+            key={displayValue}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-lg font-bold text-blue-500"
+          >
+            {typeof displayValue === 'number' ? displayValue.toFixed(1) : displayValue}/5
+          </motion.span>
+        )}
+      </div>
+
+      {/* Rating Scale - fixed height to prevent stutter */}
+      <div className="flex items-center gap-1 h-8">
+        {[1, 2, 3, 4, 5].map((value) => {
+          const isSelected = selectedValue !== null && value <= selectedValue;
+          const isHovered = hoveredValue !== null && value <= hoveredValue;
+          const isActive = isHovered || isSelected;
+
+          return (
+            <motion.button
+              key={value}
+              type="button"
+              disabled={isSubmitting || disabled}
+              onClick={() => handleRate(value)}
+              onMouseEnter={() => !disabled && setHoveredValue(value)}
+              onMouseLeave={() => setHoveredValue(null)}
+              className={cn(
+                'relative flex-1 h-8 rounded-md transition-colors duration-200',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                isActive
+                  ? 'bg-blue-500/80 shadow-[0_0_12px_rgba(59,130,246,0.4)]'
+                  : 'bg-muted/30 hover:bg-muted/50'
+              )}
+              whileTap={disabled ? {} : { scale: 0.95 }}
+            >
+              <span
+                className={cn(
+                  'absolute inset-0 flex items-center justify-center text-xs font-medium',
+                  isActive ? 'text-white' : 'text-muted-foreground'
+                )}
+              >
+                {value}
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Labels */}
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>Not useful</span>
+        <span>Very useful</span>
+      </div>
+
+      {/* User's existing rating indicator */}
+      {userRating && (
+        <p className="text-xs text-muted-foreground text-center">
+          You rated this {userRating}/5
+        </p>
+      )}
+    </div>
+  );
+});
+
+UScoreRating.displayName = 'UScoreRating';
