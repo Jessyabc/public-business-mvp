@@ -55,5 +55,11 @@
     "vaul": "^0.9.3",
     "zod": "^3.23.8",
     "zustand": "^5.0.8"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "preview": "vite preview"
   }
 }
