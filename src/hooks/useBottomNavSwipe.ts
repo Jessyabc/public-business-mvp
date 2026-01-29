@@ -32,7 +32,6 @@ export function useBottomNavSwipe({
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const touchStartTime = useRef<number>(0);
-  const lastSwipeDirection = useRef<SwipeDirection>(null);
   const isVerticalScroll = useRef<boolean>(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -60,47 +59,32 @@ export function useBottomNavSwipe({
     
     if (isVerticalScroll.current) return;
     
-    // Prevent same-direction consecutive swipes
     const currentDirection: SwipeDirection = deltaX > 0 ? 'right' : 'left';
-    
+
     // Calculate max offset based on current panel state
     let maxOffset = window.innerWidth * 0.4; // 40% of screen width for visual feedback
     
     // Apply resistance when swiping in wrong direction
     if (activePanel === 'none') {
-      // From main view, only allow right swipe (to profile)
-      if (deltaX < 0) {
-        setSwipeOffset(0);
-        return;
-      }
-    } else if (activePanel === 'profile') {
-      // From profile, allow left (back) or right (to business if member)
-      if (deltaX > 0 && !isBusinessMember) {
-        setSwipeOffset(0);
-        return;
-      }
-    } else if (activePanel === 'business') {
-      // From business, only allow left (back to profile)
+      // From main view, swipe left to reveal profile
       if (deltaX > 0) {
         setSwipeOffset(0);
         return;
       }
-    }
-    
-    // Prevent same-direction consecutive swipes
-    if (lastSwipeDirection.current === currentDirection) {
-      // Already swiped this direction, need to swipe opposite first
-      const needsOpposite = (
-        (activePanel === 'profile' && currentDirection === 'right' && !isBusinessMember) ||
-        (activePanel === 'business' && currentDirection === 'right')
-      );
-      
-      if (needsOpposite) {
+    } else if (activePanel === 'profile') {
+      // From profile, swipe right to go back or left to business (if member)
+      if (deltaX < 0 && !isBusinessMember) {
+        setSwipeOffset(0);
+        return;
+      }
+    } else if (activePanel === 'business') {
+      // From business, swipe right to go back to profile
+      if (deltaX < 0) {
         setSwipeOffset(0);
         return;
       }
     }
-    
+
     setSwipeOffset(Math.min(Math.abs(deltaX), maxOffset) * (deltaX > 0 ? 1 : -1));
   }, [isSwipeInProgress, activePanel, isBusinessMember]);
 
@@ -119,21 +103,17 @@ export function useBottomNavSwipe({
       const direction: SwipeDirection = swipeOffset > 0 ? 'right' : 'left';
       
       // Update panel based on swipe direction and current state
-      if (activePanel === 'none' && direction === 'right') {
+      if (activePanel === 'none' && direction === 'left') {
         setActivePanel('profile');
-        lastSwipeDirection.current = 'right';
       } else if (activePanel === 'profile') {
-        if (direction === 'left') {
+        if (direction === 'right') {
           setActivePanel('none');
-          lastSwipeDirection.current = 'left';
           onNavigateBack?.();
-        } else if (direction === 'right' && isBusinessMember) {
+        } else if (direction === 'left' && isBusinessMember) {
           setActivePanel('business');
-          lastSwipeDirection.current = 'right';
         }
-      } else if (activePanel === 'business' && direction === 'left') {
+      } else if (activePanel === 'business' && direction === 'right') {
         setActivePanel('profile');
-        lastSwipeDirection.current = 'left';
       }
     }
     

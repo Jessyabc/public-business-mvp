@@ -141,7 +141,7 @@ export function BusinessSlidePanel({ isOpen, onClose, onBack }: BusinessSlidePan
             {/* Footer hint */}
             <div className="p-4 border-t border-[#D5D0CA]">
               <p className="text-xs text-center text-[#8B8580]">
-                Swipe left to go back to Profile
+                Swipe right to go back to Profile
               </p>
             </div>
           </motion.div>

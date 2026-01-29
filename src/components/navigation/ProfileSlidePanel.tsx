@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { Button } from '@/components/ui/button';
-import { X, Settings, FileText, Clock, LogOut, User, ChevronRight } from 'lucide-react';
+import { X, Settings, FileText, Clock, LogOut, User, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -35,10 +35,10 @@ export function ProfileSlidePanel({
   };
 
   const menuItems = [
-    { icon: User, label: 'Edit Profile', path: '/settings' },
-    { icon: FileText, label: 'My Posts', path: '/profile' },
+    { icon: User, label: 'Edit Profile', path: '/settings?tab=profile' },
+    { icon: FileText, label: 'My Posts', path: '/profile?tab=posts' },
     { icon: Clock, label: 'Last Seen', path: '/profile?tab=lastSeen' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Settings, label: 'Settings', path: '/settings?tab=preferences' },
   ];
 
   return (
@@ -130,9 +130,9 @@ export function ProfileSlidePanel({
               >
                 <div>
                   <p className="text-sm font-medium text-foreground">Business Dashboard</p>
-                  <p className="text-xs text-muted-foreground">Swipe right to access</p>
+                  <p className="text-xs text-muted-foreground">Swipe left to access</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-primary" />
+                <ChevronLeft className="h-5 w-5 text-primary" />
               </button>
             )}
 
