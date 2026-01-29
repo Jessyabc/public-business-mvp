@@ -93,7 +93,7 @@ export function OpenCircle({
         ref={circleRef}
         className={cn(
           "open-circle relative cursor-pointer",
-          "rounded-full",
+          "rounded-full touch-none select-none",
           "transition-colors duration-200"
         )}
         style={{
