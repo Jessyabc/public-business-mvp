@@ -8,7 +8,7 @@
  * Solid for raw chain, dashed for lens boundary
  */
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { OpenCircle } from './OpenCircle';
 import { AnchoredThought } from './AnchoredThought';
@@ -23,9 +23,11 @@ import { format, parseISO, isToday, isYesterday, isThisWeek, isThisYear } from '
 const PB_BLUE = '#489FE3';
 
 interface ChainThreadProps {
-  chain: ThoughtChain;
+  chain?: ThoughtChain;
   isActive?: boolean;
   isInLens?: boolean; // If true, show dashed connector
+  showLine?: boolean; // Show just the thread line with children
+  children?: React.ReactNode;
 }
 
 /**
@@ -61,13 +63,17 @@ export function ChainThread({
   chain, 
   isActive = false,
   isInLens = false,
+  showLine = false,
+  children,
 }: ChainThreadProps) {
   const { user } = useAuth();
   const { thoughts, createThought } = useWorkspaceStore();
   const { breakChain, setActiveChain } = useChainStore();
   
   // Get thoughts for this chain, sorted by anchored_at descending
+  // Must be called before any early returns
   const chainThoughts = useMemo(() => {
+    if (!chain) return [];
     return thoughts
       .filter((t) => t.chain_id === chain.id && t.state === 'anchored')
       .sort((a, b) => {
@@ -75,30 +81,44 @@ export function ChainThread({
         const timeB = new Date(b.anchored_at || b.created_at).getTime();
         return timeB - timeA; // Newest first
       });
-  }, [thoughts, chain.id]);
+  }, [thoughts, chain]);
+  
+  // Callbacks must also be before early returns
+  const handleContinue = useCallback(() => {
+    if (!chain) return;
+    setActiveChain(chain.id);
+    createThought(undefined);
+  }, [chain, setActiveChain, createThought]);
+  
+  const handleBreak = useCallback(() => {
+    if (!user) return;
+    breakChain(user.id);
+  }, [user, breakChain]);
+  
+  const handleMerge = useCallback(() => {
+    console.log('Merge modal - V2 feature');
+  }, []);
+  
+  // Simple mode: just show thread line with children
+  if (showLine && children) {
+    return (
+      <div className="chain-thread-simple relative flex flex-col items-center">
+        {/* Thread line above */}
+        <div 
+          className="w-[2px] h-8"
+          style={{ background: `${PB_BLUE}15` }}
+        />
+        {children}
+      </div>
+    );
+  }
+  
+  // Full mode requires a chain
+  if (!chain) {
+    return null;
+  }
   
   const headerText = formatChainHeader(chain);
-  
-  // Handle continue chain
-  const handleContinue = () => {
-    setActiveChain(chain.id);
-    // Create thought for this chain
-    // Note: We'll need to update createThought to accept chainId
-    createThought(undefined);
-  };
-  
-  // Handle break chain
-  const handleBreak = () => {
-    if (!user) return;
-    // Creates new chain and makes it active
-    breakChain(user.id);
-  };
-  
-  // Handle merge (V2 - placeholder)
-  const handleMerge = () => {
-    console.log('Merge modal - V2 feature');
-    // TODO: Open merge modal
-  };
   
   return (
     <div 

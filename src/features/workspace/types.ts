@@ -61,7 +61,8 @@ export interface WorkspaceState {
 
 export interface WorkspaceActions {
   // Core thought operations - userId is optional, passed from auth context
-  createThought: (dayKey?: string, userId?: string) => string;
+  // chainId is optional - if not provided, uses active chain or creates one
+  createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => string;
   updateThought: (id: string, content: string) => void;
   anchorThought: (id: string) => void;
   reactivateThought: (id: string) => void;
