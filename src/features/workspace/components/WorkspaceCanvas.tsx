@@ -206,10 +206,10 @@ export function WorkspaceCanvas() {
           )}
         </section>
 
-        {/* Day Threads */}
+        {/* Day Threads with chain continuation */}
         {hasAnchoredThoughts && (
           <section>
-            <ThoughtStack />
+            <ThoughtStack onContinue={handleStartThinking} />
           </section>
         )}
       </div>

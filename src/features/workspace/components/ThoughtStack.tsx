@@ -3,12 +3,17 @@
  * 
  * Displays day threads - groups of thoughts organized by day.
  * Most recent day first, with ability to add to any previous day.
+ * Includes OpenCircle at the end for chain continuation/breaking.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
+import { useChainStore } from '../stores/chainStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { DayThread } from './DayThread';
 import { DaysList } from './DaysList';
+import { OpenCircle } from './OpenCircle';
+import { ChainThread } from './ChainThread';
 import { cn } from '@/lib/utils';
 import { Calendar } from 'lucide-react';
 
@@ -38,10 +43,13 @@ export function scrollToDay(dayKey: string) {
 
 interface ThoughtStackProps {
   onDaysListToggle?: (isOpen: boolean) => void;
+  onContinue?: () => void;
 }
 
-export function ThoughtStack({ onDaysListToggle }: ThoughtStackProps = {}) {
+export function ThoughtStack({ onDaysListToggle, onContinue }: ThoughtStackProps = {}) {
   const getDayThreads = useWorkspaceStore((state) => state.getDayThreads);
+  const { user } = useAuth();
+  const { breakChain, activeChainId } = useChainStore();
   const dayThreads = getDayThreads();
   const [isDaysListOpen, setIsDaysListOpen] = useState(false);
 
@@ -50,6 +58,18 @@ export function ThoughtStack({ onDaysListToggle }: ThoughtStackProps = {}) {
     setIsDaysListOpen(newState);
     onDaysListToggle?.(newState);
   };
+
+  // Handle break chain gesture - creates new chain
+  const handleBreakChain = useCallback(() => {
+    if (user) {
+      breakChain(user.id);
+    }
+  }, [user, breakChain]);
+
+  // Handle continue chain - delegate to parent
+  const handleContinue = useCallback(() => {
+    onContinue?.();
+  }, [onContinue]);
 
   if (dayThreads.length === 0) {
     return null;
@@ -110,6 +130,17 @@ export function ThoughtStack({ onDaysListToggle }: ThoughtStackProps = {}) {
             isFirst={index === 0}
           />
         ))}
+        
+        {/* OpenCircle at the end of the stack - continuation point */}
+        <div className="flex justify-center pt-6 pb-8">
+          <ChainThread showLine={true}>
+            <OpenCircle
+              onContinue={handleContinue}
+              onBreak={handleBreakChain}
+              size="md"
+            />
+          </ChainThread>
+        </div>
       </div>
 
       {/* Days List Sidebar */}

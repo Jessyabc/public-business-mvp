@@ -1270,24 +1270,35 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          active_chain_id: string | null
           created_at: string
           preferences: Json
           updated_at: string
           user_id: string
         }
         Insert: {
+          active_chain_id?: string | null
           created_at?: string
           preferences?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
+          active_chain_id?: string | null
           created_at?: string
           preferences?: Json
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_active_chain_id_fkey"
+            columns: ["active_chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workspace_thoughts: {
         Row: {

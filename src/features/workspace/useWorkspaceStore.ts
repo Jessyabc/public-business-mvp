@@ -1,20 +1,22 @@
 /**
  * Pillar #1: Individual Workspace - Zustand Store
  * 
- * Pure cognitive state management with daily threading.
+ * Pure cognitive state management with daily threading + chains.
  * No social metrics, no engagement tracking.
  * 
  * Threading model:
- * - Thoughts are grouped by day_key (YYYY-MM-DD)
+ * - Thoughts are grouped by day_key (YYYY-MM-DD) AND chain_id
  * - Each day forms a "thread" of related thinking
  * - New entries prepend to the day (most recent at top)
  * - Users can revisit and add to previous days
+ * - Pull-to-break gesture creates new chains
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { WorkspaceStore, ThoughtObject, DayThread } from './types';
+import type { WorkspaceStore, ThoughtObject, DayThread, ChainId } from './types';
 import { format, parseISO } from 'date-fns';
+import { useChainStore } from './stores/chainStore';
 
 const generateId = () => crypto.randomUUID();
 
@@ -41,7 +43,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       // Create a new thought, optionally for a specific day
       // user_id is passed from the component that has auth context
-      createThought: (dayKey?: string, userId?: string) => {
+      // If chainId is provided, assigns thought to that chain
+      createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => {
         const id = generateId();
         const now = new Date().toISOString();
         // Use provided dayKey, or activeDayKey, or today's date
@@ -52,6 +55,15 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           ? getDayKey(targetDayKey) 
           : targetDayKey;
         
+        // Get active chain from chain store if not provided
+        const activeChainId = chainId || useChainStore.getState().activeChainId;
+        
+        // If no active chain and user exists, create one
+        let finalChainId: ChainId | null = activeChainId;
+        if (!finalChainId && userId) {
+          finalChainId = useChainStore.getState().createChain(userId);
+        }
+        
         const newThought: ThoughtObject = {
           id,
           user_id: userId || '', // Set from auth context, fallback empty
@@ -60,7 +72,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           created_at: now,
           updated_at: now,
           day_key: normalizedDayKey,
-          chain_id: null, // Will be set when assigned to a chain
+          chain_id: finalChainId, // Assign to active chain
         };
         
         set((state) => ({
