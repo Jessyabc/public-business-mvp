@@ -17,10 +17,8 @@
    Design System Entry Point
    ======================================== */
 
-/* Tailwind directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 - import the CSS framework */
+@import "tailwindcss";
 
 /* ========================================
    Typography System (Raleway Roles)
