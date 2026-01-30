@@ -57,7 +57,8 @@ export function DaysList({ isOpen, onClose }: DaysListProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:bg-transparent"
+          className="fixed z-40 bg-black/20 backdrop-blur-sm md:bg-transparent"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={onClose}
         />
       )}
