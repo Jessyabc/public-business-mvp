@@ -112,6 +112,8 @@ export function useChainGestures({
     if (!enabled) return;
     
     startPosRef.current = { x: clientX, y: clientY };
+    hasDraggedRef.current = false; // Reset drag flag
+    gestureConsumedRef.current = false;
     
     setGestureState({
       isActive: true,
@@ -125,6 +127,7 @@ export function useChainGestures({
     // Start long-press timer for merge (V2)
     if (onMerge) {
       longPressTimerRef.current = setTimeout(() => {
+        gestureConsumedRef.current = true;
         triggerHaptic('light');
         onMerge();
         resetGesture();
@@ -139,8 +142,9 @@ export function useChainGestures({
     const deltaY = clientY - gestureState.startY;
     const deltaX = Math.abs(clientX - startPosRef.current.x);
     
-    // If moved more than 10px horizontally, abort long-press
-    if (deltaX > 10 || Math.abs(deltaY) > 10) {
+    // If moved more than 5px in any direction, mark as drag
+    if (Math.abs(deltaY) > 5 || deltaX > 5) {
+      hasDraggedRef.current = true;
       clearLongPress();
     }
     
@@ -177,6 +181,8 @@ export function useChainGestures({
     
     if (gestureState.resistance >= SNAP_RESISTANCE) {
       // SNAP — create new chain with heavy haptic
+      gestureConsumedRef.current = true;
+      hasDraggedRef.current = true;
       triggerHaptic('heavy');
       onBreak();
       setGestureState((prev) => ({ ...prev, didSnap: true }));
@@ -248,6 +254,7 @@ export function useChainGestures({
   return {
     gestureState,
     visualOffset,
+    wasGestureConsumed,
     handlers: {
       onTouchStart,
       onTouchMove,
