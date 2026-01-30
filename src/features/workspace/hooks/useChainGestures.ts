@@ -68,6 +68,8 @@ export function useChainGestures({
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startPosRef = useRef({ x: 0, y: 0 });
   const isMouseDownRef = useRef(false);
+  const hasDraggedRef = useRef(false); // Track if actual drag occurred
+  const gestureConsumedRef = useRef(false); // Prevent click after gesture
   
   // Calculate visual offset - circle follows cursor with resistance
   const visualOffset = gestureState.isActive
@@ -94,7 +96,16 @@ export function useChainGestures({
     });
     clearLongPress();
     isMouseDownRef.current = false;
+    // Keep gestureConsumedRef true briefly to block click
+    setTimeout(() => {
+      gestureConsumedRef.current = false;
+    }, 100);
   }, [clearLongPress]);
+  
+  // Check if gesture was consumed (for blocking click)
+  const wasGestureConsumed = useCallback(() => {
+    return gestureConsumedRef.current || hasDraggedRef.current;
+  }, []);
 
   // Handle start (touch or mouse)
   const handleStart = useCallback((clientY: number, clientX: number) => {
