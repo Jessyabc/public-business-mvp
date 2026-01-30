@@ -16,8 +16,11 @@ export function BusinessSlidePanel({ isOpen, onClose, onBack }: BusinessSlidePan
   const { data: orgId } = useUserOrgId();
 
   const handleNavigate = (path: string) => {
-    navigate(path);
-    onClose();
+    onClose(); // Close panel first for smooth transition
+    // Small delay to allow panel animation to start
+    setTimeout(() => {
+      navigate(path);
+    }, 150);
   };
 
   const menuItems = [

@@ -60,11 +60,10 @@ export function useBottomNavSwipe({
     
     if (isVerticalScroll.current) return;
     
-    // Prevent same-direction consecutive swipes
     const currentDirection: SwipeDirection = deltaX > 0 ? 'right' : 'left';
     
     // Calculate max offset based on current panel state
-    let maxOffset = window.innerWidth * 0.4; // 40% of screen width for visual feedback
+    const maxOffset = window.innerWidth * 0.4; // 40% of screen width for visual feedback
     
     // Apply resistance when swiping in wrong direction
     if (activePanel === 'none') {
@@ -87,21 +86,12 @@ export function useBottomNavSwipe({
       }
     }
     
-    // Prevent same-direction consecutive swipes
-    if (lastSwipeDirection.current === currentDirection) {
-      // Already swiped this direction, need to swipe opposite first
-      const needsOpposite = (
-        (activePanel === 'profile' && currentDirection === 'right' && !isBusinessMember) ||
-        (activePanel === 'business' && currentDirection === 'right')
-      );
-      
-      if (needsOpposite) {
-        setSwipeOffset(0);
-        return;
-      }
-    }
+    // Apply smooth resistance at boundaries
+    const clampedOffset = Math.min(Math.abs(deltaX), maxOffset);
+    const resistance = clampedOffset / maxOffset; // 0 to 1
+    const finalOffset = clampedOffset * (0.5 + resistance * 0.5); // Apply resistance curve
     
-    setSwipeOffset(Math.min(Math.abs(deltaX), maxOffset) * (deltaX > 0 ? 1 : -1));
+    setSwipeOffset(finalOffset * (deltaX > 0 ? 1 : -1));
   }, [isSwipeInProgress, activePanel, isBusinessMember]);
 
   const handleTouchEnd = useCallback(() => {
@@ -112,7 +102,7 @@ export function useBottomNavSwipe({
     }
     
     const deltaTime = Date.now() - touchStartTime.current;
-    const velocity = Math.abs(swipeOffset) / deltaTime;
+    const velocity = deltaTime > 0 ? Math.abs(swipeOffset) / deltaTime : 0;
     const passedThreshold = Math.abs(swipeOffset) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD;
     
     if (passedThreshold) {
@@ -126,7 +116,7 @@ export function useBottomNavSwipe({
         if (direction === 'left') {
           setActivePanel('none');
           lastSwipeDirection.current = 'left';
-          onNavigateBack?.();
+          // Don't call onNavigateBack here - panel closing is handled by setActivePanel
         } else if (direction === 'right' && isBusinessMember) {
           setActivePanel('business');
           lastSwipeDirection.current = 'right';
@@ -139,7 +129,10 @@ export function useBottomNavSwipe({
     
     setIsSwipeInProgress(false);
     setSwipeOffset(0);
-  }, [isSwipeInProgress, swipeOffset, activePanel, isBusinessMember, onNavigateBack]);
+    // Reset touch start position
+    touchStartX.current = 0;
+    touchStartY.current = 0;
+  }, [isSwipeInProgress, swipeOffset, activePanel, isBusinessMember]);
 
   return {
     activePanel,
