@@ -90,15 +90,9 @@ export function BottomNavigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav 
-        className="hidden md:block fixed bottom-8 z-50"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }}
-      >
+      <nav className="hidden md:block fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
         <div 
-          className="flex items-center justify-center gap-4 px-6 py-4 rounded-full transition-all duration-300"
+          className="flex items-center gap-2 px-6 py-4 rounded-full transition-all duration-300"
           style={glassStyle}
         >
           {/* Think Button */}
@@ -205,19 +199,19 @@ export function BottomNavigation() {
 
       {/* Mobile Navigation - 3 items with swipe */}
       <nav 
-        className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm mx-auto"
+        className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div 
-          className="flex items-center justify-center gap-6 sm:gap-8 px-4 py-3 rounded-2xl transition-all duration-300 relative"
+          className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300 relative"
           style={glassStyle}
         >
           {/* Think */}
           <button
             onClick={handleThinkClick}
-            className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all relative min-w-[60px]"
+            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
             style={{ color: isThinkActive ? textActive : textInactive }}
           >
             <PenTool className="w-6 h-6" />
@@ -235,7 +229,7 @@ export function BottomNavigation() {
               <Button
                 onClick={() => openComposer()}
                 size="icon"
-                className="w-14 h-14 rounded-full transition-all -mt-6 border-2 flex-shrink-0"
+                className="w-14 h-14 rounded-full transition-all -mt-6 border-2"
                 style={{
                   background: isLightBg ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.15)',
                   color: isLightBg ? PB_BLUE : 'white',
@@ -260,7 +254,7 @@ export function BottomNavigation() {
                 navigate('/discuss');
               }
             }}
-            className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all relative min-w-[60px]"
+            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
             style={{ color: isDiscussActive ? textActive : textInactive }}
           >
             <MessageCircle className="w-6 h-6" />
@@ -272,6 +266,14 @@ export function BottomNavigation() {
             )}
           </button>
 
+          {/* Swipe indicator */}
+          <div 
+            className="absolute -top-1 right-4 flex items-center gap-0.5"
+            style={{ color: textInactive }}
+          >
+            <ChevronUp className="w-3 h-3 rotate-90 opacity-60" />
+            <span className="text-[10px] opacity-60">swipe</span>
+          </div>
         </div>
       </nav>
 

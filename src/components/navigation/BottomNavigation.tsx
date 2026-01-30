@@ -199,7 +199,7 @@ export function BottomNavigation() {
 
       {/* Mobile Navigation - 3 items with swipe */}
       <nav 
-        className="md:hidden fixed bottom-4 left-0 right-0 z-50 mx-auto w-[calc(100%-2rem)] max-w-sm"
+        className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

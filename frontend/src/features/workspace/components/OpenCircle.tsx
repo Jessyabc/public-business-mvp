@@ -92,8 +92,8 @@ export function OpenCircle({
       <motion.div
         ref={circleRef}
         className={cn(
-          "open-circle relative cursor-pointer",
-          "rounded-full",
+          "open-circle relative cursor-grab active:cursor-grabbing",
+          "rounded-full touch-none select-none",
           "transition-colors duration-200"
         )}
         style={{
@@ -108,10 +108,14 @@ export function OpenCircle({
             : isPulling
               ? `0 0 12px ${PB_BLUE}30`
               : 'none',
-          y: visualOffset,
         }}
         animate={{
+          y: visualOffset,
           scale: isNearSnap ? 1.15 : isPulling ? 1.05 : 1,
+        }}
+        transition={{
+          y: { type: 'spring', stiffness: 400, damping: 30 },
+          scale: { duration: 0.15 },
         }}
         whileHover={{
           scale: gestureState.isActive ? undefined : 1.1,
