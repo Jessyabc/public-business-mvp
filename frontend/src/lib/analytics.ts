@@ -69,7 +69,18 @@ class AnalyticsService {
   }
 
   private generateSessionId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    // Use crypto.getRandomValues() for secure randomness instead of Math.random()
+    const array = new Uint8Array(16);
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(array);
+    } else {
+      // Fallback for environments without crypto (shouldn't happen in modern browsers)
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    const randomPart = Array.from(array, byte => byte.toString(36)).join('').substring(0, 11);
+    return Date.now().toString(36) + randomPart;
   }
 
   /**

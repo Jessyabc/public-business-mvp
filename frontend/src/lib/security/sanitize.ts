@@ -1,35 +1,50 @@
 /**
  * Content sanitization utilities for user-generated content
  * Prevents XSS attacks and other content-based security issues
+ * 
+ * Uses DOMPurify for secure HTML sanitization instead of vulnerable regex patterns
  */
 
-// Simple HTML sanitizer (for when DOMPurify is overkill)
+import DOMPurify from 'dompurify';
+
+// Secure HTML sanitizer using DOMPurify (prevents ReDoS and XSS attacks)
 export function sanitizeHTML(html: string): string {
-  // Remove script tags and their content
-  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  // Use DOMPurify which is battle-tested and secure
+  // It properly handles script tags, event handlers, and dangerous attributes
+  if (typeof window !== 'undefined') {
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+      ALLOWED_ATTR: ['href', 'title'],
+      ALLOW_DATA_ATTR: false,
+    });
+  }
   
-  // Remove dangerous attributes
-  html = html.replace(/\s*on\w+\s*=\s*"[^"]*"/gi, ''); // onclick, onload, etc.
-  html = html.replace(/\s*on\w+\s*=\s*'[^']*'/gi, '');
-  html = html.replace(/\s*javascript\s*:/gi, '');
-  html = html.replace(/\s*vbscript\s*:/gi, '');
-  
-  // Remove dangerous tags
-  const dangerousTags = ['iframe', 'object', 'embed', 'applet', 'link', 'style', 'meta'];
-  dangerousTags.forEach(tag => {
-    const regex = new RegExp(`<${tag}\\b[^<]*(?:(?!<\\/${tag}>)<[^<]*)*<\\/${tag}>`, 'gi');
-    html = html.replace(regex, '');
-  });
-  
-  return html;
+  // Fallback for server-side: strip all HTML tags
+  return sanitizeText(html);
 }
 
 // Sanitize text content (remove HTML entirely)
+// Uses a safer approach that avoids ReDoS vulnerabilities
 export function sanitizeText(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, '') // Remove all HTML tags
-    .replace(/&[#\w]+;/g, '') // Remove HTML entities
-    .trim();
+  if (typeof window !== 'undefined') {
+    // Use DOMPurify to strip all HTML, which is more secure than regex
+    return DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
+  }
+  
+  // Fallback: simple tag removal with length limit to prevent ReDoS
+  // Limit input length to prevent catastrophic backtracking
+  if (text.length > 100000) {
+    text = text.substring(0, 100000);
+  }
+  
+  // Use a simpler, safer regex that doesn't cause ReDoS
+  let result = text;
+  // Remove HTML tags (non-greedy match with length limit)
+  result = result.replace(/<[^>]{0,1000}>/g, '');
+  // Remove HTML entities (with length limit)
+  result = result.replace(/&[#\w]{0,20};/g, '');
+  
+  return result.trim();
 }
 
 // Sanitize and validate URLs
@@ -78,11 +93,15 @@ export function sanitizeEmail(email: string): string | null {
 }
 
 // Sanitize file names (for uploads)
+// Uses a more restrictive character set to prevent security issues
 export function sanitizeFileName(fileName: string): string {
+  // More restrictive: only allow alphanumeric, dots, hyphens, and underscores
+  // This prevents path traversal and other file system attacks
   return fileName
-    .replace(/[^a-zA-Z0-9.-_]/g, '_') // Replace special chars with underscore
-    .replace(/\.{2,}/g, '.') // Remove multiple dots
+    .replace(/[^a-zA-Z0-9._-]/g, '_') // Only allow safe characters
+    .replace(/\.{2,}/g, '.') // Remove multiple consecutive dots (prevents ..)
     .replace(/^\.+|\.+$/g, '') // Remove leading/trailing dots
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
     .slice(0, 255); // Limit length
 }
 
