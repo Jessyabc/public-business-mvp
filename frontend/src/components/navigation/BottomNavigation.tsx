@@ -92,7 +92,7 @@ export function BottomNavigation() {
       {/* Desktop Navigation */}
       <nav className="hidden md:block fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
         <div 
-          className="flex items-center gap-2 px-6 py-4 rounded-full transition-all duration-300"
+          className="flex items-center justify-center gap-4 px-6 py-4 rounded-full transition-all duration-300"
           style={glassStyle}
         >
           {/* Think Button */}
