@@ -6,13 +6,14 @@
  * 
  * Gesture must occur on the open circle only.
  * Drag within bottom 180° with resistance.
+ * Circle follows cursor position during drag.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useHaptic } from '@/hooks/useHaptic';
 import type { PullGestureState } from '../types/chain';
 
-const PULL_THRESHOLD = 120; // pixels to trigger snap
+const PULL_THRESHOLD = 80; // pixels to trigger snap (per V1 spec)
 const SNAP_RESISTANCE = 0.8; // normalized threshold
 const LONG_PRESS_DURATION = 500; // ms
 
@@ -27,13 +28,11 @@ interface GestureHandlers {
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
   onMouseDown: (e: React.MouseEvent) => void;
-  onMouseMove: (e: React.MouseEvent) => void;
-  onMouseUp: (e: React.MouseEvent) => void;
   onContextMenu: (e: React.MouseEvent) => void;
 }
 
 /**
- * Easing function for visual feedback
+ * Easing function for visual feedback - creates resistance feel
  */
 function easeOutQuad(t: number): number {
   return t * (2 - t);
@@ -68,10 +67,11 @@ export function useChainGestures({
   
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startPosRef = useRef({ x: 0, y: 0 });
+  const isMouseDownRef = useRef(false);
   
-  // Calculate visual offset based on resistance
+  // Calculate visual offset - circle follows cursor with resistance
   const visualOffset = gestureState.isActive
-    ? easeOutQuad(Math.min(gestureState.resistance, 1)) * 80
+    ? easeOutQuad(Math.min(gestureState.resistance, 1)) * PULL_THRESHOLD
     : 0;
 
   // Clear long-press timer
@@ -93,6 +93,7 @@ export function useChainGestures({
       didHaptic: false,
     });
     clearLongPress();
+    isMouseDownRef.current = false;
   }, [clearLongPress]);
 
   // Handle start (touch or mouse)
@@ -137,7 +138,7 @@ export function useChainGestures({
       const resistance = Math.min(1, deltaY / PULL_THRESHOLD);
       
       setGestureState((prev) => {
-        // Haptic feedback at threshold
+        // Haptic feedback at 70% threshold
         if (resistance > 0.7 && !prev.didHaptic) {
           triggerHaptic('medium');
           return {
@@ -164,17 +165,39 @@ export function useChainGestures({
     clearLongPress();
     
     if (gestureState.resistance >= SNAP_RESISTANCE) {
-      // SNAP — create new chain
+      // SNAP — create new chain with heavy haptic
       triggerHaptic('heavy');
       onBreak();
       setGestureState((prev) => ({ ...prev, didSnap: true }));
     }
     
-    // Reset after animation
+    // Reset after animation frame
     requestAnimationFrame(() => {
       resetGesture();
     });
   }, [gestureState.isActive, gestureState.resistance, enabled, clearLongPress, triggerHaptic, onBreak, resetGesture]);
+
+  // Global mouse move and up handlers for desktop
+  useEffect(() => {
+    if (!isMouseDownRef.current) return;
+    
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientY, e.clientX);
+    };
+    
+    const handleGlobalMouseUp = () => {
+      handleEnd();
+      isMouseDownRef.current = false;
+    };
+    
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [handleMove, handleEnd]);
 
   // Touch handlers
   const onTouchStart = useCallback((e: React.TouchEvent) => {
@@ -198,16 +221,10 @@ export function useChainGestures({
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     // Only left click
     if (e.button !== 0) return;
+    e.preventDefault(); // Prevent text selection during drag
+    isMouseDownRef.current = true;
     handleStart(e.clientY, e.clientX);
   }, [handleStart]);
-
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
-    handleMove(e.clientY, e.clientX);
-  }, [handleMove]);
-
-  const onMouseUp = useCallback(() => {
-    handleEnd();
-  }, [handleEnd]);
 
   // Context menu (right-click) for merge on desktop
   const onContextMenu = useCallback((e: React.MouseEvent) => {
@@ -225,8 +242,6 @@ export function useChainGestures({
       onTouchMove,
       onTouchEnd,
       onMouseDown,
-      onMouseMove,
-      onMouseUp,
       onContextMenu,
     },
   };
