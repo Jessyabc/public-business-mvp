@@ -104,112 +104,6 @@ export type Database = {
         }
         Relationships: []
       }
-      brainstorms: {
-        Row: {
-          comments_count: number | null
-          content: string | null
-          created_at: string | null
-          id: string
-          likes_count: number | null
-          parent_id: string | null
-          parent_type: string | null
-          title: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      business_insights: {
-        Row: {
-          comments_count: number | null
-          content: string | null
-          created_at: string | null
-          id: string
-          likes_count: number | null
-          org_id: string | null
-          parent_id: string | null
-          parent_type: string | null
-          title: string | null
-          updated_at: string | null
-          user_id: string | null
-          visibility: string | null
-        }
-        Insert: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          org_id?: string | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          visibility?: string | null
-        }
-        Update: {
-          comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          likes_count?: number | null
-          org_id?: string | null
-          parent_id?: string | null
-          parent_type?: string | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          visibility?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_insights_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "org_approval_requests"
-            referencedColumns: ["org_id"]
-          },
-          {
-            foreignKeyName: "business_insights_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "business_insights_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "view_business_org_analytics"
-            referencedColumns: ["org_id"]
-          },
-        ]
-      }
       business_invitations: {
         Row: {
           consumed_at: string | null
@@ -405,68 +299,6 @@ export type Database = {
         }
         Relationships: []
       }
-      idea_brainstorms_archive: {
-        Row: {
-          author_display_name: string
-          author_user_id: string | null
-          content: string
-          created_at: string
-          id: string
-          idea_id: string | null
-          is_public: boolean
-          title: string
-        }
-        Insert: {
-          author_display_name?: string
-          author_user_id?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          idea_id?: string | null
-          is_public?: boolean
-          title: string
-        }
-        Update: {
-          author_display_name?: string
-          author_user_id?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          idea_id?: string | null
-          is_public?: boolean
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_legacy"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_brainstorms_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_teaser"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       idea_interactions: {
         Row: {
           created_at: string
@@ -492,36 +324,7 @@ export type Database = {
           type?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_legacy"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_interactions_idea_id_fkey"
-            columns: ["idea_id"]
-            isOneToOne: false
-            referencedRelation: "open_ideas_teaser"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       idea_links: {
         Row: {
@@ -573,6 +376,42 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      lens_chains: {
+        Row: {
+          added_at: string
+          chain_id: string
+          id: string
+          lens_id: string
+        }
+        Insert: {
+          added_at?: string
+          chain_id: string
+          id?: string
+          lens_id: string
+        }
+        Update: {
+          added_at?: string
+          chain_id?: string
+          id?: string
+          lens_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lens_chains_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lens_chains_lens_id_fkey"
+            columns: ["lens_id"]
+            isOneToOne: false
+            referencedRelation: "thought_lenses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nods_page: {
         Row: {
@@ -649,102 +488,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      open_ideas_intake: {
-        Row: {
-          created_at: string | null
-          id: string
-          ip_hash: string | null
-          status: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          ip_hash?: string | null
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          ip_hash?: string | null
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text?: string
-        }
-        Relationships: []
-      }
-      open_ideas_legacy: {
-        Row: {
-          content: string
-          created_at: string
-          email: string | null
-          id: string
-          ip_hash: string | null
-          is_curated: boolean
-          linked_brainstorms_count: number
-          notify_on_interaction: boolean | null
-          represented_org_id: string | null
-          status: string | null
-          subscribe_newsletter: boolean | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          ip_hash?: string | null
-          is_curated?: boolean
-          linked_brainstorms_count?: number
-          notify_on_interaction?: boolean | null
-          represented_org_id?: string | null
-          status?: string | null
-          subscribe_newsletter?: boolean | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          ip_hash?: string | null
-          is_curated?: boolean
-          linked_brainstorms_count?: number
-          notify_on_interaction?: boolean | null
-          represented_org_id?: string | null
-          status?: string | null
-          subscribe_newsletter?: boolean | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_user: {
-        Row: {
-          created_at: string | null
-          id: string
-          status: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["open_idea_status"]
-          text?: string
-          user_id?: string | null
-        }
-        Relationships: []
       }
       org_member_applications: {
         Row: {
@@ -1030,6 +773,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          ip_hash: string | null
           kind: string
           post_id: string | null
           user_id: string | null
@@ -1037,6 +781,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          ip_hash?: string | null
           kind: string
           post_id?: string | null
           user_id?: string | null
@@ -1044,6 +789,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          ip_hash?: string | null
           kind?: string
           post_id?: string | null
           user_id?: string | null
@@ -1202,30 +948,6 @@ export type Database = {
           },
         ]
       }
-      post_relations_backup_for_relation_type_fix: {
-        Row: {
-          child_post_id: string | null
-          created_at: string | null
-          id: string | null
-          parent_post_id: string | null
-          relation_type: string | null
-        }
-        Insert: {
-          child_post_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          parent_post_id?: string | null
-          relation_type?: string | null
-        }
-        Update: {
-          child_post_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          parent_post_id?: string | null
-          relation_type?: string | null
-        }
-        Relationships: []
-      }
       post_utility_ratings: {
         Row: {
           created_at: string
@@ -1301,6 +1023,7 @@ export type Database = {
           body: string | null
           comments_count: number | null
           content: string
+          continuation_count: number | null
           created_at: string
           department_id: string | null
           id: string
@@ -1326,6 +1049,7 @@ export type Database = {
           body?: string | null
           comments_count?: number | null
           content: string
+          continuation_count?: number | null
           created_at?: string
           department_id?: string | null
           id?: string
@@ -1351,6 +1075,7 @@ export type Database = {
           body?: string | null
           comments_count?: number | null
           content?: string
+          continuation_count?: number | null
           created_at?: string
           department_id?: string | null
           id?: string
@@ -1444,6 +1169,57 @@ export type Database = {
         }
         Relationships: []
       }
+      thought_chains: {
+        Row: {
+          created_at: string
+          display_label: string | null
+          first_thought_at: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_label?: string | null
+          first_thought_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_label?: string | null
+          first_thought_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      thought_lenses: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_consent: {
         Row: {
           consent_type: string
@@ -1494,28 +1270,40 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          active_chain_id: string | null
           created_at: string
           preferences: Json
           updated_at: string
           user_id: string
         }
         Insert: {
+          active_chain_id?: string | null
           created_at?: string
           preferences?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
+          active_chain_id?: string | null
           created_at?: string
           preferences?: Json
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_active_chain_id_fkey"
+            columns: ["active_chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workspace_thoughts: {
         Row: {
           anchored_at: string | null
+          chain_id: string | null
           content: string
           created_at: string
           day_key: string
@@ -1527,6 +1315,7 @@ export type Database = {
         }
         Insert: {
           anchored_at?: string | null
+          chain_id?: string | null
           content?: string
           created_at?: string
           day_key?: string
@@ -1538,6 +1327,7 @@ export type Database = {
         }
         Update: {
           anchored_at?: string | null
+          chain_id?: string | null
           content?: string
           created_at?: string
           day_key?: string
@@ -1547,18 +1337,18 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workspace_thoughts_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
-      brainstorm_stats: {
-        Row: {
-          brainstorm_id: string | null
-          comments_count: number | null
-          likes_count: number | null
-        }
-        Relationships: []
-      }
       business_posts_view: {
         Row: {
           body: string | null
@@ -1717,30 +1507,6 @@ export type Database = {
         }
         Relationships: []
       }
-      my_open_ideas_view: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          status: string | null
-          user_id: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          status?: never
-          user_id?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          status?: never
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       my_posts_view: {
         Row: {
           body: string | null
@@ -1837,90 +1603,6 @@ export type Database = {
             referencedColumns: ["org_id"]
           },
         ]
-      }
-      open_ideas_members: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          is_curated: boolean | null
-          linked_brainstorms_count: number | null
-          status: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_public: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          is_curated: boolean | null
-          linked_brainstorms_count: number | null
-          status: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          linked_brainstorms_count?: number | null
-          status?: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_public_view: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          id: string | null
-          source: string | null
-        }
-        Relationships: []
-      }
-      open_ideas_teaser: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          is_curated: boolean | null
-          preview: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          preview?: never
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          is_curated?: boolean | null
-          preview?: never
-        }
-        Relationships: []
       }
       org_approval_requests: {
         Row: {
@@ -2337,18 +2019,16 @@ export type Database = {
           token: string
         }[]
       }
-      create_org_and_owner:
-        | { Args: { p_description?: string; p_name: string }; Returns: string }
-        | {
-            Args: {
-              p_company_size?: string
-              p_description?: string
-              p_industry_id?: string
-              p_name: string
-              p_website?: string
-            }
-            Returns: string
-          }
+      create_org_and_owner: {
+        Args: {
+          p_company_size?: string
+          p_description?: string
+          p_industry_id?: string
+          p_name: string
+          p_website?: string
+        }
+        Returns: string
+      }
       create_post: {
         Args: {
           p_body: string
@@ -2379,6 +2059,12 @@ export type Database = {
         }
       }
       current_user_email: { Args: never; Returns: string }
+      decrement_post_likes:
+        | { Args: { p_post_id: string }; Returns: undefined }
+        | {
+            Args: { p_post_id: string; p_user_id?: string }
+            Returns: undefined
+          }
       enforce_rate_limit: {
         Args: { limit_count: number; window_seconds: number }
         Returns: boolean
@@ -2395,6 +2081,42 @@ export type Database = {
           target_type: string
         }[]
       }
+      get_lineage_clusters:
+        | {
+            Args: {
+              p_cursor?: string
+              p_kinds?: string[]
+              p_limit?: number
+              p_mode?: string
+              p_org_id?: string
+              p_search?: string
+            }
+            Returns: {
+              continuations: Json
+              latest_activity_at: string
+              spark_data: Json
+              spark_id: string
+              total_continuations: number
+            }[]
+          }
+        | {
+            Args: {
+              p_cursor?: string
+              p_kinds?: string[]
+              p_limit?: number
+              p_mode?: string
+              p_org_id?: string
+              p_search?: string
+              p_user_id?: string
+            }
+            Returns: {
+              continuations: Json
+              latest_activity_at: string
+              spark_data: Json
+              spark_id: string
+              total_continuations: number
+            }[]
+          }
       get_my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -2436,7 +2158,12 @@ export type Database = {
       }
       hash_ip: { Args: { ip_address: string }; Returns: string }
       increment_post_comments: { Args: { post_id: string }; Returns: undefined }
-      increment_post_likes: { Args: { p_post_id: string }; Returns: undefined }
+      increment_post_likes:
+        | { Args: { p_post_id: string }; Returns: undefined }
+        | {
+            Args: { p_post_id: string; p_user_id?: string }
+            Returns: undefined
+          }
       increment_post_shares: { Args: { p_post_id: string }; Returns: undefined }
       increment_post_views: { Args: { p_post_id: string }; Returns: undefined }
       invite_to_org: {
@@ -2477,7 +2204,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"
       open_idea_status: "pending" | "approved" | "spam" | "flagged"
-      post_kind: "Spark" | "BusinessInsight"
+      post_kind: "Spark" | "BusinessInsight" | "Insight"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2607,7 +2334,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "business_user", "public_user", "business_member"],
       open_idea_status: ["pending", "approved", "spam", "flagged"],
-      post_kind: ["Spark", "BusinessInsight"],
+      post_kind: ["Spark", "BusinessInsight", "Insight"],
     },
   },
 } as const

@@ -20,6 +20,9 @@ export interface ThoughtEntry {
   updated_at: string;
 }
 
+/** Chain ID type alias for clarity */
+export type ChainId = string;
+
 export interface ThoughtObject {
   id: string;
   user_id: string;
@@ -33,6 +36,8 @@ export interface ThoughtObject {
   day_key: string;
   /** Optional user-provided label (replaces date header in display) */
   display_label?: string | null;
+  /** Chain ID this thought belongs to (Pull-the-Thread system) */
+  chain_id?: ChainId | null;
 }
 
 /** A day's worth of thoughts, grouped together */
@@ -56,7 +61,8 @@ export interface WorkspaceState {
 
 export interface WorkspaceActions {
   // Core thought operations - userId is optional, passed from auth context
-  createThought: (dayKey?: string, userId?: string) => string;
+  // chainId is optional - if not provided, uses active chain or creates one
+  createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => string;
   updateThought: (id: string, content: string) => void;
   anchorThought: (id: string) => void;
   reactivateThought: (id: string) => void;

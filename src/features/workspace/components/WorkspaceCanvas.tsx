@@ -9,14 +9,19 @@
  * Open previous days to continue adding thoughts.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useWorkspaceSync } from '../useWorkspaceSync';
+import { useChainStore } from '../stores/chainStore';
+import { useChainSync } from '../useChainSync';
 import { ThinkingSurface } from './ThinkingSurface';
 import { ThoughtStack } from './ThoughtStack';
 import { EmptyWorkspace } from './EmptyWorkspace';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+
+// Safety timeout for workspace loading (in case sync gets stuck)
+const LOADING_TIMEOUT_MS = 15000;
 
 export function WorkspaceCanvas() {
   const { user } = useAuth();
@@ -28,13 +33,37 @@ export function WorkspaceCanvas() {
     getActiveThought,
     activeDayKey,
     setActiveDayKey,
+    setLoading,
   } = useWorkspaceStore();
+  
+  // Prevent immediate re-open after blur closes the thought
+  const justAnchoredRef = useRef(false);
+  
+  // Safety timeout for loading state
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    
+    const timeoutId = window.setTimeout(() => {
+      console.warn('WorkspaceCanvas: Loading timed out, forcing render');
+      setLoadingTimedOut(true);
+      // Also force the store to reset loading
+      setLoading(false);
+    }, LOADING_TIMEOUT_MS);
+    
+    return () => window.clearTimeout(timeoutId);
+  }, [isLoading, setLoading]);
   
   // Track if user deliberately started thinking (for auto-focus)
   const [userInitiated, setUserInitiated] = useState(false);
   
-  // Initialize sync
+  // Initialize sync for thoughts and chains
   useWorkspaceSync();
+  useChainSync();
   
   const activeThought = getActiveThought();
   const hasThoughts = thoughts.length > 0;
@@ -46,13 +75,23 @@ export function WorkspaceCanvas() {
     createThought(undefined, user?.id);
   }, [createThought, setActiveDayKey, user?.id]);
 
-  // Reset user-initiated flag when thought is anchored
+  // Reset user-initiated flag when thought is anchored and prevent immediate re-open
   const handleAnchor = useCallback(() => {
     setUserInitiated(false);
+    justAnchoredRef.current = true;
+    // Reset after a short delay to allow click events to complete
+    setTimeout(() => {
+      justAnchoredRef.current = false;
+    }, 100);
   }, []);
 
   // Handle canvas click (tap anywhere empty to start writing)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    // Prevent re-opening immediately after blur closed the thought
+    if (justAnchoredRef.current) {
+      return;
+    }
+    
     const target = e.target as HTMLElement;
     // Check if click is on an interactive element that should not trigger new thought
     const isOnThought = target.closest('.anchored-thought') || 
@@ -91,7 +130,8 @@ export function WorkspaceCanvas() {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [activeThought, createThought, setActiveDayKey, user?.id]);
 
-  if (isLoading) {
+  // Show loading only if we're actually loading and haven't timed out
+  if (isLoading && !loadingTimedOut) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-[var(--text-tertiary)] opacity-60">...</div>
@@ -104,7 +144,7 @@ export function WorkspaceCanvas() {
       className={cn(
         "workspace-canvas",
         "w-full min-h-screen",
-        "px-4 py-8 md:px-8 md:py-12",
+        "px-4 pt-8 pb-32 md:px-8 md:pt-12 md:pb-36",
         !activeThought && hasThoughts && "cursor-text"
       )}
       onClick={handleCanvasClick}
@@ -166,10 +206,10 @@ export function WorkspaceCanvas() {
           )}
         </section>
 
-        {/* Day Threads */}
+        {/* Day Threads with chain continuation */}
         {hasAnchoredThoughts && (
           <section>
-            <ThoughtStack />
+            <ThoughtStack onContinue={handleStartThinking} />
           </section>
         )}
       </div>

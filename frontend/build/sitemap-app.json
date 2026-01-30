@@ -1,0 +1,123 @@
+{
+  "canonical_routes": [
+    {
+      "path": "/",
+      "component": "Index",
+      "description": "Main dashboard - shows feeds based on user mode"
+    },
+    {
+      "path": "/brainstorm",
+      "component": "BrainstormPage",
+      "description": "Canonical brainstorm canvas with graph interface"
+    },
+    {
+      "path": "/business/feed",
+      "component": "BusinessDashboard",
+      "description": "Business insights and member feed"
+    },
+    {
+      "path": "/open-ideas",
+      "component": "OpenIdeas",
+      "description": "Community open ideas bank"
+    },
+    {
+      "path": "/open-ideas/new",
+      "component": "OpenIdeaNew", 
+      "description": "Submit new open idea"
+    },
+    {
+      "path": "/admin/business",
+      "component": "Admin",
+      "description": "Business administration panel"
+    },
+    {
+      "path": "/members/business",
+      "component": "BusinessMembers",
+      "description": "Business member directory"
+    },
+    {
+      "path": "/members/public/profile",
+      "component": "PublicMembers",
+      "description": "Public member profiles"
+    },
+    {
+      "path": "/info/overview",
+      "component": "About",
+      "description": "Platform overview and introduction"
+    },
+    {
+      "path": "/info/safety",
+      "component": "HelpCenter",
+      "description": "Community safety guidelines"
+    },
+    {
+      "path": "/info/faq",
+      "component": "FAQ",
+      "description": "Frequently asked questions"
+    },
+    {
+      "path": "/contact",
+      "component": "Contact",
+      "description": "Contact form and support"
+    },
+    {
+      "path": "/terms",
+      "component": "TermsOfService",
+      "description": "Terms of service and legal"
+    },
+    {
+      "path": "/privacy",
+      "component": "PrivacyPolicy",
+      "description": "Privacy policy and data handling"
+    },
+    {
+      "path": "/auth",
+      "component": "Auth",
+      "description": "Authentication and registration"
+    }
+  ],
+  "redirects": [
+    {
+      "from": "/brainstorm-v2",
+      "to": "/brainstorm",
+      "reason": "Legacy route consolidation"
+    },
+    {
+      "from": "/brainstorms/canvas",
+      "to": "/brainstorm",
+      "reason": "Legacy route consolidation"
+    },
+    {
+      "from": "/brainstorms",
+      "to": "/brainstorm",
+      "reason": "Canonical brainstorm consolidation"
+    }
+  ],
+  "legacy_routes": [
+    {
+      "path": "/brainstorms",
+      "status": "deprecated",
+      "replacement": "/brainstorm"
+    },
+    {
+      "path": "/brainstorms/new",
+      "status": "deprecated", 
+      "replacement": "/brainstorm"
+    },
+    {
+      "path": "/brainstorms/:id",
+      "status": "deprecated",
+      "replacement": "/brainstorm"
+    },
+    {
+      "path": "/brainstorms/:id/edit",
+      "status": "deprecated",
+      "replacement": "/brainstorm"
+    }
+  ],
+  "navigation_health": {
+    "orphaned_pages": [],
+    "destinationless_links": 0,
+    "missing_404": false
+  }
+}

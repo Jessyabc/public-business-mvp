@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/ui/components/GlassCard";
-import { Settings, Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, User } from "lucide-react";
+import { Plus, Building2, Clock, FileText, Calendar, Eye, Heart, MessageCircle, AlertCircle, User } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePosts } from "@/hooks/usePosts";
@@ -20,13 +20,15 @@ import type { Post } from "@/types/post";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { isBusinessMember, isAdmin } = useUserRoles();
   const { posts, loading: postsLoading, error, fetchUserPosts } = usePosts();
   const { data: orgId } = useUserOrgId();
   const [showComposer, setShowComposer] = useState(false);
-  const [activeTab, setActiveTab] = useState('posts');
+  const initialTab = searchParams.get('tab') || 'posts';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -35,6 +37,13 @@ export default function Profile() {
       fetchUserPosts();
     }
   }, [user]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -58,13 +67,11 @@ export default function Profile() {
               <p className="text-muted-foreground">Manage your profile and view your content</p>
             </div>
 
-            {/* Quick Actions - Inline buttons */}
+            {/* Quick Actions - Inline buttons (removed business dashboard button - now accessible via swipe) */}
             <div className={`grid gap-4 mb-6 ${
-              (isBusinessMember() || isAdmin()) 
+              !orgId 
                 ? 'grid-cols-1 md:grid-cols-3' 
-                : !orgId 
-                  ? 'grid-cols-1 md:grid-cols-3' 
-                  : 'grid-cols-1 md:grid-cols-2'
+                : 'grid-cols-1 md:grid-cols-2'
             }`}>
               <Button 
                 onClick={() => setShowComposer(true)}
@@ -92,20 +99,6 @@ export default function Profile() {
                 </Button>
               )}
 
-              {(isBusinessMember() || isAdmin()) && (
-                <Button 
-                  onClick={() => navigate("/business-dashboard")}
-                  className="glass-ios-triple h-16 text-left justify-start"
-                  variant="outline"
-                >
-                  <Building2 className="h-5 w-5 mr-2" />
-                  <div>
-                    <div className="font-medium">Business</div>
-                    <div className="text-xs text-muted-foreground">Dashboard & tools</div>
-                  </div>
-                </Button>
-              )}
-
               <Button 
                 onClick={() => navigate("/settings")}
                 className="glass-ios-triple h-16 text-left justify-start"
@@ -121,7 +114,16 @@ export default function Profile() {
 
             {/* My Posts Section - Now embedded */}
             <GlassCard className="glass-ios-triple glass-corner-distort">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => {
+                  setActiveTab(value);
+                  const nextParams = new URLSearchParams(searchParams);
+                  nextParams.set('tab', value);
+                  setSearchParams(nextParams, { replace: true });
+                }}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2 glass-ios-triple mb-6 border-white/40 bg-white/10 backdrop-blur-xl shadow-lg shadow-primary/20">
                   <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-primary/30 data-[state=active]:text-foreground">
                     <FileText className="w-4 h-4" />

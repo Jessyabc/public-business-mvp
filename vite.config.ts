@@ -6,8 +6,9 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 8080,
+    allowedHosts: true,
     watch: {
       // Reduce file watcher overhead
       usePolling: false,
@@ -39,10 +40,31 @@ export default defineConfig(({ mode }) => ({
       '@supabase/supabase-js',
       '@supabase/postgrest-js',
       '@supabase/realtime-js',
-      '@supabase/storage-js'
+      '@supabase/storage-js',
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion'
     ]
   },
   ssr: {
     noExternal: ['@supabase/supabase-js']
+  },
+  build: {
+    outDir: 'build',
+    // Increase chunk size warning limit (after optimization)
+    chunkSizeWarningLimit: 500,
+    // Enable source maps for production debugging (optional)
+    sourcemap: mode === 'development',
+    // Target modern browsers for smaller bundles
+    target: 'es2020',
+    // Minification settings - use terser for better compression
+    minify: 'esbuild',
+    // CSS code splitting
+    cssCodeSplit: true,
+    // Reduce chunk size by compressing more aggressively
+    cssMinify: true,
+    // Report compressed sizes
+    reportCompressedSize: true,
   }
 }));

@@ -1,11 +1,16 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { PenTool, Plus, User, MessageCircle } from 'lucide-react';
+import { PenTool, Plus, User, MessageCircle, ChevronUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { useWorkspaceStore } from '@/features/workspace/useWorkspaceStore';
 import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { useBottomNavSwipe } from '@/hooks/useBottomNavSwipe';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ComposerModal } from '@/components/composer/ComposerModal';
+import { ProfileSlidePanel } from './ProfileSlidePanel';
+import { BusinessSlidePanel } from './BusinessSlidePanel';
 import { cn } from '@/lib/utils';
 
 // PB Blue for active states on business/light backgrounds
@@ -13,10 +18,24 @@ const PB_BLUE = '#4A7C9B';
 
 export function BottomNavigation() {
   const { isOpen, openComposer, closeComposer } = useComposerStore();
+  const { createThought, getActiveThought } = useWorkspaceStore();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { lens, toggleLens } = useDiscussLensSafe();
+  const { isBusinessMember } = useUserRoles();
+
+  // Swipe navigation
+  const {
+    activePanel,
+    setActivePanel,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useBottomNavSwipe({
+    isBusinessMember: isBusinessMember(),
+    onNavigateBack: () => navigate(-1),
+  });
 
   if (!user) return null;
 
@@ -25,6 +44,19 @@ export function BottomNavigation() {
   const isThinkActive = isThinkPage;
   const isDiscussActive = isDiscussPage;
   const isProfileActive = location.pathname === '/profile';
+  
+  // Handle Think button click - navigate or open new thought
+  const handleThinkClick = () => {
+    if (isThinkActive) {
+      // Already on Think page - create new thought if none active
+      const activeThought = getActiveThought();
+      if (!activeThought) {
+        createThought(undefined, user?.id);
+      }
+    } else {
+      navigate('/');
+    }
+  };
   
   // Route-aware tooltip text for composer button
   const composerTooltip = isThinkActive ? 'Share to Discuss' : 'Create post';
@@ -63,9 +95,9 @@ export function BottomNavigation() {
           className="flex items-center gap-2 px-6 py-4 rounded-full transition-all duration-300"
           style={glassStyle}
         >
-          {/* Think Link */}
-          <NavLink
-            to="/"
+          {/* Think Button */}
+          <button
+            onClick={handleThinkClick}
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-3 rounded-2xl min-w-[80px]",
               "transition-all duration-200 relative group"
@@ -85,7 +117,7 @@ export function BottomNavigation() {
                 style={{ background: textActive }}
               />
             )}
-          </NavLink>
+          </button>
 
           {/* Centered Composer Button */}
           <Tooltip>
@@ -113,7 +145,6 @@ export function BottomNavigation() {
           <button
             onClick={() => {
               if (isDiscussActive) {
-                // If already on Discuss, toggle lens instead of navigating
                 toggleLens();
               } else {
                 navigate('/discuss');
@@ -140,7 +171,7 @@ export function BottomNavigation() {
             )}
           </button>
 
-          {/* Profile Link */}
+          {/* Profile Link - Desktop only */}
           <NavLink
             to="/profile"
             className={cn(
@@ -166,42 +197,25 @@ export function BottomNavigation() {
         </div>
       </nav>
 
-      {/* Mobile Navigation */}
-      <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm">
+      {/* Mobile Navigation - 3 items with swipe */}
+      <nav 
+        className="md:hidden fixed bottom-4 left-0 right-0 z-50 mx-auto w-[calc(100%-2rem)] max-w-sm"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div 
-          className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300"
+          className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300 relative"
           style={glassStyle}
         >
           {/* Think */}
-          <NavLink
-            to="/"
+          <button
+            onClick={handleThinkClick}
             className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
             style={{ color: isThinkActive ? textActive : textInactive }}
           >
             <PenTool className="w-6 h-6" />
             {isThinkActive && (
-              <span 
-                className="w-1 h-1 rounded-full"
-                style={{ background: textActive }}
-              />
-            )}
-          </NavLink>
-
-          {/* Discuss */}
-          <button
-            onClick={() => {
-              if (isDiscussActive) {
-                // If already on Discuss, toggle lens instead of navigating
-                toggleLens();
-              } else {
-                navigate('/discuss');
-              }
-            }}
-            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
-            style={{ color: isDiscussActive ? textActive : textInactive }}
-          >
-            <MessageCircle className="w-6 h-6" />
-            {isDiscussActive && (
               <span 
                 className="w-1 h-1 rounded-full"
                 style={{ background: textActive }}
@@ -231,22 +245,51 @@ export function BottomNavigation() {
             </TooltipContent>
           </Tooltip>
 
-          {/* Profile */}
-          <NavLink
-            to="/profile"
+          {/* Discuss */}
+          <button
+            onClick={() => {
+              if (isDiscussActive) {
+                toggleLens();
+              } else {
+                navigate('/discuss');
+              }
+            }}
             className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all relative"
-            style={{ color: isProfileActive ? textActive : textInactive }}
+            style={{ color: isDiscussActive ? textActive : textInactive }}
           >
-            <User className="w-6 h-6" />
-            {isProfileActive && (
+            <MessageCircle className="w-6 h-6" />
+            {isDiscussActive && (
               <span 
                 className="w-1 h-1 rounded-full"
                 style={{ background: textActive }}
               />
             )}
-          </NavLink>
+          </button>
+
+          {/* Swipe indicator */}
+          <div 
+            className="absolute -top-1 right-4 flex items-center gap-0.5"
+            style={{ color: textInactive }}
+          >
+            <ChevronUp className="w-3 h-3 rotate-90 opacity-60" />
+            <span className="text-[10px] opacity-60">swipe</span>
+          </div>
         </div>
       </nav>
+
+      {/* Slide Panels */}
+      <ProfileSlidePanel
+        isOpen={activePanel === 'profile'}
+        onClose={() => setActivePanel('none')}
+        showBusinessHint={isBusinessMember()}
+        onSwipeTowardsBusiness={() => setActivePanel('business')}
+      />
+      
+      <BusinessSlidePanel
+        isOpen={activePanel === 'business'}
+        onClose={() => setActivePanel('none')}
+        onBack={() => setActivePanel('profile')}
+      />
 
       <ComposerModal isOpen={isOpen} onClose={closeComposer} />
     </>
