@@ -68,6 +68,8 @@ export function useChainGestures({
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startPosRef = useRef({ x: 0, y: 0 });
   const isMouseDownRef = useRef(false);
+  const hasDraggedRef = useRef(false); // Track if actual drag occurred
+  const gestureConsumedRef = useRef(false); // Prevent click after gesture
   
   // Calculate visual offset - circle follows cursor with resistance
   const visualOffset = gestureState.isActive
@@ -94,13 +96,24 @@ export function useChainGestures({
     });
     clearLongPress();
     isMouseDownRef.current = false;
+    // Keep gestureConsumedRef true briefly to block click
+    setTimeout(() => {
+      gestureConsumedRef.current = false;
+    }, 100);
   }, [clearLongPress]);
+  
+  // Check if gesture was consumed (for blocking click)
+  const wasGestureConsumed = useCallback(() => {
+    return gestureConsumedRef.current || hasDraggedRef.current;
+  }, []);
 
   // Handle start (touch or mouse)
   const handleStart = useCallback((clientY: number, clientX: number) => {
     if (!enabled) return;
     
     startPosRef.current = { x: clientX, y: clientY };
+    hasDraggedRef.current = false; // Reset drag flag
+    gestureConsumedRef.current = false;
     
     setGestureState({
       isActive: true,
@@ -114,6 +127,7 @@ export function useChainGestures({
     // Start long-press timer for merge (V2)
     if (onMerge) {
       longPressTimerRef.current = setTimeout(() => {
+        gestureConsumedRef.current = true;
         triggerHaptic('light');
         onMerge();
         resetGesture();
@@ -128,8 +142,9 @@ export function useChainGestures({
     const deltaY = clientY - gestureState.startY;
     const deltaX = Math.abs(clientX - startPosRef.current.x);
     
-    // If moved more than 10px horizontally, abort long-press
-    if (deltaX > 10 || Math.abs(deltaY) > 10) {
+    // If moved more than 5px in any direction, mark as drag
+    if (Math.abs(deltaY) > 5 || deltaX > 5) {
+      hasDraggedRef.current = true;
       clearLongPress();
     }
     
@@ -166,6 +181,8 @@ export function useChainGestures({
     
     if (gestureState.resistance >= SNAP_RESISTANCE) {
       // SNAP — create new chain with heavy haptic
+      gestureConsumedRef.current = true;
+      hasDraggedRef.current = true;
       triggerHaptic('heavy');
       onBreak();
       setGestureState((prev) => ({ ...prev, didSnap: true }));
@@ -237,6 +254,7 @@ export function useChainGestures({
   return {
     gestureState,
     visualOffset,
+    wasGestureConsumed,
     handlers: {
       onTouchStart,
       onTouchMove,
