@@ -1,28 +1,27 @@
-import { resolveTheme } from './src/styles/theme.ts';
+// Static theme values - these match the CSS variables defined in index.css
+// Using CSS variables ensures runtime theme switching works correctly
+// and avoids TypeScript import issues in build environments like Lovable.dev
 
-// Determine the default mode from environment or fallback to 'public'
-const mode = process.env.VITE_DEFAULT_MODE || 'public';
-const theme = resolveTheme(mode);
-
-// Build semantic color palette from theme
+// Build semantic color palette using CSS variables
+// These will be resolved at runtime based on the active theme
 const pbColors = {
-  background: theme.colors.background,
-  surface: theme.colors.surface,
-  'text-primary': theme.colors.textPrimary,
-  'text-secondary': theme.colors.textSecondary,
-  'text-tertiary': theme.colors.textTertiary,
-  accent: theme.colors.accent,
-  'accent-on': theme.colors.accentOn,
-  border: theme.colors.border,
-  focus: theme.colors.focus,
+  background: 'var(--background)',
+  surface: 'var(--surface)',
+  'text-primary': 'var(--text-primary)',
+  'text-secondary': 'var(--text-secondary)',
+  'text-tertiary': 'var(--text-tertiary)',
+  accent: 'var(--accent)',
+  'accent-on': 'var(--accent-on)',
+  border: 'var(--border)',
+  focus: 'var(--focus)',
 };
 
-// Border radii scale
+// Border radii scale using CSS variables
 const pbRadii = {
-  'pb-sm': theme.radii.sm,
-  'pb-md': theme.radii.md,
-  'pb-lg': theme.radii.lg,
-  'pb-xl': theme.radii.xl,
+  'pb-sm': 'var(--radius-sm)',
+  'pb-md': 'var(--radius-md)',
+  'pb-lg': 'var(--radius-lg)',
+  'pb-xl': 'var(--radius-xl)',
 };
 
 /**
