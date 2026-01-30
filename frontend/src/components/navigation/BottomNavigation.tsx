@@ -90,7 +90,13 @@ export function BottomNavigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:block fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+      <nav 
+        className="hidden md:block fixed bottom-8 z-50"
+        style={{
+          left: '50%',
+          transform: 'translateX(-50%)'
+        }}
+      >
         <div 
           className="flex items-center justify-center gap-4 px-6 py-4 rounded-full transition-all duration-300"
           style={glassStyle}
