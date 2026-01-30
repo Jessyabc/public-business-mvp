@@ -187,24 +187,18 @@ export function BusinessDashboard() {
   }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: '#EAE6E2',
-        padding: '1.5rem'
-      }}
-    >
+    <div className="min-h-screen bg-[#EAE6E2] px-4 py-6 sm:px-6 lg:px-8">
       <div className="container mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
             <img 
               src="/lovable-uploads/77267ade-34ff-4c2e-8797-fb16de997bd1.png" 
               alt="Public Business - Creating Collaboration" 
               className="h-10 w-auto"
             />
-            <h1 className="text-3xl font-bold text-[#3A3530]">Business Dashboard</h1>
+            <h1 className="text-2xl font-bold text-[#3A3530] sm:text-3xl">Business Dashboard</h1>
             {isOrgOwner && (
               <Badge variant="default" className="bg-primary text-white border-primary/30">
                 Owner
@@ -224,12 +218,12 @@ export function BusinessDashboard() {
           )}
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
           {/* Organization Selector - show if user has multiple orgs */}
           {userOrgs && userOrgs.length > 1 && (
             <Select value={selectedOrgIdState || ''} onValueChange={handleOrgChange}>
               <SelectTrigger 
-                className="w-[250px] text-[#3A3530] bg-[#F5F1ED] border-[#D4CEC5] hover:bg-[#EAE6E2]"
+                className="w-full text-[#3A3530] bg-[#F5F1ED] border-[#D4CEC5] hover:bg-[#EAE6E2] sm:w-[250px]"
                 style={{
                   background: '#F5F1ED',
                   boxShadow: 'inset 2px 2px 5px rgba(166, 150, 130, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5)',
@@ -281,7 +275,7 @@ export function BusinessDashboard() {
           {canCreateBusinessPosts && (
             <Button 
               onClick={() => openComposer()} 
-              className="flex items-center gap-2 text-white bg-[#3A3530] hover:bg-[#2A2520]"
+              className="flex w-full items-center justify-center gap-2 text-white bg-[#3A3530] hover:bg-[#2A2520] sm:w-auto"
               style={{
                 boxShadow: '8px 8px 16px rgba(166, 150, 130, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85)'
               }}
@@ -303,7 +297,7 @@ export function BusinessDashboard() {
             borderRadius: '24px'
           }}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center gap-2">
               {orgLogoSignedUrl ? (
                 <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0" style={{
@@ -353,7 +347,7 @@ export function BusinessDashboard() {
             borderRadius: '24px'
           }}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center gap-2">
               <Users className="h-8 w-8 text-blue-500" />
               <div>
@@ -372,7 +366,7 @@ export function BusinessDashboard() {
             borderRadius: '24px'
           }}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center gap-2">
               <FileText className="h-8 w-8 text-green-500" />
               <div>
@@ -391,7 +385,7 @@ export function BusinessDashboard() {
             borderRadius: '24px'
           }}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-orange-500" />
               <div>
@@ -411,7 +405,7 @@ export function BusinessDashboard() {
         navigate(`/business-dashboard?${newParams.toString()}`, { replace: true });
       }} className="space-y-6">
         <TabsList 
-          className="grid w-full grid-cols-4 text-[#6B635B]"
+          className="grid w-full grid-cols-2 gap-2 text-[#6B635B] sm:grid-cols-4"
           style={{
             background: '#EAE6E2',
             boxShadow: 'inset 4px 4px 10px rgba(166, 150, 130, 0.2), inset -4px -4px 10px rgba(255, 255, 255, 0.6)',

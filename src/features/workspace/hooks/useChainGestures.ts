@@ -184,12 +184,18 @@ export function useChainGestures({
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
+    if (gestureState.isActive && touch.clientY - gestureState.startY > 0) {
+      e.preventDefault();
+    }
     handleMove(touch.clientY, touch.clientX);
-  }, [handleMove]);
+  }, [gestureState.isActive, gestureState.startY, handleMove]);
 
-  const onTouchEnd = useCallback(() => {
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (gestureState.resistance > 0) {
+      e.preventDefault();
+    }
     handleEnd();
-  }, [handleEnd]);
+  }, [gestureState.resistance, handleEnd]);
 
   // Mouse handlers (for desktop)
   const onMouseDown = useCallback((e: React.MouseEvent) => {

@@ -35,10 +35,10 @@ export function ProfileSlidePanel({
   };
 
   const menuItems = [
-    { icon: User, label: 'Edit Profile', path: '/settings' },
-    { icon: FileText, label: 'My Posts', path: '/profile' },
+    { icon: User, label: 'Edit Profile', path: '/settings?tab=profile' },
+    { icon: FileText, label: 'My Posts', path: '/profile?tab=posts' },
     { icon: Clock, label: 'Last Seen', path: '/profile?tab=lastSeen' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Settings, label: 'Settings', path: '/settings?tab=preferences' },
   ];
 
   return (

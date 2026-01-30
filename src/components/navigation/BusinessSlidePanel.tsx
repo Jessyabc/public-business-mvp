@@ -22,9 +22,9 @@ export function BusinessSlidePanel({ isOpen, onClose, onBack }: BusinessSlidePan
 
   const menuItems = [
     { icon: BarChart3, label: 'Dashboard', path: '/business-dashboard' },
-    { icon: FileText, label: 'Business Posts', path: '/business-dashboard?tab=posts' },
-    { icon: Users, label: 'Team Members', path: '/business-members' },
-    { icon: Settings, label: 'Organization Settings', path: '/business-settings' },
+    { icon: FileText, label: 'Business Posts', path: '/business-dashboard?tab=insights' },
+    { icon: Users, label: 'Team Members', path: '/business-dashboard?tab=team' },
+    { icon: Settings, label: 'Organization Settings', path: '/business-dashboard?tab=settings' },
   ];
 
   return (
@@ -113,7 +113,7 @@ export function BusinessSlidePanel({ isOpen, onClose, onBack }: BusinessSlidePan
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => handleNavigate('/business-dashboard')}
+                    onClick={() => handleNavigate('/business-dashboard?tab=insights')}
                     className="p-4 rounded-xl text-center"
                     style={{
                       background: '#E0DCD8',
@@ -124,7 +124,7 @@ export function BusinessSlidePanel({ isOpen, onClose, onBack }: BusinessSlidePan
                     <span className="text-xs font-medium text-[#4D4843]">Analytics</span>
                   </button>
                   <button
-                    onClick={() => handleNavigate('/business-members')}
+                    onClick={() => handleNavigate('/business-dashboard?tab=team')}
                     className="p-4 rounded-xl text-center"
                     style={{
                       background: '#E0DCD8',
