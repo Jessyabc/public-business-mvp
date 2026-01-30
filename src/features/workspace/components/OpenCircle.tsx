@@ -40,7 +40,7 @@ export function OpenCircle({
   const baseSize = size === 'lg' ? 56 : size === 'sm' ? 24 : (isMobile ? 48 : 32);
   
   // Gesture handling
-  const { gestureState, visualOffset, handlers } = useChainGestures({
+  const { gestureState, visualOffset, wasGestureConsumed, handlers } = useChainGestures({
     onBreak,
     onMerge,
     enabled: true,
@@ -56,17 +56,17 @@ export function OpenCircle({
   // Transform for thread stretch effect
   const threadStretch = useTransform(springOffset, [0, 80], [0, 40]);
   
-  // Handle tap/click to continue
+  // Handle tap/click to continue - only if no drag occurred
   const handleClick = useCallback((e: React.MouseEvent) => {
-    // Prevent if gesture is active or just completed
-    if (gestureState.isActive || gestureState.didSnap) {
+    // Prevent if gesture was consumed (drag, snap, or long-press)
+    if (wasGestureConsumed()) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
     
     onContinue();
-  }, [gestureState.isActive, gestureState.didSnap, onContinue]);
+  }, [wasGestureConsumed, onContinue]);
   
   // Determine interaction state
   const isPulling = gestureState.isActive && gestureState.resistance > 0.1;
