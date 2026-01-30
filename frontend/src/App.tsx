@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { router } from "./app/router";
-import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
 import { Component, type ReactNode, type ErrorInfo } from "react";
 
 // Error boundary to catch runtime errors and display a recovery UI
@@ -80,7 +79,6 @@ const App = () => (
               <RouterProvider router={router} />
             </main>
           </div>
-          {import.meta.env.DEV && <DeveloperPanel />}
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
