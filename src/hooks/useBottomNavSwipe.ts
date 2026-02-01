@@ -58,15 +58,19 @@ export function useBottomNavSwipe({
     }
     
     if (isVerticalScroll.current) return;
+    
+    const currentDirection: SwipeDirection = deltaX > 0 ? 'right' : 'left';
 
     // Calculate max offset based on current panel state
     let maxOffset = window.innerWidth * 0.4; // 40% of screen width for visual feedback
     
-    // Only allow swipe gestures when a panel is open
-    // From main view ('none'), no swipe gestures are enabled
+    // Apply resistance when swiping in wrong direction
     if (activePanel === 'none') {
-      setSwipeOffset(0);
-      return;
+      // From main view, swipe left to reveal profile
+      if (deltaX > 0) {
+        setSwipeOffset(0);
+        return;
+      }
     } else if (activePanel === 'profile') {
       // From profile, swipe right to go back or left to business (if member)
       if (deltaX < 0 && !isBusinessMember) {
@@ -99,8 +103,9 @@ export function useBottomNavSwipe({
       const direction: SwipeDirection = swipeOffset > 0 ? 'right' : 'left';
       
       // Update panel based on swipe direction and current state
-      // Note: No swipe gestures from main view ('none') - panels are opened via buttons
-      if (activePanel === 'profile') {
+      if (activePanel === 'none' && direction === 'left') {
+        setActivePanel('profile');
+      } else if (activePanel === 'profile') {
         if (direction === 'right') {
           setActivePanel('none');
           onNavigateBack?.();

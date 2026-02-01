@@ -138,14 +138,11 @@ export function BusinessSlidePanel({ isOpen, onClose, onBack }: BusinessSlidePan
               </div>
             </div>
 
-            {/* Footer */}
+            {/* Footer hint */}
             <div className="p-4 border-t border-[#D5D0CA]">
-              <button
-                onClick={onBack}
-                className="w-full text-xs text-center text-[#4A7C9B] hover:text-[#3A6B8A] transition-colors"
-              >
-                ← Back to Profile
-              </button>
+              <p className="text-xs text-center text-[#8B8580]">
+                Swipe right to go back to Profile
+              </p>
             </div>
           </motion.div>
         </>

@@ -130,7 +130,7 @@ export function ProfileSlidePanel({
               >
                 <div>
                   <p className="text-sm font-medium text-foreground">Business Dashboard</p>
-                  <p className="text-xs text-muted-foreground">Tap to access</p>
+                  <p className="text-xs text-muted-foreground">Swipe left to access</p>
                 </div>
                 <ChevronLeft className="h-5 w-5 text-primary" />
               </button>
