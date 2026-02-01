@@ -52,6 +52,7 @@ export function useChainGestures({
 }: UseChainGesturesOptions): {
   gestureState: PullGestureState;
   visualOffset: number;
+  wasGestureConsumed: () => boolean;
   handlers: GestureHandlers;
 } {
   const { triggerHaptic } = useHaptic();
