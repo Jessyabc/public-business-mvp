@@ -71,6 +71,7 @@ export function useChainGestures({
   const isMouseDownRef = useRef(false);
   const hasDraggedRef = useRef(false); // Track if actual drag occurred
   const gestureConsumedRef = useRef(false); // Prevent click after gesture
+  const currentResistanceRef = useRef(0); // Track current resistance for reliable gesture detection
   
   // Calculate visual offset - circle follows cursor with resistance
   const visualOffset = gestureState.isActive
@@ -95,6 +96,7 @@ export function useChainGestures({
       didSnap: false,
       didHaptic: false,
     });
+    currentResistanceRef.current = 0; // Reset ref
     clearLongPress();
     isMouseDownRef.current = false;
     // Keep gestureConsumedRef true briefly to block click
@@ -165,11 +167,13 @@ export function useChainGestures({
           };
         }
         
-        return {
+        const newState = {
           ...prev,
           currentY: clientY,
           resistance,
         };
+        currentResistanceRef.current = resistance; // Update ref with current resistance
+        return newState;
       });
     }
   }, [gestureState.isActive, gestureState.startY, enabled, clearLongPress, triggerHaptic]);
@@ -180,20 +184,25 @@ export function useChainGestures({
     
     clearLongPress();
     
-    if (gestureState.resistance >= SNAP_RESISTANCE) {
+    // Use ref value to ensure we have the most current resistance (avoids stale closure)
+    const currentResistance = currentResistanceRef.current;
+    
+    if (currentResistance >= SNAP_RESISTANCE) {
       // SNAP — create new chain with heavy haptic
       gestureConsumedRef.current = true;
       hasDraggedRef.current = true;
       triggerHaptic('heavy');
+      // Call onBreak immediately to ensure chain break happens
       onBreak();
       setGestureState((prev) => ({ ...prev, didSnap: true }));
     }
     
     // Reset after animation frame
     requestAnimationFrame(() => {
+      currentResistanceRef.current = 0; // Reset ref
       resetGesture();
     });
-  }, [gestureState.isActive, gestureState.resistance, enabled, clearLongPress, triggerHaptic, onBreak, resetGesture]);
+  }, [gestureState.isActive, enabled, clearLongPress, triggerHaptic, onBreak, resetGesture]);
 
   // Global mouse move and up handlers for desktop
   useEffect(() => {

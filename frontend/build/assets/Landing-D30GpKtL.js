@@ -1,2 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-DdiXzYE2.js","assets/index-s0UwzZhW.css"])))=>i.map(i=>d[i]);
-import{u as t,j as s,r as n,_ as a}from"./index-DdiXzYE2.js";const r=n.lazy(()=>a(()=>import("./index-DdiXzYE2.js").then(e=>e.cl),__vite__mapDeps([0,1])).then(e=>({default:e.NewLanding})));function o(){const{user:e}=t();return s.jsx(n.Suspense,{fallback:s.jsx("div",{className:"min-h-screen"}),children:s.jsx(r,{})})}export{o as Landing,o as default};

@@ -89,8 +89,13 @@ export function BottomNavigation() {
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className="hidden md:block fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+      {/* Mobile Navigation - Used everywhere for consistency */}
+      <nav 
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div 
           className="flex items-center gap-2 px-6 py-4 rounded-full transition-all duration-300"
           style={glassStyle}
@@ -196,14 +201,6 @@ export function BottomNavigation() {
           </NavLink>
         </div>
       </nav>
-
-      {/* Mobile Navigation - 3 items with swipe */}
-      <nav 
-        className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
         <div 
           className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300 relative"
           style={glassStyle}
