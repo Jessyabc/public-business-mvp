@@ -30,17 +30,21 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const [enterCount, setEnterCount] = useState(0);
   const isMobile = useIsMobile();
   const { thoughts, updateThought, anchorThought, deleteThought, activeDayKey } = useWorkspaceStore();
-  const { activeChainId, getChainById } = useChainStore();
+  const { activeChainId, pendingChainId, getChainById } = useChainStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
+  // Check pending chain first (from break gesture), then active chain
+  const pendingChain = pendingChainId ? getChainById(pendingChainId) : null;
   const activeChain = activeChainId ? getChainById(activeChainId) : null;
   
   // Show which day/chain we're adding to
   const showDayLabel = activeDayKey && !isToday(parseISO(activeDayKey));
   const dayLabel = activeDayKey ? format(parseISO(activeDayKey), 'MMMM d') : null;
   
-  // Chain indicator - shows which chain we're writing to
-  const chainLabel = activeChain?.display_label || (activeChain ? 'Current chain' : null);
+  // Chain indicator - shows which chain we're writing to (pending takes priority)
+  const writingChain = pendingChain || activeChain;
+  const chainLabel = writingChain?.display_label || (writingChain ? 'Current chain' : null);
+  const isPending = !!pendingChain;
   
   // Reset enter count when content changes
   useEffect(() => {
@@ -194,6 +198,9 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
               }}
             >
               Writing to: {chainLabel}
+              {isPending && (
+                <span className="ml-1 opacity-75">(pending)</span>
+              )}
             </span>
           )}
           {showDayLabel && dayLabel && (

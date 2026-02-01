@@ -183,13 +183,37 @@ export function DayThread({ thread, isFirst = false }: DayThreadProps) {
       
       {/* Thought entries */}
       <div className="space-y-3 pl-2">
-        {thread.thoughts.map((thought, index) => (
-          <AnchoredThought
-            key={thought.id}
-            thoughtId={thought.id}
-            depth={index}
-          />
-        ))}
+        {thread.thoughts.map((thought, index) => {
+          // Check if this is a new chain (chain_id differs from previous thought)
+          const prevThought = index > 0 ? thread.thoughts[index - 1] : null;
+          const isNewChain = prevThought && prevThought.chain_id && thought.chain_id && prevThought.chain_id !== thought.chain_id;
+          
+          return (
+            <div key={thought.id}>
+              {/* Visual break for new chain */}
+              {isNewChain && (
+                <div className="my-6 flex items-center gap-3">
+                  <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(72, 159, 227, 0.3), transparent)' }} />
+                  <div 
+                    className="px-3 py-1 rounded-full text-xs font-medium"
+                    style={{ 
+                      color: '#489FE3',
+                      background: 'rgba(72, 159, 227, 0.1)',
+                      border: '1px solid rgba(72, 159, 227, 0.2)'
+                    }}
+                  >
+                    New Chain
+                  </div>
+                  <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(72, 159, 227, 0.3), transparent)' }} />
+                </div>
+              )}
+              <AnchoredThought
+                thoughtId={thought.id}
+                depth={index}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

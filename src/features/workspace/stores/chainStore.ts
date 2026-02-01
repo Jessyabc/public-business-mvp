@@ -25,6 +25,7 @@ export const useChainStore = create<ChainStore>()(
       chains: [],
       lenses: [],
       activeChainId: null,
+      pendingChainId: null,
       activeLensId: null,
       viewMode: 'raw' as ChainViewMode,
       isLoadingChains: false,
@@ -56,6 +57,7 @@ export const useChainStore = create<ChainStore>()(
         set((state) => ({
           chains: state.chains.filter((c) => c.id !== id),
           activeChainId: state.activeChainId === id ? null : state.activeChainId,
+          pendingChainId: state.pendingChainId === id ? null : state.pendingChainId,
           // Also remove from any lenses
           lenses: state.lenses.map((lens) => ({
             ...lens,
@@ -77,12 +79,14 @@ export const useChainStore = create<ChainStore>()(
       setActiveChain: (id: ChainId | null) => {
         set({ 
           activeChainId: id,
+          // Clear pending chain when manually setting active chain (overrides pending behavior)
+          pendingChainId: id ? null : get().pendingChainId,
           // Clear lens when switching to raw chain view
           activeLensId: id ? null : get().activeLensId,
         });
       },
 
-      // Break chain - creates new chain and makes it active
+      // Break chain - creates new chain as pending (becomes active on first anchor)
       breakChain: (userId: string): ChainId => {
         const id = generateId();
         const now = new Date().toISOString();
@@ -98,10 +102,15 @@ export const useChainStore = create<ChainStore>()(
         
         set((state) => ({
           chains: [newChain, ...state.chains],
-          activeChainId: id,
+          pendingChainId: id, // Set as pending, NOT active - keeps current activeChainId
         }));
         
         return id;
+      },
+
+      // Clear pending chain (used when activating it)
+      clearPendingChain: () => {
+        set({ pendingChainId: null });
       },
 
       // Lens operations (V2)
@@ -210,6 +219,7 @@ export const useChainStore = create<ChainStore>()(
         chains: state.chains,
         lenses: state.lenses,
         activeChainId: state.activeChainId,
+        pendingChainId: state.pendingChainId,
         activeLensId: state.activeLensId,
         viewMode: state.viewMode,
       }),

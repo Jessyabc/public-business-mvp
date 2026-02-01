@@ -70,6 +70,7 @@ export interface ChainState {
   chains: ThoughtChain[];
   lenses: ThoughtLens[];
   activeChainId: ChainId | null;
+  pendingChainId: ChainId | null; // Chain created by break gesture, becomes active on first anchor
   activeLensId: LensId | null;
   viewMode: ChainViewMode;
   isLoadingChains: boolean;
@@ -87,7 +88,8 @@ export interface ChainActions {
   setActiveChain: (id: ChainId | null) => void;
   
   // Break chain gesture result
-  breakChain: (userId: string) => ChainId; // Creates new chain, returns its ID
+  breakChain: (userId: string) => ChainId; // Creates new chain as pending, returns its ID
+  clearPendingChain: () => void; // Clear pending chain (used when activating it)
   
   // Lens operations (V2)
   createLens: (userId: string, chainIds: ChainId[], label?: string | null) => LensId;

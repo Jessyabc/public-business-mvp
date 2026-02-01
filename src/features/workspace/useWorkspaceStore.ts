@@ -55,13 +55,18 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           ? getDayKey(targetDayKey) 
           : targetDayKey;
         
-        // Get active chain from chain store if not provided
-        const activeChainId = chainId || useChainStore.getState().activeChainId;
+        // Get chain from chain store if not provided
+        // Priority: 1) provided chainId, 2) pendingChainId (from break gesture), 3) activeChainId
+        const chainStore = useChainStore.getState();
+        const pendingChainId = chainStore.pendingChainId;
+        const activeChainId = chainStore.activeChainId;
         
-        // If no active chain and user exists, create one
-        let finalChainId: ChainId | null = activeChainId;
+        // Use pending chain if it exists (from break gesture), otherwise use active or provided
+        let finalChainId: ChainId | null = chainId || pendingChainId || activeChainId;
+        
+        // If no chain and user exists, create one
         if (!finalChainId && userId) {
-          finalChainId = useChainStore.getState().createChain(userId);
+          finalChainId = chainStore.createChain(userId);
         }
         
         const newThought: ThoughtObject = {
@@ -99,6 +104,11 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       anchorThought: (id) => {
         const now = new Date().toISOString();
         const anchoredDayKey = getDayKey(now);
+        
+        // Get the thought before updating to check its chain_id
+        const thought = get().thoughts.find(t => t.id === id);
+        const thoughtChainId = thought?.chain_id;
+        
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
@@ -114,6 +124,14 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           ),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
         }));
+        
+        // If this thought belongs to the pending chain, activate it
+        const chainStore = useChainStore.getState();
+        if (thoughtChainId && chainStore.pendingChainId === thoughtChainId) {
+          // Activate the pending chain and clear pending status
+          chainStore.setActiveChain(thoughtChainId);
+          chainStore.clearPendingChain();
+        }
       },
 
       // Reactivate an anchored thought for continued thinking
