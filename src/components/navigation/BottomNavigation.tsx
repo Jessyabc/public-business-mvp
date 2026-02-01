@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { PenTool, Plus, User, MessageCircle, ChevronUp } from 'lucide-react';
+import { PenTool, Plus, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { useWorkspaceStore } from '@/features/workspace/useWorkspaceStore';
@@ -266,14 +266,6 @@ export function BottomNavigation() {
             )}
           </button>
 
-          {/* Swipe indicator */}
-          <div 
-            className="absolute -top-1 right-4 flex items-center gap-0.5"
-            style={{ color: textInactive }}
-          >
-            <ChevronUp className="w-3 h-3 rotate-90 opacity-60" />
-            <span className="text-[10px] opacity-60">swipe</span>
-          </div>
         </div>
       </nav>
 
