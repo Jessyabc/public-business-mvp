@@ -1,8 +1,8 @@
 /**
  * Think Space: Chain Sync Hook
  * 
- * Syncs thought_chains with Supabase.
- * Runs alongside useWorkspaceSync.
+ * Syncs thought_chains and active_chain_id with Supabase.
+ * Active chain is ACCOUNT-LEVEL (persisted to user_settings.active_chain_id).
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -17,14 +17,71 @@ export function useChainSync() {
   const { user } = useAuth();
   const {
     chains,
+    activeChainId,
     setChains,
+    setActiveChain,
     setLoadingChains,
     setSyncingChains,
   } = useChainStore();
   
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const activeChainSyncRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
   const lastSyncedChainsRef = useRef<string>('');
+  const lastSyncedActiveChainRef = useRef<string | null>(null);
+
+  // Load active_chain_id from user_settings (account-level persistence)
+  const loadActiveChain = useCallback(async () => {
+    if (!user) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('active_chain_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      return data?.active_chain_id ?? null;
+    } catch (err) {
+      console.error('Failed to load active chain:', err);
+      return null;
+    }
+  }, [user]);
+
+  // Persist active_chain_id to user_settings
+  const persistActiveChain = useCallback(async (chainId: string | null) => {
+    if (!user) return;
+    
+    // Skip if no change
+    if (chainId === lastSyncedActiveChainRef.current) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          active_chain_id: chainId,
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+      
+      lastSyncedActiveChainRef.current = chainId;
+    } catch (err) {
+      console.error('Failed to persist active chain:', err);
+    }
+  }, [user]);
+
+  // Debounced active chain sync
+  const debouncedActiveChainSync = useCallback((chainId: string | null) => {
+    if (activeChainSyncRef.current) {
+      clearTimeout(activeChainSyncRef.current);
+    }
+    activeChainSyncRef.current = setTimeout(() => {
+      persistActiveChain(chainId);
+    }, 500); // Faster sync for active chain (important for UX)
+  }, [persistActiveChain]);
 
   // Load chains from Supabase on mount
   const loadChains = useCallback(async () => {
@@ -36,16 +93,20 @@ export function useChainSync() {
     setLoadingChains(true);
     
     try {
-      const { data, error } = await supabase
-        .from('thought_chains')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      // Load chains and active_chain_id in parallel
+      const [chainsResult, activeChainId] = await Promise.all([
+        supabase
+          .from('thought_chains')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        loadActiveChain(),
+      ]);
 
-      if (error) throw error;
+      if (chainsResult.error) throw chainsResult.error;
       
-      if (data && isMountedRef.current) {
-        const loadedChains: ThoughtChain[] = data.map((row) => ({
+      if (chainsResult.data && isMountedRef.current) {
+        const loadedChains: ThoughtChain[] = chainsResult.data.map((row) => ({
           id: row.id,
           user_id: row.user_id,
           created_at: row.created_at,
@@ -60,13 +121,19 @@ export function useChainSync() {
         
         setChains(mergedChains);
         lastSyncedChainsRef.current = JSON.stringify(mergedChains);
+        
+        // Restore active chain from DB (account-level)
+        if (activeChainId && mergedChains.some(c => c.id === activeChainId)) {
+          setActiveChain(activeChainId);
+          lastSyncedActiveChainRef.current = activeChainId;
+        }
       }
     } catch (err) {
       console.error('Failed to load chains:', err);
     } finally {
       setLoadingChains(false);
     }
-  }, [user, setChains, setLoadingChains]);
+  }, [user, setChains, setActiveChain, setLoadingChains, loadActiveChain]);
 
   // Sync chains to Supabase
   const syncChains = useCallback(async () => {
@@ -130,6 +197,9 @@ export function useChainSync() {
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
+      if (activeChainSyncRef.current) {
+        clearTimeout(activeChainSyncRef.current);
+      }
     };
   }, [user, loadChains, setLoadingChains]);
 
@@ -140,9 +210,17 @@ export function useChainSync() {
     }
   }, [chains, user, debouncedSync]);
 
+  // Persist active chain when it changes (account-level)
+  useEffect(() => {
+    if (user && activeChainId !== undefined) {
+      debouncedActiveChainSync(activeChainId);
+    }
+  }, [activeChainId, user, debouncedActiveChainSync]);
+
   return {
     loadChains,
     syncChains,
+    persistActiveChain,
   };
 }
 
