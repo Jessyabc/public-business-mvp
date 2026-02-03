@@ -33,7 +33,9 @@ export function useWorkspaceSync() {
   // Load thoughts from Supabase on mount
   const loadThoughts = useCallback(async () => {
     if (!user) {
-      // No user - ensure loading is false
+      // No user - clear thoughts and ensure loading is false
+      setThoughts([]);
+      setActiveThought(null);
       setLoading(false);
       return;
     }
@@ -45,6 +47,16 @@ export function useWorkspaceSync() {
     loadAbortRef.current = new AbortController();
     
     setLoading(true);
+    
+    // CRITICAL: Clear localStorage thoughts from previous users
+    // Filter out any thoughts that don't belong to the current user
+    const currentThoughts = useWorkspaceStore.getState().thoughts;
+    const filteredThoughts = currentThoughts.filter(t => t.user_id === user.id);
+    if (filteredThoughts.length !== currentThoughts.length) {
+      // Some thoughts were from a different user - clear and reset
+      setThoughts([]);
+      setActiveThought(null);
+    }
     
     // Set up a timeout to prevent infinite loading
     const timeoutId = window.setTimeout(() => {
@@ -65,7 +77,10 @@ export function useWorkspaceSync() {
       if (error) throw error;
       
       if (data && isMountedRef.current) {
-        const loadedThoughts: ThoughtObject[] = data.map((row) => {
+        // CRITICAL: Double-check that all loaded thoughts belong to current user
+        const userThoughts = data.filter(row => row.user_id === user.id);
+        
+        const loadedThoughts: ThoughtObject[] = userThoughts.map((row) => {
           // Derive day_key from anchored_at if available, otherwise created_at
           const dayKeySource = row.anchored_at || row.created_at;
           const dayKey = row.day_key || dayKeySource.split('T')[0];
@@ -85,20 +100,23 @@ export function useWorkspaceSync() {
           };
         });
         
-        // Merge with local thoughts (prefer newer, preserve active state)
-        const localThoughts = useWorkspaceStore.getState().thoughts;
+        // Merge with local thoughts, but ONLY keep thoughts from current user
+        const localThoughts = useWorkspaceStore.getState().thoughts.filter(t => t.user_id === user.id);
         const mergedThoughts = mergeThoughts(localThoughts, loadedThoughts);
         
-        setThoughts(mergedThoughts);
+        // Final safety check: ensure all thoughts belong to current user
+        const safeThoughts = mergedThoughts.filter(t => t.user_id === user.id);
+        
+        setThoughts(safeThoughts);
         // Only clear active thought if it's not in the merged list or was anchored
         const currentActiveId = useWorkspaceStore.getState().activeThoughtId;
         if (currentActiveId) {
-          const activeThought = mergedThoughts.find(t => t.id === currentActiveId);
+          const activeThought = safeThoughts.find(t => t.id === currentActiveId);
           if (!activeThought || activeThought.state === 'anchored') {
             setActiveThought(null);
           }
         }
-        lastSyncedThoughtsRef.current = JSON.stringify(mergedThoughts);
+        lastSyncedThoughtsRef.current = JSON.stringify(safeThoughts);
         setLastSynced(new Date().toISOString());
       }
     } catch (err) {
@@ -116,7 +134,11 @@ export function useWorkspaceSync() {
     if (!user) return;
     
     const currentThoughts = useWorkspaceStore.getState().thoughts;
-    const currentJson = JSON.stringify(currentThoughts);
+    
+    // CRITICAL: Only sync thoughts that belong to the current user
+    const userThoughts = currentThoughts.filter(t => t.user_id === user.id);
+    
+    const currentJson = JSON.stringify(userThoughts);
     
     // Skip if nothing changed
     if (currentJson === lastSyncedThoughtsRef.current) return;
@@ -124,7 +146,7 @@ export function useWorkspaceSync() {
     setSyncing(true);
     try {
       // Ensure all thoughts have valid day_key before syncing
-      const thoughtsToSync = currentThoughts.map((t) => {
+      const thoughtsToSync = userThoughts.map((t) => {
         // Ensure day_key is set
         let dayKey = t.day_key;
         if (!dayKey) {
@@ -173,15 +195,35 @@ export function useWorkspaceSync() {
     syncTimeoutRef.current = setTimeout(syncThoughts, SYNC_DEBOUNCE_MS);
   }, [syncThoughts]);
 
+  // Track previous user to detect user changes
+  const prevUserIdRef = useRef<string | null>(null);
+  
   // Load on mount - with proper cleanup
   useEffect(() => {
     isMountedRef.current = true;
+    
+    // CRITICAL: If user changed, clear all thoughts from previous user
+    if (prevUserIdRef.current && prevUserIdRef.current !== user?.id) {
+      console.log('User changed, clearing thoughts from previous user');
+      setThoughts([]);
+      setActiveThought(null);
+      // Clear localStorage for workspace to prevent cross-user contamination
+      try {
+        localStorage.removeItem('pb-workspace');
+      } catch (e) {
+        console.warn('Failed to clear workspace localStorage:', e);
+      }
+    }
+    
+    prevUserIdRef.current = user?.id || null;
     
     // Only load if we have a user
     if (user) {
       loadThoughts();
     } else {
-      // Ensure loading is false when there's no user
+      // No user - clear thoughts and ensure loading is false
+      setThoughts([]);
+      setActiveThought(null);
       setLoading(false);
     }
     
@@ -195,7 +237,7 @@ export function useWorkspaceSync() {
         loadAbortRef.current.abort();
       }
     };
-  }, [user, loadThoughts, setLoading]);
+  }, [user?.id, loadThoughts, setLoading, setThoughts, setActiveThought]);
 
   // Auto-sync when thoughts change (including when first thought is created)
   useEffect(() => {
