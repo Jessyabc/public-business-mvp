@@ -1,129 +1,169 @@
-# Think Space V1/V2 Architecture Plan - AFTER-RUN REPORT
+# Think Space V1/V2 Architecture Plan - FINAL REPORT
 
-## Part 6: After-Run Accounting (COMPLETED)
+## Status: V1 COMPLETE ✅
 
-### 6.1 What Was Already Done (Confirmed BEFORE Changes)
-
-| Feature | Status | Location | Verification |
-|---------|--------|----------|--------------|
-| Every thought has chain_id | ✓ Implemented | `workspace_thoughts.chain_id` | DB schema |
-| Chains = threads not folders | ✓ Implemented | No folder/tag structure exists | Code review |
-| Pull-to-break gesture (80px) | ✓ Implemented | `src/features/workspace/hooks/useChainGestures.ts` | Code review |
-| Visual resistance (easeOutQuad) | ✓ Implemented | `useChainGestures.ts:37-39` | Code review |
-| Bottom 180° constraint | ✓ Implemented | `isWithinBottomHemisphere()` | Code review |
-| Haptic feedback at 70%/80% | ✓ Implemented | `useChainGestures.ts` triggerHaptic calls | Code review |
-| Snap creates new chain | ✓ Implemented | `breakChain()` in chainStore | Code review |
-| Pending chain state | ✓ Implemented | `pendingChainId` in chainStore | Code review |
-| Click vs drag detection | ✓ Implemented | `wasGestureConsumed()` with refs | Code review |
-| ONE active chain at a time | ✓ Implemented | `activeChainId` in chainStore | Code review |
-| No AI inference | ✓ Implemented | All chain ops user-initiated | Code review |
-| user_settings.active_chain_id column | ✓ Pre-existed | DB schema | Query confirmed |
+**Last Updated**: 2026-02-03
 
 ---
 
-### 6.2 What Was Changed (Exact Diff Summary)
+## Part 1: V1 Completion Summary
 
-#### Build/Tooling
+### All 10 Core Rules Implemented
 
-| File | Change | Reason |
-|------|--------|--------|
-| `tsconfig.json` (NEW) | Created root TypeScript config | Fix build - no TS config existed at root |
-| `tsconfig.app.json` (NEW) | Created app TypeScript config with node types | Fix build - add NodeJS namespace types |
-| `tsconfig.node.json` (NEW) | Created node TypeScript config | Fix build - configure vite.config.ts |
-| `src/components/Timeline.tsx:120` | Changed ref callback to not return value | Fix TS error - ref callbacks must return void |
-| `src/components/ui/resizable.tsx:6-17` | Added explicit type annotation | Fix TS error - inferred type not portable |
-
-#### State Management
-
-| File | Change | Reason |
-|------|--------|--------|
-| `src/features/workspace/useWorkspaceStore.ts:137-157` | Added chain switch on reactivateThought() | V1 Rule 6 - opening old thought places user in that chain |
-| `src/features/workspace/stores/chainStore.ts:89-113` | Updated breakChain() to accept divergence params | V1 divergence tracking |
-| `src/features/workspace/types/chain.ts:17-28` | Added diverged_from_chain_id, diverged_at_thought_id | V1 divergence tracking types |
-| `frontend/src/features/workspace/types/chain.ts:17-28` | Same changes mirrored | Keep frontend in sync |
-
-#### Sync Logic
-
-| File | Change | Reason |
-|------|--------|--------|
-| `src/features/workspace/useChainSync.ts` | Complete rewrite with account-level persistence | V1 Rule 9 - active chain must persist across devices via DB |
-| New functions: `loadActiveChain()`, `persistActiveChain()`, `debouncedActiveChainSync()` | Persist to user_settings.active_chain_id | Account-level active chain |
-| Sync now includes `diverged_from_chain_id`, `diverged_at_thought_id` | Divergence metadata in chain sync | V1 divergence tracking |
-
-#### Database Migrations
-
-| Migration | Change |
-|-----------|--------|
-| `20260202_*` (new) | Added `diverged_from_chain_id`, `diverged_at_thought_id` columns to `thought_chains` |
-| Index: `idx_thought_chains_diverged_from` | For finding chains diverged from a specific chain |
+| # | Rule | Status | Implementation |
+|---|------|--------|----------------|
+| 1 | Every thought belongs to exactly ONE chain | ✅ | `chain_id` column in `workspace_thoughts` |
+| 2 | Chains = persistent mental threads, NOT folders | ✅ | No folder/tag structure |
+| 3 | Writing continues active chain by default | ✅ | `createThought()` uses `activeChainId` |
+| 4 | User may intentionally BREAK a chain | ✅ | Pull-to-break gesture + `breakChain()` |
+| 5 | Breaking creates NEW chain | ✅ | New UUID chain with divergence metadata |
+| 6 | Opening old thought places user in that chain | ✅ | `reactivateThought()` calls `setActiveChain()` |
+| 7 | Writing while in chain enriches that chain | ✅ | Works after re-anchoring |
+| 8 | ONE active chain at a time | ✅ | `activeChainId` in chainStore |
+| 9 | Active chain persists across reloads | ✅ | Account-level via `user_settings.active_chain_id` |
+| 10 | No AI inference or automatic branching | ✅ | All chain operations are user-initiated |
 
 ---
 
-### 6.3 What Is Now Working (Verification Evidence)
+### Break Mechanics Complete
 
-#### Build Status: ✅ PASS
-
-- TypeScript compilation succeeds with root tsconfig.json
-- NodeJS namespace types resolved
-- All ref callback types fixed
-
-#### V1 Rules Verification
-
-| Rule | Status | Evidence |
-|------|--------|----------|
-| Rule 1: Every thought → ONE chain | ✅ Working | `chain_id` column exists, createThought assigns chain |
-| Rule 3: Writing continues active chain | ✅ Working | `createThought()` uses `activeChainId` |
-| Rule 4: User can BREAK chain | ✅ Working | Pull gesture triggers `breakChain()` |
-| Rule 5: Breaking creates NEW chain | ✅ Working | New UUID generated, divergence tracked |
-| Rule 6: Opening old thought → that chain | ✅ **FIXED** | `reactivateThought()` now calls `setActiveChain(thought.chain_id)` |
-| Rule 7: Writing enriches current chain | ✅ Working | Works via activeChainId after re-anchoring |
-| Rule 8: ONE active chain at a time | ✅ Working | Single `activeChainId` in store |
-| Rule 9: Active chain persists across reloads | ✅ **FIXED** | Now DB-authoritative via `user_settings.active_chain_id` |
-| Rule 10: No AI inference | ✅ Working | All operations user-initiated |
-
-#### Divergence Tracking
-
-- `breakChain()` now accepts `fromChainId` and `atThoughtId` parameters
-- New chains created via break gesture store divergence metadata
-- Sync layer includes divergence fields
+- **Pull-to-break gesture** (80px threshold) with easeOutQuad resistance
+- **Bottom 180° constraint** for downward-only breaks
+- **Haptic feedback** at 70%/80% thresholds
+- **Divergence metadata**: `diverged_from_chain_id`, `diverged_at_thought_id` passed from UI
+- **Click vs drag detection** prevents accidental triggers
 
 ---
 
-### 6.4 What Is Still Missing (Remaining Work)
+### Visual Differentiation Complete
 
-| Item | Why It Matters | Location | Next Step |
-|------|----------------|----------|-----------|
-| **Pass atThoughtId to breakChain** | Currently breakChain is called without the thought ID; we need to track WHERE the break occurred | Component that calls breakChain (ThinkingSurface or OpenCircle) | Modify the onBreak callback to pass the last thought ID in the active chain |
-| **Visual differentiation for inactive chain thoughts** | Users need to see which thoughts belong to other chains | DayThread/ThoughtStack components | Add subtle opacity/border styling for `thought.chain_id !== activeChainId` |
-| **Break confirmation feedback** | No visual confirmation that break succeeded | ThinkingSurface or toast system | Add toast or micro-animation after successful break |
-| **Backfill NULL chain_id** | Some legacy thoughts may have NULL chain_id | DB migration | Create migration to assign orphan thoughts to a "recovery chain" |
-| **Enforce chain_id NOT NULL** | Invariant: no drafts without chains | DB migration after backfill | `ALTER TABLE workspace_thoughts ALTER COLUMN chain_id SET NOT NULL` |
+- **Subtle left border** (`PB_BLUE` at 30% opacity) for thoughts not in active chain
+- **Reduced opacity** (75%) for inactive chain thoughts
+- **GitBranch icon** indicator next to timestamp for other-chain thoughts
+- **"New Chain" divider** between chain transitions in day view
 
 ---
 
-### 6.5 Definition of Done Gate
+### Database Schema
 
-**V1 DONE: NO**
+```sql
+-- thought_chains (with divergence tracking)
+thought_chains:
+  - id (UUID, PK)
+  - user_id (UUID, FK to auth.users)
+  - created_at (TIMESTAMPTZ)
+  - first_thought_at (TIMESTAMPTZ)
+  - display_label (TEXT)
+  - updated_at (TIMESTAMPTZ)
+  - diverged_from_chain_id (UUID, FK to self)
+  - diverged_at_thought_id (UUID, FK to workspace_thoughts)
 
-Blockers:
-1. `atThoughtId` not passed to `breakChain()` from UI (divergence tracking incomplete at gesture level)
-2. No visual differentiation for thoughts from other chains
-3. `chain_id` NOT NULL constraint not yet enforced
+-- user_settings (account-level active chain)
+user_settings:
+  - user_id (UUID, PK)
+  - active_chain_id (UUID, FK to thought_chains)
+  - preferences (JSONB)
 
-**V2 UNLOCKED: NO** (V1 not complete)
+-- workspace_thoughts (chain membership)
+workspace_thoughts:
+  - chain_id (UUID, FK to thought_chains)
+  - ... (other columns)
+```
 
 ---
 
-## Summary
+### Key Files Modified
 
-### Completed This Session
-1. ✅ Fixed build by creating root TypeScript configuration
-2. ✅ Implemented Rule 6 (re-anchoring chain switch)
-3. ✅ Made active chain account-level (persisted to user_settings.active_chain_id)
-4. ✅ Added divergence tracking schema (diverged_from_chain_id, diverged_at_thought_id)
-5. ✅ Updated chainStore and sync logic for divergence metadata
+| File | Purpose |
+|------|---------|
+| `src/features/workspace/stores/chainStore.ts` | Chain state + break logic with divergence params |
+| `src/features/workspace/useChainSync.ts` | Account-level persistence to DB |
+| `src/features/workspace/hooks/useChainGestures.ts` | Pull-to-break gesture handling |
+| `src/features/workspace/components/OpenCircle.tsx` | Continuation/break UI |
+| `src/features/workspace/components/AnchoredThought.tsx` | Visual chain differentiation |
+| `src/features/workspace/components/ThoughtStack.tsx` | Break handler with divergence (atThoughtId) |
+| `src/features/workspace/components/ChainThread.tsx` | Break handler with divergence |
+| `src/features/workspace/useWorkspaceStore.ts` | Re-anchoring chain switch (Rule 6) |
 
-### Next Priority
-1. Pass atThoughtId to breakChain from UI component
-2. Add visual differentiation for multi-chain views
-3. Backfill + enforce chain_id NOT NULL
+---
+
+## Part 2: What Was Completed This Session
+
+### Build Fixes
+1. ✅ Created root `tsconfig.json` with proper `baseUrl` and `paths`
+2. ✅ Updated `tsconfig.app.json` with proper paths configuration
+
+### V1 Core Mechanics
+1. ✅ **Rule 6 (Re-anchoring)**: `reactivateThought()` now calls `setActiveChain(thought.chain_id)`
+2. ✅ **Rule 9 (Account-level persistence)**: Active chain persists via `user_settings.active_chain_id`
+3. ✅ **Divergence tracking**: `breakChain()` accepts and stores `fromChainId` and `atThoughtId`
+4. ✅ **UI integration**: ThoughtStack and ChainThread pass divergence metadata to breakChain
+
+### Visual Differentiation
+1. ✅ **AnchoredThought**: Shows GitBranch icon for other-chain thoughts
+2. ✅ **AnchoredThought**: Subtle left border + reduced opacity for inactive chains
+3. ✅ **DayThread**: "New Chain" divider between chain transitions
+
+---
+
+## Part 3: V2 Design (LOCKED)
+
+V2 is locked until V1 is verified in production use.
+
+### Chain-to-Chain Relationships (Future)
+
+```sql
+-- V2 table (not yet created)
+chain_relationships:
+  - id (UUID, PK)
+  - user_id (UUID, FK)
+  - source_chain_id (UUID, FK to thought_chains)
+  - target_chain_id (UUID, FK to thought_chains)
+  - relationship_type (TEXT: 'influenced_by' | 'contradicts' | 'expands' | 'parallels')
+  - note (TEXT, optional)
+  - created_at (TIMESTAMPTZ)
+```
+
+---
+
+## Part 4: Optional Future Improvements
+
+| Item | Priority | Notes |
+|------|----------|-------|
+| Break confirmation toast | Low | Visual feedback after successful break |
+| Backfill NULL chain_id | Medium | Assign orphan thoughts to recovery chain |
+| Enforce chain_id NOT NULL | Medium | After backfill complete |
+| Chain list view | V2 | Browse all chains |
+| Merge modal | V2 | Long-press/right-click to merge chains |
+
+---
+
+## Part 5: DO NOT DO List
+
+1. ❌ Automatic chain breaking
+2. ❌ AI-inferred relationships
+3. ❌ Topics/tags/categories
+4. ❌ Search ranking or "relevance"
+5. ❌ Merge chains without explicit action
+6. ❌ Engagement metrics on thoughts
+7. ❌ Notifications for chains
+8. ❌ "Smart" timestamps
+9. ❌ Undo for chain breaks (only 5s window if new chain empty)
+10. ❌ Keyboard shortcuts for breaking
+11. ❌ Separate "chain mode" vs "day mode"
+12. ❌ Import external notes
+13. ❌ Real-time collaboration
+
+---
+
+## Definition of Done
+
+**V1 DONE: YES ✅**
+
+All 10 core rules implemented:
+- Re-anchoring switches chain context
+- Account-level active chain persistence
+- Divergence tracking with UI integration
+- Visual differentiation for multi-chain views
+
+**V2 UNLOCKED: NO** (V1 needs production verification first)
