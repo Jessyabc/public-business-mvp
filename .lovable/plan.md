@@ -1,169 +1,153 @@
-# Think Space V1/V2 Architecture Plan - FINAL REPORT
 
-## Status: V1 COMPLETE ✅
+# Plan: Fix Build and Verify Auth Data Isolation
 
-**Last Updated**: 2026-02-03
+## Part 1: Build Fix (Critical - Blocking Publish)
 
----
+### Issue Identified
+The build error occurs in `vite.config.ts` line 23:
+```
+server.allowedHosts: true
+```
+In Vite 7.x, the `allowedHosts` type changed from `boolean` to `true | string[]`. TypeScript infers `true` as `boolean` which fails the type check.
 
-## Part 1: V1 Completion Summary
-
-### All 10 Core Rules Implemented
-
-| # | Rule | Status | Implementation |
-|---|------|--------|----------------|
-| 1 | Every thought belongs to exactly ONE chain | ✅ | `chain_id` column in `workspace_thoughts` |
-| 2 | Chains = persistent mental threads, NOT folders | ✅ | No folder/tag structure |
-| 3 | Writing continues active chain by default | ✅ | `createThought()` uses `activeChainId` |
-| 4 | User may intentionally BREAK a chain | ✅ | Pull-to-break gesture + `breakChain()` |
-| 5 | Breaking creates NEW chain | ✅ | New UUID chain with divergence metadata |
-| 6 | Opening old thought places user in that chain | ✅ | `reactivateThought()` calls `setActiveChain()` |
-| 7 | Writing while in chain enriches that chain | ✅ | Works after re-anchoring |
-| 8 | ONE active chain at a time | ✅ | `activeChainId` in chainStore |
-| 9 | Active chain persists across reloads | ✅ | Account-level via `user_settings.active_chain_id` |
-| 10 | No AI inference or automatic branching | ✅ | All chain operations are user-initiated |
+### Fix
+Change line 23 in `vite.config.ts` from:
+```typescript
+allowedHosts: true,
+```
+to:
+```typescript
+allowedHosts: true as const,
+```
+This ensures TypeScript treats it as the literal `true` type rather than `boolean`.
 
 ---
 
-### Break Mechanics Complete
+## Part 2: Auth Data Isolation Audit
 
-- **Pull-to-break gesture** (80px threshold) with easeOutQuad resistance
-- **Bottom 180° constraint** for downward-only breaks
-- **Haptic feedback** at 70%/80% thresholds
-- **Divergence metadata**: `diverged_from_chain_id`, `diverged_at_thought_id` passed from UI
-- **Click vs drag detection** prevents accidental triggers
+### Think Space (Workspace) - VERIFIED SECURE
+
+| Component | Status | Evidence |
+|-----------|--------|----------|
+| RLS on `workspace_thoughts` | SECURE | `user_id = auth.uid()` on SELECT, INSERT, UPDATE, DELETE |
+| RLS on `thought_chains` | SECURE | `user_id = auth.uid()` on SELECT, INSERT, UPDATE, DELETE |
+| RLS on `user_settings` | SECURE | `user_id = auth.uid()` on all operations |
+| Code queries | SECURE | `useWorkspaceSync.ts` always filters `.eq('user_id', user.id)` |
+| Chain sync | SECURE | `useChainSync.ts` always filters `.eq('user_id', user.id)` |
+
+**Conclusion**: Think Space data is properly isolated at both RLS and application layers.
+
+### Discuss Spaces (Posts) - VERIFIED SECURE
+
+| Component | Status | Evidence |
+|-----------|--------|----------|
+| RLS on `posts` | SECURE | Multiple policies: own posts, public visibility, org-based visibility |
+| Feed queries | SECURE | `feedQueries.ts` applies mode/visibility filters |
+| Business mode | SECURE | Requires `org_id` + `is_org_member()` check in RLS |
+
+**Conclusion**: Discuss Space data is properly isolated.
 
 ---
 
-### Visual Differentiation Complete
+## Part 3: Potential Data Leakage Vectors (To Harden)
 
-- **Subtle left border** (`PB_BLUE` at 30% opacity) for thoughts not in active chain
-- **Reduced opacity** (75%) for inactive chain thoughts
-- **GitBranch icon** indicator next to timestamp for other-chain thoughts
-- **"New Chain" divider** between chain transitions in day view
+### 3.1 LocalStorage Stale Data
+**Risk**: If user A logs out and user B logs in on the same device, localStorage may contain user A's cached thoughts.
+
+**Current State**: `useWorkspaceStore` uses Zustand persist with `pb-workspace` key. On mount, it merges localStorage data with server data.
+
+**Recommended Fix**: Clear localStorage on logout.
+
+### 3.2 React Query Cache
+**Risk**: Query cache may persist between user sessions.
+
+**Current State**: No explicit cache clearing on auth state change.
+
+**Recommended Fix**: Clear React Query cache when user changes.
+
+### 3.3 Zustand Store State
+**Risk**: In-memory store state persists if user switches accounts without page reload.
+
+**Recommended Fix**: Reset workspace stores on auth state change.
 
 ---
 
-### Database Schema
+## Implementation Roadmap
 
-```sql
--- thought_chains (with divergence tracking)
-thought_chains:
-  - id (UUID, PK)
-  - user_id (UUID, FK to auth.users)
-  - created_at (TIMESTAMPTZ)
-  - first_thought_at (TIMESTAMPTZ)
-  - display_label (TEXT)
-  - updated_at (TIMESTAMPTZ)
-  - diverged_from_chain_id (UUID, FK to self)
-  - diverged_at_thought_id (UUID, FK to workspace_thoughts)
+### Phase 1: Fix Build (Immediate)
+1. Update `vite.config.ts` line 23 to use `true as const`
+2. Verify build succeeds locally
 
--- user_settings (account-level active chain)
-user_settings:
-  - user_id (UUID, PK)
-  - active_chain_id (UUID, FK to thought_chains)
-  - preferences (JSONB)
+### Phase 2: Add Auth State Cleanup (Hardening)
+1. Create `useAuthCleanup` hook that:
+   - Listens to `onAuthStateChange`
+   - On SIGNED_OUT or user change: clears localStorage keys
+   - Resets Zustand stores
+   - Clears React Query cache
+2. Integrate hook into `AuthContext` or root layout
 
--- workspace_thoughts (chain membership)
-workspace_thoughts:
-  - chain_id (UUID, FK to thought_chains)
-  - ... (other columns)
+### Phase 3: Verification
+1. Test login/logout cycle
+2. Verify no stale data appears after user switch
+3. Confirm feed shows correct posts for each lens
+
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `vite.config.ts` | Fix `allowedHosts: true as const` |
+| `src/contexts/AuthContext.tsx` | Add cleanup on logout |
+| `src/features/workspace/useWorkspaceStore.ts` | Add `resetStore()` action |
+| `src/features/workspace/stores/chainStore.ts` | Add `resetChains()` action |
+
+---
+
+## Technical Details
+
+### Vite Config Fix
+```typescript
+// Before (line 23)
+allowedHosts: true,
+
+// After
+allowedHosts: true as const,
+```
+
+### Auth Cleanup Pattern
+```typescript
+// In AuthContext or a dedicated hook
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      // Clear localStorage
+      localStorage.removeItem('pb-workspace');
+      localStorage.removeItem('pb-chain-store');
+      
+      // Reset stores
+      useWorkspaceStore.setState({ thoughts: [], activeThoughtId: null });
+      useChainStore.setState({ chains: [], activeChainId: null });
+      
+      // Clear React Query cache
+      queryClient.clear();
+    }
+  });
+  
+  return () => subscription.unsubscribe();
+}, []);
 ```
 
 ---
 
-### Key Files Modified
+## Summary
 
-| File | Purpose |
-|------|---------|
-| `src/features/workspace/stores/chainStore.ts` | Chain state + break logic with divergence params |
-| `src/features/workspace/useChainSync.ts` | Account-level persistence to DB |
-| `src/features/workspace/hooks/useChainGestures.ts` | Pull-to-break gesture handling |
-| `src/features/workspace/components/OpenCircle.tsx` | Continuation/break UI |
-| `src/features/workspace/components/AnchoredThought.tsx` | Visual chain differentiation |
-| `src/features/workspace/components/ThoughtStack.tsx` | Break handler with divergence (atThoughtId) |
-| `src/features/workspace/components/ChainThread.tsx` | Break handler with divergence |
-| `src/features/workspace/useWorkspaceStore.ts` | Re-anchoring chain switch (Rule 6) |
+| Issue | Severity | Status |
+|-------|----------|--------|
+| Build fails on `allowedHosts` type | CRITICAL | Fix required |
+| Think Space RLS | LOW | Already secure |
+| Discuss Spaces RLS | LOW | Already secure |
+| LocalStorage stale data | MEDIUM | Hardening recommended |
+| React Query cache | MEDIUM | Hardening recommended |
 
----
-
-## Part 2: What Was Completed This Session
-
-### Build Fixes
-1. ✅ Created root `tsconfig.json` with proper `baseUrl` and `paths`
-2. ✅ Updated `tsconfig.app.json` with proper paths configuration
-
-### V1 Core Mechanics
-1. ✅ **Rule 6 (Re-anchoring)**: `reactivateThought()` now calls `setActiveChain(thought.chain_id)`
-2. ✅ **Rule 9 (Account-level persistence)**: Active chain persists via `user_settings.active_chain_id`
-3. ✅ **Divergence tracking**: `breakChain()` accepts and stores `fromChainId` and `atThoughtId`
-4. ✅ **UI integration**: ThoughtStack and ChainThread pass divergence metadata to breakChain
-
-### Visual Differentiation
-1. ✅ **AnchoredThought**: Shows GitBranch icon for other-chain thoughts
-2. ✅ **AnchoredThought**: Subtle left border + reduced opacity for inactive chains
-3. ✅ **DayThread**: "New Chain" divider between chain transitions
-
----
-
-## Part 3: V2 Design (LOCKED)
-
-V2 is locked until V1 is verified in production use.
-
-### Chain-to-Chain Relationships (Future)
-
-```sql
--- V2 table (not yet created)
-chain_relationships:
-  - id (UUID, PK)
-  - user_id (UUID, FK)
-  - source_chain_id (UUID, FK to thought_chains)
-  - target_chain_id (UUID, FK to thought_chains)
-  - relationship_type (TEXT: 'influenced_by' | 'contradicts' | 'expands' | 'parallels')
-  - note (TEXT, optional)
-  - created_at (TIMESTAMPTZ)
-```
-
----
-
-## Part 4: Optional Future Improvements
-
-| Item | Priority | Notes |
-|------|----------|-------|
-| Break confirmation toast | Low | Visual feedback after successful break |
-| Backfill NULL chain_id | Medium | Assign orphan thoughts to recovery chain |
-| Enforce chain_id NOT NULL | Medium | After backfill complete |
-| Chain list view | V2 | Browse all chains |
-| Merge modal | V2 | Long-press/right-click to merge chains |
-
----
-
-## Part 5: DO NOT DO List
-
-1. ❌ Automatic chain breaking
-2. ❌ AI-inferred relationships
-3. ❌ Topics/tags/categories
-4. ❌ Search ranking or "relevance"
-5. ❌ Merge chains without explicit action
-6. ❌ Engagement metrics on thoughts
-7. ❌ Notifications for chains
-8. ❌ "Smart" timestamps
-9. ❌ Undo for chain breaks (only 5s window if new chain empty)
-10. ❌ Keyboard shortcuts for breaking
-11. ❌ Separate "chain mode" vs "day mode"
-12. ❌ Import external notes
-13. ❌ Real-time collaboration
-
----
-
-## Definition of Done
-
-**V1 DONE: YES ✅**
-
-All 10 core rules implemented:
-- Re-anchoring switches chain context
-- Account-level active chain persistence
-- Divergence tracking with UI integration
-- Visual differentiation for multi-chain views
-
-**V2 UNLOCKED: NO** (V1 needs production verification first)
+The primary blocker is the Vite config type error. Once fixed, the build will succeed. Data isolation is already enforced at the database level via RLS policies.
