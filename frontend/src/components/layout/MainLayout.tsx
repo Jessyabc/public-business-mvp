@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { GlobalBackground } from '@/components/layout/GlobalBackground';
 import { SwipeNavigationWrapper } from '@/components/layout/SwipeNavigationWrapper';
 import { ErrorBoundary } from '@/ui/feedback/ErrorBoundary';
+import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ThemeInjector } from '@/styles/ThemeInjector';
@@ -92,5 +93,8 @@ export function MainLayout({
 
       {/* Bottom Navigation - only show when user is logged in */}
       {user && <BottomNavigation />}
+
+      {/* Onboarding Provider - shows contextual guides */}
+      {user && <OnboardingProvider />}
     </div>;
 }

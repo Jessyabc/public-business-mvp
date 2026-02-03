@@ -10,12 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
 import { useIsOrgOwner } from '@/hooks/useOrgMembership';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Bell, Shield, Palette, Building2, BookOpen, Loader2 } from 'lucide-react';
+import { User, Bell, Shield, Palette, Building2, BookOpen, Loader2, HelpCircle } from 'lucide-react';
 import Resources from './Resources';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import {
@@ -35,8 +36,10 @@ export default function Settings() {
   const [searchParams] = useSearchParams();
   const { userRoles, isBusinessMember, isAdmin } = useUserRoles();
   const { preferences, loading: settingsLoading, saving, updatePreference } = useUserSettings();
+  const { resetOnboarding, saving: onboardingSaving } = useOnboarding();
   const { toast } = useToast();
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [resetOnboardingOpen, setResetOnboardingOpen] = useState(false);
   const { isOrgOwner } = useIsOrgOwner();
   
   // Get initial tab from URL params
@@ -454,6 +457,71 @@ export default function Settings() {
                         <option>UTC+00:00 (GMT)</option>
                         <option>UTC+01:00 (CET)</option>
                       </select>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Onboarding Section */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <HelpCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="font-medium mb-1">Onboarding</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        See helpful guides as you explore new areas of the platform.
+                      </p>
+                      <AlertDialog open={resetOnboardingOpen} onOpenChange={setResetOnboardingOpen}>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            disabled={onboardingSaving}
+                            className="w-full sm:w-auto"
+                          >
+                            {onboardingSaving ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Resetting...
+                              </>
+                            ) : (
+                              'Reset Onboarding'
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Reset Onboarding?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will show all contextual guides again as you explore different areas. 
+                              You can dismiss them individually as you go.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={async () => {
+                                const success = await resetOnboarding();
+                                if (success) {
+                                  toast({
+                                    title: "Onboarding Reset",
+                                    description: "You'll see guides again as you explore new areas.",
+                                  });
+                                  setResetOnboardingOpen(false);
+                                } else {
+                                  toast({
+                                    title: "Error",
+                                    description: "Failed to reset onboarding. Please try again.",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                            >
+                              Reset
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 </div>
