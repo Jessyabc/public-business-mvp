@@ -110,6 +110,7 @@ export interface ChainActions {
   setLenses: (lenses: ThoughtLens[]) => void;
   setLoadingChains: (loading: boolean) => void;
   setSyncingChains: (syncing: boolean) => void;
+  resetStore: () => void; // Reset store for auth cleanup
   
   // Selectors
   getActiveChain: () => ThoughtChain | null;

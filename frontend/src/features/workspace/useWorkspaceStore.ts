@@ -1,20 +1,22 @@
 /**
  * Pillar #1: Individual Workspace - Zustand Store
  * 
- * Pure cognitive state management with daily threading.
+ * Pure cognitive state management with daily threading + chains.
  * No social metrics, no engagement tracking.
  * 
  * Threading model:
- * - Thoughts are grouped by day_key (YYYY-MM-DD)
+ * - Thoughts are grouped by day_key (YYYY-MM-DD) AND chain_id
  * - Each day forms a "thread" of related thinking
  * - New entries prepend to the day (most recent at top)
  * - Users can revisit and add to previous days
+ * - Pull-to-break gesture creates new chains
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { WorkspaceStore, ThoughtObject, DayThread } from './types';
+import type { WorkspaceStore, ThoughtObject, DayThread, ChainId } from './types';
 import { format, parseISO } from 'date-fns';
+import { useChainStore } from './stores/chainStore';
 
 const generateId = () => crypto.randomUUID();
 
@@ -41,7 +43,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       // Create a new thought, optionally for a specific day
       // user_id is passed from the component that has auth context
-      createThought: (dayKey?: string, userId?: string) => {
+      // If chainId is provided, assigns thought to that chain
+      createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => {
         const id = generateId();
         const now = new Date().toISOString();
         // Use provided dayKey, or activeDayKey, or today's date
@@ -52,6 +55,20 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           ? getDayKey(targetDayKey) 
           : targetDayKey;
         
+        // Get chain from chain store if not provided
+        // Priority: 1) provided chainId, 2) pendingChainId (from break gesture), 3) activeChainId
+        const chainStore = useChainStore.getState();
+        const pendingChainId = chainStore.pendingChainId;
+        const activeChainId = chainStore.activeChainId;
+        
+        // Use pending chain if it exists (from break gesture), otherwise use active or provided
+        let finalChainId: ChainId | null = chainId || pendingChainId || activeChainId;
+        
+        // If no chain and user exists, create one
+        if (!finalChainId && userId) {
+          finalChainId = chainStore.createChain(userId);
+        }
+        
         const newThought: ThoughtObject = {
           id,
           user_id: userId || '', // Set from auth context, fallback empty
@@ -60,7 +77,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           created_at: now,
           updated_at: now,
           day_key: normalizedDayKey,
-          chain_id: null, // Will be set when assigned to a chain
+          chain_id: finalChainId, // Assign to active chain
         };
         
         set((state) => ({
@@ -87,6 +104,11 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       anchorThought: (id) => {
         const now = new Date().toISOString();
         const anchoredDayKey = getDayKey(now);
+        
+        // Get the thought before updating to check its chain_id
+        const thought = get().thoughts.find(t => t.id === id);
+        const thoughtChainId = thought?.chain_id;
+        
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
@@ -102,11 +124,27 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           ),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
         }));
+        
+        // If this thought belongs to the pending chain, activate it
+        const chainStore = useChainStore.getState();
+        if (thoughtChainId && chainStore.pendingChainId === thoughtChainId) {
+          // Activate the pending chain and clear pending status
+          chainStore.setActiveChain(thoughtChainId);
+          chainStore.clearPendingChain();
+        }
       },
 
       // Reactivate an anchored thought for continued thinking
+      // IMPORTANT: Rule 6 - opening old thought places user in that chain
       reactivateThought: (id) => {
         const thought = get().thoughts.find(t => t.id === id);
+        
+        // Re-anchor to the thought's chain (V1 Rule 6)
+        if (thought?.chain_id) {
+          const chainStore = useChainStore.getState();
+          chainStore.setActiveChain(thought.chain_id);
+        }
+        
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id
@@ -115,6 +153,23 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           ),
           activeThoughtId: id,
           activeDayKey: thought?.day_key || null,
+        }));
+      },
+
+      // Cancel edit: restore thought to anchored state without updating timestamps
+      cancelEdit: (id, originalContent) => {
+        set((state) => ({
+          thoughts: state.thoughts.map((t) =>
+            t.id === id
+              ? { 
+                  ...t, 
+                  content: originalContent,
+                  state: 'anchored',
+                  // Don't update updated_at, anchored_at, or day_key - keep original values
+                }
+              : t
+          ),
+          activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
         }));
       },
 
@@ -154,6 +209,18 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       setLoading: (isLoading) => set({ isLoading }),
       setSyncing: (isSyncing) => set({ isSyncing }),
       setLastSynced: (lastSyncedAt) => set({ lastSyncedAt }),
+
+      // Reset store (for auth cleanup)
+      resetStore: () => {
+        set({
+          thoughts: [],
+          activeThoughtId: null,
+          activeDayKey: null,
+          isLoading: false,
+          isSyncing: false,
+          lastSyncedAt: null,
+        });
+      },
 
       // Selectors
       getActiveThought: () => {

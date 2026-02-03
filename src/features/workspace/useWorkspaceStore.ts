@@ -210,6 +210,18 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       setSyncing: (isSyncing) => set({ isSyncing }),
       setLastSynced: (lastSyncedAt) => set({ lastSyncedAt }),
 
+      // Reset store (for auth cleanup)
+      resetStore: () => {
+        set({
+          thoughts: [],
+          activeThoughtId: null,
+          activeDayKey: null,
+          isLoading: false,
+          isSyncing: false,
+          lastSyncedAt: null,
+        });
+      },
+
       // Selectors
       getActiveThought: () => {
         const { thoughts, activeThoughtId } = get();

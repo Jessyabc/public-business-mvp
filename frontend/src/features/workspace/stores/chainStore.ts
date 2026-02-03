@@ -25,6 +25,7 @@ export const useChainStore = create<ChainStore>()(
       chains: [],
       lenses: [],
       activeChainId: null,
+      pendingChainId: null,
       activeLensId: null,
       viewMode: 'raw' as ChainViewMode,
       isLoadingChains: false,
@@ -56,6 +57,7 @@ export const useChainStore = create<ChainStore>()(
         set((state) => ({
           chains: state.chains.filter((c) => c.id !== id),
           activeChainId: state.activeChainId === id ? null : state.activeChainId,
+          pendingChainId: state.pendingChainId === id ? null : state.pendingChainId,
           // Also remove from any lenses
           lenses: state.lenses.map((lens) => ({
             ...lens,
@@ -77,15 +79,21 @@ export const useChainStore = create<ChainStore>()(
       setActiveChain: (id: ChainId | null) => {
         set({ 
           activeChainId: id,
+          // Clear pending chain when manually setting active chain (overrides pending behavior)
+          pendingChainId: id ? null : get().pendingChainId,
           // Clear lens when switching to raw chain view
           activeLensId: id ? null : get().activeLensId,
         });
       },
 
-      // Break chain - creates new chain and makes it active
-      breakChain: (userId: string): ChainId => {
+      // Break chain - creates new chain as pending (becomes active on first anchor)
+      // Records divergence metadata for lineage tracking
+      breakChain: (userId: string, fromChainId?: string | null, atThoughtId?: string | null): ChainId => {
         const id = generateId();
         const now = new Date().toISOString();
+        
+        // Get the current active chain if fromChainId not provided
+        const currentActiveChainId = fromChainId ?? get().activeChainId;
         
         const newChain: ThoughtChain = {
           id,
@@ -94,14 +102,21 @@ export const useChainStore = create<ChainStore>()(
           first_thought_at: null,
           display_label: null,
           updated_at: now,
+          diverged_from_chain_id: currentActiveChainId,
+          diverged_at_thought_id: atThoughtId ?? null,
         };
         
         set((state) => ({
           chains: [newChain, ...state.chains],
-          activeChainId: id,
+          pendingChainId: id, // Set as pending, NOT active - keeps current activeChainId
         }));
         
         return id;
+      },
+
+      // Clear pending chain (used when activating it)
+      clearPendingChain: () => {
+        set({ pendingChainId: null });
       },
 
       // Lens operations (V2)
@@ -180,6 +195,20 @@ export const useChainStore = create<ChainStore>()(
       setLoadingChains: (isLoadingChains: boolean) => set({ isLoadingChains }),
       setSyncingChains: (isSyncingChains: boolean) => set({ isSyncingChains }),
 
+      // Reset store (for auth cleanup)
+      resetStore: () => {
+        set({
+          chains: [],
+          lenses: [],
+          activeChainId: null,
+          pendingChainId: null,
+          activeLensId: null,
+          viewMode: 'raw' as ChainViewMode,
+          isLoadingChains: false,
+          isSyncingChains: false,
+        });
+      },
+
       // Selectors
       getActiveChain: () => {
         const { chains, activeChainId } = get();
@@ -210,6 +239,7 @@ export const useChainStore = create<ChainStore>()(
         chains: state.chains,
         lenses: state.lenses,
         activeChainId: state.activeChainId,
+        pendingChainId: state.pendingChainId,
         activeLensId: state.activeLensId,
         viewMode: state.viewMode,
       }),
