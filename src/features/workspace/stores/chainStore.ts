@@ -87,9 +87,13 @@ export const useChainStore = create<ChainStore>()(
       },
 
       // Break chain - creates new chain as pending (becomes active on first anchor)
-      breakChain: (userId: string): ChainId => {
+      // Records divergence metadata for lineage tracking
+      breakChain: (userId: string, fromChainId?: string | null, atThoughtId?: string | null): ChainId => {
         const id = generateId();
         const now = new Date().toISOString();
+        
+        // Get the current active chain if fromChainId not provided
+        const currentActiveChainId = fromChainId ?? get().activeChainId;
         
         const newChain: ThoughtChain = {
           id,
@@ -98,6 +102,8 @@ export const useChainStore = create<ChainStore>()(
           first_thought_at: null,
           display_label: null,
           updated_at: now,
+          diverged_from_chain_id: currentActiveChainId,
+          diverged_at_thought_id: atThoughtId ?? null,
         };
         
         set((state) => ({

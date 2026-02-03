@@ -21,6 +21,10 @@ export interface ThoughtChain {
   first_thought_at: string | null;
   display_label: string | null;
   updated_at: string;
+  /** ID of chain this was diverged from (break point origin) */
+  diverged_from_chain_id?: ChainId | null;
+  /** ID of thought where the break occurred */
+  diverged_at_thought_id?: string | null;
 }
 
 /**
