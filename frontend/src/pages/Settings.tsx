@@ -17,7 +17,6 @@ import { BusinessProfileForm } from '@/components/business/BusinessProfileForm';
 import { useIsOrgOwner } from '@/hooks/useOrgMembership';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Bell, Shield, Palette, Building2, BookOpen, Loader2, HelpCircle } from 'lucide-react';
-import Resources from './Resources';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import {
   AlertDialog,
@@ -157,9 +156,9 @@ export default function Settings() {
               <Palette className="h-4 w-4" />
               Preferences
             </TabsTrigger>
-            <TabsTrigger value="resources" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Resources
+            <TabsTrigger value="onboarding" className="flex items-center gap-2">
+              <HelpCircle className="h-4 w-4" />
+              Onboarding
             </TabsTrigger>
           </TabsList>
 
@@ -461,77 +460,85 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <Separator />
-
-                {/* Onboarding Section */}
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <HelpCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div className="flex-1">
-                      <h3 className="font-medium mb-1">Onboarding</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        See helpful guides as you explore new areas of the platform.
-                      </p>
-                      <AlertDialog open={resetOnboardingOpen} onOpenChange={setResetOnboardingOpen}>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            disabled={onboardingSaving}
-                            className="w-full sm:w-auto"
-                          >
-                            {onboardingSaving ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Resetting...
-                              </>
-                            ) : (
-                              'Reset Onboarding'
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Reset Onboarding?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will show all contextual guides again as you explore different areas. 
-                              You can dismiss them individually as you go.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={async () => {
-                                const success = await resetOnboarding();
-                                if (success) {
-                                  toast({
-                                    title: "Onboarding Reset",
-                                    description: "You'll see guides again as you explore new areas.",
-                                  });
-                                  setResetOnboardingOpen(false);
-                                } else {
-                                  toast({
-                                    title: "Error",
-                                    description: "Failed to reset onboarding. Please try again.",
-                                    variant: "destructive",
-                                  });
-                                }
-                              }}
-                            >
-                              Reset
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Resources Tab */}
-          <TabsContent value="resources">
-            <Resources />
+          {/* Onboarding Tab */}
+          <TabsContent value="onboarding">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-5 w-5" />
+                  Onboarding Guides
+                  {onboardingSaving && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-2">Contextual Guides</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      As you explore different areas of the platform, helpful guides will appear to explain features and functionality. 
+                      Each guide appears once per area. You can reset onboarding to see all guides again.
+                    </p>
+                    <AlertDialog open={resetOnboardingOpen} onOpenChange={setResetOnboardingOpen}>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="default"
+                          disabled={onboardingSaving}
+                          className="w-full sm:w-auto"
+                        >
+                          {onboardingSaving ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Resetting...
+                            </>
+                          ) : (
+                            <>
+                              <HelpCircle className="h-4 w-4 mr-2" />
+                              Reset Onboarding
+                            </>
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Reset Onboarding?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will clear all visited areas and show contextual guides again as you explore different sections of the platform. 
+                            You can dismiss them individually as you go.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={async () => {
+                              const success = await resetOnboarding();
+                              if (success) {
+                                toast({
+                                  title: "Onboarding Reset",
+                                  description: "You'll see guides again as you explore new areas.",
+                                });
+                                setResetOnboardingOpen(false);
+                              } else {
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to reset onboarding. Please try again.",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                          >
+                            Reset
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
