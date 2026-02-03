@@ -6,6 +6,8 @@ import { useWorkspaceStore } from '@/features/workspace/useWorkspaceStore';
 import { useDiscussLensSafe } from '@/contexts/DiscussLensContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useBottomNavSwipe } from '@/hooks/useBottomNavSwipe';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useProfilePanelStore } from '@/hooks/useProfilePanelStore';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ComposerModal } from '@/components/composer/ComposerModal';
@@ -24,8 +26,10 @@ export function BottomNavigation() {
   const navigate = useNavigate();
   const { lens, toggleLens } = useDiscussLensSafe();
   const { isBusinessMember } = useUserRoles();
+  const isMobile = useIsMobile();
+  const { isOpen: isProfilePanelOpen, closePanel: closeProfilePanel } = useProfilePanelStore();
 
-  // Swipe navigation
+  // Swipe navigation (mobile only)
   const {
     activePanel,
     setActivePanel,
@@ -36,6 +40,9 @@ export function BottomNavigation() {
     isBusinessMember: isBusinessMember(),
     onNavigateBack: () => navigate(-1),
   });
+
+  // Sync swipe panel state with profile panel store (for desktop access)
+  const effectiveActivePanel = isMobile ? activePanel : (isProfilePanelOpen ? 'profile' : 'none');
 
   if (!user) return null;
 
@@ -89,12 +96,14 @@ export function BottomNavigation() {
 
   return (
     <>
-      {/* Mobile Navigation - Used everywhere for consistency */}
+      {/* Bottom Navigation - Used everywhere for consistency, swipe gestures mobile-only */}
       <nav 
         className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        {...(isMobile ? {
+          onTouchStart: handleTouchStart,
+          onTouchMove: handleTouchMove,
+          onTouchEnd: handleTouchEnd,
+        } : {})}
       >
         <div 
           className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300 relative"
@@ -158,23 +167,35 @@ export function BottomNavigation() {
             )}
           </button>
 
-          {/* Swipe indicator */}
-          <div 
-            className="absolute -top-1 right-4 flex items-center gap-0.5"
-            style={{ color: textInactive }}
-          >
-            <ChevronUp className="w-3 h-3 rotate-90 opacity-60" />
-            <span className="text-[10px] opacity-60">swipe</span>
-          </div>
+          {/* Swipe indicator - mobile only */}
+          {isMobile && (
+            <div 
+              className="absolute -top-1 right-4 flex items-center gap-0.5"
+              style={{ color: textInactive }}
+            >
+              <ChevronUp className="w-3 h-3 rotate-90 opacity-60" />
+              <span className="text-[10px] opacity-60">swipe</span>
+            </div>
+          )}
         </div>
       </nav>
 
       {/* Slide Panels */}
       <ProfileSlidePanel
-        isOpen={activePanel === 'profile'}
-        onClose={() => setActivePanel('none')}
+        isOpen={effectiveActivePanel === 'profile'}
+        onClose={() => {
+          if (isMobile) {
+            setActivePanel('none');
+          } else {
+            closeProfilePanel();
+          }
+        }}
         showBusinessHint={isBusinessMember()}
-        onSwipeTowardsBusiness={() => setActivePanel('business')}
+        onSwipeTowardsBusiness={() => {
+          if (isMobile) {
+            setActivePanel('business');
+          }
+        }}
       />
       
       <BusinessSlidePanel

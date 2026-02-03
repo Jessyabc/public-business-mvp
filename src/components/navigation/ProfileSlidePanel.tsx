@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { X, Settings, FileText, Clock, LogOut, User, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,7 @@ export function ProfileSlidePanel({
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
+  const isMobile = useIsMobile();
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -130,7 +132,9 @@ export function ProfileSlidePanel({
               >
                 <div>
                   <p className="text-sm font-medium text-foreground">Business Dashboard</p>
-                  <p className="text-xs text-muted-foreground">Swipe left to access</p>
+                  {isMobile && (
+                    <p className="text-xs text-muted-foreground">Swipe left to access</p>
+                  )}
                 </div>
                 <ChevronLeft className="h-5 w-5 text-primary" />
               </button>

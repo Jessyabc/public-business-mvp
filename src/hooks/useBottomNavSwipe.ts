@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useIsMobile } from './use-mobile';
 
 export type SwipePanel = 'none' | 'profile' | 'business';
 type SwipeDirection = 'left' | 'right' | null;
@@ -25,6 +26,7 @@ export function useBottomNavSwipe({
   isBusinessMember, 
   onNavigateBack 
 }: UseBottomNavSwipeOptions): UseBottomNavSwipeReturn {
+  const isMobile = useIsMobile();
   const [activePanel, setActivePanel] = useState<SwipePanel>('none');
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isSwipeInProgress, setIsSwipeInProgress] = useState(false);
@@ -35,15 +37,17 @@ export function useBottomNavSwipe({
   const isVerticalScroll = useRef<boolean>(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!isMobile) return;
     const touch = e.touches[0];
     touchStartX.current = touch.clientX;
     touchStartY.current = touch.clientY;
     touchStartTime.current = Date.now();
     isVerticalScroll.current = false;
     setIsSwipeInProgress(true);
-  }, []);
+  }, [isMobile]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isMobile) return;
     if (!isSwipeInProgress) return;
     
     const touch = e.touches[0];
@@ -86,9 +90,10 @@ export function useBottomNavSwipe({
     }
 
     setSwipeOffset(Math.min(Math.abs(deltaX), maxOffset) * (deltaX > 0 ? 1 : -1));
-  }, [isSwipeInProgress, activePanel, isBusinessMember]);
+  }, [isMobile, isSwipeInProgress, activePanel, isBusinessMember]);
 
   const handleTouchEnd = useCallback(() => {
+    if (!isMobile) return;
     if (!isSwipeInProgress || isVerticalScroll.current) {
       setIsSwipeInProgress(false);
       setSwipeOffset(0);
@@ -119,7 +124,7 @@ export function useBottomNavSwipe({
     
     setIsSwipeInProgress(false);
     setSwipeOffset(0);
-  }, [isSwipeInProgress, swipeOffset, activePanel, isBusinessMember, onNavigateBack]);
+  }, [isMobile, isSwipeInProgress, swipeOffset, activePanel, isBusinessMember, onNavigateBack]);
 
   return {
     activePanel,

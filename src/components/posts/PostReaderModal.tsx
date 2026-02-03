@@ -200,7 +200,7 @@ export function PostReaderModal({ isOpen, onClose, post }: PostReaderModalProps)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 z-50 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] ${
+        className={`max-w-lg sm:max-w-2xl lg:max-w-4xl overflow-y-auto p-0 z-50 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] ${
           useNeumorphic 
             ? 'bg-transparent backdrop-blur-none border-0 shadow-none' 
             : 'border-[var(--glass-border)] bg-transparent backdrop-blur-none'

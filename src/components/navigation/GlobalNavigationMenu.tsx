@@ -18,6 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useComposerStore } from '@/hooks/useComposerStore';
+import { useProfilePanelStore } from '@/hooks/useProfilePanelStore';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserOrgId } from '@/features/orgs/hooks/useUserOrgId';
 
 // PB Blue for accents on light backgrounds
@@ -33,6 +35,8 @@ export function GlobalNavigationMenu() {
   const { toast } = useToast();
   const { data: orgId } = useUserOrgId();
   const { lens } = useDiscussLensSafe();
+  const { openPanel: openProfilePanel } = useProfilePanelStore();
+  const isMobile = useIsMobile();
 
   // PB requirement: lens/role UI should not appear in Think (/); keep it scoped to Discuss.
   const showDiscussOnlyUi = location.pathname.startsWith('/discuss');
@@ -141,35 +145,36 @@ export function GlobalNavigationMenu() {
           </Button>
 
           {/* Profile Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="relative h-8 w-8 rounded-full"
-                style={{ 
-                  background: 'transparent'
-                }}
+          {isMobile ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="relative h-8 w-8 rounded-full"
+                  style={{ 
+                    background: 'transparent'
+                  }}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || 'User'} />
+                    <AvatarFallback className="bg-primary/20 text-primary">
+                      {profile?.display_name?.[0] || user?.email?.[0] || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                className={cn(
+                  "w-56 backdrop-blur-md border-border shadow-lg",
+                  isLightBg 
+                    ? "bg-white/95 text-[#3A3530] border-[#D4CEC5]" 
+                    : "bg-popover/95 text-popover-foreground"
+                )} 
+                align="end" 
+                forceMount
+                side="bottom"
+                sideOffset={8}
               >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || 'User'} />
-                  <AvatarFallback className="bg-primary/20 text-primary">
-                    {profile?.display_name?.[0] || user?.email?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              className={cn(
-                "w-56 backdrop-blur-md border-border shadow-lg",
-                isLightBg 
-                  ? "bg-white/95 text-[#3A3530] border-[#D4CEC5]" 
-                  : "bg-popover/95 text-popover-foreground"
-              )} 
-              align="end" 
-              forceMount
-              side="bottom"
-              sideOffset={8}
-            >
               <DropdownMenuLabel className={cn("font-normal", isLightBg && "text-[#3A3530]")}>
                 <div className="flex flex-col space-y-1">
                   <p className={cn("text-sm font-medium leading-none", isLightBg ? "text-[#3A3530]" : "")}>
@@ -307,8 +312,25 @@ export function GlobalNavigationMenu() {
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="ghost" 
+              className="relative h-8 w-8 rounded-full"
+              style={{ 
+                background: 'transparent'
+              }}
+              onClick={openProfilePanel}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || 'User'} />
+                <AvatarFallback className="bg-primary/20 text-primary">
+                  {profile?.display_name?.[0] || user?.email?.[0] || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          )}
         </div>
       </div>
     </nav>

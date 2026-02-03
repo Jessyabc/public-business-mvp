@@ -463,7 +463,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
   if (!isPublicMode) {
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="sm:max-w-2xl bg-transparent backdrop-blur-none border-0 shadow-none p-0 data-[theme=business]">
+        <DialogContent className="max-w-lg sm:max-w-2xl lg:max-w-3xl bg-transparent backdrop-blur-none border-0 shadow-none p-0 data-[theme=business]">
           <DialogHeader className="sr-only">
             <DialogTitle>Create Business Insight</DialogTitle>
             <DialogDescription>
@@ -480,7 +480,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-xl bg-background/95 backdrop-blur-xl border-white/10">
+      <DialogContent className="max-w-lg sm:max-w-xl lg:max-w-2xl bg-background/95 backdrop-blur-xl border-white/10">
         <DialogHeader>
           <DialogTitle className="sr-only">Create Spark</DialogTitle>
           <DialogDescription className="sr-only">
