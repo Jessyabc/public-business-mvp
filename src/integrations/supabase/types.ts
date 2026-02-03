@@ -1173,6 +1173,8 @@ export type Database = {
         Row: {
           created_at: string
           display_label: string | null
+          diverged_at_thought_id: string | null
+          diverged_from_chain_id: string | null
           first_thought_at: string | null
           id: string
           updated_at: string
@@ -1181,6 +1183,8 @@ export type Database = {
         Insert: {
           created_at?: string
           display_label?: string | null
+          diverged_at_thought_id?: string | null
+          diverged_from_chain_id?: string | null
           first_thought_at?: string | null
           id?: string
           updated_at?: string
@@ -1189,12 +1193,29 @@ export type Database = {
         Update: {
           created_at?: string
           display_label?: string | null
+          diverged_at_thought_id?: string | null
+          diverged_from_chain_id?: string | null
           first_thought_at?: string | null
           id?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "thought_chains_diverged_at_thought_id_fkey"
+            columns: ["diverged_at_thought_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_thoughts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thought_chains_diverged_from_chain_id_fkey"
+            columns: ["diverged_from_chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       thought_lenses: {
         Row: {

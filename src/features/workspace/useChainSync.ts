@@ -113,6 +113,8 @@ export function useChainSync() {
           first_thought_at: row.first_thought_at,
           display_label: row.display_label,
           updated_at: row.updated_at,
+          diverged_from_chain_id: row.diverged_from_chain_id,
+          diverged_at_thought_id: row.diverged_at_thought_id,
         }));
         
         // Merge with local chains (prefer newer)
@@ -154,6 +156,8 @@ export function useChainSync() {
         first_thought_at: c.first_thought_at,
         display_label: c.display_label,
         updated_at: c.updated_at,
+        diverged_from_chain_id: c.diverged_from_chain_id ?? null,
+        diverged_at_thought_id: c.diverged_at_thought_id ?? null,
       }));
 
       if (chainsToSync.length > 0) {
