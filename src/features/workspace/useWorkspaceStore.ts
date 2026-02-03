@@ -135,8 +135,16 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       },
 
       // Reactivate an anchored thought for continued thinking
+      // IMPORTANT: Rule 6 - opening old thought places user in that chain
       reactivateThought: (id) => {
         const thought = get().thoughts.find(t => t.id === id);
+        
+        // Re-anchor to the thought's chain (V1 Rule 6)
+        if (thought?.chain_id) {
+          const chainStore = useChainStore.getState();
+          chainStore.setActiveChain(thought.chain_id);
+        }
+        
         set((state) => ({
           thoughts: state.thoughts.map((t) =>
             t.id === id

@@ -21,6 +21,10 @@ export interface ThoughtChain {
   first_thought_at: string | null;
   display_label: string | null;
   updated_at: string;
+  /** ID of chain this was diverged from (break point origin) */
+  diverged_from_chain_id?: ChainId | null;
+  /** ID of thought where the break occurred */
+  diverged_at_thought_id?: string | null;
 }
 
 /**
@@ -87,8 +91,8 @@ export interface ChainActions {
   updateChainLabel: (id: ChainId, label: string | null) => void;
   setActiveChain: (id: ChainId | null) => void;
   
-  // Break chain gesture result
-  breakChain: (userId: string) => ChainId; // Creates new chain as pending, returns its ID
+  // Break chain gesture result - includes divergence tracking
+  breakChain: (userId: string, fromChainId?: ChainId | null, atThoughtId?: string | null) => ChainId;
   clearPendingChain: () => void; // Clear pending chain (used when activating it)
   
   // Lens operations (V2)

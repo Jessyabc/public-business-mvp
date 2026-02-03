@@ -117,7 +117,7 @@ export function Timeline({ onComplete }: TimelineProps) {
             <div 
               key={step.id} 
               className="flex items-center"
-              ref={el => stepRefs.current[index] = el}
+              ref={(el) => { stepRefs.current[index] = el; }}
             >
               <GlassCard className="w-80 p-6 text-center transition-all duration-300 hover:scale-105">
                 <div 

@@ -91,9 +91,11 @@ export function ChainThread({
   }, [chain, setActiveChain, createThought]);
   
   const handleBreak = useCallback(() => {
-    if (!user) return;
-    breakChain(user.id);
-  }, [user, breakChain]);
+    if (!user || !chain) return;
+    // Pass divergence metadata: fromChainId and the last thought in this chain
+    const lastThought = chainThoughts[0]; // Newest first, so [0] is the last
+    breakChain(user.id, chain.id, lastThought?.id ?? null);
+  }, [user, breakChain, chain, chainThoughts]);
   
   const handleMerge = useCallback(() => {
     console.log('Merge modal - V2 feature');

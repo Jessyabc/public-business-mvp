@@ -47,7 +47,7 @@ interface ThoughtStackProps {
 }
 
 export function ThoughtStack({ onDaysListToggle, onContinue }: ThoughtStackProps = {}) {
-  const getDayThreads = useWorkspaceStore((state) => state.getDayThreads);
+  const { getDayThreads, thoughts } = useWorkspaceStore();
   const { user } = useAuth();
   const { breakChain, activeChainId } = useChainStore();
   const dayThreads = getDayThreads();
@@ -59,12 +59,22 @@ export function ThoughtStack({ onDaysListToggle, onContinue }: ThoughtStackProps
     onDaysListToggle?.(newState);
   };
 
-  // Handle break chain gesture - creates new chain
+  // Handle break chain gesture - creates new chain with divergence tracking
   const handleBreakChain = useCallback(() => {
-    if (user) {
-      breakChain(user.id);
-    }
-  }, [user, breakChain]);
+    if (!user) return;
+    
+    // Find the last anchored thought in the current active chain for divergence tracking
+    const lastThoughtInChain = thoughts
+      .filter(t => t.chain_id === activeChainId && t.state === 'anchored')
+      .sort((a, b) => {
+        const timeA = new Date(a.anchored_at || a.created_at).getTime();
+        const timeB = new Date(b.anchored_at || b.created_at).getTime();
+        return timeB - timeA; // Newest first
+      })[0];
+    
+    // Break with divergence metadata
+    breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
+  }, [user, breakChain, activeChainId, thoughts]);
 
   // Handle continue chain - delegate to parent
   const handleContinue = useCallback(() => {
