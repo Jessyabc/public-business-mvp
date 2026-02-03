@@ -10,8 +10,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
+import { useChainStore } from '../stores/chainStore';
 import { AnchoredThought } from './AnchoredThought';
-import { Plus } from 'lucide-react';
+import { Plus, Link2Off } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
 import type { DayThread as DayThreadType } from '../types';
@@ -45,10 +46,16 @@ function formatDayHeader(dayKey: string): string {
 
 export function DayThread({ thread, isFirst = false }: DayThreadProps) {
   const { createThought, updateDayLabel, setActiveDayKey } = useWorkspaceStore();
+  const { getChainById, updateChainLabel } = useChainStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const dayRef = useRef<HTMLDivElement>(null);
+  
+  // Chain break editing state (per chain)
+  const [editingChainBreak, setEditingChainBreak] = useState<string | null>(null);
+  const [chainBreakDraft, setChainBreakDraft] = useState('');
+  const chainBreakInputRef = useRef<HTMLInputElement>(null);
 
   // Register this day thread for scrolling
   useEffect(() => {
@@ -110,6 +117,43 @@ export function DayThread({ thread, isFirst = false }: DayThreadProps) {
     setActiveDayKey(thread.day_key);
     createThought(thread.day_key);
   }, [thread.day_key, createThought, setActiveDayKey]);
+
+  // Chain break editing handlers
+  const handleStartEditChainBreak = useCallback((e: React.MouseEvent, chainId: string) => {
+    e.stopPropagation();
+    const chain = getChainById(chainId);
+    setChainBreakDraft(chain?.display_label || '');
+    setEditingChainBreak(chainId);
+  }, [getChainById]);
+  
+  const handleSaveChainBreakTitle = useCallback((chainId: string) => {
+    const trimmed = chainBreakDraft.trim();
+    updateChainLabel(chainId, trimmed === '' ? null : trimmed);
+    setEditingChainBreak(null);
+    setChainBreakDraft('');
+  }, [chainBreakDraft, updateChainLabel]);
+  
+  const handleCancelChainBreakEdit = useCallback(() => {
+    setEditingChainBreak(null);
+    setChainBreakDraft('');
+  }, []);
+  
+  const handleChainBreakKeyDown = useCallback((e: React.KeyboardEvent, chainId: string) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      handleSaveChainBreakTitle(chainId);
+    } else if (e.key === 'Escape') {
+      handleCancelChainBreakEdit();
+    }
+  }, [handleSaveChainBreakTitle, handleCancelChainBreakEdit]);
+  
+  // Focus chain break input when editing starts
+  useEffect(() => {
+    if (editingChainBreak && chainBreakInputRef.current) {
+      chainBreakInputRef.current.focus();
+      chainBreakInputRef.current.select();
+    }
+  }, [editingChainBreak]);
 
   return (
     <div ref={dayRef} className="day-thread" data-day-key={thread.day_key}>
@@ -188,21 +232,59 @@ export function DayThread({ thread, isFirst = false }: DayThreadProps) {
           const prevThought = index > 0 ? thread.thoughts[index - 1] : null;
           const isNewChain = prevThought && prevThought.chain_id && thought.chain_id && prevThought.chain_id !== thought.chain_id;
           
+          // Get chain info to check if it's a break (has diverged_from_chain_id)
+          const chain = thought.chain_id ? getChainById(thought.chain_id) : null;
+          const isChainBreak = chain?.diverged_from_chain_id != null;
+          
+          // Format timestamp for chain break (use first thought's timestamp in this chain)
+          const chainBreakTimestamp = thought.anchored_at || thought.created_at;
+          const chainBreakTimeString = format(parseISO(chainBreakTimestamp), 'h:mm a');
+          
+          // Get display label for chain break (chain label or timestamp)
+          const chainBreakLabel = chain?.display_label || chainBreakTimeString;
+          const isEditingThisChainBreak = editingChainBreak === thought.chain_id;
+          
           return (
             <div key={thought.id}>
-              {/* Visual break for new chain */}
+              {/* Visual break for new chain with broken chain icon */}
               {isNewChain && (
                 <div className="my-6 flex items-center gap-3">
                   <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(72, 159, 227, 0.3), transparent)' }} />
-                  <div 
-                    className="px-3 py-1 rounded-full text-xs font-medium"
-                    style={{ 
-                      color: '#489FE3',
-                      background: 'rgba(72, 159, 227, 0.1)',
-                      border: '1px solid rgba(72, 159, 227, 0.2)'
-                    }}
-                  >
-                    New Chain
+                  <div className="flex items-center gap-2">
+                    {/* Broken chain icon */}
+                    {isChainBreak && (
+                      <Link2Off 
+                        className="w-4 h-4" 
+                        style={{ color: '#489FE3' }}
+                      />
+                    )}
+                    {/* Editable timestamp/title */}
+                    {isEditingThisChainBreak ? (
+                      <input
+                        ref={chainBreakInputRef}
+                        type="text"
+                        value={chainBreakDraft}
+                        onChange={(e) => setChainBreakDraft(e.target.value)}
+                        onBlur={() => handleSaveChainBreakTitle(thought.chain_id!)}
+                        onKeyDown={(e) => handleChainBreakKeyDown(e, thought.chain_id!)}
+                        className="bg-transparent border-none outline-none text-xs font-medium min-w-[60px]"
+                        style={{ color: '#489FE3' }}
+                        placeholder={chainBreakTimeString}
+                      />
+                    ) : (
+                      <button
+                        onClick={(e) => handleStartEditChainBreak(e, thought.chain_id!)}
+                        className="px-3 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80"
+                        style={{ 
+                          color: '#489FE3',
+                          background: 'rgba(72, 159, 227, 0.1)',
+                          border: '1px solid rgba(72, 159, 227, 0.2)'
+                        }}
+                        title="Click to edit"
+                      >
+                        {chainBreakLabel}
+                      </button>
+                    )}
                   </div>
                   <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(72, 159, 227, 0.3), transparent)' }} />
                 </div>

@@ -85,7 +85,7 @@ export function WorkspaceCanvas() {
     }, 100);
   }, []);
 
-  // Handle canvas click (tap anywhere empty to start writing)
+  // Handle canvas click (tap anywhere empty to start writing or blur active thought)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     // Prevent re-opening immediately after blur closed the thought
     if (justAnchoredRef.current) {
@@ -101,6 +101,15 @@ export function WorkspaceCanvas() {
                         target.closest('input') ||
                         target.closest('textarea') ||
                         target.closest('a');
+    
+    // If there's an active thought and clicking outside, blur it (which will cancel if no changes)
+    if (activeThought && !isOnThought) {
+      const textarea = document.querySelector('.thinking-surface textarea') as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.blur();
+      }
+      return;
+    }
     
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);

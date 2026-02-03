@@ -158,14 +158,25 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
     handleInput();
   }, [handleInput]);
 
+  // Handle click outside to blur (cancel edit if no changes)
+  const handleContainerClick = useCallback((e: React.MouseEvent) => {
+    // If clicking on the container but not on the textarea, blur it
+    if (textareaRef.current && e.target === e.currentTarget) {
+      textareaRef.current.blur();
+    }
+  }, []);
+
   if (!thought) return null;
 
   return (
-    <div className={cn(
-      "thinking-surface",
-      "relative w-full max-w-2xl mx-auto",
-      "transition-all duration-300 ease-out"
-    )}>
+    <div 
+      className={cn(
+        "thinking-surface",
+        "relative w-full max-w-2xl mx-auto",
+        "transition-all duration-300 ease-out"
+      )}
+      onClick={handleContainerClick}
+    >
       {/* PB Blue focus glow - active cognition indicator */}
       <div 
         className="absolute -inset-3 rounded-3xl transition-all duration-500 pointer-events-none"

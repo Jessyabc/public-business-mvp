@@ -98,7 +98,12 @@ export function BottomNavigation() {
     <>
       {/* Bottom Navigation - Used everywhere for consistency, swipe gestures mobile-only */}
       <nav 
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
+        className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
+        style={{
+          paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+          paddingRight: 'max(1rem, env(safe-area-inset-right))',
+          paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        }}
         {...(isMobile ? {
           onTouchStart: handleTouchStart,
           onTouchMove: handleTouchMove,
@@ -106,7 +111,7 @@ export function BottomNavigation() {
         } : {})}
       >
         <div 
-          className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300 relative"
+          className="flex items-center justify-around px-4 py-3 rounded-2xl transition-all duration-300 relative max-w-sm w-full"
           style={glassStyle}
         >
           {/* Think */}
