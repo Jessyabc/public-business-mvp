@@ -66,6 +66,7 @@ export interface WorkspaceActions {
   updateThought: (id: string, content: string) => void;
   anchorThought: (id: string) => void;
   reactivateThought: (id: string) => void;
+  cancelEdit: (id: string, originalContent: string) => void;
   deleteThought: (id: string) => void;
   
   // Day thread operations

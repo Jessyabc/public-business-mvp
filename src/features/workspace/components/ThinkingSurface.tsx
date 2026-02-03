@@ -28,8 +28,9 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [enterCount, setEnterCount] = useState(0);
+  const originalContentRef = useRef<string>(''); // Track original content when editing starts
   const isMobile = useIsMobile();
-  const { thoughts, updateThought, anchorThought, deleteThought, activeDayKey } = useWorkspaceStore();
+  const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit, activeDayKey } = useWorkspaceStore();
   const { activeChainId, pendingChainId, getChainById } = useChainStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
@@ -45,6 +46,13 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const writingChain = pendingChain || activeChain;
   const chainLabel = writingChain?.display_label || (writingChain ? 'Current chain' : null);
   const isPending = !!pendingChain;
+  
+  // Track original content when thought becomes active (for cancel detection)
+  useEffect(() => {
+    if (thought) {
+      originalContentRef.current = thought.content;
+    }
+  }, [thoughtId]); // Only update when thoughtId changes (new edit session)
   
   // Reset enter count when content changes
   useEffect(() => {
@@ -75,11 +83,40 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   }, [thoughtId, updateThought, handleInput]);
 
   // Implicit anchoring: blur with content = anchor, dismiss if empty
+  // If no changes were made, cancel the edit and restore original state
   const handleBlur = useCallback(() => {
     setIsFocused(false);
     setEnterCount(0);
     
-    if (thought?.content.trim()) {
+    if (!thought) return;
+    
+    const currentContent = thought.content.trim();
+    const originalContent = originalContentRef.current.trim();
+    const wasAnchored = thought.state === 'anchored';
+    const hasChanges = currentContent !== originalContent;
+    
+    // If no changes were made, cancel the edit
+    if (!hasChanges) {
+      if (wasAnchored) {
+        // Restore to anchored state without changing timestamps or day_key
+        cancelEdit(thoughtId, originalContentRef.current);
+        onAnchor?.();
+      } else {
+        // New thought with no content - delete it
+        if (!currentContent) {
+          deleteThought(thoughtId);
+          onAnchor?.();
+        } else {
+          // New thought with original content - anchor it
+          anchorThought(thoughtId);
+          onAnchor?.();
+        }
+      }
+      return;
+    }
+    
+    // Changes were made - proceed with normal behavior
+    if (currentContent) {
       anchorThought(thoughtId);
       onAnchor?.();
     } else {
@@ -87,7 +124,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
       deleteThought(thoughtId);
       onAnchor?.();
     }
-  }, [thought, thoughtId, anchorThought, deleteThought, onAnchor]);
+  }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, onAnchor]);
 
   // Cmd+Enter (or Ctrl+Enter) to anchor immediately
   // On mobile: double Enter with empty content = dismiss

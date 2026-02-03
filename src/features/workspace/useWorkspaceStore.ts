@@ -156,6 +156,23 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }));
       },
 
+      // Cancel edit: restore thought to anchored state without updating timestamps
+      cancelEdit: (id, originalContent) => {
+        set((state) => ({
+          thoughts: state.thoughts.map((t) =>
+            t.id === id
+              ? { 
+                  ...t, 
+                  content: originalContent,
+                  state: 'anchored',
+                  // Don't update updated_at, anchored_at, or day_key - keep original values
+                }
+              : t
+          ),
+          activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
+        }));
+      },
+
       // Delete a thought (also marks it for deletion from Supabase)
       deleteThought: (id) => {
         // Get the thought before removing it so we can delete from Supabase
