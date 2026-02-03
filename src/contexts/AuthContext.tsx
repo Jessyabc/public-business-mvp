@@ -89,9 +89,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       finishLoading();
     });
 
+    // Track previous user ID to detect user changes
+    let previousUserId: string | null = null;
+    
+    // Helper to clean up workspace data
+    const cleanupWorkspaceData = async () => {
+      // Clear localStorage keys used by workspace stores
+      localStorage.removeItem('pb-workspace');
+      localStorage.removeItem('pb-workspace-chains');
+      
+      // Reset Zustand stores
+      try {
+        const { useWorkspaceStore } = await import('@/features/workspace/useWorkspaceStore');
+        const { useChainStore } = await import('@/features/workspace/stores/chainStore');
+        useWorkspaceStore.getState().resetStore();
+        useChainStore.getState().resetStore();
+      } catch {
+        // Stores may not be loaded yet
+      }
+      
+      // Clear React Query cache
+      queryClient.clear();
+    };
+
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        const currentUserId = session?.user?.id ?? null;
+        
+        // Detect user change or sign out
+        if (event === 'SIGNED_OUT' || (previousUserId && currentUserId !== previousUserId)) {
+          await cleanupWorkspaceData();
+        }
+        
+        previousUserId = currentUserId;
+        
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {

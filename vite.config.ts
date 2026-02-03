@@ -20,7 +20,7 @@ export default defineConfig(async ({ mode }) => {
     server: {
       host: "0.0.0.0",
       port: 8080,
-      allowedHosts: true,
+      allowedHosts: true as const,
       watch: {
         // Reduce file watcher overhead
         usePolling: false,
@@ -70,7 +70,7 @@ export default defineConfig(async ({ mode }) => {
       // Target modern browsers for smaller bundles
       target: 'es2020',
       // Minification settings - use terser for better compression
-      minify: 'esbuild',
+      minify: 'esbuild' as const,
       // CSS code splitting
       cssCodeSplit: true,
       // Reduce chunk size by compressing more aggressively

@@ -195,6 +195,20 @@ export const useChainStore = create<ChainStore>()(
       setLoadingChains: (isLoadingChains: boolean) => set({ isLoadingChains }),
       setSyncingChains: (isSyncingChains: boolean) => set({ isSyncingChains }),
 
+      // Reset store (for auth cleanup)
+      resetStore: () => {
+        set({
+          chains: [],
+          lenses: [],
+          activeChainId: null,
+          pendingChainId: null,
+          activeLensId: null,
+          viewMode: 'raw' as ChainViewMode,
+          isLoadingChains: false,
+          isSyncingChains: false,
+        });
+      },
+
       // Selectors
       getActiveChain: () => {
         const { chains, activeChainId } = get();

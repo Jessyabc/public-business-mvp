@@ -79,6 +79,7 @@ export interface WorkspaceActions {
   setLoading: (loading: boolean) => void;
   setSyncing: (syncing: boolean) => void;
   setLastSynced: (timestamp: string) => void;
+  resetStore: () => void; // Reset store for auth cleanup
   
   // Selectors
   getActiveThought: () => ThoughtObject | null;
