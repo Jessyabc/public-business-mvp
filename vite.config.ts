@@ -62,7 +62,7 @@ export default defineConfig(async ({ mode }) => {
       noExternal: ['@supabase/supabase-js']
     },
     build: {
-      outDir: 'build',
+      outDir: 'dist',
       // Increase chunk size warning limit (after optimization)
       chunkSizeWarningLimit: 500,
       // Enable source maps for production debugging (optional)
