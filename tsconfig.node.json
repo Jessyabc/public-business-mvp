@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "skipLibCheck": true,
+    "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "strict": false,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node"]
   },
   "include": ["vite.config.ts"]
 }
