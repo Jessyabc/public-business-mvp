@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { PenTool, Plus, User, MessageCircle, ChevronUp } from 'lucide-react';
+import { PenTool, Plus, User, MessageCircle, ChevronUp, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComposerStore } from '@/hooks/useComposerStore';
 import { useWorkspaceStore } from '@/features/workspace/useWorkspaceStore';
@@ -13,7 +13,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { ComposerModal } from '@/components/composer/ComposerModal';
 import { ProfileSlidePanel } from './ProfileSlidePanel';
 import { BusinessSlidePanel } from './BusinessSlidePanel';
+import { ChainBrowser } from '@/features/workspace/components/ChainBrowser';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 // PB Blue for active states on business/light backgrounds
 const PB_BLUE = '#4A7C9B';
@@ -28,6 +30,7 @@ export function BottomNavigation() {
   const { isBusinessMember } = useUserRoles();
   const isMobile = useIsMobile();
   const { isOpen: isProfilePanelOpen, closePanel: closeProfilePanel } = useProfilePanelStore();
+  const [isChainBrowserOpen, setIsChainBrowserOpen] = useState(false);
 
   // Swipe navigation (mobile only)
   const {
@@ -52,6 +55,17 @@ export function BottomNavigation() {
   const isDiscussActive = isDiscussPage;
   const isProfileActive = location.pathname === '/profile';
   
+  // Handle center button click - different behavior on Think vs Discuss
+  const handleCenterButtonClick = () => {
+    if (isThinkActive) {
+      // On Think page: open chain browser
+      setIsChainBrowserOpen(true);
+    } else {
+      // On other pages: open composer
+      openComposer();
+    }
+  };
+  
   // Handle Think button click - navigate or open new thought
   const handleThinkClick = () => {
     if (isThinkActive) {
@@ -66,7 +80,8 @@ export function BottomNavigation() {
   };
   
   // Route-aware tooltip text for composer button
-  const composerTooltip = isThinkActive ? 'Share to Discuss' : 'Create post';
+  const centerButtonTooltip = isThinkActive ? 'Browse chains' : 'Create post';
+  const CenterIcon = isThinkActive ? Search : Plus;
 
   // Determine if we're on a light background
   // Light: Think page, or Discuss with business lens
@@ -133,7 +148,7 @@ export function BottomNavigation() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                onClick={() => openComposer()}
+                onClick={handleCenterButtonClick}
                 size="icon"
                 className="w-14 h-14 rounded-full transition-all -mt-6 border-2"
                 style={{
@@ -143,11 +158,11 @@ export function BottomNavigation() {
                   boxShadow: isLightBg ? '0 4px 16px rgba(74, 124, 155, 0.25)' : '0 4px 16px rgba(0,0,0,0.3)'
                 }}
               >
-                <Plus className="w-7 h-7" />
+                <CenterIcon className="w-7 h-7" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{composerTooltip}</p>
+              <p>{centerButtonTooltip}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -210,6 +225,12 @@ export function BottomNavigation() {
       />
 
       <ComposerModal isOpen={isOpen} onClose={closeComposer} />
+      
+      {/* Chain Browser - Think space only */}
+      <ChainBrowser 
+        isOpen={isChainBrowserOpen} 
+        onClose={() => setIsChainBrowserOpen(false)} 
+      />
     </>
   );
 }
