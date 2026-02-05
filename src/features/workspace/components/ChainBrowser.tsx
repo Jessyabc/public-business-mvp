@@ -129,7 +129,7 @@
            />
            
            {/* Content */}
-           <div className="relative h-full overflow-y-auto pb-32 pt-8 px-4">
+           <div className="relative h-full overflow-y-auto pb-32 pt-20 px-4">
              <div className="max-w-2xl mx-auto">
                {/* Header */}
                <div className="flex items-center justify-between mb-4">
