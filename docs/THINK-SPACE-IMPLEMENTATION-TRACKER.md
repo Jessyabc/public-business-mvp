@@ -1,13 +1,22 @@
  # Think Space: Chain of Thoughts - Implementation Tracker
  
 **Last Updated**: 2026-02-05 (Run 3)
+**Last Updated**: 2026-02-05 (Run 5)
  **Status**: In Progress
  
  ---
  
  ## Summary of Latest Changes
  
-### Run 4 (2026-02-05) - Latest
+### Run 5 (2026-02-05) - Latest
+- [x] **Phase 8**: Realtime sync via Supabase subscriptions
+- [x] Created `hooks/useRealtimeSync.ts` with all event handlers
+- [x] Subscribes to workspace_thoughts (INSERT/UPDATE/DELETE)
+- [x] Subscribes to thought_chains (INSERT/UPDATE/DELETE)
+- [x] Server-authoritative: deduplicates optimistic inserts, prefers newer server data
+- [x] Integrated into WorkspaceCanvas.tsx
+
+### Run 4 (2026-02-05)
 - [x] **Phase 7**: Copy-on-edit integration in ThinkingSurface.tsx
 - [x] ThinkingSurface now uses `editThought()` for changes to anchored thoughts
 - [x] Original thought preserved, new thought appears at top with new timestamp
@@ -48,7 +57,7 @@
 | 5 | Break gesture correction (horizontal on top) | ✅ Done | ✅ |
 | 6 | Continue chain prompt | ✅ Done | ⏳ |
 | 7 | Copy-on-edit | ✅ Done | ⏳ |
- | 8 | Realtime sync | ⏳ Pending | ❌ |
+| 8 | Realtime sync | ✅ Done | ⏳ |
  | 9 | Semantic search | ⏳ Pending | ❌ |
  | 10 | Chain linking UI | ⏳ Pending | ❌ |
  
@@ -112,11 +121,13 @@
 - [x] ThoughtCard shows edit indicator for edited thoughts
  
  ### Phase 8: Realtime Sync
- - [ ] Create `hooks/useRealtimeSync.ts`
- - [ ] Subscribe to workspace_thoughts changes
- - [ ] Subscribe to thought_chains changes
- - [ ] Subscribe to chain_links changes
- - [ ] Implement reconciliation logic
+- [x] Create `hooks/useRealtimeSync.ts`
+- [x] Subscribe to workspace_thoughts changes (INSERT/UPDATE/DELETE)
+- [x] Subscribe to thought_chains changes (INSERT/UPDATE/DELETE)
+- [x] Implement reconciliation logic (server-authoritative)
+- [x] Deduplicate optimistic inserts by ID
+- [x] Integrate into WorkspaceCanvas.tsx
+- [ ] Subscribe to chain_links changes (V2 - when LinkPanel is implemented)
  
  ### Phase 9: Semantic Search
  - [ ] Create `supabase/functions/embed-thought/index.ts`
@@ -182,7 +193,7 @@
  | Global feed | All thoughts in timestamp order | ❌ |
  | Scope transitions | Subtle fade/reflow, no navigation | ❌ |
 | Copy-on-edit | Original preserved, new thought at top | ⏳ |
- | Realtime sync | Changes reflect across devices | ❌ |
+| Realtime sync | Changes reflect across devices | ⏳ |
  | Semantic search | Vector similarity returns relevant thoughts | ❌ |
  
  ---
@@ -268,6 +279,18 @@
 - ChainThread timestamp moved from header to footer (under oldest thought)
 
 **Next Steps:**
-- Phase 8: useRealtimeSync for cross-device updates
 - Phase 9: Semantic search (edge function + UI)
+- Phase 10: Chain linking UI (LinkPanel)
+
+### Run 5 (2026-02-05)
+**Phase 8 Completed: Realtime Sync**
+- Created `useRealtimeSync.ts` hook with Supabase realtime subscriptions
+- Handles INSERT/UPDATE/DELETE for workspace_thoughts and thought_chains
+- Server-authoritative: server data wins on conflicts (newer timestamp)
+- Deduplicates optimistic inserts by checking existing IDs before adding
+- Debounced batch processing (100ms) to prevent rapid re-renders
+- Integrated into WorkspaceCanvas.tsx
+
+**Next Steps:**
+- Phase 9: Semantic search (embed-thought edge function + SearchInline UI)
 - Phase 10: Chain linking UI (LinkPanel)
