@@ -9,6 +9,7 @@
  import { supabase } from '@/integrations/supabase/client';
  import { useFeedStore } from '../stores/feedStore';
  import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
  import type { ChainLink } from '../types';
  
  export function useLinkSync() {
@@ -120,9 +121,18 @@
  
        const newLink = data as ChainLink;
        addChainLink(newLink);
+      toast({
+        title: 'Chains linked',
+        description: 'Successfully connected the chains',
+      });
        return newLink;
      } catch (err) {
        console.error('Error creating chain link:', err);
+      toast({
+        title: 'Failed to link chains',
+        description: 'Please try again',
+        variant: 'destructive',
+      });
        return null;
      } finally {
        isSyncingRef.current = false;
@@ -148,9 +158,18 @@
        }
  
        removeChainLink(linkId);
+      toast({
+        title: 'Link removed',
+        description: 'Successfully disconnected the chains',
+      });
        return true;
      } catch (err) {
        console.error('Error deleting chain link:', err);
+      toast({
+        title: 'Failed to remove link',
+        description: 'Please try again',
+        variant: 'destructive',
+      });
        return false;
      } finally {
        isSyncingRef.current = false;
