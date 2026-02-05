@@ -5,9 +5,27 @@
 /* Tailwind CSS v4 - MUST be first */
 @import "tailwindcss";
 
+/* Tailwind CSS v4 source scanning */
+@source "../index.html";
+@source "./**/*.{ts,tsx,js,jsx,mdx}";
+
 /* Custom CSS modules */
 @import "./styles/glass-tiers.css";
 @import "./styles/reduced-motion.css";
+
+/* ========================================
+   Tailwind v4 Theme Tokens
+   ======================================== */
+@theme {
+  /* Brand */
+  --color-pb-blue: var(--pb-blue);
+
+  /* Text */
+  --color-ink-base: var(--text-primary);
+
+  /* Motion */
+  --duration-med: var(--t-med);
+}
 
 /* 
  * Font Loading Strategy:
