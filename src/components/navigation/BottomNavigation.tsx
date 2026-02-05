@@ -68,6 +68,12 @@ export function BottomNavigation() {
   
   // Handle Think button click - navigate or open new thought
   const handleThinkClick = () => {
+    // If chain browser is open, close it and return to main view
+    if (isChainBrowserOpen) {
+      setIsChainBrowserOpen(false);
+      return;
+    }
+    
     if (isThinkActive) {
       // Already on Think page - create new thought if none active
       const activeThought = getActiveThought();
