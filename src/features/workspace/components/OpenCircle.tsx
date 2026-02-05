@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 // PB Blue - active cognition color
 const PB_BLUE = '#489FE3';
-const SNAP_THRESHOLD = 60; // Match gesture threshold
+const SNAP_THRESHOLD = 120; // Match gesture threshold (2x pull distance)
 
 interface OpenCircleProps {
   onContinue: () => void;
@@ -39,7 +39,7 @@ export function OpenCircle({
   const circleRef = useRef<HTMLDivElement>(null);
   
   // Size based on device and variant
-  const baseSize = size === 'lg' ? 56 : size === 'sm' ? 22 : (isMobile ? 36 : 26);
+  const baseSize = size === 'lg' ? 72 : size === 'sm' ? 28 : (isMobile ? 44 : 36);
   
   // Gesture handling
   const { gestureState, visualOffset, direction, wasGestureConsumed, handlers } = useChainGestures({
@@ -165,11 +165,11 @@ export function OpenCircle({
           }}
         >
           <div 
-            className="w-[35%] h-[1.5px] rounded-full"
+            className="w-[40%] h-[2px] rounded-full"
             style={{ background: PB_BLUE }}
           />
           <div 
-            className="absolute w-[1.5px] h-[35%] rounded-full"
+            className="absolute w-[2px] h-[40%] rounded-full"
             style={{ background: PB_BLUE }}
           />
         </div>
@@ -182,7 +182,7 @@ export function OpenCircle({
             animate={{ opacity: gestureState.resistance }}
           >
             <div 
-              className="w-[35%] h-[1.5px] rounded-full"
+              className="w-[40%] h-[2px] rounded-full"
               style={{ background: PB_BLUE }}
             />
           </motion.div>

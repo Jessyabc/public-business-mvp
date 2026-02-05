@@ -12,8 +12,8 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import { useHaptic } from '@/hooks/useHaptic';
 import type { PullGestureState } from '../types/chain';
 
-const PULL_THRESHOLD = 60; // max horizontal distance circle can travel
-const SNAP_RESISTANCE = 0.8; // normalized threshold (48px)
+const PULL_THRESHOLD = 120; // max horizontal distance circle can travel (2x pull distance)
+const SNAP_RESISTANCE = 0.8; // normalized threshold (96px)
 const LONG_PRESS_DURATION = 500; // ms
 const MAX_VERTICAL_DRIFT = 40; // cancel gesture if vertical movement exceeds this
 
