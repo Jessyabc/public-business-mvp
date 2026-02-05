@@ -58,13 +58,22 @@
        .from('workspace_thoughts')
        .select('id, content, user_id')
        .eq('id', thoughtId)
-       .single();
+        .maybeSingle();
  
-     if (fetchError || !thought) {
-       console.error('Error fetching thought:', fetchError);
+      if (fetchError) {
+        console.error('Error fetching thought:', fetchError.message);
        return new Response(
-         JSON.stringify({ success: false, error: 'Thought not found' }),
-         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false, error: fetchError.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Thought not synced yet - return success with pending status (client can retry)
+      if (!thought) {
+        console.log(`Thought ${thoughtId} not found yet (may be pending sync)`);
+        return new Response(
+          JSON.stringify({ success: true, pending: true, reason: 'Thought not yet synced' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
        );
      }
  
