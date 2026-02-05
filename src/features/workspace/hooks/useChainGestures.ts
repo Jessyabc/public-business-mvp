@@ -1,19 +1,18 @@
 /**
- * Think Space: Pull-the-Thread System - Gesture Handling
+ * Think Space: Horizontal Pull-to-Break Gesture
  * 
- * Pull-to-break gesture for creating new chains.
+ * Horizontal (left/right) pull-to-break gesture for creating new chains.
  * Long-press for merge (V2).
  * 
- * Gesture must occur on the open circle only.
- * Drag within bottom 180° with resistance.
- * Circle follows cursor position during drag.
+ * Pull LEFT or RIGHT with 60px threshold to break chain.
+ * Circle follows cursor horizontally during drag.
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useHaptic } from '@/hooks/useHaptic';
 import type { PullGestureState } from '../types/chain';
 
-const PULL_THRESHOLD = 80; // pixels to trigger snap (per V1 spec)
+const PULL_THRESHOLD = 60; // pixels to trigger horizontal snap
 const SNAP_RESISTANCE = 0.8; // normalized threshold
 const LONG_PRESS_DURATION = 500; // ms
 
@@ -31,19 +30,8 @@ interface GestureHandlers {
   onContextMenu: (e: React.MouseEvent) => void;
 }
 
-/**
- * Easing function for visual feedback - creates resistance feel
- */
-function easeOutQuad(t: number): number {
-  return t * (2 - t);
-}
-
-/**
- * Check if drag is within bottom 180° (downward)
- */
-function isWithinBottomHemisphere(deltaY: number): boolean {
-  return deltaY > 0;
-}
+/** Easing function for visual feedback - creates resistance feel */
+function easeOutQuad(t: number): number { return t * (2 - t); }
 
 export function useChainGestures({
   onBreak,
@@ -52,6 +40,7 @@ export function useChainGestures({
 }: UseChainGesturesOptions): {
   gestureState: PullGestureState;
   visualOffset: number;
+  direction: 'left' | 'right' | null;
   wasGestureConsumed: () => boolean;
   handlers: GestureHandlers;
 } {
@@ -59,11 +48,12 @@ export function useChainGestures({
   
   const [gestureState, setGestureState] = useState<PullGestureState>({
     isActive: false,
-    startY: 0,
-    currentY: 0,
+    startX: 0,
+    currentX: 0,
     resistance: 0,
     didSnap: false,
     didHaptic: false,
+    direction: null,
   });
   
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -72,8 +62,9 @@ export function useChainGestures({
   const hasDraggedRef = useRef(false); // Track if actual drag occurred
   const gestureConsumedRef = useRef(false); // Prevent click after gesture
   const currentResistanceRef = useRef(0); // Track current resistance for reliable gesture detection
+  const currentDirectionRef = useRef<'left' | 'right' | null>(null);
   
-  // Calculate visual offset - circle follows cursor with resistance
+  // Calculate visual offset - circle follows cursor horizontally with resistance
   const visualOffset = gestureState.isActive
     ? easeOutQuad(Math.min(gestureState.resistance, 1)) * PULL_THRESHOLD
     : 0;
@@ -90,13 +81,15 @@ export function useChainGestures({
   const resetGesture = useCallback(() => {
     setGestureState({
       isActive: false,
-      startY: 0,
-      currentY: 0,
+      startX: 0,
+      currentX: 0,
       resistance: 0,
       didSnap: false,
       didHaptic: false,
+      direction: null,
     });
     currentResistanceRef.current = 0; // Reset ref
+    currentDirectionRef.current = null;
     clearLongPress();
     isMouseDownRef.current = false;
     // Keep gestureConsumedRef true briefly to block click
@@ -110,8 +103,8 @@ export function useChainGestures({
     return gestureConsumedRef.current || hasDraggedRef.current;
   }, []);
 
-  // Handle start (touch or mouse)
-  const handleStart = useCallback((clientY: number, clientX: number) => {
+  // Handle start (touch or mouse) - now tracks X position for horizontal
+  const handleStart = useCallback((clientX: number, clientY: number) => {
     if (!enabled) return;
     
     startPosRef.current = { x: clientX, y: clientY };
@@ -120,11 +113,12 @@ export function useChainGestures({
     
     setGestureState({
       isActive: true,
-      startY: clientY,
-      currentY: clientY,
+      startX: clientX,
+      currentX: clientX,
       resistance: 0,
       didSnap: false,
       didHaptic: false,
+      direction: null,
     });
     
     // Start long-press timer for merge (V2)
@@ -138,22 +132,24 @@ export function useChainGestures({
     }
   }, [enabled, onMerge, triggerHaptic, resetGesture]);
 
-  // Handle move (touch or mouse)
-  const handleMove = useCallback((clientY: number, clientX: number) => {
+  // Handle move (touch or mouse) - now uses horizontal delta
+  const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!gestureState.isActive || !enabled) return;
     
-    const deltaY = clientY - gestureState.startY;
-    const deltaX = Math.abs(clientX - startPosRef.current.x);
+    const deltaX = clientX - gestureState.startX;
+    const deltaY = Math.abs(clientY - startPosRef.current.y);
     
     // If moved more than 5px in any direction, mark as drag
-    if (Math.abs(deltaY) > 5 || deltaX > 5) {
+    if (Math.abs(deltaX) > 5 || deltaY > 5) {
       hasDraggedRef.current = true;
       clearLongPress();
     }
     
-    // Only allow downward drag (break gesture)
-    if (isWithinBottomHemisphere(deltaY)) {
-      const resistance = Math.min(1, deltaY / PULL_THRESHOLD);
+    // Horizontal pull - either direction works
+    if (Math.abs(deltaX) > 5) {
+      const absDelta = Math.abs(deltaX);
+      const resistance = Math.min(1, absDelta / PULL_THRESHOLD);
+      const newDirection: 'left' | 'right' = deltaX < 0 ? 'left' : 'right';
       
       setGestureState((prev) => {
         // Haptic feedback at 70% threshold
@@ -161,22 +157,25 @@ export function useChainGestures({
           triggerHaptic('medium');
           return {
             ...prev,
-            currentY: clientY,
+            currentX: clientX,
             resistance,
             didHaptic: true,
+            direction: newDirection,
           };
         }
         
         const newState = {
           ...prev,
-          currentY: clientY,
+          currentX: clientX,
           resistance,
+          direction: newDirection,
         };
-        currentResistanceRef.current = resistance; // Update ref with current resistance
+        currentResistanceRef.current = resistance;
+        currentDirectionRef.current = newDirection;
         return newState;
       });
     }
-  }, [gestureState.isActive, gestureState.startY, enabled, clearLongPress, triggerHaptic]);
+  }, [gestureState.isActive, gestureState.startX, enabled, clearLongPress, triggerHaptic]);
 
   // Handle end (touch or mouse)
   const handleEnd = useCallback(() => {
@@ -229,12 +228,12 @@ export function useChainGestures({
   // Touch handlers
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
-    handleStart(touch.clientY, touch.clientX);
+    handleStart(touch.clientX, touch.clientY);
   }, [handleStart]);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
-    handleMove(touch.clientY, touch.clientX);
+    handleMove(touch.clientX, touch.clientY);
   }, [handleMove]);
 
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
@@ -250,7 +249,7 @@ export function useChainGestures({
     if (e.button !== 0) return;
     e.preventDefault(); // Prevent text selection during drag
     isMouseDownRef.current = true;
-    handleStart(e.clientY, e.clientX);
+    handleStart(e.clientX, e.clientY);
   }, [handleStart]);
 
   // Context menu (right-click) for merge on desktop
@@ -264,6 +263,7 @@ export function useChainGestures({
   return {
     gestureState,
     visualOffset,
+    direction: gestureState.direction,
     wasGestureConsumed,
     handlers: {
       onTouchStart,
