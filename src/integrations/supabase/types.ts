@@ -2273,33 +2273,50 @@ export type Database = {
         Args: { p_reason?: string; p_request_id: string }
         Returns: boolean
       }
-      search_thoughts: {
-        Args: {
-          match_count?: number
-          match_threshold?: number
-          query_embedding: string
-        }
-        Returns: {
-          anchored_at: string | null
-          chain_id: string | null
-          content: string
-          created_at: string
-          day_key: string
-          display_label: string | null
-          edited_from_id: string | null
-          embedding: string | null
-          id: string
-          state: string
-          updated_at: string
-          user_id: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "workspace_thoughts"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
+      search_thoughts:
+        | {
+            Args: {
+              match_count?: number
+              match_threshold?: number
+              query_embedding: string
+              search_user_id?: string
+            }
+            Returns: {
+              anchored_at: string
+              chain_id: string
+              content: string
+              created_at: string
+              id: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              match_count?: number
+              match_threshold?: number
+              query_embedding: string
+            }
+            Returns: {
+              anchored_at: string | null
+              chain_id: string | null
+              content: string
+              created_at: string
+              day_key: string
+              display_label: string | null
+              edited_from_id: string | null
+              embedding: string | null
+              id: string
+              state: string
+              updated_at: string
+              user_id: string
+            }[]
+            SetofOptions: {
+              from: "*"
+              to: "workspace_thoughts"
+              isOneToOne: false
+              isSetofReturn: true
+            }
+          }
     }
     Enums: {
       app_role: "admin" | "business_user" | "public_user" | "business_member"
