@@ -1,14 +1,22 @@
  # Think Space: Chain of Thoughts - Implementation Tracker
  
 **Last Updated**: 2026-02-05 (Run 3)
-**Last Updated**: 2026-02-05 (Run 5)
+ **Last Updated**: 2026-02-05 (Run 6)
  **Status**: In Progress
  
  ---
  
  ## Summary of Latest Changes
  
+ ### Run 6 (2026-02-05) - Latest
+ - [x] **Phase 10**: Chain Linking UI
+ - [x] Created `hooks/useLinkSync.ts` for chain_links persistence + realtime
+ - [x] Created `components/LinkPanel.tsx` inline panel for linking chains
+ - [x] Updated ChainStartMarker with link button + panel toggle
+ - [x] Integrated useLinkSync into WorkspaceCanvas
+ 
 ### Run 5 (2026-02-05) - Latest
+ -> Previous run notes
 - [x] **Phase 8**: Realtime sync via Supabase subscriptions
 - [x] Created `hooks/useRealtimeSync.ts` with all event handlers
 - [x] Subscribes to workspace_thoughts (INSERT/UPDATE/DELETE)
@@ -59,7 +67,7 @@
 | 7 | Copy-on-edit | ✅ Done | ⏳ |
 | 8 | Realtime sync | ✅ Done | ⏳ |
  | 9 | Semantic search | ⏳ Pending | ❌ |
- | 10 | Chain linking UI | ⏳ Pending | ❌ |
+ | 10 | Chain linking UI | ✅ Done | ⏳ |
  
  ---
  
@@ -136,9 +144,13 @@
  - [ ] Configure OPENAI_API_KEY secret
  
  ### Phase 10: Chain Linking UI
- - [ ] Create `components/LinkPanel.tsx`
- - [ ] Implement inline panel (not modal)
- - [ ] Create links in chain_links table
+ - [x] Create `components/LinkPanel.tsx`
+ - [x] Implement inline panel (not modal)
+ - [x] Create links in chain_links table
+ - [x] Create `hooks/useLinkSync.ts` for persistence
+ - [x] Add link button to ChainStartMarker
+ - [x] Show existing links with unlink option
+ - [x] Filter available chains (no duplicates, no self-link)
  
  ---
  
@@ -170,6 +182,8 @@
  | components/LinkPanel.tsx | Chain linking panel | ⏳ |
  | hooks/useRealtimeSync.ts | Realtime subscriptions | ⏳ |
  | hooks/useThoughtSearch.ts | Semantic search hook | ⏳ |
+ | hooks/useLinkSync.ts | Chain links persistence | ✅ |
+ | components/LinkPanel.tsx | Chain linking panel | ✅ |
  | supabase/functions/embed-thought/index.ts | Embedding generation | ⏳ |
  
  ## Files Deleted/Deprecated
@@ -226,6 +240,22 @@
  - Phase 8: Add useRealtimeSync for live updates
  - Phase 9: Implement embed-thought edge function + SearchInline UI
 - Phase 10: Create LinkPanel for chain linking
+ 
+ ### Run 6 (2026-02-05)
+ **Phase 10 Completed: Chain Linking UI**
+ - Created `useLinkSync.ts` hook for chain_links persistence
+ - Loads links on mount, realtime subscriptions for INSERT/DELETE
+ - Created `LinkPanel.tsx` inline panel:
+   - Shows existing links with unlink button
+   - Shows available chains to link to
+   - Filters out self and already-linked chains
+   - Displays chain preview (first thought content)
+ - Updated ChainStartMarker with link button (Link2 + Plus icon)
+ - Panel toggles inline below the chain marker
+ - Integrated useLinkSync into WorkspaceCanvas
+ 
+ **Next Steps:**
+ - Phase 9: Semantic search (embed-thought edge function + SearchInline UI)
 
 ### Run 2 (2026-02-05)
 **Completed:**

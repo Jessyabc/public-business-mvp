@@ -13,6 +13,7 @@ import { useWorkspaceSync } from '../useWorkspaceSync';
 import { useChainStore } from '../stores/chainStore';
 import { useChainSync } from '../useChainSync';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
+ import { useLinkSync } from '../hooks/useLinkSync';
 import { ThinkingSurface } from './ThinkingSurface';
  import { ThinkFeed } from './ThinkFeed';
  import { OpenCircle } from './OpenCircle';
@@ -65,6 +66,7 @@ export function WorkspaceCanvas() {
   useWorkspaceSync();
   useChainSync();
   useRealtimeSync(); // Cross-device realtime updates
+   useLinkSync(); // Chain links sync
   
   const activeThought = getActiveThought();
   const hasThoughts = thoughts.length > 0;
