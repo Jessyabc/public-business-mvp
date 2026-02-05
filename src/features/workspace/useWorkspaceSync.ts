@@ -74,8 +74,8 @@ export function useWorkspaceSync() {
             id: row.id,
             user_id: row.user_id,
             content: row.content,
-            // Preserve state from database (should be 'anchored' for persisted thoughts)
-            state: row.state === 'active' ? 'active' as const : 'anchored' as const,
+              // Preserve state from database
+              state: row.state as 'active' | 'anchored',
             created_at: row.created_at,
             updated_at: row.updated_at,
             day_key: dayKey,

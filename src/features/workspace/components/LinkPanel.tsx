@@ -28,7 +28,7 @@
   */
  function getChainPreview(chainId: string, thoughts: ReturnType<typeof useWorkspaceStore.getState>['thoughts']): string {
    const chainThoughts = thoughts
-     .filter(t => t.chain_id === chainId && t.state === 'anchored')
+    .filter(t => t.chain_id === chainId && t.anchored_at)
      .sort((a, b) => {
        const timeA = new Date(a.anchored_at || a.created_at).getTime();
        const timeB = new Date(b.anchored_at || b.created_at).getTime();
@@ -60,11 +60,9 @@
    const availableChains = useMemo(() => {
      return chains.filter(c => 
        c.id !== chainId && 
-       !linkedChainIds.has(c.id) &&
-       // Only show chains with at least one thought
-       thoughts.some(t => t.chain_id === c.id && t.state === 'anchored')
+      !linkedChainIds.has(c.id)
      );
-   }, [chains, chainId, linkedChainIds, thoughts]);
+  }, [chains, chainId, linkedChainIds]);
  
    // Get linked chains (for display)
    const linkedChains = useMemo(() => {
