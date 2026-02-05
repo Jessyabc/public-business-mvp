@@ -11,6 +11,7 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useWorkspaceSync } from '../useWorkspaceSync';
 import { useChainStore } from '../stores/chainStore';
+import { useFeedStore } from '../stores/feedStore';
 import { useChainSync } from '../useChainSync';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
  import { useLinkSync } from '../hooks/useLinkSync';
@@ -36,7 +37,8 @@ export function WorkspaceCanvas() {
     getActiveThought,
     setLoading,
   } = useWorkspaceStore();
-   const { breakChain, activeChainId } = useChainStore();
+  const { breakChain, activeChainId, setActiveChain } = useChainStore();
+  const { scope, focusedChainId } = useFeedStore();
   
   // Prevent immediate re-open after blur closes the thought
   const justAnchoredRef = useRef(false);
@@ -76,8 +78,10 @@ export function WorkspaceCanvas() {
 
   const handleStartThinking = useCallback(() => {
     setUserInitiated(true);
-    createThought(undefined, user?.id);
-   }, [createThought, user?.id]);
+    // If viewing a specific chain, use that as the target chain
+    const targetChainId = scope === 'chain' && focusedChainId ? focusedChainId : undefined;
+    createThought(undefined, user?.id, undefined, targetChainId);
+  }, [createThought, user?.id, scope, focusedChainId]);
  
    // Handle break chain gesture
    const handleBreakChain = useCallback(() => {
@@ -142,9 +146,11 @@ export function WorkspaceCanvas() {
     
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);
-      createThought(undefined, user?.id);
+      // If viewing a specific chain, use that as the target chain
+      const targetChainId = scope === 'chain' && focusedChainId ? focusedChainId : undefined;
+      createThought(undefined, user?.id, undefined, targetChainId);
     }
-   }, [activeThought, createThought, user?.id]);
+  }, [activeThought, createThought, user?.id, scope, focusedChainId]);
 
   // Global Enter key to start writing (when no thought is active)
   useEffect(() => {
@@ -158,7 +164,10 @@ export function WorkspaceCanvas() {
       if (e.key === 'Enter' && !activeThought && !isTyping && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
         e.preventDefault();
         setUserInitiated(true);
-        createThought(undefined, user?.id);
+        // If viewing a specific chain, use that as the target chain
+        const { scope: currentScope, focusedChainId: currentFocusedChain } = useFeedStore.getState();
+        const targetChainId = currentScope === 'chain' && currentFocusedChain ? currentFocusedChain : undefined;
+        createThought(undefined, user?.id, undefined, targetChainId);
       }
     };
 
