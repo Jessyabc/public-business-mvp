@@ -32,13 +32,10 @@
      }
    }, [focusedChainId, scope, viewChain]);
  
-   // Don't show in global view
-   if (scope === 'global') {
-     return null;
-   }
- 
    return (
-     <div className="feed-scope-indicator mb-4 px-2">
+     <div className="feed-scope-indicator px-2">
+       {/* Only show breadcrumb when not in global view */}
+       {scope !== 'global' && (
        <div 
          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs"
          style={{
@@ -99,6 +96,7 @@
            </>
          )}
        </div>
+       )}
      </div>
    );
  }
