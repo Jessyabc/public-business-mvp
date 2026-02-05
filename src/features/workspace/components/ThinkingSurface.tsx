@@ -13,7 +13,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useChainStore } from '../stores/chainStore';
 import { cn } from '@/lib/utils';
-import { format, parseISO, isToday } from 'date-fns';
+ import { format } from 'date-fns';
 
 // PB Blue - represents active cognition
 const PB_BLUE = '#489FE3';
@@ -30,17 +30,13 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const [enterCount, setEnterCount] = useState(0);
   const originalContentRef = useRef<string>(''); // Track original content when editing starts
   const isMobile = useIsMobile();
-  const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit, activeDayKey } = useWorkspaceStore();
+   const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit } = useWorkspaceStore();
   const { activeChainId, pendingChainId, getChainById } = useChainStore();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
   // Check pending chain first (from break gesture), then active chain
   const pendingChain = pendingChainId ? getChainById(pendingChainId) : null;
   const activeChain = activeChainId ? getChainById(activeChainId) : null;
-  
-  // Show which day/chain we're adding to
-  const showDayLabel = activeDayKey && !isToday(parseISO(activeDayKey));
-  const dayLabel = activeDayKey ? format(parseISO(activeDayKey), 'MMMM d') : null;
   
   // Chain indicator - shows which chain we're writing to (pending takes priority)
   const writingChain = pendingChain || activeChain;
@@ -235,7 +231,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
       </div>
       
       {/* Day/Chain indicator when adding to a previous day or specific chain */}
-      {(showDayLabel || chainLabel) && (
+       {chainLabel && (
         <div className="flex items-center justify-center gap-2 mt-3">
           {chainLabel && (
             <span 
@@ -249,14 +245,6 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
               {isPending && (
                 <span className="ml-1 opacity-75">(pending)</span>
               )}
-            </span>
-          )}
-          {showDayLabel && dayLabel && (
-            <span 
-              className="text-xs opacity-60"
-              style={{ color: '#9A8F85' }}
-            >
-              {chainLabel ? '·' : ''} Adding to {dayLabel}
             </span>
           )}
         </div>

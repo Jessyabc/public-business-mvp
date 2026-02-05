@@ -1,20 +1,17 @@
 /**
  * Pillar #1: Individual Workspace - Zustand Store
+ *
+ * Chain of Thoughts - Pure cognitive state management.
  * 
- * Pure cognitive state management with daily threading + chains.
- * No social metrics, no engagement tracking.
- * 
- * Threading model:
- * - Thoughts are grouped by day_key (YYYY-MM-DD) AND chain_id
- * - Each day forms a "thread" of related thinking
- * - New entries prepend to the day (most recent at top)
- * - Users can revisit and add to previous days
- * - Pull-to-break gesture creates new chains
+ * Key invariants:
+ * - Chains break ONLY when user explicitly breaks them
+ * - Global feed is strictly time-ordered (newest first)
+ * - Copy-on-edit: edits create new thoughts, original preserved
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { WorkspaceStore, ThoughtObject, DayThread, ChainId } from './types';
+ import type { WorkspaceStore, ThoughtObject, ChainId } from './types';
 import { format, parseISO } from 'date-fns';
 import { useChainStore } from './stores/chainStore';
 
@@ -36,19 +33,16 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       // Initial state
       thoughts: [],
       activeThoughtId: null,
-      activeDayKey: null,
       isLoading: false,
       isSyncing: false,
       lastSyncedAt: null,
 
       // Create a new thought, optionally for a specific day
-      // user_id is passed from the component that has auth context
-      // If chainId is provided, assigns thought to that chain
       createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => {
         const id = generateId();
         const now = new Date().toISOString();
-        // Use provided dayKey, or activeDayKey, or today's date
-        const targetDayKey = dayKey || get().activeDayKey || getTodayKey();
+         // day_key kept for backward compat only
+         const targetDayKey = dayKey || getTodayKey();
         
         // Ensure day_key is in correct format (YYYY-MM-DD)
         const normalizedDayKey = targetDayKey.includes('T') 
@@ -83,7 +77,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         set((state) => ({
           thoughts: [newThought, ...state.thoughts],
           activeThoughtId: id,
-          activeDayKey: normalizedDayKey,
         }));
         
         return id;
@@ -103,7 +96,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       // Anchor a thought (implicit transition, not "save" or "submit")
       anchorThought: (id) => {
         const now = new Date().toISOString();
-        const anchoredDayKey = getDayKey(now);
         
         // Get the thought before updating to check its chain_id
         const thought = get().thoughts.find(t => t.id === id);
@@ -117,8 +109,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                   state: 'anchored', 
                   anchored_at: now, 
                   updated_at: now,
-                  // Set day_key based on when anchored (this determines which day thread it belongs to)
-                  day_key: anchoredDayKey,
+                   day_key: getDayKey(now),
                 }
               : t
           ),
@@ -152,7 +143,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
               : t
           ),
           activeThoughtId: id,
-          activeDayKey: thought?.day_key || null,
         }));
       },
 
@@ -187,21 +177,34 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         return thoughtToDelete?.id ?? null;
       },
 
-      // Set which day thread to add to
-      setActiveDayKey: (dayKey) => set({ activeDayKey: dayKey }),
-
-      // Update display label for a day thread
-      // Stores label on all thoughts in the day for consistency (we use the first one for display)
-      // If label is null or empty string, it will revert to smart date formatting
-      updateDayLabel: (dayKey, label) => {
-        set((state) => ({
-          thoughts: state.thoughts.map((t) =>
-            t.day_key === dayKey
-              ? { ...t, display_label: (label && label.trim() !== '') ? label : null, updated_at: new Date().toISOString() }
-              : t
-          ),
-        }));
-      },
+       // Copy-on-edit: creates new thought referencing original
+       editThought: (id, newContent, userId) => {
+         const original = get().thoughts.find(t => t.id === id);
+         if (!original || original.content === newContent) return null;
+ 
+         const now = new Date().toISOString();
+         const editedId = generateId();
+ 
+         const editedThought: ThoughtObject = {
+           id: editedId,
+           user_id: userId || original.user_id,
+           content: newContent,
+           state: 'anchored',
+           created_at: now,
+           updated_at: now,
+           anchored_at: now,
+           day_key: getDayKey(now),
+           chain_id: original.chain_id,
+           edited_from_id: id,
+         };
+ 
+         set(state => ({
+           thoughts: [editedThought, ...state.thoughts],
+           activeThoughtId: null,
+         }));
+ 
+         return editedId;
+       },
 
       // State setters
       setActiveThought: (id) => set({ activeThoughtId: id }),
@@ -215,7 +218,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         set({
           thoughts: [],
           activeThoughtId: null,
-          activeDayKey: null,
           isLoading: false,
           isSyncing: false,
           lastSyncedAt: null,
@@ -239,54 +241,29 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           });
       },
 
-      // Get all thoughts grouped by day
-      getDayThreads: () => {
+       // Get ALL anchored thoughts in strict timestamp order (newest first)
+       getGlobalFeed: () => {
         const { thoughts } = get();
-        const anchored = thoughts.filter((t) => t.state === 'anchored');
-        
-        // Group by day_key
-        const dayMap = new Map<string, ThoughtObject[]>();
-        
-        for (const thought of anchored) {
-          // Ensure day_key is set (should always be set, but safety check)
-          const key = thought.day_key || getDayKey(thought.anchored_at || thought.created_at);
-          if (!dayMap.has(key)) {
-            dayMap.set(key, []);
-          }
-          dayMap.get(key)!.push(thought);
-        }
-        
-        // Convert to DayThread array
-        const threads: DayThread[] = [];
-        
-        dayMap.forEach((dayThoughts, dayKey) => {
-          // Sort thoughts within day by anchored_at descending (newest first)
-          const sorted = dayThoughts.sort((a, b) => {
-            const timeA = a.anchored_at || a.created_at;
-            const timeB = b.anchored_at || b.created_at;
-            return new Date(timeB).getTime() - new Date(timeA).getTime();
+         return thoughts
+           .filter((t) => t.state === 'anchored')
+           .sort((a, b) => {
+             const timeA = new Date(a.anchored_at || a.created_at).getTime();
+             const timeB = new Date(b.anchored_at || b.created_at).getTime();
+             return timeB - timeA; // Newest first
           });
-          
-          // Get the display label from the first thought in this day (they all share it)
-          // Filter out null/empty labels to find the first non-null one
-          const displayLabel = sorted.find(t => t.display_label)?.display_label || null;
-          
-          threads.push({
-            day_key: dayKey,
-            display_label: displayLabel,
-            thoughts: sorted,
-            earliest_at: sorted[sorted.length - 1].anchored_at || sorted[sorted.length - 1].created_at,
-            latest_at: sorted[0].anchored_at || sorted[0].created_at,
-          });
-        });
-        
-        // Sort threads by day_key descending (most recent day first)
-        return threads.sort((a, b) => b.day_key.localeCompare(a.day_key));
       },
 
-      getDayThread: (dayKey) => {
-        const threads = get().getDayThreads();
-        return threads.find((t) => t.day_key === dayKey) || null;
+       // Get anchor thought for a chain (earliest thought in that chain)
+       getChainAnchor: (chainId) => {
+         const { thoughts } = get();
+         const chainThoughts = thoughts
+           .filter((t) => t.chain_id === chainId && t.state === 'anchored')
+           .sort((a, b) => {
+             const timeA = new Date(a.anchored_at || a.created_at).getTime();
+             const timeB = new Date(b.anchored_at || b.created_at).getTime();
+             return timeA - timeB; // Oldest first for anchor
+           });
+         return chainThoughts[0] || null;
       },
     }),
     {
@@ -295,7 +272,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       partialize: (state) => ({
         thoughts: state.thoughts,
         activeThoughtId: state.activeThoughtId,
-        activeDayKey: state.activeDayKey,
         lastSyncedAt: state.lastSyncedAt,
       }),
     }

@@ -1,12 +1,10 @@
 /**
  * Pillar #1: Workspace Canvas
- * 
+ *
  * The Individual Workspace - private cognitive sanctuary.
- * Orchestrates Active Thinking and Day Threads.
- * 
- * Daily threading: Each day creates a new thread.
- * Tap breathing space to start today's thinking.
- * Open previous days to continue adding thoughts.
+ * Orchestrates Active Thinking and the continuous ThinkFeed.
+ *
+ * Chain of Thoughts: No day grouping, explicit chain breaks only.
  */
 
 import { useCallback, useState, useEffect, useRef } from 'react';
@@ -15,7 +13,8 @@ import { useWorkspaceSync } from '../useWorkspaceSync';
 import { useChainStore } from '../stores/chainStore';
 import { useChainSync } from '../useChainSync';
 import { ThinkingSurface } from './ThinkingSurface';
-import { ThoughtStack } from './ThoughtStack';
+ import { ThinkFeed } from './ThinkFeed';
+ import { OpenCircle } from './OpenCircle';
 import { EmptyWorkspace } from './EmptyWorkspace';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -31,10 +30,9 @@ export function WorkspaceCanvas() {
     isSyncing,
     createThought,
     getActiveThought,
-    activeDayKey,
-    setActiveDayKey,
     setLoading,
   } = useWorkspaceStore();
+   const { breakChain, activeChainId } = useChainStore();
   
   // Prevent immediate re-open after blur closes the thought
   const justAnchoredRef = useRef(false);
@@ -71,9 +69,24 @@ export function WorkspaceCanvas() {
 
   const handleStartThinking = useCallback(() => {
     setUserInitiated(true);
-    setActiveDayKey(null); // New thought = today
     createThought(undefined, user?.id);
-  }, [createThought, setActiveDayKey, user?.id]);
+   }, [createThought, user?.id]);
+ 
+   // Handle break chain gesture
+   const handleBreakChain = useCallback(() => {
+     if (!user) return;
+     
+     // Find the last anchored thought in the current active chain
+     const lastThoughtInChain = thoughts
+       .filter(t => t.chain_id === activeChainId && t.state === 'anchored')
+       .sort((a, b) => {
+         const timeA = new Date(a.anchored_at || a.created_at).getTime();
+         const timeB = new Date(b.anchored_at || b.created_at).getTime();
+         return timeB - timeA;
+       })[0];
+     
+     breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
+   }, [user, breakChain, activeChainId, thoughts]);
 
   // Reset user-initiated flag when thought is anchored and prevent immediate re-open
   const handleAnchor = useCallback(() => {
@@ -95,8 +108,12 @@ export function WorkspaceCanvas() {
     const target = e.target as HTMLElement;
     // Check if click is on an interactive element that should not trigger new thought
     const isOnThought = target.closest('.anchored-thought') || 
+                         target.closest('.thought-card') ||
                         target.closest('.thinking-surface') ||
-                        target.closest('.day-thread') ||
+                         target.closest('.think-feed') ||
+                         target.closest('.open-circle') ||
+                         target.closest('.chain-start-marker') ||
+                         target.closest('.feed-scope-indicator') ||
                         target.closest('button') ||
                         target.closest('input') ||
                         target.closest('textarea') ||
@@ -113,10 +130,9 @@ export function WorkspaceCanvas() {
     
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);
-      setActiveDayKey(null); // New thought = today
       createThought(undefined, user?.id);
     }
-  }, [activeThought, createThought, setActiveDayKey, user?.id]);
+   }, [activeThought, createThought, user?.id]);
 
   // Global Enter key to start writing (when no thought is active)
   useEffect(() => {
@@ -130,14 +146,13 @@ export function WorkspaceCanvas() {
       if (e.key === 'Enter' && !activeThought && !isTyping && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
         e.preventDefault();
         setUserInitiated(true);
-        setActiveDayKey(null);
         createThought(undefined, user?.id);
       }
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [activeThought, createThought, setActiveDayKey, user?.id]);
+   }, [activeThought, createThought, user?.id]);
 
   // Show loading only if we're actually loading and haven't timed out
   if (isLoading && !loadingTimedOut) {
@@ -179,46 +194,58 @@ export function WorkspaceCanvas() {
               autoFocus={userInitiated}
             />
           ) : hasThoughts ? (
-            /* Warm breathing space - subtle indent inviting interaction */
-            <div
-              className="group min-h-[80px] rounded-2xl transition-all duration-300 ease-out flex items-center justify-center cursor-text"
-              style={{
-                background: '#EAE5E0',
-                boxShadow: `
-                  inset 4px 4px 8px rgba(180, 165, 145, 0.15),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.5)
-                `
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `
-                  inset 4px 4px 8px rgba(180, 165, 145, 0.15),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.5),
-                  0 0 15px rgba(72, 159, 227, 0.08)
-                `;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = `
-                  inset 4px 4px 8px rgba(180, 165, 145, 0.15),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.5)
-                `;
-              }}
-            >
-              <span 
-                className="text-sm transition-opacity duration-300 opacity-30 group-hover:opacity-50"
-                style={{ color: '#A09890' }}
+             /* Breathing space with break control */
+             <div className="flex flex-col items-center gap-4">
+               {/* Break control (+ button) at TOP */}
+               <div className="flex justify-center">
+                 <OpenCircle
+                   onContinue={handleStartThinking}
+                   onBreak={handleBreakChain}
+                   size="md"
+                 />
+               </div>
+               
+               {/* Tap to think hint */}
+               <div
+                 className="group min-h-[60px] w-full rounded-2xl transition-all duration-300 ease-out flex items-center justify-center cursor-text"
+                 style={{
+                   background: '#EAE5E0',
+                   boxShadow: `
+                     inset 4px 4px 8px rgba(180, 165, 145, 0.15),
+                     inset -4px -4px 8px rgba(255, 255, 255, 0.5)
+                   `
+                 }}
+                 onMouseEnter={(e) => {
+                   e.currentTarget.style.boxShadow = `
+                     inset 4px 4px 8px rgba(180, 165, 145, 0.15),
+                     inset -4px -4px 8px rgba(255, 255, 255, 0.5),
+                     0 0 15px rgba(72, 159, 227, 0.08)
+                   `;
+                 }}
+                 onMouseLeave={(e) => {
+                   e.currentTarget.style.boxShadow = `
+                     inset 4px 4px 8px rgba(180, 165, 145, 0.15),
+                     inset -4px -4px 8px rgba(255, 255, 255, 0.5)
+                   `;
+                 }}
               >
-                Tap to think
-              </span>
+                 <span 
+                   className="text-sm transition-opacity duration-300 opacity-30 group-hover:opacity-50"
+                   style={{ color: '#A09890' }}
+                 >
+                   Tap to think
+                 </span>
+               </div>
             </div>
           ) : (
             <EmptyWorkspace onStartThinking={handleStartThinking} />
           )}
         </section>
 
-        {/* Day Threads with chain continuation */}
+         {/* ThinkFeed - continuous feed of all thoughts */}
         {hasAnchoredThoughts && (
           <section>
-            <ThoughtStack onContinue={handleStartThinking} />
+             <ThinkFeed />
           </section>
         )}
       </div>

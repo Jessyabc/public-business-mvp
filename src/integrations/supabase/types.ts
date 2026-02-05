@@ -212,6 +212,45 @@ export type Database = {
           },
         ]
       }
+      chain_links: {
+        Row: {
+          created_at: string
+          from_chain_id: string
+          id: string
+          to_chain_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_chain_id: string
+          id?: string
+          to_chain_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_chain_id?: string
+          id?: string
+          to_chain_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_links_from_chain_id_fkey"
+            columns: ["from_chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_links_to_chain_id_fkey"
+            columns: ["to_chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_requests: {
         Row: {
           company: string | null
@@ -1329,6 +1368,8 @@ export type Database = {
           created_at: string
           day_key: string
           display_label: string | null
+          edited_from_id: string | null
+          embedding: string | null
           id: string
           state: string
           updated_at: string
@@ -1341,6 +1382,8 @@ export type Database = {
           created_at?: string
           day_key?: string
           display_label?: string | null
+          edited_from_id?: string | null
+          embedding?: string | null
           id?: string
           state?: string
           updated_at?: string
@@ -1353,6 +1396,8 @@ export type Database = {
           created_at?: string
           day_key?: string
           display_label?: string | null
+          edited_from_id?: string | null
+          embedding?: string | null
           id?: string
           state?: string
           updated_at?: string
@@ -1364,6 +1409,13 @@ export type Database = {
             columns: ["chain_id"]
             isOneToOne: false
             referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_thoughts_edited_from_id_fkey"
+            columns: ["edited_from_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_thoughts"
             referencedColumns: ["id"]
           },
         ]
@@ -2220,6 +2272,33 @@ export type Database = {
       reject_org_request: {
         Args: { p_reason?: string; p_request_id: string }
         Returns: boolean
+      }
+      search_thoughts: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          anchored_at: string | null
+          chain_id: string | null
+          content: string
+          created_at: string
+          day_key: string
+          display_label: string | null
+          edited_from_id: string | null
+          embedding: string | null
+          id: string
+          state: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "workspace_thoughts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {
