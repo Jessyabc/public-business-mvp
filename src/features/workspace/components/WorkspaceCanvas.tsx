@@ -14,6 +14,8 @@ import { useChainStore } from '../stores/chainStore';
 import { useChainSync } from '../useChainSync';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
  import { useLinkSync } from '../hooks/useLinkSync';
+ import { useEmbedThought } from '../hooks/useThoughtSearch';
+ import { SearchInline } from './SearchInline';
 import { ThinkingSurface } from './ThinkingSurface';
  import { ThinkFeed } from './ThinkFeed';
  import { OpenCircle } from './OpenCircle';
@@ -67,6 +69,7 @@ export function WorkspaceCanvas() {
   useChainSync();
   useRealtimeSync(); // Cross-device realtime updates
    useLinkSync(); // Chain links sync
+   const { embedThought } = useEmbedThought();
   
   const activeThought = getActiveThought();
   const hasThoughts = thoughts.length > 0;
@@ -93,15 +96,20 @@ export function WorkspaceCanvas() {
      breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
    }, [user, breakChain, activeChainId, thoughts]);
 
-  // Reset user-initiated flag when thought is anchored and prevent immediate re-open
-  const handleAnchor = useCallback(() => {
+   // Reset user-initiated flag when thought is anchored, embed for search, and prevent immediate re-open
+   const handleAnchor = useCallback((thoughtId?: string) => {
     setUserInitiated(false);
     justAnchoredRef.current = true;
     // Reset after a short delay to allow click events to complete
     setTimeout(() => {
       justAnchoredRef.current = false;
     }, 100);
-  }, []);
+     
+     // Embed the thought for semantic search (fire and forget)
+     if (thoughtId) {
+       embedThought(thoughtId).catch(console.error);
+     }
+   }, [embedThought]);
 
   // Handle canvas click (tap anywhere empty to start writing or blur active thought)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -190,6 +198,13 @@ export function WorkspaceCanvas() {
 
 
       <div className="max-w-3xl mx-auto space-y-8">
+         {/* Search bar */}
+         {hasAnchoredThoughts && (
+           <div className="flex justify-end">
+             <SearchInline />
+           </div>
+         )}
+ 
         {/* Breathing space / Active thinking area */}
         <section>
           {activeThought ? (
