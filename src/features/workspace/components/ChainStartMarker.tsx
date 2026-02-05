@@ -2,17 +2,18 @@
   * Think Space: ChainStartMarker
   * 
   * Visual marker for the first thought of a chain (anchor-based, not adjacency).
-  * Shows chain title (editable) and subtle "NEW CHAIN" indicator.
+  * Shows chain title (editable), link indicator, and inline LinkPanel.
   */
  
  import { useState, useRef, useEffect, useCallback } from 'react';
  import { useChainStore } from '../stores/chainStore';
  import { useFeedStore } from '../stores/feedStore';
- import { Link2, ChevronRight } from 'lucide-react';
+ import { Link2, ChevronRight, Plus } from 'lucide-react';
  import { format, parseISO } from 'date-fns';
  import { cn } from '@/lib/utils';
  import type { ThoughtChain } from '../types/chain';
  import type { ThoughtObject } from '../types';
+ import { LinkPanel } from './LinkPanel';
  
  // PB Blue
  const PB_BLUE = '#489FE3';
@@ -24,9 +25,10 @@
  
  export function ChainStartMarker({ chain, anchorThought }: ChainStartMarkerProps) {
    const { updateChainLabel } = useChainStore();
-   const { viewChain, scope, focusedChainId } = useFeedStore();
+   const { viewChain, scope, focusedChainId, chainLinks } = useFeedStore();
    const [isEditing, setIsEditing] = useState(false);
    const [titleDraft, setTitleDraft] = useState('');
+   const [showLinkPanel, setShowLinkPanel] = useState(false);
    const inputRef = useRef<HTMLInputElement>(null);
  
    // Default title: timestamp of anchor thought
@@ -38,7 +40,6 @@
    const hasCustomTitle = !!chain.display_label;
  
    // Check if this chain has links (show || indicator)
-   const { chainLinks } = useFeedStore();
    const hasLinks = chainLinks.some(
      (l) => l.from_chain_id === chain.id || l.to_chain_id === chain.id
    );
@@ -92,9 +93,15 @@
      viewMerged(chain.id);
    }, [chain.id]);
  
+   // Toggle link panel
+   const handleToggleLinkPanel = useCallback((e: React.MouseEvent) => {
+     e.stopPropagation();
+     setShowLinkPanel(prev => !prev);
+   }, []);
+ 
    return (
-     <div className="chain-start-marker py-4">
-       <div className="flex items-center gap-3">
+     <div className="chain-start-marker">
+       <div className="flex items-center gap-3 py-4">
          {/* Broken line + NEW CHAIN label */}
          <div 
            className="flex-1 h-px"
@@ -146,13 +153,32 @@
            {hasLinks && (
              <button
                onClick={handleViewMerged}
-               className="flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-opacity px-1.5 py-1 rounded"
+               className="flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded"
                style={{ color: PB_BLUE }}
                title="View merged chains"
              >
                <span className="text-sm font-bold">||</span>
              </button>
            )}
+ 
+           {/* Add link button */}
+           <button
+             onClick={handleToggleLinkPanel}
+             className={cn(
+               "flex items-center gap-1 px-1.5 py-0.5 rounded transition-all",
+               showLinkPanel 
+                 ? "opacity-100" 
+                 : "opacity-40 hover:opacity-80"
+             )}
+             style={{ 
+               color: PB_BLUE,
+               background: showLinkPanel ? `${PB_BLUE}15` : 'transparent',
+             }}
+             title="Link to another chain"
+           >
+             <Link2 className="w-3 h-3" />
+             {!hasLinks && <Plus className="w-2.5 h-2.5 -ml-0.5" />}
+           </button>
  
            {/* Focus chain indicator */}
            {scope === 'global' && (
@@ -173,6 +199,14 @@
            }}
          />
        </div>
+ 
+       {/* Link Panel (inline, below marker) */}
+       {showLinkPanel && (
+         <LinkPanel 
+           chainId={chain.id} 
+           onClose={() => setShowLinkPanel(false)} 
+         />
+       )}
      </div>
    );
  }
