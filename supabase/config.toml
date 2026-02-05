@@ -1,1 +1,7 @@
 project_id = "opjltuyirkbbpwgkavjq"
+ 
+ [functions.embed-thought]
+ verify_jwt = false
+ 
+ [functions.search-thoughts]
+ verify_jwt = false

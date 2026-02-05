@@ -21,7 +21,7 @@ const PB_BLUE = '#489FE3';
 
 interface ThinkingSurfaceProps {
   thoughtId: string;
-  onAnchor?: () => void;
+   onAnchor?: (thoughtId?: string) => void;
   autoFocus?: boolean;
 }
 
@@ -100,41 +100,41 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
       if (wasAnchored) {
         // Restore to anchored state without changing timestamps or day_key
         cancelEdit(thoughtId, originalContentRef.current);
-        onAnchor?.();
+         onAnchor?.(thoughtId);
       } else {
         // New thought with no content - delete it
         if (!currentContent) {
           deleteThought(thoughtId);
-          onAnchor?.();
-        } else {
-          // New thought with original content - anchor it
-          anchorThought(thoughtId);
-          onAnchor?.();
-        }
-      }
-      return;
-    }
-    
-    // Changes were made - use copy-on-edit for previously anchored thoughts
-    if (currentContent) {
-      if (wasAnchored) {
-        // Copy-on-edit: create new thought with reference to original
-        // First restore original to anchored state
-        cancelEdit(thoughtId, originalContentRef.current);
-        // Then create the edited version
-        editThought(thoughtId, currentContent, user?.id);
-        onAnchor?.();
-      } else {
-        // New thought - just anchor it
-        anchorThought(thoughtId);
-        onAnchor?.();
-      }
-    } else {
-      // Empty content - delete the active thought to show "tap to think"
-      deleteThought(thoughtId);
-      onAnchor?.();
-    }
-  }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, onAnchor]);
+           onAnchor?.(thoughtId);
+         } else {
+           // New thought with original content - anchor it
+           anchorThought(thoughtId);
+           onAnchor?.(thoughtId);
+         }
+       }
+       return;
+     }
+     
+     // Changes were made - use copy-on-edit for previously anchored thoughts
+     if (currentContent) {
+       if (wasAnchored) {
+         // Copy-on-edit: create new thought with reference to original
+         // First restore original to anchored state
+         cancelEdit(thoughtId, originalContentRef.current);
+         // Then create the edited version
+         const newThoughtId = editThought(thoughtId, currentContent, user?.id);
+         onAnchor?.(newThoughtId ?? thoughtId);
+       } else {
+         // New thought - just anchor it
+         anchorThought(thoughtId);
+         onAnchor?.(thoughtId);
+       }
+     } else {
+       // Empty content - delete the active thought to show "tap to think"
+       deleteThought(thoughtId);
+       onAnchor?.(thoughtId);
+     }
+   }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, editThought, onAnchor, user?.id]);
 
   // Cmd+Enter (or Ctrl+Enter) to anchor immediately
   // On mobile: double Enter with empty content = dismiss
@@ -143,7 +143,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
       e.preventDefault();
       if (thought?.content.trim()) {
         anchorThought(thoughtId);
-        onAnchor?.();
+         onAnchor?.(thoughtId);
         textareaRef.current?.blur();
       }
       return;
@@ -158,7 +158,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
         e.preventDefault();
         textareaRef.current?.blur();
         deleteThought(thoughtId);
-        onAnchor?.();
+         onAnchor?.(thoughtId);
       }
     }
   }, [thought, thoughtId, anchorThought, deleteThought, onAnchor, isMobile, enterCount]);

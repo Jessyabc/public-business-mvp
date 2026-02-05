@@ -1,14 +1,24 @@
  # Think Space: Chain of Thoughts - Implementation Tracker
  
 **Last Updated**: 2026-02-05 (Run 3)
- **Last Updated**: 2026-02-05 (Run 6)
+ **Last Updated**: 2026-02-05 (Run 7)
  **Status**: In Progress
  
  ---
  
  ## Summary of Latest Changes
  
+ ### Run 7 (2026-02-05) - Latest
+ - [x] **Phase 9**: Semantic Search
+ - [x] Created `embed-thought` edge function (OpenAI text-embedding-3-small)
+ - [x] Created `search-thoughts` edge function (vector similarity search)
+ - [x] Created `useThoughtSearch.ts` hook with search + embed functions
+ - [x] Created `SearchInline.tsx` inline search component
+ - [x] Integrated auto-embedding on thought anchor
+ - [x] Added search bar to WorkspaceCanvas
+ 
  ### Run 6 (2026-02-05) - Latest
+ -> Previous run notes
  - [x] **Phase 10**: Chain Linking UI
  - [x] Created `hooks/useLinkSync.ts` for chain_links persistence + realtime
  - [x] Created `components/LinkPanel.tsx` inline panel for linking chains
@@ -66,7 +76,7 @@
 | 6 | Continue chain prompt | ✅ Done | ⏳ |
 | 7 | Copy-on-edit | ✅ Done | ⏳ |
 | 8 | Realtime sync | ✅ Done | ⏳ |
- | 9 | Semantic search | ⏳ Pending | ❌ |
+ | 9 | Semantic search | ✅ Done | ⏳ |
  | 10 | Chain linking UI | ✅ Done | ⏳ |
  
  ---
@@ -138,10 +148,14 @@
 - [ ] Subscribe to chain_links changes (V2 - when LinkPanel is implemented)
  
  ### Phase 9: Semantic Search
- - [ ] Create `supabase/functions/embed-thought/index.ts`
- - [ ] Create `hooks/useThoughtSearch.ts`
- - [ ] Create `components/SearchInline.tsx`
- - [ ] Configure OPENAI_API_KEY secret
+ - [x] Create `supabase/functions/embed-thought/index.ts`
+ - [x] Create `supabase/functions/search-thoughts/index.ts`
+ - [x] Create `hooks/useThoughtSearch.ts`
+ - [x] Create `components/SearchInline.tsx`
+ - [x] Configure OPENAI_API_KEY secret
+ - [x] Auto-embed on thought anchor
+ - [x] Debounced search with 300ms delay
+ - [x] Results show similarity % and navigate to chain
  
  ### Phase 10: Chain Linking UI
  - [x] Create `components/LinkPanel.tsx`
@@ -182,9 +196,13 @@
  | components/LinkPanel.tsx | Chain linking panel | ⏳ |
  | hooks/useRealtimeSync.ts | Realtime subscriptions | ⏳ |
  | hooks/useThoughtSearch.ts | Semantic search hook | ⏳ |
+ -> | hooks/useThoughtSearch.ts | Semantic search hook | ✅ |
  | hooks/useLinkSync.ts | Chain links persistence | ✅ |
  | components/LinkPanel.tsx | Chain linking panel | ✅ |
  | supabase/functions/embed-thought/index.ts | Embedding generation | ⏳ |
+ -> | supabase/functions/embed-thought/index.ts | Embedding generation | ✅ |
+ | supabase/functions/search-thoughts/index.ts | Vector search | ✅ |
+ | components/SearchInline.tsx | Inline search UI | ✅ |
  
  ## Files Deleted/Deprecated
  
@@ -323,4 +341,30 @@
 
 **Next Steps:**
 - Phase 9: Semantic search (embed-thought edge function + SearchInline UI)
+ 
+ ### Run 7 (2026-02-05)
+ **Phase 9 Completed: Semantic Search**
+ - Created `embed-thought` edge function:
+   - Calls OpenAI text-embedding-3-small API
+   - Stores embedding as pgvector string in workspace_thoughts
+   - Skips thoughts with content < 3 chars
+ - Created `search-thoughts` edge function:
+   - Embeds query via OpenAI
+   - Calls search_thoughts RPC for vector similarity
+   - Returns top N results with similarity scores
+ - Created `useThoughtSearch` hook:
+   - `search(query)` - semantic search
+   - `embedThought(id)` - generate embedding for thought
+ - Created `SearchInline` component:
+   - Inline search bar in workspace header
+   - 300ms debounced search
+   - Results show content preview, timestamp, similarity %
+   - Click result navigates to that chain
+ - Integrated auto-embedding on thought anchor
+ 
+ **All V2 Phases Complete!**
+ - Phase 7: Copy-on-edit ✅
+ - Phase 8: Realtime sync ✅
+ - Phase 9: Semantic search ✅
+ - Phase 10: Chain linking ✅
 - Phase 10: Chain linking UI (LinkPanel)
