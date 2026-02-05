@@ -1,14 +1,11 @@
 /**
  * Pillar #1: Individual Workspace - Type Definitions
- * 
- * These are THOUGHT objects, not POST objects.
- * No social metrics, no forced structure, no publishing.
- * 
- * Daily Threading Model:
- * - Each day you write creates a new "day thread"
- * - Thoughts are grouped by day_key (YYYY-MM-DD)
- * - New entries prepend to the day (add from top)
- * - Days are sorted newest first, entries within sorted by created_at desc
+ *
+ * Chain of Thoughts Model:
+ * - Chains break ONLY when user explicitly breaks them
+ * - Global feed shows ALL thoughts in strict timestamp order (newest first)
+ * - day_key kept for backward compat but NOT used for grouping
+ * - Copy-on-edit: edits create new thoughts with edited_from_id reference
  */
 
 export type ThoughtState = 'active' | 'anchored';
@@ -38,22 +35,25 @@ export interface ThoughtObject {
   display_label?: string | null;
   /** Chain ID this thought belongs to (Pull-the-Thread system) */
   chain_id?: ChainId | null;
+   /** Reference to original thought when this is an edit (copy-on-edit) */
+   edited_from_id?: string | null;
 }
 
-/** A day's worth of thoughts, grouped together */
-export interface DayThread {
-  day_key: string; // YYYY-MM-DD
-  display_label: string | null; // User's custom title, or null to show date
-  thoughts: ThoughtObject[]; // Ordered newest first within the day
-  earliest_at: string; // First thought of the day
-  latest_at: string; // Most recent thought of the day
-}
+ /** Feed scope for projection views */
+ export type FeedScope = 'global' | 'chain' | 'merged';
+ 
+ /** Chain link for merge relationships */
+ export interface ChainLink {
+   id: string;
+   user_id: string;
+   from_chain_id: string;
+   to_chain_id: string;
+   created_at: string;
+ }
 
 export interface WorkspaceState {
   thoughts: ThoughtObject[];
   activeThoughtId: string | null;
-  /** Which day thread is currently being added to (null = new day) */
-  activeDayKey: string | null;
   isLoading: boolean;
   isSyncing: boolean;
   lastSyncedAt: string | null;
@@ -61,17 +61,14 @@ export interface WorkspaceState {
 
 export interface WorkspaceActions {
   // Core thought operations - userId is optional, passed from auth context
-  // chainId is optional - if not provided, uses active chain or creates one
   createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => string;
   updateThought: (id: string, content: string) => void;
   anchorThought: (id: string) => void;
   reactivateThought: (id: string) => void;
   cancelEdit: (id: string, originalContent: string) => void;
   deleteThought: (id: string) => void;
-  
-  // Day thread operations
-  setActiveDayKey: (dayKey: string | null) => void;
-  updateDayLabel: (dayKey: string, label: string | null) => void;
+   /** Copy-on-edit: creates new thought referencing original */
+   editThought: (id: string, newContent: string, userId?: string) => string | null;
   
   // State management
   setActiveThought: (id: string | null) => void;
@@ -84,8 +81,10 @@ export interface WorkspaceActions {
   // Selectors
   getActiveThought: () => ThoughtObject | null;
   getAnchoredThoughts: () => ThoughtObject[];
-  getDayThreads: () => DayThread[];
-  getDayThread: (dayKey: string) => DayThread | null;
+   /** Get ALL anchored thoughts in strict timestamp order (newest first) */
+   getGlobalFeed: () => ThoughtObject[];
+   /** Get anchor thought for a chain (first thought in that chain) */
+   getChainAnchor: (chainId: ChainId) => ThoughtObject | null;
 }
 
 export type WorkspaceStore = WorkspaceState & WorkspaceActions;

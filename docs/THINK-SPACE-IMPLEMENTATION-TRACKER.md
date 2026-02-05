@@ -8,8 +8,13 @@
  ## Summary of Latest Changes
  
  ### Current Run (2026-02-05)
- - [ ] Starting implementation
- - [ ] Database migrations pending
+ - [x] Database migrations completed (chain_links, edited_from_id, embedding, search_thoughts RPC)
+ - [x] Phase 2: Fixed core bug - removed day_key grouping, added getGlobalFeed()
+ - [x] Phase 3: Created feedStore for scope/projection system
+ - [x] Phase 4: Created ThinkFeed, ThoughtCard, ChainStartMarker, FeedScopeIndicator
+ - [x] Deleted deprecated: DayThread.tsx, DaysList.tsx, ThoughtStack.tsx
+ - [x] Updated WorkspaceCanvas with OpenCircle at top
+ - [ ] Pending: Horizontal break gesture, realtime sync, semantic search, copy-on-edit integration
  
  ---
  
@@ -17,10 +22,10 @@
  
  | Phase | Description | Status | Verified |
  |-------|-------------|--------|----------|
- | 1 | Database migrations (chain_links, edited_from_id, embedding) | 🔄 In Progress | ❌ |
- | 2 | Fix core bug - remove day grouping | ⏳ Pending | ❌ |
- | 3 | Feed scope/projection system (feedStore) | ⏳ Pending | ❌ |
- | 4 | ThinkFeed component | ⏳ Pending | ❌ |
+ | 1 | Database migrations (chain_links, edited_from_id, embedding) | ✅ Done | ✅ |
+ | 2 | Fix core bug - remove day grouping | ✅ Done | ⏳ |
+ | 3 | Feed scope/projection system (feedStore) | ✅ Done | ⏳ |
+ | 4 | ThinkFeed component | ✅ Done | ⏳ |
  | 5 | Break gesture correction (horizontal on top) | ⏳ Pending | ❌ |
  | 6 | Continue chain prompt | ⏳ Pending | ❌ |
  | 7 | Copy-on-edit | ⏳ Pending | ❌ |
@@ -33,39 +38,37 @@
  ## Detailed Task Checklist
  
  ### Phase 1: Database Migrations
- - [ ] Create `chain_links` table
-   - [ ] id, user_id, from_chain_id, to_chain_id, created_at
-   - [ ] Unique constraint (from_chain_id, to_chain_id)
-   - [ ] Check constraint from_chain_id <> to_chain_id
-   - [ ] RLS policies
- - [ ] Add `edited_from_id` column to workspace_thoughts
- - [ ] Add `embedding` vector(1536) column to workspace_thoughts
- - [ ] Create IVFFlat index on embedding
- - [ ] Create `search_thoughts` RPC function
+ - [x] Create `chain_links` table with RLS
+ - [x] Add `edited_from_id` column to workspace_thoughts
+ - [x] Add `embedding` vector(1536) column to workspace_thoughts
+ - [x] Create IVFFlat index on embedding
+ - [x] Create `search_thoughts` RPC function
  
  ### Phase 2: Fix Core Bug (Remove Day Grouping)
- - [ ] Remove `getDayThreads()` from useWorkspaceStore.ts
- - [ ] Remove `getDayThread()` from useWorkspaceStore.ts
- - [ ] Remove `activeDayKey` state and `setActiveDayKey()` action
- - [ ] Remove `updateDayLabel()` action
- - [ ] Add `getGlobalFeed()` selector
- - [ ] Update types.ts (remove DayThread usage, add edited_from_id)
+ - [x] Remove `getDayThreads()` from useWorkspaceStore.ts
+ - [x] Remove `getDayThread()` from useWorkspaceStore.ts
+ - [x] Remove `activeDayKey` state and `setActiveDayKey()` action
+ - [x] Remove `updateDayLabel()` action
+ - [x] Add `getGlobalFeed()` selector
+ - [x] Add `getChainAnchor()` selector
+ - [x] Add `editThought()` action for copy-on-edit
+ - [x] Update types.ts (add FeedScope, ChainLink, edited_from_id)
  
  ### Phase 3: Feed Scope System
- - [ ] Create `stores/feedStore.ts`
- - [ ] Implement FeedScope type ('global' | 'chain' | 'merged')
- - [ ] Implement viewGlobal(), viewChain(), viewMerged() actions
- - [ ] Implement getVisibleThoughts() selector
- - [ ] Implement scroll anchor preservation
+ - [x] Create `stores/feedStore.ts`
+ - [x] Implement FeedScope type ('global' | 'chain' | 'merged')
+ - [x] Implement viewGlobal(), viewChain(), viewMerged() actions
+ - [x] Implement getVisibleThoughts() selector
+ - [x] Implement getMergeSet() for 1-hop chain links
  
  ### Phase 4: ThinkFeed Component
- - [ ] Create `components/ThinkFeed.tsx`
- - [ ] Create `components/ChainBreakMarker.tsx` (anchor-based)
- - [ ] Create `components/LinkIndicator.tsx`
- - [ ] Create `components/ThoughtCard.tsx` (repurpose AnchoredThought)
- - [ ] Implement vertical continuity line
- - [ ] Implement scope transitions (fade/reflow)
- - [ ] Delete/deprecate DayThread.tsx, ThoughtStack.tsx, DaysList.tsx
+ - [x] Create `components/ThinkFeed.tsx`
+ - [x] Create `components/ChainStartMarker.tsx` (anchor-based)
+ - [x] Create `components/FeedScopeIndicator.tsx`
+ - [x] Create `components/ThoughtCard.tsx`
+ - [x] Implement vertical continuity line
+ - [x] Implement scope transitions (AnimatePresence)
+ - [x] Delete DayThread.tsx, ThoughtStack.tsx, DaysList.tsx
  
  ### Phase 5: Break Gesture Correction
  - [ ] Modify useChainGestures.ts for horizontal pull
@@ -172,6 +175,19 @@
  ## Notes
  
  ### Run 1 (2026-02-05)
- - Starting implementation
- - Reading existing codebase structure
- - Planning database migrations
+ **Completed:**
+ - Database migrations: chain_links table, edited_from_id/embedding columns, search_thoughts RPC
+ - Removed day_key grouping (core bug fix) - chains now break ONLY explicitly
+ - Created feedStore for scope/projection system (global/chain/merged views)
+ - Created new components: ThinkFeed, ThoughtCard, ChainStartMarker, FeedScopeIndicator
+ - Deleted deprecated: DayThread.tsx, DaysList.tsx, ThoughtStack.tsx
+ - Updated WorkspaceCanvas with OpenCircle at TOP position
+ - Added editThought() for copy-on-edit pattern
+ 
+ **Next Steps:**
+ - Phase 5: Modify useChainGestures for horizontal (left/right) pull instead of vertical
+ - Phase 6: Add ContinuePrompt for 30-min inactivity hint
+ - Phase 7: Integrate editThought in ThinkingSurface
+ - Phase 8: Add useRealtimeSync for live updates
+ - Phase 9: Implement embed-thought edge function + SearchInline UI
+ - Phase 10: Create LinkPanel for chain linking
