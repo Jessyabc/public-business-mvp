@@ -38,7 +38,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       lastSyncedAt: null,
 
       // Create a new thought, optionally for a specific day
-      createThought: (dayKey?: string, userId?: string, chainId?: ChainId) => {
+      createThought: (dayKey?: string, userId?: string, chainId?: ChainId, focusedChainId?: ChainId | null) => {
         const id = generateId();
         const now = new Date().toISOString();
          // day_key kept for backward compat only
@@ -50,17 +50,22 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           : targetDayKey;
         
         // Get chain from chain store if not provided
-        // Priority: 1) provided chainId, 2) pendingChainId (from break gesture), 3) activeChainId
+        // Priority: 1) provided chainId, 2) focusedChainId (from chain view), 3) pendingChainId (from break gesture), 4) activeChainId
         const chainStore = useChainStore.getState();
         const pendingChainId = chainStore.pendingChainId;
         const activeChainId = chainStore.activeChainId;
         
-        // Use pending chain if it exists (from break gesture), otherwise use active or provided
-        let finalChainId: ChainId | null = chainId || pendingChainId || activeChainId;
+        // Use focused chain from view if provided, then pending chain (from break gesture), otherwise active
+        let finalChainId: ChainId | null = chainId || focusedChainId || pendingChainId || activeChainId;
         
         // If no chain and user exists, create one
         if (!finalChainId && userId) {
           finalChainId = chainStore.createChain(userId);
+        }
+        
+        // If using focusedChainId, set it as active chain immediately
+        if (focusedChainId && finalChainId === focusedChainId) {
+          chainStore.setActiveChain(focusedChainId);
         }
         
         const newThought: ThoughtObject = {
