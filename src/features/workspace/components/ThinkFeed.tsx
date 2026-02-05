@@ -18,6 +18,7 @@
  import { ThoughtCard } from './ThoughtCard';
  import { ChainStartMarker } from './ChainStartMarker';
  import { FeedScopeIndicator } from './FeedScopeIndicator';
+import { SearchInline } from './SearchInline';
  import { cn } from '@/lib/utils';
  
  // PB Blue for continuity line
@@ -78,8 +79,11 @@
  
    return (
      <div ref={feedRef} className="think-feed w-full max-w-2xl mx-auto">
-       {/* Scope indicator */}
-       <FeedScopeIndicator />
+       {/* Feed header with scope indicator and search */}
+       <div className="flex items-start justify-between mb-4 gap-4">
+         <FeedScopeIndicator />
+         <SearchInline />
+       </div>
  
        {/* Feed items with AnimatePresence for smooth transitions */}
        <AnimatePresence mode="popLayout">
