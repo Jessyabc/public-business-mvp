@@ -91,27 +91,49 @@
    };
  }
  
- /**
-  * Hook to trigger embedding generation after anchoring a thought
-  */
- export function useEmbedThought() {
-   const embedThought = useCallback(async (thoughtId: string): Promise<boolean> => {
-     try {
-       const { data, error } = await supabase.functions.invoke('embed-thought', {
-         body: { thoughtId },
-       });
- 
-       if (error) {
-         console.error('Embed error:', error);
-         return false;
-       }
- 
-       return data?.success ?? false;
-     } catch (err) {
-       console.error('Embed error:', err);
-       return false;
-     }
-   }, []);
- 
-   return { embedThought };
- }
+/**
+ * Hook to trigger embedding generation after anchoring a thought.
+ * Includes retry logic to handle sync delays.
+ */
+export function useEmbedThought() {
+  const embedThought = useCallback(async (thoughtId: string, retries = 3): Promise<boolean> => {
+    // Wait a short delay to allow sync to complete
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const { data, error } = await supabase.functions.invoke('embed-thought', {
+          body: { thoughtId },
+        });
+
+        if (error) {
+          console.error(`Embed attempt ${attempt} error:`, error);
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
+            continue;
+          }
+          return false;
+        }
+
+        // If pending (thought not yet synced), retry
+        if (data?.pending && attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
+          continue;
+        }
+
+        return data?.success ?? false;
+      } catch (err) {
+        console.error(`Embed attempt ${attempt} error:`, err);
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
+          continue;
+        }
+        return false;
+      }
+    }
+    
+    return false;
+  }, []);
+
+  return { embedThought };
+}
