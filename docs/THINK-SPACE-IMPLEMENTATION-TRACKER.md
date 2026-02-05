@@ -185,9 +185,26 @@
  - Added editThought() for copy-on-edit pattern
  
  **Next Steps:**
- - Phase 5: Modify useChainGestures for horizontal (left/right) pull instead of vertical
- - Phase 6: Add ContinuePrompt for 30-min inactivity hint
  - Phase 7: Integrate editThought in ThinkingSurface
  - Phase 8: Add useRealtimeSync for live updates
  - Phase 9: Implement embed-thought edge function + SearchInline UI
- - Phase 10: Create LinkPanel for chain linking
+- Phase 10: Create LinkPanel for chain linking
+
+### Run 2 (2026-02-05)
+**Completed:**
+- Phase 5: Horizontal pull gesture (left/right, 60px threshold)
+- Phase 6: ContinuePrompt component (30min inactivity hint)
+- OpenCircle positioned between input and feed
+- Updated types/chain.ts: PullGestureState now uses startX/currentX and direction
+
+**Key Changes:**
+- `useChainGestures.ts`: Horizontal delta tracking instead of vertical
+- `OpenCircle.tsx`: Horizontal stretch indicators, smaller sm variant
+- `ContinuePrompt.tsx`: Shows "Continue this chain?" after 30min
+- `WorkspaceCanvas.tsx`: Reordered layout (input → OpenCircle → feed)
+
+**Next Steps:**
+- Phase 7: Integrate copy-on-edit in ThinkingSurface
+- Phase 8: Add useRealtimeSync for live updates
+- Phase 9: Implement embed-thought edge function + SearchInline UI
+- Phase 10: Create LinkPanel for chain linking

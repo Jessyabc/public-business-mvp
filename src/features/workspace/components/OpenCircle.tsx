@@ -1,16 +1,16 @@
 /**
- * Think Space: Open Circle - Continuation Point
+ * Think Space: Open Circle - Break/Continue Control
  * 
- * The gesture-aware continuation indicator at the end of a chain.
+ * Positioned between input area and feed.
  * - Tap: Continue chain (append thought)
- * - Pull down: Break chain (start new)
+ * - Pull LEFT or RIGHT: Break chain (start new)
  * - Long-press / Right-click: Merge (V2)
  * 
- * Visual: Subtle pulse, PB Blue glow on interaction
+ * Visual: Horizontal stretch on drag, PB Blue glow on interaction
  */
 
-import { useCallback, useRef, useEffect } from 'react';
-import { motion, useSpring, useTransform } from 'framer-motion';
+import { useCallback, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChainGestures } from '../hooks/useChainGestures';
 import { cn } from '@/lib/utils';
@@ -37,24 +37,17 @@ export function OpenCircle({
   const circleRef = useRef<HTMLDivElement>(null);
   
   // Size based on device
-  const baseSize = size === 'lg' ? 56 : size === 'sm' ? 24 : (isMobile ? 48 : 32);
+  const baseSize = size === 'lg' ? 56 : size === 'sm' ? 22 : (isMobile ? 36 : 26);
   
   // Gesture handling
-  const { gestureState, visualOffset, wasGestureConsumed, handlers } = useChainGestures({
+  const { gestureState, visualOffset, direction, wasGestureConsumed, handlers } = useChainGestures({
     onBreak,
     onMerge,
     enabled: true,
   });
   
-  // Animated spring for smooth visual feedback
-  const springOffset = useSpring(0, { stiffness: 300, damping: 30 });
-  
-  useEffect(() => {
-    springOffset.set(visualOffset);
-  }, [visualOffset, springOffset]);
-  
-  // Transform for thread stretch effect
-  const threadStretch = useTransform(springOffset, [0, 80], [0, 40]);
+  // Calculate horizontal offset based on direction
+  const xOffset = direction === 'left' ? -visualOffset : direction === 'right' ? visualOffset : 0;
   
   // Handle tap/click to continue - only if no drag occurred
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -71,28 +64,49 @@ export function OpenCircle({
   // Determine interaction state
   const isPulling = gestureState.isActive && gestureState.resistance > 0.1;
   const isNearSnap = gestureState.resistance > 0.7;
+  const isLeftPull = direction === 'left';
+  const isRightPull = direction === 'right';
   
   return (
     <div 
       className={cn(
-        "open-circle-container relative flex flex-col items-center",
+        "open-circle-container relative flex items-center justify-center",
         className
       )}
     >
-      {/* Thread line that stretches during pull */}
-      <motion.div
-        className="thread-stretch w-[2px] origin-top"
-        style={{
-          height: threadStretch,
-          background: `linear-gradient(to bottom, rgba(72, 159, 227, 0.15), rgba(72, 159, 227, 0.3))`,
-        }}
-      />
+      {/* Left stretch indicator */}
+      {isPulling && isLeftPull && (
+        <motion.div
+          className="absolute h-[2px] origin-right"
+          style={{
+            right: '50%',
+            width: visualOffset,
+            background: `linear-gradient(to left, ${PB_BLUE}40, ${PB_BLUE}10)`,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        />
+      )}
+      
+      {/* Right stretch indicator */}
+      {isPulling && isRightPull && (
+        <motion.div
+          className="absolute h-[2px] origin-left"
+          style={{
+            left: '50%',
+            width: visualOffset,
+            background: `linear-gradient(to right, ${PB_BLUE}40, ${PB_BLUE}10)`,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        />
+      )}
       
       {/* The circle itself */}
       <motion.div
         ref={circleRef}
         className={cn(
-          "open-circle relative cursor-grab active:cursor-grabbing",
+          "open-circle relative cursor-grab active:cursor-grabbing z-10",
           "rounded-full touch-none select-none",
           "transition-colors duration-200"
         )}
@@ -110,11 +124,11 @@ export function OpenCircle({
               : 'none',
         }}
         animate={{
-          y: visualOffset,
+          x: xOffset,
           scale: isNearSnap ? 1.15 : isPulling ? 1.05 : 1,
         }}
         transition={{
-          y: { type: 'spring', stiffness: 400, damping: 30 },
+          x: { type: 'spring', stiffness: 400, damping: 30 },
           scale: { duration: 0.15 },
         }}
         whileHover={{
@@ -146,48 +160,49 @@ export function OpenCircle({
         
         {/* Plus indicator (subtle) */}
         <div 
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-150"
           style={{
-            opacity: isPulling ? 0 : 0.4,
+            opacity: isPulling ? 0 : 0.5,
           }}
         >
           <div 
-            className="w-[40%] h-[2px] rounded-full"
+            className="w-[35%] h-[1.5px] rounded-full"
             style={{ background: PB_BLUE }}
           />
           <div 
-            className="absolute w-[2px] h-[40%] rounded-full"
+            className="absolute w-[1.5px] h-[35%] rounded-full"
             style={{ background: PB_BLUE }}
           />
         </div>
         
-        {/* Break indicator (appears during pull) */}
+        {/* Break indicator (horizontal line during pull) */}
         {isPulling && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            initial={{ opacity: 0, rotate: 0 }}
-            animate={{ 
-              opacity: gestureState.resistance, 
-              rotate: gestureState.resistance * 45,
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: gestureState.resistance }}
           >
             <div 
-              className="w-[50%] h-[2px] rounded-full"
+              className="w-[35%] h-[1.5px] rounded-full"
               style={{ background: PB_BLUE }}
             />
           </motion.div>
         )}
       </motion.div>
       
-      {/* Visual hint on hover */}
-      {!gestureState.isActive && (
+      {/* Snap hint (appears near threshold) */}
+      {isNearSnap && (
         <motion.span
-          className="absolute -bottom-6 text-[10px] whitespace-nowrap pointer-events-none"
-          style={{ color: `${PB_BLUE}80` }}
+          className="absolute text-[9px] whitespace-nowrap pointer-events-none font-medium"
+          style={{ 
+            color: PB_BLUE,
+            left: isLeftPull ? `calc(50% - ${visualOffset + 30}px)` : undefined,
+            right: isRightPull ? `calc(50% - ${visualOffset + 30}px)` : undefined,
+          }}
           initial={{ opacity: 0 }}
-          whileHover={{ opacity: 0.6 }}
+          animate={{ opacity: 0.9 }}
         >
-          Pull ↓ to break
+          Break
         </motion.span>
       )}
     </div>

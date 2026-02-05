@@ -16,6 +16,7 @@ import { ThinkingSurface } from './ThinkingSurface';
  import { ThinkFeed } from './ThinkFeed';
  import { OpenCircle } from './OpenCircle';
 import { EmptyWorkspace } from './EmptyWorkspace';
+import { ContinuePrompt } from './ContinuePrompt';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
@@ -194,20 +195,14 @@ export function WorkspaceCanvas() {
               autoFocus={userInitiated}
             />
           ) : hasThoughts ? (
-             /* Breathing space with break control */
-             <div className="flex flex-col items-center gap-4">
-               {/* Break control (+ button) at TOP */}
-               <div className="flex justify-center">
-                 <OpenCircle
-                   onContinue={handleStartThinking}
-                   onBreak={handleBreakChain}
-                   size="md"
-                 />
-               </div>
+             /* Input area with break control below */
+             <div className="flex flex-col items-center gap-2">
+               {/* Continue prompt (shows after 30min inactivity) */}
+               <ContinuePrompt className="mb-1" />
                
-               {/* Tap to think hint */}
+               {/* Tap to think hint box */}
                <div
-                 className="group min-h-[60px] w-full rounded-2xl transition-all duration-300 ease-out flex items-center justify-center cursor-text"
+                 className="group min-h-[56px] w-full rounded-2xl transition-all duration-300 ease-out flex items-center justify-center cursor-text"
                  style={{
                    background: '#EAE5E0',
                    boxShadow: `
@@ -230,11 +225,20 @@ export function WorkspaceCanvas() {
                  }}
               >
                  <span 
-                   className="text-sm transition-opacity duration-300 opacity-30 group-hover:opacity-50"
+                   className="text-sm transition-opacity duration-300 opacity-25 group-hover:opacity-45"
                    style={{ color: '#A09890' }}
                  >
                    Tap to think
                  </span>
+               </div>
+               
+               {/* Break control (+ button) BETWEEN input and feed */}
+               <div className="flex justify-center py-1">
+                 <OpenCircle
+                   onContinue={handleStartThinking}
+                   onBreak={handleBreakChain}
+                   size="sm"
+                 />
                </div>
             </div>
           ) : (
@@ -244,7 +248,7 @@ export function WorkspaceCanvas() {
 
          {/* ThinkFeed - continuous feed of all thoughts */}
         {hasAnchoredThoughts && (
-          <section>
+          <section className="-mt-2">
              <ThinkFeed />
           </section>
         )}

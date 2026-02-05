@@ -60,11 +60,12 @@ export type ChainViewMode = 'raw' | 'lens' | 'all';
  */
 export interface PullGestureState {
   isActive: boolean;
-  startY: number;
-  currentY: number;
+  startX: number;
+  currentX: number;
   resistance: number; // 0-1 normalized
   didSnap: boolean;
   didHaptic: boolean;
+  direction: 'left' | 'right' | null;
 }
 
 /**
