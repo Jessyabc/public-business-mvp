@@ -12,6 +12,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useChainStore } from '../stores/chainStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
  import { format } from 'date-fns';
 
@@ -29,9 +30,11 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const [isFocused, setIsFocused] = useState(false);
   const [enterCount, setEnterCount] = useState(0);
   const originalContentRef = useRef<string>(''); // Track original content when editing starts
+  const wasAnchoredRef = useRef<boolean>(false); // Track if thought was previously anchored
   const isMobile = useIsMobile();
-   const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit } = useWorkspaceStore();
+  const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit, editThought } = useWorkspaceStore();
   const { activeChainId, pendingChainId, getChainById } = useChainStore();
+  const { user } = useAuth();
   
   const thought = thoughts.find((t) => t.id === thoughtId);
   // Check pending chain first (from break gesture), then active chain
@@ -47,6 +50,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   useEffect(() => {
     if (thought) {
       originalContentRef.current = thought.content;
+      wasAnchoredRef.current = thought.state === 'anchored';
     }
   }, [thoughtId]); // Only update when thoughtId changes (new edit session)
   
@@ -88,7 +92,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
     
     const currentContent = thought.content.trim();
     const originalContent = originalContentRef.current.trim();
-    const wasAnchored = thought.state === 'anchored';
+    const wasAnchored = wasAnchoredRef.current;
     const hasChanges = currentContent !== originalContent;
     
     // If no changes were made, cancel the edit
@@ -111,10 +115,20 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
       return;
     }
     
-    // Changes were made - proceed with normal behavior
+    // Changes were made - use copy-on-edit for previously anchored thoughts
     if (currentContent) {
-      anchorThought(thoughtId);
-      onAnchor?.();
+      if (wasAnchored) {
+        // Copy-on-edit: create new thought with reference to original
+        // First restore original to anchored state
+        cancelEdit(thoughtId, originalContentRef.current);
+        // Then create the edited version
+        editThought(thoughtId, currentContent, user?.id);
+        onAnchor?.();
+      } else {
+        // New thought - just anchor it
+        anchorThought(thoughtId);
+        onAnchor?.();
+      }
     } else {
       // Empty content - delete the active thought to show "tap to think"
       deleteThought(thoughtId);

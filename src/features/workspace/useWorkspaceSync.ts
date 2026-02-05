@@ -82,6 +82,7 @@ export function useWorkspaceSync() {
             display_label: row.display_label || null,
             anchored_at: row.anchored_at || null,
             chain_id: row.chain_id || null,
+            edited_from_id: row.edited_from_id || null,
           };
         });
         
@@ -143,6 +144,7 @@ export function useWorkspaceSync() {
           display_label: t.display_label || null,
           anchored_at: t.anchored_at || null,
           chain_id: t.chain_id || null,
+          edited_from_id: t.edited_from_id || null,
         };
       });
 
