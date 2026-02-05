@@ -6,7 +6,8 @@
  * - Pull LEFT or RIGHT: Break chain (start new)
  * - Long-press / Right-click: Merge (V2)
  * 
- * Visual: Horizontal stretch on drag, PB Blue glow on interaction
+ * Visual: Circle follows cursor horizontally until snap threshold.
+ * Auto-snaps and creates new chain when threshold is passed.
  */
 
 import { useCallback, useRef } from 'react';
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils';
 
 // PB Blue - active cognition color
 const PB_BLUE = '#489FE3';
+const SNAP_THRESHOLD = 60; // Match gesture threshold
 
 interface OpenCircleProps {
   onContinue: () => void;
@@ -36,7 +38,7 @@ export function OpenCircle({
   const isMobile = useIsMobile();
   const circleRef = useRef<HTMLDivElement>(null);
   
-  // Size based on device
+  // Size based on device and variant
   const baseSize = size === 'lg' ? 56 : size === 'sm' ? 22 : (isMobile ? 36 : 26);
   
   // Gesture handling
@@ -46,8 +48,12 @@ export function OpenCircle({
     enabled: true,
   });
   
-  // Calculate horizontal offset based on direction
-  const xOffset = direction === 'left' ? -visualOffset : direction === 'right' ? visualOffset : 0;
+  // Calculate horizontal offset - circle follows cursor within limits
+  const xOffset = direction === 'left' ? -visualOffset : 
+                  direction === 'right' ? visualOffset : 0;
+  
+  // Calculate progress to snap (0-1)
+  const snapProgress = Math.min(visualOffset / SNAP_THRESHOLD, 1);
   
   // Handle tap/click to continue - only if no drag occurred
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -64,6 +70,7 @@ export function OpenCircle({
   // Determine interaction state
   const isPulling = gestureState.isActive && gestureState.resistance > 0.1;
   const isNearSnap = gestureState.resistance > 0.7;
+  const hasSnapped = gestureState.didSnap;
   const isLeftPull = direction === 'left';
   const isRightPull = direction === 'right';
   
@@ -74,31 +81,19 @@ export function OpenCircle({
         className
       )}
     >
-      {/* Left stretch indicator */}
-      {isPulling && isLeftPull && (
+      {/* Trail line - shows path from origin */}
+      {(isPulling || hasSnapped) && (isLeftPull || isRightPull) && (
         <motion.div
-          className="absolute h-[2px] origin-right"
+          className="absolute h-[2px]"
           style={{
-            right: '50%',
+            left: isLeftPull ? `calc(50% - ${visualOffset}px)` : '50%',
             width: visualOffset,
-            background: `linear-gradient(to left, ${PB_BLUE}40, ${PB_BLUE}10)`,
+            background: hasSnapped 
+              ? `linear-gradient(${isLeftPull ? 'to right' : 'to left'}, ${PB_BLUE}60, ${PB_BLUE}30)`
+              : `linear-gradient(${isLeftPull ? 'to right' : 'to left'}, ${PB_BLUE}${Math.round(40 * snapProgress)}%, ${PB_BLUE}10)`,
           }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        />
-      )}
-      
-      {/* Right stretch indicator */}
-      {isPulling && isRightPull && (
-        <motion.div
-          className="absolute h-[2px] origin-left"
-          style={{
-            left: '50%',
-            width: visualOffset,
-            background: `linear-gradient(to right, ${PB_BLUE}40, ${PB_BLUE}10)`,
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: hasSnapped ? 1 : 0.8 }}
         />
       )}
       
@@ -113,11 +108,15 @@ export function OpenCircle({
         style={{
           width: baseSize,
           height: baseSize,
-          background: isPulling
+          background: hasSnapped
+            ? `radial-gradient(circle, ${PB_BLUE}60 0%, ${PB_BLUE}40 70%)`
+            : isPulling
             ? `radial-gradient(circle, ${PB_BLUE}40 0%, ${PB_BLUE}20 70%)`
             : `radial-gradient(circle, ${PB_BLUE}30 0%, ${PB_BLUE}10 70%)`,
-          border: `2px solid ${isPulling ? `${PB_BLUE}60` : `${PB_BLUE}30`}`,
-          boxShadow: isNearSnap
+          border: `2px solid ${hasSnapped ? `${PB_BLUE}80` : isPulling ? `${PB_BLUE}60` : `${PB_BLUE}30`}`,
+          boxShadow: hasSnapped
+            ? `0 0 24px ${PB_BLUE}70, 0 0 48px ${PB_BLUE}40`
+            : isNearSnap
             ? `0 0 20px ${PB_BLUE}50, 0 0 40px ${PB_BLUE}30`
             : isPulling
               ? `0 0 12px ${PB_BLUE}30`
@@ -125,11 +124,11 @@ export function OpenCircle({
         }}
         animate={{
           x: xOffset,
-          scale: isNearSnap ? 1.15 : isPulling ? 1.05 : 1,
+          scale: hasSnapped ? 1.2 : isNearSnap ? 1.15 : isPulling ? 1.05 : 1,
         }}
         transition={{
           x: { type: 'spring', stiffness: 400, damping: 30 },
-          scale: { duration: 0.15 },
+          scale: { duration: hasSnapped ? 0.1 : 0.15 },
         }}
         whileHover={{
           scale: gestureState.isActive ? undefined : 1.1,
@@ -191,7 +190,7 @@ export function OpenCircle({
       </motion.div>
       
       {/* Snap hint (appears near threshold) */}
-      {isNearSnap && (
+      {(isNearSnap || hasSnapped) && (
         <motion.span
           className="absolute text-[9px] whitespace-nowrap pointer-events-none font-medium"
           style={{ 
@@ -200,9 +199,9 @@ export function OpenCircle({
             right: isRightPull ? `calc(50% - ${visualOffset + 30}px)` : undefined,
           }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.9 }}
+          animate={{ opacity: hasSnapped ? 1 : 0.9 }}
         >
-          Break
+          {hasSnapped ? 'New Chain' : 'Break'}
         </motion.span>
       )}
     </div>

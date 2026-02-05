@@ -1,20 +1,31 @@
  # Think Space: Chain of Thoughts - Implementation Tracker
  
- **Last Updated**: 2026-02-05
+**Last Updated**: 2026-02-05 (Run 3)
  **Status**: In Progress
  
  ---
  
  ## Summary of Latest Changes
  
- ### Current Run (2026-02-05)
+### Run 3 (2026-02-05) - Latest
+- [x] **FIXED**: `useChainGestures.ts` wrong param order in `handleGlobalMouseMove`
+- [x] **IMPROVED**: Circle follows cursor directly within 60px limit
+- [x] **IMPROVED**: Auto-snap on threshold pass (no wait for release)
+- [x] **ADDED**: Vertical drift cancellation (40px max)
+- [x] **ADDED**: `didSnapRef` to prevent double-triggering
+- [x] **IMPROVED**: OpenCircle visuals - trail line, snap glow, "New Chain" text
+
+### Run 2 (2026-02-05)
+- [x] Phase 5: Horizontal pull gesture (left/right, 60px threshold)
+- [x] Phase 6: ContinuePrompt component (30min inactivity hint)
+
+### Run 1 (2026-02-05)
  - [x] Database migrations completed (chain_links, edited_from_id, embedding, search_thoughts RPC)
  - [x] Phase 2: Fixed core bug - removed day_key grouping, added getGlobalFeed()
  - [x] Phase 3: Created feedStore for scope/projection system
  - [x] Phase 4: Created ThinkFeed, ThoughtCard, ChainStartMarker, FeedScopeIndicator
  - [x] Deleted deprecated: DayThread.tsx, DaysList.tsx, ThoughtStack.tsx
  - [x] Updated WorkspaceCanvas with OpenCircle at top
- - [ ] Pending: Horizontal break gesture, realtime sync, semantic search, copy-on-edit integration
  
  ---
  
@@ -26,8 +37,8 @@
  | 2 | Fix core bug - remove day grouping | ✅ Done | ⏳ |
  | 3 | Feed scope/projection system (feedStore) | ✅ Done | ⏳ |
  | 4 | ThinkFeed component | ✅ Done | ⏳ |
- | 5 | Break gesture correction (horizontal on top) | ⏳ Pending | ❌ |
- | 6 | Continue chain prompt | ⏳ Pending | ❌ |
+| 5 | Break gesture correction (horizontal on top) | ✅ Done | ✅ |
+| 6 | Continue chain prompt | ✅ Done | ⏳ |
  | 7 | Copy-on-edit | ⏳ Pending | ❌ |
  | 8 | Realtime sync | ⏳ Pending | ❌ |
  | 9 | Semantic search | ⏳ Pending | ❌ |
@@ -71,18 +82,21 @@
  - [x] Delete DayThread.tsx, ThoughtStack.tsx, DaysList.tsx
  
  ### Phase 5: Break Gesture Correction
- - [ ] Modify useChainGestures.ts for horizontal pull
- - [ ] Update OpenCircle.tsx position and visuals
- - [ ] Move break control to TOP near writer input
- - [ ] Update WorkspaceCanvas.tsx layout
+- [x] Modify useChainGestures.ts for horizontal pull (left/right)
+- [x] **FIX**: Corrected param order in handleGlobalMouseMove (was clientY, clientX)
+- [x] Update OpenCircle.tsx position and visuals
+- [x] Move break control between input and feed
+- [x] Auto-snap on threshold pass (no wait for release)
+- [x] Circle follows cursor within 60px limit
+- [x] Vertical drift cancellation (40px max)
  
  ### Phase 6: Continue Chain Prompt
- - [ ] Create `components/ContinuePrompt.tsx`
- - [ ] Implement 30-minute inactivity detection
- - [ ] Non-blocking visual hint near input
+- [x] Create `components/ContinuePrompt.tsx`
+- [x] Implement 30-minute inactivity detection
+- [x] Non-blocking visual hint near input
  
  ### Phase 7: Copy-on-Edit
- - [ ] Add `editThought()` action to useWorkspaceStore.ts
+- [x] Add `editThought()` action to useWorkspaceStore.ts (done in Run 1)
  - [ ] Modify ThinkingSurface.tsx to use editThought
  - [ ] Ensure original thought remains visible
  - [ ] Edited thought appears at top with new timestamp
@@ -152,7 +166,9 @@
  | Test | Description | Passed |
  |------|-------------|--------|
  | Chain continuity | Chains don't break at day boundaries | ❌ |
- | Horizontal break | Pull left/right on + creates new chain | ❌ |
+| Horizontal break | Pull left/right on + creates new chain | ✅ |
+| Auto-snap | Circle snaps when cursor passes threshold | ✅ |
+| Circle follows cursor | Circle moves with cursor up to 60px limit | ✅ |
  | Global feed | All thoughts in timestamp order | ❌ |
  | Scope transitions | Subtle fade/reflow, no navigation | ❌ |
  | Copy-on-edit | Original preserved, new thought at top | ❌ |
@@ -208,3 +224,25 @@
 - Phase 8: Add useRealtimeSync for live updates
 - Phase 9: Implement embed-thought edge function + SearchInline UI
 - Phase 10: Create LinkPanel for chain linking
+
+### Run 3 (2026-02-05)
+**Critical Bug Fixed:**
+- `handleGlobalMouseMove` was passing `(e.clientY, e.clientX)` instead of `(e.clientX, e.clientY)`
+
+**Improvements:**
+- Circle follows cursor directly within 60px limit (no easing resistance)
+- Auto-snap triggers when cursor passes 48px (80% of 60px threshold)
+- Added MAX_VERTICAL_DRIFT (40px) - cancels if user scrolls
+- Added `didSnapRef` to prevent double-snap
+- OpenCircle shows trail line, brighter glow on snap, "New Chain" text
+
+**Behavior Flow:**
+1. User starts drag on + circle
+2. Circle follows cursor horizontally (capped at 60px)
+3. When cursor passes 48px → immediate snap + haptic + chain break
+4. Next thought entry goes to new chain
+
+**Next Steps:**
+- Phase 7: Integrate editThought in ThinkingSurface
+- Phase 8: Add useRealtimeSync for live updates
+- Phase 9-10: Semantic search and chain linking
