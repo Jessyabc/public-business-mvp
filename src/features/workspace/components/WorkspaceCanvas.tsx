@@ -15,7 +15,6 @@ import { useChainSync } from '../useChainSync';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
  import { useLinkSync } from '../hooks/useLinkSync';
  import { useEmbedThought } from '../hooks/useThoughtSearch';
- import { SearchInline } from './SearchInline';
 import { ThinkingSurface } from './ThinkingSurface';
  import { ThinkFeed } from './ThinkFeed';
  import { OpenCircle } from './OpenCircle';
@@ -198,13 +197,6 @@ export function WorkspaceCanvas() {
 
 
       <div className="max-w-3xl mx-auto space-y-8">
-         {/* Search bar */}
-         {hasAnchoredThoughts && (
-           <div className="flex justify-end">
-             <SearchInline />
-           </div>
-         )}
- 
         {/* Breathing space / Active thinking area */}
         <section>
           {activeThought ? (
