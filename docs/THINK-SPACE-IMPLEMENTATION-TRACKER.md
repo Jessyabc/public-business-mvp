@@ -7,7 +7,15 @@
  
  ## Summary of Latest Changes
  
-### Run 3 (2026-02-05) - Latest
+### Run 4 (2026-02-05) - Latest
+- [x] **Phase 7**: Copy-on-edit integration in ThinkingSurface.tsx
+- [x] ThinkingSurface now uses `editThought()` for changes to anchored thoughts
+- [x] Original thought preserved, new thought appears at top with new timestamp
+- [x] `useWorkspaceSync.ts` updated to persist `edited_from_id`
+- [x] ThoughtCard shows edit indicator (pencil icon) for edited thoughts
+- [x] ChainThread timestamp moved to UNDER first post (footer position)
+
+### Run 3 (2026-02-05)
 - [x] **FIXED**: `useChainGestures.ts` wrong param order in `handleGlobalMouseMove`
 - [x] **IMPROVED**: Circle follows cursor directly within 60px limit
 - [x] **IMPROVED**: Auto-snap on threshold pass (no wait for release)
@@ -39,7 +47,7 @@
  | 4 | ThinkFeed component | ✅ Done | ⏳ |
 | 5 | Break gesture correction (horizontal on top) | ✅ Done | ✅ |
 | 6 | Continue chain prompt | ✅ Done | ⏳ |
- | 7 | Copy-on-edit | ⏳ Pending | ❌ |
+| 7 | Copy-on-edit | ✅ Done | ⏳ |
  | 8 | Realtime sync | ⏳ Pending | ❌ |
  | 9 | Semantic search | ⏳ Pending | ❌ |
  | 10 | Chain linking UI | ⏳ Pending | ❌ |
@@ -97,9 +105,11 @@
  
  ### Phase 7: Copy-on-Edit
 - [x] Add `editThought()` action to useWorkspaceStore.ts (done in Run 1)
- - [ ] Modify ThinkingSurface.tsx to use editThought
- - [ ] Ensure original thought remains visible
- - [ ] Edited thought appears at top with new timestamp
+- [x] Modify ThinkingSurface.tsx to use editThought
+- [x] Update useWorkspaceSync.ts to persist edited_from_id
+- [x] Ensure original thought remains visible
+- [x] Edited thought appears at top with new timestamp
+- [x] ThoughtCard shows edit indicator for edited thoughts
  
  ### Phase 8: Realtime Sync
  - [ ] Create `hooks/useRealtimeSync.ts`
@@ -171,7 +181,7 @@
 | Circle follows cursor | Circle moves with cursor up to 60px limit | ✅ |
  | Global feed | All thoughts in timestamp order | ❌ |
  | Scope transitions | Subtle fade/reflow, no navigation | ❌ |
- | Copy-on-edit | Original preserved, new thought at top | ❌ |
+| Copy-on-edit | Original preserved, new thought at top | ⏳ |
  | Realtime sync | Changes reflect across devices | ❌ |
  | Semantic search | Vector similarity returns relevant thoughts | ❌ |
  
@@ -243,6 +253,21 @@
 4. Next thought entry goes to new chain
 
 **Next Steps:**
-- Phase 7: Integrate editThought in ThinkingSurface
 - Phase 8: Add useRealtimeSync for live updates
 - Phase 9-10: Semantic search and chain linking
+
+### Run 4 (2026-02-05)
+**Phase 7 Completed: Copy-on-Edit**
+- ThinkingSurface now uses copy-on-edit pattern when editing existing anchored thoughts
+- When user edits an anchored thought and blurs:
+  1. Original thought is restored to its anchored state (cancelEdit)
+  2. New thought is created with reference to original (editThought)
+  3. New thought appears at top of feed with current timestamp
+- useWorkspaceSync.ts updated to include `edited_from_id` in both load and sync
+- ThoughtCard already shows pencil icon for edited thoughts
+- ChainThread timestamp moved from header to footer (under oldest thought)
+
+**Next Steps:**
+- Phase 8: useRealtimeSync for cross-device updates
+- Phase 9: Semantic search (edge function + UI)
+- Phase 10: Chain linking UI (LinkPanel)
