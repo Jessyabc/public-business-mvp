@@ -99,24 +99,19 @@
      setShowLinkPanel(prev => !prev);
    }, []);
  
-   return (
-     <div className="chain-start-marker">
-       <div className="flex items-center gap-3 py-4">
-         {/* Broken line + NEW CHAIN label */}
-         <div 
-           className="flex-1 h-px"
-           style={{ 
-             background: `linear-gradient(to right, transparent, ${PB_BLUE}30, ${PB_BLUE}30)` 
-           }}
-         />
- 
-         {/* Chain title (editable) */}
-         <div className="flex items-center gap-2">
-           {isEditing ? (
-             <input
-               ref={inputRef}
-               type="text"
-               value={titleDraft}
+  return (
+    <div className="chain-start-marker">
+      <div className="flex items-center gap-3 py-3">
+        {/* Spacer to align with thought time column */}
+        <div className="shrink-0 w-16" />
+
+        {/* Chain title (editable) */}
+        <div className="flex items-center gap-2 flex-1">
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={titleDraft}
                onChange={(e) => setTitleDraft(e.target.value)}
                onBlur={handleSave}
                onKeyDown={handleKeyDown}
@@ -149,56 +144,57 @@
              </button>
            )}
  
-           {/* Link indicator || - only show if chain has links */}
-           {hasLinks && (
-             <button
-               onClick={handleViewMerged}
-               className="flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded"
-               style={{ color: PB_BLUE }}
-               title="View merged chains"
-             >
-               <span className="text-sm font-bold">||</span>
-             </button>
-           )}
- 
-           {/* Add link button */}
-           <button
-             onClick={handleToggleLinkPanel}
-             className={cn(
-               "flex items-center gap-1 px-1.5 py-0.5 rounded transition-all",
-               showLinkPanel 
-                 ? "opacity-100" 
-                 : "opacity-40 hover:opacity-80"
-             )}
-             style={{ 
-               color: PB_BLUE,
-               background: showLinkPanel ? `${PB_BLUE}15` : 'transparent',
-             }}
-             title="Link to another chain"
-           >
-             <Link2 className="w-3 h-3" />
-             {!hasLinks && <Plus className="w-2.5 h-2.5 -ml-0.5" />}
-           </button>
- 
-           {/* Focus chain indicator */}
-           {scope === 'global' && (
-             <button
-               onClick={handleChainFocus}
-               className="opacity-40 hover:opacity-80 transition-opacity"
-               title="Focus this chain"
-             >
-               <ChevronRight className="w-3 h-3" style={{ color: PB_BLUE }} />
-             </button>
-           )}
-         </div>
- 
-         <div 
-           className="flex-1 h-px"
-           style={{ 
-             background: `linear-gradient(to left, transparent, ${PB_BLUE}30, ${PB_BLUE}30)` 
-           }}
-         />
-       </div>
+          {/* Link indicator || - only show if chain has links */}
+          {hasLinks && (
+            <button
+              onClick={handleViewMerged}
+              className="flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded"
+              style={{ color: PB_BLUE }}
+              title="View merged chains"
+            >
+              <span className="text-sm font-bold">||</span>
+            </button>
+          )}
+
+          {/* Add link button */}
+          <button
+            onClick={handleToggleLinkPanel}
+            className={cn(
+              "flex items-center gap-1 px-1.5 py-0.5 rounded transition-all",
+              showLinkPanel 
+                ? "opacity-100" 
+                : "opacity-40 hover:opacity-80"
+            )}
+            style={{ 
+              color: PB_BLUE,
+              background: showLinkPanel ? `${PB_BLUE}15` : 'transparent',
+            }}
+            title="Link to another chain"
+          >
+            <Link2 className="w-3 h-3" />
+            {!hasLinks && <Plus className="w-2.5 h-2.5 -ml-0.5" />}
+          </button>
+
+          {/* Focus chain indicator */}
+          {scope === 'global' && (
+            <button
+              onClick={handleChainFocus}
+              className="opacity-40 hover:opacity-80 transition-opacity"
+              title="Focus this chain"
+            >
+              <ChevronRight className="w-3 h-3" style={{ color: PB_BLUE }} />
+            </button>
+          )}
+
+          {/* Trailing line */}
+          <div 
+            className="flex-1 h-px ml-2"
+            style={{ 
+              background: `linear-gradient(to right, ${PB_BLUE}30, transparent)` 
+            }}
+          />
+        </div>
+      </div>
  
        {/* Link Panel (inline, below marker) */}
        {showLinkPanel && (

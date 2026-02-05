@@ -101,27 +101,27 @@
                }}
                className="relative"
              >
-               {/* Chain anchor marker - shows "NEW CHAIN" at first thought of chain */}
-               {isAnchor && chain && (
-                 <ChainStartMarker
-                   chain={chain}
-                   anchorThought={thought}
-                 />
-               )}
+              {/* Thought card */}
+              <ThoughtCard thought={thought} />
  
-               {/* Thought card */}
-               <ThoughtCard thought={thought} />
+              {/* Chain anchor marker - placed after the first thought to avoid confusion */}
+              {isAnchor && chain && (
+                <ChainStartMarker
+                  chain={chain}
+                  anchorThought={thought}
+                />
+              )}
  
                {/* Vertical continuity line to next thought */}
                {showContinuityLine && (
                  <div
-                   className="absolute left-1/2 -translate-x-1/2 w-[2px] h-6"
-                   style={{
-                     top: '100%',
-                     background: `${PB_BLUE}25`,
-                   }}
-                 />
-               )}
+                  className="absolute left-1/2 -translate-x-1/2 w-[2px] h-6"
+                  style={{
+                    top: 'calc(100% - 8px)',
+                    background: `${PB_BLUE}25`,
+                  }}
+                />
+              )}
              </motion.div>
            );
          })}
