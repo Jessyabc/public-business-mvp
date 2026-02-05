@@ -129,28 +129,6 @@ export function ChainThread({
         isActive && "is-active"
       )}
     >
-      {/* Chain header */}
-      <div className="chain-header flex items-center justify-between mb-4 px-2">
-        <h3 
-          className={cn(
-            "text-sm font-medium transition-colors",
-            isActive ? "opacity-80" : "opacity-50"
-          )}
-          style={{ color: isActive ? '#3D3833' : '#6B635B' }}
-        >
-          {headerText}
-        </h3>
-        
-        {/* Chain indicator */}
-        <div 
-          className="w-2 h-2 rounded-full"
-          style={{ 
-            background: isActive ? PB_BLUE : `${PB_BLUE}40`,
-            boxShadow: isActive ? `0 0 8px ${PB_BLUE}50` : 'none',
-          }}
-        />
-      </div>
-      
       {/* Thread line container */}
       <div className="thread-container relative pl-6">
         {/* Vertical thread line */}
@@ -180,6 +158,28 @@ export function ChainThread({
                 thoughtId={thought.id} 
                 depth={index}
               />
+              
+              {/* Chain timestamp under the LAST (oldest) thought */}
+              {index === chainThoughts.length - 1 && (
+                <div className="chain-footer flex items-center gap-2 mt-3 pl-1">
+                  <div 
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ 
+                      background: isActive ? PB_BLUE : `${PB_BLUE}40`,
+                      boxShadow: isActive ? `0 0 6px ${PB_BLUE}50` : 'none',
+                    }}
+                  />
+                  <span 
+                    className={cn(
+                      "text-xs font-medium transition-colors",
+                      isActive ? "opacity-60" : "opacity-40"
+                    )}
+                    style={{ color: '#6B635B' }}
+                  >
+                    {headerText}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
