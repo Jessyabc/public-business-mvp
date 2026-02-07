@@ -1,72 +1,128 @@
 
-## Tailwind v4 Production Build Fix
+## Tailwind v4 Production Build - Complete Fix
 
-### Problem Identified
+### Problems Identified
 
-The styling discrepancy between the Lovable editor preview and the published preview URL is caused by **Tailwind v4's `@theme` block incorrectly using `var()` CSS variable references**.
-
-In Tailwind v4, the `@theme` directive tokens are processed **at build time** to generate utility classes. However, the current configuration uses runtime CSS variable references inside `@theme`:
-
-```css
-@theme {
-  --color-pb-blue: var(--pb-blue);        /* ❌ Runtime reference */
-  --color-ink-base: var(--text-primary);  /* ❌ Runtime reference */
-  --duration-med: var(--t-med);           /* ❌ Runtime reference */
-}
-```
-
-This works in the Lovable editor preview (likely due to HMR/dev mode handling) but **fails in production builds** because Tailwind cannot resolve `var()` references at compile time.
-
-### Root Cause
-
-- Tailwind v4 `@theme` tokens must be **static values** (hex colors, pixel values, etc.)
-- Using `var(--custom-prop)` inside `@theme` causes the generated utility classes to not compile correctly
-- The production CSS bundle ends up with broken/empty utility values
-
-### Solution
-
-Replace `var()` references in `@theme` with static values, then use those `@theme` tokens to define the `:root` CSS variables (reversing the dependency direction).
-
-### Implementation Steps
-
-1. **Fix `@theme` Block** - Use static values directly in `@theme`:
-   ```css
-   @theme {
-     /* Brand - static values */
-     --color-pb-blue: #489FE3;
-     
-     /* Text */
-     --color-ink-base: #E6F0FF;
-     
-     /* Motion */
-     --duration-med: 220ms;
-   }
-   ```
-
-2. **Update `:root` Variables** - Reference `@theme` tokens in runtime variables:
-   ```css
-   :root {
-     --pb-blue: var(--color-pb-blue);
-     --text-primary: var(--color-ink-base);
-     --t-med: var(--duration-med);
-   }
-   ```
-
-3. **Verify Component Usage** - Ensure components using `text-ink-base`, `bg-pb-blue`, and `duration-med` work correctly after the fix.
+After thorough investigation, I've identified **three critical issues** causing the styling discrepancy between the editor preview and the published URL:
 
 ---
 
-### Technical Details
+### Issue 1: Missing CSS Import for Glass Effects
 
-**Files to Modify:**
-- `src/index.css` - Fix `@theme` block and `:root` variable order
+**File:** `src/styles/effects.css`
 
-**Key Changes:**
-- Invert the dependency: `@theme` defines static values, `:root` references them
-- This ensures Tailwind can generate proper utility classes at build time
-- Runtime theming (via ThemeInjector) will still work by overriding the CSS variables
+This file defines essential glass morphism classes used throughout the app:
+- `.glass-card` (used in 30+ components)
+- `.glass-surface`
+- `.glass-button`
+- `.pb-dock`
+- `.scrim`
 
-**Testing:**
-- Verify styling in Lovable preview
-- Republish and check preview URL
-- Confirm utility classes like `text-ink-base`, `bg-pb-blue`, `duration-med` render correctly
+**The problem:** This file is **NOT imported** in `src/index.css`. Currently only these are imported:
+```css
+@import "./styles/glass-tiers.css";
+@import "./styles/reduced-motion.css";
+```
+
+**The fix:** Add the missing import:
+```css
+@import "./styles/effects.css";
+```
+
+---
+
+### Issue 2: Missing CSS Variable `--glass-bg`
+
+**File:** `src/index.css`
+
+The `.glassButton` component class references `var(--glass-bg)`:
+```css
+.glassButton {
+  background: var(--glass-bg);  /* ❌ Not defined in :root */
+}
+```
+
+However, `:root` only defines `--glass-fill`, not `--glass-bg`. Looking at line 161:
+```css
+--glass-bg: rgba(8, 19, 40, 0.55);  /* ✓ Actually is defined */
+```
+
+This is actually defined, so this is not the issue.
+
+---
+
+### Issue 3: `@source` Directive May Not Scan CSS Files
+
+Tailwind v4's `@source` directive tells the build what files to scan for utility classes:
+```css
+@source "./**/*.{ts,tsx,js,jsx,mdx}";
+```
+
+This **does not include `.css` files**. If custom class names appear only in CSS files (like `effects.css`), they may not be recognized by Tailwind's class detection.
+
+---
+
+## Implementation Plan
+
+### Step 1: Add Missing CSS Import (Critical)
+
+Update `src/index.css` to import the effects stylesheet:
+
+```css
+/* Custom CSS modules */
+@import "./styles/glass-tiers.css";
+@import "./styles/reduced-motion.css";
+@import "./styles/effects.css";  /* ADD THIS LINE */
+```
+
+### Step 2: Ensure `@source` Includes CSS Files
+
+Update the source scanning to include CSS files:
+
+```css
+@source "../index.html";
+@source "./**/*.{ts,tsx,js,jsx,mdx,css}";
+```
+
+### Step 3: Verify CSS Variable Completeness
+
+Ensure all referenced CSS variables in `effects.css` are defined in `:root`. Cross-check:
+- `--glass-fill` - defined
+- `--glass-border` - defined
+- `--glass-blur` - defined
+- `--glass-vibrancy` - defined
+- `--glass-bright` - defined
+- `--glass-refraction-blur` - defined
+- `--text-ink` / `--text-ink-d` - defined
+- `--shadow-md` / `--shadow-lg` - defined
+- `--radius` - defined
+- `--t-fast` / `--ease` - defined
+- `--dock-h` / `--dock-gap` - defined
+
+All variables appear to be defined in the `:root` block.
+
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/index.css` | Add `@import "./styles/effects.css"` after existing imports |
+| `src/index.css` | Update `@source` to include `.css` extension |
+
+---
+
+## Technical Details
+
+### Why This Works in Development But Not Production
+
+1. **HMR (Hot Module Replacement)**: In development, Vite's HMR may load CSS files through different mechanisms that work around missing imports
+2. **CSS Module Resolution**: The CSS module `glassSurface.module.css` is imported directly in components and processed separately by Vite
+3. **Build-time Scanning**: Production builds strictly follow the `@import` chain and `@source` directives
+
+### Testing After Fix
+
+1. Verify styling in Lovable preview (should remain unchanged)
+2. Republish the application
+3. Check the published URL with a hard refresh (`Cmd+Shift+R`)
+4. Confirm glass effects, navigation styling, and button states work correctly
