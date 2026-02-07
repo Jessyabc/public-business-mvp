@@ -174,15 +174,15 @@
   --card-bg-hover: rgba(8, 19, 40, 0.7);
   --card-ring: #7AA2FF;
   
-  /* Legacy tokens for backward compatibility */
-  --pb-blue: var(--color-pb-blue);
-  --text-ink: var(--text-primary);
-  --text-ink-d: var(--text-primary);
-  --shadow-md: var(--elevation-4);
-  --shadow-lg: var(--elevation-8);
-  --radius: var(--radius-lg);
-  --t-fast: var(--duration-fast);
-  --t-med: var(--duration-med);
+  /* Legacy tokens for backward compatibility - STATIC values for production */
+  --pb-blue: #489FE3;
+  --text-ink: #E6F0FF;
+  --text-ink-d: #E6F0FF;
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  --radius: 16px;
+  --t-fast: 120ms;
+  --t-med: 220ms;
   --ease: cubic-bezier(.2, .6, .2, 1);
   --dock-h: 88px;
   --dock-gap: 24px;
