@@ -17,31 +17,31 @@
 /* ========== Glass Surfaces ========== */
 .glass-surface,
 .glass-button {
-  --glass-layer-bg: var(--glass-fill);
-  --glass-layer-border: var(--glass-border);
-  --glass-layer-shadow: var(--shadow-md);
-  --glass-layer-blur: calc(var(--glass-blur) * 0.55);
+  --glass-layer-bg: var(--glass-fill, rgba(8, 19, 40, 0.55));
+  --glass-layer-border: var(--glass-border, rgba(180, 200, 255, 0.18));
+  --glass-layer-shadow: var(--shadow-md, 0 10px 15px -3px rgb(0 0 0 / 0.5));
+  --glass-layer-blur: calc(var(--glass-blur, 16px) * 0.55);
   position: relative;
   isolation: isolate;
-  color: var(--text-ink);
+  color: var(--text-ink, #E6F0FF);
   background: var(--glass-layer-bg);
   border: 1px solid var(--glass-layer-border);
   box-shadow: var(--glass-layer-shadow);
   background-clip: padding-box;
   transition:
-    background var(--t-fast) var(--ease),
-    border-color var(--t-fast) var(--ease),
-    box-shadow var(--t-fast) var(--ease);
+    background var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1)),
+    border-color var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1)),
+    box-shadow var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1));
 }
 
 .glass-surface {
-  --glass-layer-shadow: var(--shadow-md);
-  border-radius: calc(var(--radius) - 6px);
+  --glass-layer-shadow: var(--shadow-md, 0 10px 15px -3px rgb(0 0 0 / 0.5));
+  border-radius: calc(var(--radius, 16px) - 6px);
 }
 
 .glass-button {
-  --glass-layer-shadow: var(--shadow-md);
-  --glass-layer-blur: calc(var(--glass-blur) * 0.45);
+  --glass-layer-shadow: var(--shadow-md, 0 10px 15px -3px rgb(0 0 0 / 0.5));
+  --glass-layer-blur: calc(var(--glass-blur, 16px) * 0.45);
 }
 
 /* Enhanced opacity with color-mix support */
@@ -61,15 +61,15 @@
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .glass-surface,
   .glass-button {
-    -webkit-backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
-    backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+    -webkit-backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy, 1.15)) brightness(var(--glass-bright, 1.06));
+    backdrop-filter: blur(var(--glass-layer-blur)) saturate(var(--glass-vibrancy, 1.15)) brightness(var(--glass-bright, 1.06));
   }
 }
 
 /* Interactive states */
 .glass-button:hover,
 .glass-button:focus-visible {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgb(0 0 0 / 0.6));
 }
 
 .glass-button:focus-visible {
@@ -82,7 +82,7 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  border: 2px solid var(--glass-border);
+  border: 2px solid var(--glass-border, rgba(180, 200, 255, 0.18));
   pointer-events: none;
 }
 
@@ -95,27 +95,27 @@
 /* Dark canvas overrides */
 body[data-bg="dark"] .glass-surface,
 body[data-bg="dark"] .glass-button {
-  color: var(--text-ink-d);
-  box-shadow: var(--shadow-lg);
+  color: var(--text-ink-d, #E6F0FF);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgb(0 0 0 / 0.6));
 }
 
 /* ========== Glass Cards ========== */
 .glass-card {
   position: relative;
-  border-radius: var(--radius);
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius, 16px);
+  background: var(--glass-fill, rgba(8, 19, 40, 0.55));
+  border: 1px solid var(--glass-border, rgba(180, 200, 255, 0.18));
+  box-shadow: var(--shadow-md, 0 10px 15px -3px rgb(0 0 0 / 0.5));
   overflow: clip;
   isolation: isolate;
   transform: translateZ(0);
-  color: var(--text-ink);
+  color: var(--text-ink, #E6F0FF);
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .glass-card {
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 16px)) saturate(var(--glass-vibrancy, 1.15)) brightness(var(--glass-bright, 1.06));
+    backdrop-filter: blur(var(--glass-blur, 16px)) saturate(var(--glass-vibrancy, 1.15)) brightness(var(--glass-bright, 1.06));
   }
 }
 
@@ -126,7 +126,7 @@ body[data-bg="dark"] .glass-button {
   inset: 0;
   background: inherit;
   background-attachment: fixed;
-  filter: blur(var(--glass-refraction-blur)) url(#glass-displace);
+  filter: blur(var(--glass-refraction-blur, 6px)) url(#glass-displace);
   transform: scale(1.02);
   pointer-events: none;
   -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
@@ -148,33 +148,33 @@ body[data-bg="dark"] .glass-button {
 }
 
 .glass-card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgb(0 0 0 / 0.6));
   transform: translateY(-1px);
-  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  transition: transform var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1)), box-shadow var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1));
 }
 
 body[data-bg="dark"] .glass-card {
-  color: var(--text-ink-d);
-  box-shadow: var(--shadow-lg);
+  color: var(--text-ink-d, #E6F0FF);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgb(0 0 0 / 0.6));
 }
 
 /* ========== Business Mode Glass Cards ========== */
 .glass-business-card {
   position: relative;
-  border-radius: var(--radius);
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius, 16px);
+  background: var(--glass-fill, rgba(8, 19, 40, 0.55));
+  border: 1px solid var(--glass-border, rgba(180, 200, 255, 0.18));
+  box-shadow: var(--shadow-md, 0 10px 15px -3px rgb(0 0 0 / 0.5));
   overflow: clip;
   isolation: isolate;
   transform: translateZ(0);
-  color: var(--text-ink);
+  color: var(--text-ink, #E6F0FF);
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .glass-business-card {
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-vibrancy)) brightness(var(--glass-bright));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 16px)) saturate(var(--glass-vibrancy, 1.15)) brightness(var(--glass-bright, 1.06));
+    backdrop-filter: blur(var(--glass-blur, 16px)) saturate(var(--glass-vibrancy, 1.15)) brightness(var(--glass-bright, 1.06));
   }
 }
 
@@ -184,7 +184,7 @@ body[data-bg="dark"] .glass-card {
   inset: 0;
   background: inherit;
   background-attachment: fixed;
-  filter: blur(var(--glass-refraction-blur)) url(#glass-displace);
+  filter: blur(var(--glass-refraction-blur, 6px)) url(#glass-displace);
   transform: scale(1.02);
   pointer-events: none;
   -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, rgba(0, 0, 0, .95), rgba(0, 0, 0, .2) 65%, transparent 100%);
@@ -205,14 +205,14 @@ body[data-bg="dark"] .glass-card {
 }
 
 .glass-business-card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgb(0 0 0 / 0.6));
   transform: translateY(-1px);
-  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  transition: transform var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1)), box-shadow var(--t-fast, 120ms) var(--ease, cubic-bezier(.2, .6, .2, 1));
 }
 
 body[data-bg="dark"] .glass-business-card {
-  color: var(--text-ink-d);
-  box-shadow: var(--shadow-lg);
+  color: var(--text-ink-d, #E6F0FF);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgb(0 0 0 / 0.6));
 }
 
 /* ========== Dock Positioning ========== */
@@ -221,10 +221,10 @@ body[data-bg="dark"] .glass-business-card {
   left: 50%;
   bottom: max(12px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  height: var(--dock-h);
+  height: var(--dock-h, 88px);
   z-index: 50;
 }
 
 .pb-dock-safe {
-  padding-bottom: calc(var(--dock-h) + max(var(--dock-gap), env(safe-area-inset-bottom)));
+  padding-bottom: calc(var(--dock-h, 88px) + max(var(--dock-gap, 24px), env(safe-area-inset-bottom)));
 }
