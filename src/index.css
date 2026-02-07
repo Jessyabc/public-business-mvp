@@ -9,7 +9,10 @@
 @source "../index.html";
 @source "./**/*.{ts,tsx,js,jsx,mdx,css}";
 
-/* Custom CSS modules */
+/* 
+ * Custom CSS modules - MUST be top-level imports after tailwindcss
+ * These contain non-Tailwind CSS that needs to be preserved
+ */
 @import "./styles/glass-tiers.css";
 @import "./styles/reduced-motion.css";
 @import "./styles/effects.css";
