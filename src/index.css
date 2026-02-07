@@ -7,11 +7,12 @@
 
 /* Tailwind CSS v4 source scanning */
 @source "../index.html";
-@source "./**/*.{ts,tsx,js,jsx,mdx}";
+@source "./**/*.{ts,tsx,js,jsx,mdx,css}";
 
 /* Custom CSS modules */
 @import "./styles/glass-tiers.css";
 @import "./styles/reduced-motion.css";
+@import "./styles/effects.css";
 
 /* ========================================
    Tailwind v4 Theme Tokens
