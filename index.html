@@ -20,8 +20,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Raleway:wght@600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Raleway:wght@600;700;800&display=swap"></noscript>
     
-    <!-- Preload LCP image (hero logo) for immediate discovery -->
-    <link rel="preload" href="/src/assets/pb-logo-hero.png" as="image" type="image/png" fetchpriority="high">
+    <!-- LCP image is imported via ES6 in components, Vite handles preloading -->
     
     <!-- Critical CSS for initial render - prevents layout shift -->
     <style>

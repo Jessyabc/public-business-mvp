@@ -7,24 +7,38 @@
 
 /* Tailwind CSS v4 source scanning */
 @source "../index.html";
-@source "./**/*.{ts,tsx,js,jsx,mdx}";
+@source "./**/*.{ts,tsx,js,jsx,mdx,css}";
 
-/* Custom CSS modules */
+/* 
+ * Custom CSS modules - MUST be top-level imports after tailwindcss
+ * These contain non-Tailwind CSS that needs to be preserved
+ */
 @import "./styles/glass-tiers.css";
 @import "./styles/reduced-motion.css";
+@import "./styles/effects.css";
 
 /* ========================================
    Tailwind v4 Theme Tokens
    ======================================== */
 @theme {
-  /* Brand */
-  --color-pb-blue: var(--pb-blue);
+  /* Brand – static values for build-time compilation */
+  --color-pb-blue: #489FE3;
+  --color-pb-aqua: #67FFD8;
+  --color-pb-gold: #FFC85B;
 
-  /* Text */
-  --color-ink-base: var(--text-primary);
+  /* Text – static values */
+  --color-ink-base: #E6F0FF;
+  --color-ink-muted: #9FB4D1;
 
-  /* Motion */
-  --duration-med: var(--t-med);
+  /* Motion – static values */
+  --duration-fast: 120ms;
+  --duration-med: 220ms;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
 /* 
@@ -163,13 +177,13 @@
   --card-bg-hover: rgba(8, 19, 40, 0.7);
   --card-ring: #7AA2FF;
   
-  /* Legacy tokens for backward compatibility */
+  /* Legacy tokens for backward compatibility - STATIC values for production */
   --pb-blue: #489FE3;
-  --text-ink: var(--text-primary);
-  --text-ink-d: var(--text-primary);
-  --shadow-md: var(--elevation-4);
-  --shadow-lg: var(--elevation-8);
-  --radius: var(--radius-lg);
+  --text-ink: #E6F0FF;
+  --text-ink-d: #E6F0FF;
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  --radius: 16px;
   --t-fast: 120ms;
   --t-med: 220ms;
   --ease: cubic-bezier(.2, .6, .2, 1);
