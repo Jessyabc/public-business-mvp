@@ -5,23 +5,24 @@
  * PB Blue glow appears when focused = active cognition.
  * When thought settles, blue fades and thought becomes warm neumorphic.
  * 
- * Performance: Minimal blur, GPU-optimized shadows
+ * Swipe-down gesture anchors the thought into the feed.
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { motion, useMotionValue, useTransform, useAnimation } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useChainStore } from '../stores/chainStore';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHaptic } from '@/hooks/useHaptic';
 import { cn } from '@/lib/utils';
- import { format } from 'date-fns';
 
-// PB Blue - represents active cognition
 const PB_BLUE = '#489FE3';
+const SWIPE_DOWN_THRESHOLD = 60; // px to trigger anchor
 
 interface ThinkingSurfaceProps {
   thoughtId: string;
-   onAnchor?: (thoughtId?: string) => void;
+  onAnchor?: (thoughtId?: string) => void;
   autoFocus?: boolean;
 }
 
@@ -29,47 +30,46 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [enterCount, setEnterCount] = useState(0);
-  const originalContentRef = useRef<string>(''); // Track original content when editing starts
-  const wasAnchoredRef = useRef<boolean>(false); // Track if thought was previously anchored
+  const originalContentRef = useRef<string>('');
+  const wasAnchoredRef = useRef<boolean>(false);
   const isMobile = useIsMobile();
   const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit, editThought } = useWorkspaceStore();
   const { activeChainId, pendingChainId, getChainById } = useChainStore();
   const { user } = useAuth();
+  const { triggerHaptic } = useHaptic();
+  
+  // Swipe-down state
+  const swipeY = useMotionValue(0);
+  const swipeOpacity = useTransform(swipeY, [0, SWIPE_DOWN_THRESHOLD], [1, 0.4]);
+  const swipeScale = useTransform(swipeY, [0, SWIPE_DOWN_THRESHOLD], [1, 0.95]);
+  const controls = useAnimation();
+  const swipeStartRef = useRef<{ y: number; scrollTop: number } | null>(null);
+  const isSwipingRef = useRef(false);
   
   const thought = thoughts.find((t) => t.id === thoughtId);
-  // Check pending chain first (from break gesture), then active chain
   const pendingChain = pendingChainId ? getChainById(pendingChainId) : null;
   const activeChain = activeChainId ? getChainById(activeChainId) : null;
-  
-  // Chain indicator - shows which chain we're writing to (pending takes priority)
   const writingChain = pendingChain || activeChain;
   const chainLabel = writingChain?.display_label || (writingChain ? 'Current chain' : null);
   const isPending = !!pendingChain;
   
-  // Track original content when thought becomes active (for cancel detection)
   useEffect(() => {
     if (thought) {
       originalContentRef.current = thought.content;
       wasAnchoredRef.current = thought.state === 'anchored';
     }
-  }, [thoughtId]); // Only update when thoughtId changes (new edit session)
+  }, [thoughtId]);
   
-  // Reset enter count when content changes
-  useEffect(() => {
-    setEnterCount(0);
-  }, [thought?.content]);
+  useEffect(() => { setEnterCount(0); }, [thought?.content]);
   
-  // Only auto-focus when user deliberately initiated thinking
   useEffect(() => {
     if (textareaRef.current && autoFocus) {
       textareaRef.current.focus();
-      // Place cursor at end
       const len = textareaRef.current.value.length;
       textareaRef.current.setSelectionRange(len, len);
     }
   }, [thoughtId, autoFocus]);
 
-  // Auto-resize textarea
   const handleInput = useCallback(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -82,12 +82,8 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
     handleInput();
   }, [thoughtId, updateThought, handleInput]);
 
-  // Implicit anchoring: blur with content = anchor, dismiss if empty
-  // If no changes were made, cancel the edit and restore original state
-  const handleBlur = useCallback(() => {
-    setIsFocused(false);
-    setEnterCount(0);
-    
+  // Anchor helper (shared by blur and swipe)
+  const performAnchor = useCallback(() => {
     if (!thought) return;
     
     const currentContent = thought.content.trim();
@@ -95,99 +91,143 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
     const wasAnchored = wasAnchoredRef.current;
     const hasChanges = currentContent !== originalContent;
     
-    // If no changes were made, cancel the edit
     if (!hasChanges) {
       if (wasAnchored) {
-        // Restore to anchored state without changing timestamps or day_key
         cancelEdit(thoughtId, originalContentRef.current);
-         onAnchor?.(thoughtId);
+        onAnchor?.(thoughtId);
       } else {
-        // New thought with no content - delete it
         if (!currentContent) {
           deleteThought(thoughtId);
-           onAnchor?.(thoughtId);
-         } else {
-           // New thought with original content - anchor it
-           anchorThought(thoughtId);
-           onAnchor?.(thoughtId);
-         }
-       }
-       return;
-     }
-     
-     // Changes were made - use copy-on-edit for previously anchored thoughts
-     if (currentContent) {
-       if (wasAnchored) {
-         // Copy-on-edit: create new thought with reference to original
-         // First restore original to anchored state
-         cancelEdit(thoughtId, originalContentRef.current);
-         // Then create the edited version
-         const newThoughtId = editThought(thoughtId, currentContent, user?.id);
-         onAnchor?.(newThoughtId ?? thoughtId);
-       } else {
-         // New thought - just anchor it
-         anchorThought(thoughtId);
-         onAnchor?.(thoughtId);
-       }
-     } else {
-       // Empty content - delete the active thought to show "tap to think"
-       deleteThought(thoughtId);
-       onAnchor?.(thoughtId);
-     }
-   }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, editThought, onAnchor, user?.id]);
+          onAnchor?.(thoughtId);
+        } else {
+          anchorThought(thoughtId);
+          onAnchor?.(thoughtId);
+        }
+      }
+      return;
+    }
+    
+    if (currentContent) {
+      if (wasAnchored) {
+        cancelEdit(thoughtId, originalContentRef.current);
+        const newThoughtId = editThought(thoughtId, currentContent, user?.id);
+        onAnchor?.(newThoughtId ?? thoughtId);
+      } else {
+        anchorThought(thoughtId);
+        onAnchor?.(thoughtId);
+      }
+    } else {
+      deleteThought(thoughtId);
+      onAnchor?.(thoughtId);
+    }
+  }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, editThought, onAnchor, user?.id]);
 
-  // Cmd+Enter (or Ctrl+Enter) to anchor immediately
-  // On mobile: double Enter with empty content = dismiss
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    setEnterCount(0);
+    performAnchor();
+  }, [performAnchor]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
       if (thought?.content.trim()) {
         anchorThought(thoughtId);
-         onAnchor?.(thoughtId);
+        onAnchor?.(thoughtId);
         textareaRef.current?.blur();
       }
       return;
     }
     
-    // Mobile: double Enter on empty content = dismiss keyboard and surface
     if (isMobile && e.key === 'Enter' && !thought?.content.trim()) {
       const newCount = enterCount + 1;
       setEnterCount(newCount);
-      
       if (newCount >= 2) {
         e.preventDefault();
         textareaRef.current?.blur();
         deleteThought(thoughtId);
-         onAnchor?.(thoughtId);
+        onAnchor?.(thoughtId);
       }
     }
   }, [thought, thoughtId, anchorThought, deleteThought, onAnchor, isMobile, enterCount]);
 
-  // Initial resize
-  useEffect(() => {
-    handleInput();
-  }, [handleInput]);
+  useEffect(() => { handleInput(); }, [handleInput]);
 
-  // Handle click outside to blur (cancel edit if no changes)
   const handleContainerClick = useCallback((e: React.MouseEvent) => {
-    // If clicking on the container but not on the textarea, blur it
     if (textareaRef.current && e.target === e.currentTarget) {
       textareaRef.current.blur();
     }
   }, []);
 
+  // --- Swipe-down to anchor gesture ---
+  const handleSwipeTouchStart = useCallback((e: React.TouchEvent) => {
+    const textarea = textareaRef.current;
+    swipeStartRef.current = {
+      y: e.touches[0].clientY,
+      scrollTop: textarea?.scrollTop ?? 0,
+    };
+    isSwipingRef.current = false;
+  }, []);
+
+  const handleSwipeTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!swipeStartRef.current) return;
+    const dy = e.touches[0].clientY - swipeStartRef.current.y;
+    
+    // Only activate swipe-down if textarea is scrolled to top
+    if (swipeStartRef.current.scrollTop <= 0 && dy > 10) {
+      isSwipingRef.current = true;
+      const clamped = Math.min(dy, SWIPE_DOWN_THRESHOLD * 1.5);
+      swipeY.set(clamped);
+      
+      // Haptic at threshold
+      if (clamped >= SWIPE_DOWN_THRESHOLD) {
+        triggerHaptic('medium');
+      }
+    }
+  }, [swipeY, triggerHaptic]);
+
+  const handleSwipeTouchEnd = useCallback(() => {
+    if (!isSwipingRef.current) {
+      swipeStartRef.current = null;
+      return;
+    }
+    
+    const currentY = swipeY.get();
+    if (currentY >= SWIPE_DOWN_THRESHOLD && thought?.content.trim()) {
+      // Animate out and anchor
+      triggerHaptic('success');
+      controls.start({ y: 100, opacity: 0, scale: 0.9, transition: { duration: 0.25 } })
+        .then(() => {
+          performAnchor();
+          swipeY.set(0);
+          controls.set({ y: 0, opacity: 1, scale: 1 });
+        });
+    } else {
+      // Spring back
+      swipeY.set(0);
+    }
+    
+    swipeStartRef.current = null;
+    isSwipingRef.current = false;
+  }, [swipeY, thought, performAnchor, controls, triggerHaptic]);
+
   if (!thought) return null;
 
   return (
-    <div 
+    <motion.div 
       className={cn(
         "thinking-surface",
         "relative w-full max-w-2xl mx-auto",
         "transition-all duration-300 ease-out"
       )}
       onClick={handleContainerClick}
+      style={{ opacity: swipeOpacity, scale: swipeScale }}
+      animate={controls}
+      onTouchStart={handleSwipeTouchStart}
+      onTouchMove={handleSwipeTouchMove}
+      onTouchEnd={handleSwipeTouchEnd}
     >
-      {/* PB Blue focus glow - active cognition indicator */}
+      {/* PB Blue focus glow */}
       <div 
         className="absolute -inset-3 rounded-3xl transition-all duration-500 pointer-events-none"
         style={{
@@ -198,11 +238,10 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
         }}
       />
       
-      {/* Glassmorphic container - frosted glass effect */}
+      {/* Glassmorphic container */}
       <div 
         className="relative rounded-2xl overflow-hidden transition-all duration-300"
         style={{
-          // Glassmorphism: semi-transparent with blur
           background: 'rgba(255, 255, 255, 0.35)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
@@ -214,7 +253,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
             : `0 8px 32px rgba(166, 150, 130, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.2)`,
         }}
       >
-        {/* Subtle glass shine */}
+        {/* Glass shine */}
         <div 
           className="absolute inset-0 pointer-events-none rounded-2xl"
           style={{
@@ -244,35 +283,37 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
         />
       </div>
       
-      {/* Day/Chain indicator when adding to a previous day or specific chain */}
-       {chainLabel && (
+      {/* Chain indicator */}
+      {chainLabel && (
         <div className="flex items-center justify-center gap-2 mt-3">
-          {chainLabel && (
-            <span 
-              className="text-xs px-2 py-0.5 rounded-full opacity-60"
-              style={{ 
-                color: PB_BLUE,
-                background: `${PB_BLUE}15`,
-              }}
-            >
-              Writing to: {chainLabel}
-              {isPending && (
-                <span className="ml-1 opacity-75">(pending)</span>
-              )}
-            </span>
-          )}
+          <span 
+            className="text-xs px-2 py-0.5 rounded-full opacity-60"
+            style={{ color: PB_BLUE, background: `${PB_BLUE}15` }}
+          >
+            Writing to: {chainLabel}
+            {isPending && <span className="ml-1 opacity-75">(pending)</span>}
+          </span>
         </div>
       )}
       
-      {/* Gentle hint - only show when empty */}
+      {/* Swipe hint + keyboard hint */}
       {!thought.content && (
-        <p 
-          className="text-center text-sm mt-4 opacity-50"
-          style={{ color: '#6B635B' }}
-        >
-          {isMobile ? 'Just start writing. Tap outside to save.' : 'Just start writing. Press ⌘↵ to save.'}
+        <p className="text-center text-sm mt-4 opacity-50" style={{ color: '#6B635B' }}>
+          {isMobile ? 'Swipe down or tap outside to save' : 'Just start writing. Press ⌘↵ to save.'}
         </p>
       )}
-    </div>
+      
+      {/* Swipe-down visual indicator */}
+      {isSwipingRef.current && swipeY.get() > 10 && (
+        <motion.div
+          className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium"
+          style={{ color: PB_BLUE }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: swipeY.get() >= SWIPE_DOWN_THRESHOLD ? 1 : 0.5 }}
+        >
+          {swipeY.get() >= SWIPE_DOWN_THRESHOLD ? '↓ Release to anchor' : '↓ Pull to anchor'}
+        </motion.div>
+      )}
+    </motion.div>
   );
 }

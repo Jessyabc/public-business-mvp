@@ -1,109 +1,84 @@
 /**
- * Think Space: Open Circle - Break/Continue Control
+ * Think Space: Open Circle - Break Control
  * 
- * Positioned between input area and feed.
- * - Tap: Continue chain (append thought)
- * - Pull LEFT or RIGHT: Break chain (start new)
- * - Long-press / Right-click: Merge (V2)
+ * Break-only control positioned between input area and feed.
+ * - Pull in ANY direction: Break chain (start new)
+ * - No tap action (tapping empty space continues chain)
  * 
- * Visual: Circle follows cursor horizontally until snap threshold.
- * Auto-snaps and creates new chain when threshold is passed.
+ * Visual: Circle follows cursor omnidirectionally with radial trail.
+ * Auto-snaps and triggers break composer when threshold is passed.
  */
 
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChainGestures } from '../hooks/useChainGestures';
 import { cn } from '@/lib/utils';
 
-// PB Blue - active cognition color
 const PB_BLUE = '#489FE3';
-const SNAP_THRESHOLD = 120; // Match gesture threshold (2x pull distance)
 
 interface OpenCircleProps {
-  onContinue: () => void;
   onBreak: () => void;
-  onMerge?: () => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function OpenCircle({
-  onContinue,
-  onBreak,
-  onMerge,
-  className,
-  size = 'md',
-}: OpenCircleProps) {
+export function OpenCircle({ onBreak, className, size = 'md' }: OpenCircleProps) {
   const isMobile = useIsMobile();
   const circleRef = useRef<HTMLDivElement>(null);
   
-  // Size based on device and variant
   const baseSize = size === 'lg' ? 72 : size === 'sm' ? 28 : (isMobile ? 44 : 36);
   
-  // Gesture handling
-  const { gestureState, visualOffset, direction, wasGestureConsumed, handlers } = useChainGestures({
+  const { gestureState, visualX, visualY, visualDist, handlers } = useChainGestures({
     onBreak,
-    onMerge,
     enabled: true,
   });
   
-  // Calculate horizontal offset - circle follows cursor within limits
-  const xOffset = direction === 'left' ? -visualOffset : 
-                  direction === 'right' ? visualOffset : 0;
-  
-  // Calculate progress to snap (0-1)
-  const snapProgress = Math.min(visualOffset / SNAP_THRESHOLD, 1);
-  
-  // Handle tap/click to continue - only if no drag occurred
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    // Prevent if gesture was consumed (drag, snap, or long-press)
-    if (wasGestureConsumed()) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    
-    onContinue();
-  }, [wasGestureConsumed, onContinue]);
-  
-  // Determine interaction state
-  const isPulling = gestureState.isActive && gestureState.resistance > 0.1;
-  const isNearSnap = gestureState.resistance > 0.7;
+  const snapProgress = gestureState.resistance;
+  const isPulling = gestureState.isActive && snapProgress > 0.05;
+  const isNearSnap = snapProgress > 0.65;
   const hasSnapped = gestureState.didSnap;
-  const isLeftPull = direction === 'left';
-  const isRightPull = direction === 'right';
   
   return (
-    <div 
-      className={cn(
-        "open-circle-container relative flex items-center justify-center",
-        className
-      )}
+    <div className={cn("open-circle-container relative flex items-center justify-center", className)}
+      style={{ width: baseSize * 3, height: baseSize * 2 }}
     >
-      {/* Trail line - shows path from origin */}
-      {(isPulling || hasSnapped) && (isLeftPull || isRightPull) && (
+      {/* Radial trail ring */}
+      {isPulling && (
         <motion.div
-          className="absolute h-[2px]"
+          className="absolute rounded-full pointer-events-none"
           style={{
-            left: isLeftPull ? `calc(50% - ${visualOffset}px)` : '50%',
-            width: visualOffset,
-            background: hasSnapped 
-              ? `linear-gradient(${isLeftPull ? 'to right' : 'to left'}, ${PB_BLUE}60, ${PB_BLUE}30)`
-              : `linear-gradient(${isLeftPull ? 'to right' : 'to left'}, ${PB_BLUE}${Math.round(40 * snapProgress)}%, ${PB_BLUE}10)`,
+            width: visualDist * 2 + baseSize,
+            height: visualDist * 2 + baseSize,
+            border: `1.5px solid ${PB_BLUE}${Math.round(snapProgress * 40).toString(16).padStart(2, '0')}`,
+            background: `radial-gradient(circle, transparent 60%, ${PB_BLUE}${Math.round(snapProgress * 12).toString(16).padStart(2, '0')} 100%)`,
           }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: hasSnapped ? 1 : 0.8 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.1 }}
+        />
+      )}
+
+      {/* Origin ghost (stays in place during pull) */}
+      {isPulling && (
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: baseSize * 0.5,
+            height: baseSize * 0.5,
+            background: `${PB_BLUE}15`,
+            border: `1px dashed ${PB_BLUE}25`,
+          }}
         />
       )}
       
-      {/* The circle itself */}
+      {/* The circle itself - follows cursor omnidirectionally */}
       <motion.div
         ref={circleRef}
         className={cn(
-          "open-circle relative cursor-grab active:cursor-grabbing z-10",
+          "open-circle relative z-10",
           "rounded-full touch-none select-none",
-          "transition-colors duration-200"
+          isPulling ? "cursor-grabbing" : "cursor-grab",
         )}
         style={{
           width: baseSize,
@@ -112,96 +87,78 @@ export function OpenCircle({
             ? `radial-gradient(circle, ${PB_BLUE}60 0%, ${PB_BLUE}40 70%)`
             : isPulling
             ? `radial-gradient(circle, ${PB_BLUE}40 0%, ${PB_BLUE}20 70%)`
-            : `radial-gradient(circle, ${PB_BLUE}30 0%, ${PB_BLUE}10 70%)`,
-          border: `2px solid ${hasSnapped ? `${PB_BLUE}80` : isPulling ? `${PB_BLUE}60` : `${PB_BLUE}30`}`,
+            : `radial-gradient(circle, ${PB_BLUE}25 0%, ${PB_BLUE}08 70%)`,
+          border: `2px solid ${hasSnapped ? `${PB_BLUE}80` : isPulling ? `${PB_BLUE}50` : `${PB_BLUE}25`}`,
           boxShadow: hasSnapped
-            ? `0 0 24px ${PB_BLUE}70, 0 0 48px ${PB_BLUE}40`
+            ? `0 0 24px ${PB_BLUE}60, 0 0 48px ${PB_BLUE}30`
             : isNearSnap
-            ? `0 0 20px ${PB_BLUE}50, 0 0 40px ${PB_BLUE}30`
+            ? `0 0 20px ${PB_BLUE}40, 0 0 40px ${PB_BLUE}20`
             : isPulling
-              ? `0 0 12px ${PB_BLUE}30`
+              ? `0 0 12px ${PB_BLUE}20`
               : 'none',
         }}
         animate={{
-          x: xOffset,
-          scale: hasSnapped ? 1.2 : isNearSnap ? 1.15 : isPulling ? 1.05 : 1,
+          x: visualX,
+          y: visualY,
+          scale: hasSnapped ? 1.3 : isNearSnap ? 1.15 : isPulling ? 1.08 : 1,
         }}
         transition={{
-          x: { type: 'spring', stiffness: 400, damping: 30 },
-          scale: { duration: hasSnapped ? 0.1 : 0.15 },
+          x: gestureState.isActive
+            ? { type: 'tween', duration: 0.03 } // Direct follow during drag
+            : { type: 'spring', stiffness: 500, damping: 25 }, // Spring back
+          y: gestureState.isActive
+            ? { type: 'tween', duration: 0.03 }
+            : { type: 'spring', stiffness: 500, damping: 25 },
+          scale: { type: 'spring', stiffness: 300, damping: 20 },
         }}
         whileHover={{
           scale: gestureState.isActive ? undefined : 1.1,
-          boxShadow: `0 0 16px ${PB_BLUE}40`,
+          boxShadow: `0 0 16px ${PB_BLUE}30`,
         }}
-        whileTap={{
-          scale: gestureState.isActive ? undefined : 0.95,
-        }}
-        onClick={handleClick}
         {...handlers}
       >
-        {/* Inner glow / pulse animation */}
+        {/* Inner pulse */}
         <motion.div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: `radial-gradient(circle, ${PB_BLUE}20 0%, transparent 70%)`,
-          }}
-          animate={{
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${PB_BLUE}15 0%, transparent 70%)` }}
+          animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.05, 1] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        {/* Plus indicator (subtle) */}
-        <div 
-          className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-150"
-          style={{
-            opacity: isPulling ? 0 : 0.5,
-          }}
+        {/* Plus icon (fades out during pull) */}
+        <motion.div 
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          animate={{ opacity: isPulling ? 0 : 0.5 }}
+          transition={{ duration: 0.15 }}
         >
-          <div 
-            className="w-[40%] h-[2px] rounded-full"
-            style={{ background: PB_BLUE }}
-          />
-          <div 
-            className="absolute w-[2px] h-[40%] rounded-full"
-            style={{ background: PB_BLUE }}
-          />
-        </div>
+          <div className="w-[40%] h-[2px] rounded-full" style={{ background: PB_BLUE }} />
+          <div className="absolute w-[2px] h-[40%] rounded-full" style={{ background: PB_BLUE }} />
+        </motion.div>
         
-        {/* Break indicator (horizontal line during pull) */}
+        {/* Break indicator (appears during pull - horizontal line) */}
         {isPulling && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
             initial={{ opacity: 0 }}
-            animate={{ opacity: gestureState.resistance }}
+            animate={{ opacity: snapProgress, rotate: (gestureState.angle * 180) / Math.PI }}
           >
-            <div 
-              className="w-[40%] h-[2px] rounded-full"
-              style={{ background: PB_BLUE }}
-            />
+            <div className="w-[50%] h-[2px] rounded-full" style={{ background: PB_BLUE }} />
           </motion.div>
         )}
       </motion.div>
       
-      {/* Snap hint (appears near threshold) */}
+      {/* Snap label */}
       {(isNearSnap || hasSnapped) && (
         <motion.span
-          className="absolute text-[9px] whitespace-nowrap pointer-events-none font-medium"
+          className="absolute text-[10px] whitespace-nowrap pointer-events-none font-medium"
           style={{ 
             color: PB_BLUE,
-            left: isLeftPull ? `calc(50% - ${visualOffset + 30}px)` : undefined,
-            right: isRightPull ? `calc(50% - ${visualOffset + 30}px)` : undefined,
+            top: -18,
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: hasSnapped ? 1 : 0.9 }}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          {hasSnapped ? 'New Chain' : 'Break'}
+          {hasSnapped ? '✦ New Chain' : 'Break'}
         </motion.span>
       )}
     </div>

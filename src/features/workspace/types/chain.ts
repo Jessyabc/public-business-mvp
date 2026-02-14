@@ -56,15 +56,21 @@ export interface LensChainMembership {
 export type ChainViewMode = 'raw' | 'lens' | 'all';
 
 /**
- * Gesture states for pull-to-break interaction
+ * Gesture states for omnidirectional pull-to-break interaction
  */
 export interface PullGestureState {
   isActive: boolean;
   startX: number;
+  startY: number;
   currentX: number;
-  resistance: number; // 0-1 normalized
+  currentY: number;
+  /** Normalized distance 0-1 from center to threshold */
+  resistance: number;
   didSnap: boolean;
   didHaptic: boolean;
+  /** Angle in radians from start point */
+  angle: number;
+  /** Legacy compat */
   direction: 'left' | 'right' | null;
 }
 
