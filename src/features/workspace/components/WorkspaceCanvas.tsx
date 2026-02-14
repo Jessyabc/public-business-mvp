@@ -22,6 +22,7 @@ import { ThinkingSurface } from './ThinkingSurface';
 import { EmptyWorkspace } from './EmptyWorkspace';
 import { ContinuePrompt } from './ContinuePrompt';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 // Safety timeout for workspace loading (in case sync gets stuck)
@@ -37,11 +38,15 @@ export function WorkspaceCanvas() {
     getActiveThought,
     setLoading,
   } = useWorkspaceStore();
-  const { breakChain, activeChainId, setActiveChain } = useChainStore();
+  const { breakChain, activeChainId } = useChainStore();
   const { scope, focusedChainId } = useFeedStore();
   
   // Prevent immediate re-open after blur closes the thought
   const justAnchoredRef = useRef(false);
+  const [showChainNaming, setShowChainNaming] = useState(false);
+  const [newChainId, setNewChainId] = useState<string | null>(null);
+  const [chainNameDraft, setChainNameDraft] = useState('');
+  const chainNameInputRef = useRef<HTMLInputElement>(null);
   
   // Safety timeout for loading state
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
@@ -68,7 +73,7 @@ export function WorkspaceCanvas() {
   // Initialize sync for thoughts and chains
   useWorkspaceSync();
   useChainSync();
-  useRealtimeSync(); // Cross-device realtime updates
+  const { isConnected } = useRealtimeSync(); // Cross-device realtime updates
    useLinkSync(); // Chain links sync
    const { embedThought } = useEmbedThought();
   
@@ -84,20 +89,53 @@ export function WorkspaceCanvas() {
   }, [createThought, user?.id, scope, focusedChainId]);
  
    // Handle break chain gesture
-   const handleBreakChain = useCallback(() => {
-     if (!user) return;
-     
-     // Find the last anchored thought in the current active chain
-     const lastThoughtInChain = thoughts
-       .filter(t => t.chain_id === activeChainId && t.state === 'anchored')
-       .sort((a, b) => {
-         const timeA = new Date(a.anchored_at || a.created_at).getTime();
-         const timeB = new Date(b.anchored_at || b.created_at).getTime();
-         return timeB - timeA;
-       })[0];
-     
-     breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
-   }, [user, breakChain, activeChainId, thoughts]);
+    const handleBreakChain = useCallback(() => {
+      if (!user) return;
+      
+      const lastThoughtInChain = thoughts
+        .filter(t => t.chain_id === activeChainId && t.state === 'anchored')
+        .sort((a, b) => {
+          const timeA = new Date(a.anchored_at || a.created_at).getTime();
+          const timeB = new Date(b.anchored_at || b.created_at).getTime();
+          return timeB - timeA;
+        })[0];
+      
+      const chainId = breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
+      
+      // Show naming prompt
+      setNewChainId(chainId);
+      setChainNameDraft('');
+      setShowChainNaming(true);
+      setTimeout(() => chainNameInputRef.current?.focus(), 150);
+    }, [user, breakChain, activeChainId, thoughts]);
+
+    const handleSaveChainName = useCallback(() => {
+      if (newChainId) {
+        const trimmed = chainNameDraft.trim();
+        if (trimmed) {
+          const { updateChainLabel } = useChainStore.getState();
+          updateChainLabel(newChainId, trimmed);
+          // Persist to Supabase
+          if (user) {
+            supabase
+              .from('thought_chains')
+              .update({ display_label: trimmed, updated_at: new Date().toISOString() })
+              .eq('id', newChainId)
+              .eq('user_id', user.id)
+              .then(() => {});
+          }
+        }
+      }
+      setShowChainNaming(false);
+      setNewChainId(null);
+      setChainNameDraft('');
+    }, [newChainId, chainNameDraft, user]);
+
+    const handleSkipChainName = useCallback(() => {
+      setShowChainNaming(false);
+      setNewChainId(null);
+      setChainNameDraft('');
+    }, []);
 
    // Reset user-initiated flag when thought is anchored, embed for search, and prevent immediate re-open
    const handleAnchor = useCallback((thoughtId?: string) => {
@@ -194,12 +232,29 @@ export function WorkspaceCanvas() {
       )}
       onClick={handleCanvasClick}
     >
-      {/* Sync indicator - very subtle */}
+      {/* Sync indicator */}
       {isSyncing && (
         <div className="fixed top-4 right-4 z-50">
           <span className="text-xs text-[var(--text-tertiary)] opacity-30">
             ·
           </span>
+        </div>
+      )}
+
+      {/* Offline indicator */}
+      {!isConnected && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+          <div 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium"
+            style={{
+              background: 'rgba(199, 120, 50, 0.15)',
+              color: '#C77832',
+              border: '1px solid rgba(199, 120, 50, 0.3)',
+            }}
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+            Reconnecting...
+          </div>
         </div>
       )}
 
@@ -252,14 +307,57 @@ export function WorkspaceCanvas() {
                  </span>
                </div>
                
-               {/* Break control (+ button) BETWEEN input and feed */}
-               <div className="flex justify-center py-1">
-                 <OpenCircle
-                   onContinue={handleStartThinking}
-                   onBreak={handleBreakChain}
-                   size="sm"
-                 />
-               </div>
+                {/* Chain naming prompt (appears after break gesture) */}
+                {showChainNaming && (
+                  <div 
+                    className="flex items-center gap-2 w-full px-3 py-2 rounded-xl"
+                    style={{
+                      background: 'rgba(72, 159, 227, 0.08)',
+                      border: '1px solid rgba(72, 159, 227, 0.2)',
+                    }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <span className="text-xs whitespace-nowrap" style={{ color: '#489FE3' }}>
+                      Name this chain:
+                    </span>
+                    <input
+                      ref={chainNameInputRef}
+                      type="text"
+                      value={chainNameDraft}
+                      onChange={(e) => setChainNameDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveChainName();
+                        if (e.key === 'Escape') handleSkipChainName();
+                      }}
+                      placeholder="Optional..."
+                      className="flex-1 bg-transparent border-none outline-none text-sm min-w-0"
+                      style={{ color: '#4A443D' }}
+                    />
+                    <button
+                      onClick={handleSaveChainName}
+                      className="text-xs px-2 py-1 rounded-lg font-medium"
+                      style={{ color: '#489FE3', background: 'rgba(72, 159, 227, 0.12)' }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleSkipChainName}
+                      className="text-xs px-2 py-1 rounded-lg"
+                      style={{ color: '#A09890' }}
+                    >
+                      Skip
+                    </button>
+                  </div>
+                )}
+
+                {/* Break control (+ button) BETWEEN input and feed */}
+                <div className="flex justify-center py-1">
+                  <OpenCircle
+                    onContinue={handleStartThinking}
+                    onBreak={handleBreakChain}
+                    size="sm"
+                  />
+                </div>
             </div>
           ) : (
             <EmptyWorkspace onStartThinking={handleStartThinking} />
