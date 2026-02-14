@@ -44,6 +44,7 @@ export function WorkspaceCanvas() {
   
   // Prevent immediate re-open after blur closes the thought
   const justAnchoredRef = useRef(false);
+  const wasAnchoredRef = useRef(false); // Track if active thought was reactivated from anchored
   const [showBreakComposer, setShowBreakComposer] = useState(false);
   
   // Safety timeout for loading state
@@ -78,6 +79,17 @@ export function WorkspaceCanvas() {
   const activeThought = getActiveThought();
   const hasThoughts = thoughts.length > 0;
   const hasAnchoredThoughts = thoughts.some((t) => t.state === 'anchored');
+
+  // Track if current active thought was reactivated from anchored state
+  // We detect this by checking: if activeThought exists and has an anchored_at timestamp,
+  // it was a reactivated anchored thought (new thoughts never have anchored_at)
+  useEffect(() => {
+    if (activeThought?.anchored_at) {
+      wasAnchoredRef.current = true;
+    } else {
+      wasAnchoredRef.current = false;
+    }
+  }, [activeThought?.id]);
 
   const handleStartThinking = useCallback(() => {
     setUserInitiated(true);
@@ -270,6 +282,7 @@ export function WorkspaceCanvas() {
               thoughtId={activeThought.id}
               onAnchor={handleAnchor}
               autoFocus={userInitiated}
+              wasAnchored={wasAnchoredRef.current}
             />
           ) : hasThoughts ? (
              /* Input area with break control below */
