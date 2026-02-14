@@ -37,6 +37,9 @@ export function WorkspaceCanvas() {
     isSyncing,
     createThought,
     getActiveThought,
+    anchorThought,
+    deleteThought,
+    cancelEdit,
     setLoading,
   } = useWorkspaceStore();
   const { breakChain, activeChainId } = useChainStore();
@@ -166,7 +169,34 @@ export function WorkspaceCanvas() {
      }
    }, [embedThought]);
 
-  // Handle canvas click (tap anywhere empty to start writing or blur active thought)
+  // Directly anchor active thought (used when clicking away, regardless of focus)
+  const anchorActiveThought = useCallback(() => {
+    if (!activeThought) return;
+    
+    const content = activeThought.content.trim();
+    const wasAnchored = wasAnchoredRef.current;
+    
+    // First, blur any focused textarea to prevent double-fire
+    const textarea = document.querySelector('.thinking-surface textarea') as HTMLTextAreaElement;
+    if (textarea && document.activeElement === textarea) {
+      // Remove blur handler temporarily to prevent double execution
+      textarea.setAttribute('data-skip-blur', 'true');
+      textarea.blur();
+    }
+    
+    if (!content) {
+      deleteThought(activeThought.id);
+    } else if (wasAnchored) {
+      // Was a reactivated thought — just restore it (cancel edit)
+      cancelEdit(activeThought.id, content);
+    } else {
+      anchorThought(activeThought.id);
+    }
+    
+    handleAnchor(activeThought.id);
+  }, [activeThought, anchorThought, deleteThought, cancelEdit, handleAnchor]);
+
+  // Handle canvas click (tap anywhere empty to start writing or anchor active thought)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     // Prevent re-opening immediately after blur closed the thought
     if (justAnchoredRef.current) {
@@ -187,12 +217,9 @@ export function WorkspaceCanvas() {
                         target.closest('textarea') ||
                         target.closest('a');
     
-    // If there's an active thought and clicking outside, blur it (which will cancel if no changes)
+    // If there's an active thought and clicking outside, anchor it directly
     if (activeThought && !isOnThought) {
-      const textarea = document.querySelector('.thinking-surface textarea') as HTMLTextAreaElement;
-      if (textarea) {
-        textarea.blur();
-      }
+      anchorActiveThought();
       return;
     }
     
@@ -202,7 +229,7 @@ export function WorkspaceCanvas() {
       const targetChainId = scope === 'chain' && focusedChainId ? focusedChainId : undefined;
       createThought(undefined, user?.id, undefined, targetChainId);
     }
-  }, [activeThought, createThought, user?.id, scope, focusedChainId]);
+  }, [activeThought, anchorActiveThought, createThought, user?.id, scope, focusedChainId]);
 
   // Global Enter key to start writing (when no thought is active)
   useEffect(() => {

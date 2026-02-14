@@ -127,6 +127,11 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
   const handleBlur = useCallback(() => {
     setIsFocused(false);
     setEnterCount(0);
+    // Skip if parent already handled anchor (e.g., canvas click)
+    if (textareaRef.current?.getAttribute('data-skip-blur') === 'true') {
+      textareaRef.current.removeAttribute('data-skip-blur');
+      return;
+    }
     performAnchor();
   }, [performAnchor]);
 
