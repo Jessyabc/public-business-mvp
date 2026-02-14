@@ -127,6 +127,12 @@ export function WorkspaceCanvas() {
       embedThought(thoughtId).catch(console.error);
       
       setShowBreakComposer(false);
+      
+      // Immediately open a new active thought in the new chain so keyboard stays active
+      setTimeout(() => {
+        setUserInitiated(true);
+        createThought(undefined, user.id, chainId);
+      }, 100);
     }, [user, breakChain, activeChainId, thoughts, createThought, embedThought]);
 
     const handleBreakCancel = useCallback(() => {
