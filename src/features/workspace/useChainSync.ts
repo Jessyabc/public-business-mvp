@@ -3,6 +3,7 @@
  * 
  * Syncs thought_chains and active_chain_id with Supabase.
  * Active chain is ACCOUNT-LEVEL (persisted to user_settings.active_chain_id).
+ * DB is source of truth — replaces local state on load.
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -30,7 +31,7 @@ export function useChainSync() {
   const lastSyncedChainsRef = useRef<string>('');
   const lastSyncedActiveChainRef = useRef<string | null>(null);
 
-  // Load active_chain_id from user_settings (account-level persistence)
+  // Load active_chain_id from user_settings
   const loadActiveChain = useCallback(async () => {
     if (!user) return null;
     
@@ -42,7 +43,6 @@ export function useChainSync() {
         .maybeSingle();
 
       if (error) throw error;
-      
       return data?.active_chain_id ?? null;
     } catch (err) {
       console.error('Failed to load active chain:', err);
@@ -53,8 +53,6 @@ export function useChainSync() {
   // Persist active_chain_id to user_settings
   const persistActiveChain = useCallback(async (chainId: string | null) => {
     if (!user) return;
-    
-    // Skip if no change
     if (chainId === lastSyncedActiveChainRef.current) return;
     
     try {
@@ -66,24 +64,20 @@ export function useChainSync() {
         }, { onConflict: 'user_id' });
 
       if (error) throw error;
-      
       lastSyncedActiveChainRef.current = chainId;
     } catch (err) {
       console.error('Failed to persist active chain:', err);
     }
   }, [user]);
 
-  // Debounced active chain sync
   const debouncedActiveChainSync = useCallback((chainId: string | null) => {
-    if (activeChainSyncRef.current) {
-      clearTimeout(activeChainSyncRef.current);
-    }
+    if (activeChainSyncRef.current) clearTimeout(activeChainSyncRef.current);
     activeChainSyncRef.current = setTimeout(() => {
       persistActiveChain(chainId);
-    }, 500); // Faster sync for active chain (important for UX)
+    }, 500);
   }, [persistActiveChain]);
 
-  // Load chains from Supabase on mount
+  // Load chains — DB is source of truth
   const loadChains = useCallback(async () => {
     if (!user) {
       setLoadingChains(false);
@@ -93,7 +87,6 @@ export function useChainSync() {
     setLoadingChains(true);
     
     try {
-      // Load chains and active_chain_id in parallel
       const [chainsResult, activeChainId] = await Promise.all([
         supabase
           .from('thought_chains')
@@ -117,15 +110,11 @@ export function useChainSync() {
           diverged_at_thought_id: row.diverged_at_thought_id,
         }));
         
-        // Merge with local chains (prefer newer)
-        const localChains = useChainStore.getState().chains;
-        const mergedChains = mergeChains(localChains, loadedChains);
+        // DB is source of truth — replace local state
+        setChains(loadedChains);
+        lastSyncedChainsRef.current = JSON.stringify(loadedChains);
         
-        setChains(mergedChains);
-        lastSyncedChainsRef.current = JSON.stringify(mergedChains);
-        
-        // Restore active chain from DB (account-level)
-        if (activeChainId && mergedChains.some(c => c.id === activeChainId)) {
+        if (activeChainId && loadedChains.some(c => c.id === activeChainId)) {
           setActiveChain(activeChainId);
           lastSyncedActiveChainRef.current = activeChainId;
         }
@@ -144,7 +133,6 @@ export function useChainSync() {
     const currentChains = useChainStore.getState().chains;
     const currentJson = JSON.stringify(currentChains);
     
-    // Skip if nothing changed
     if (currentJson === lastSyncedChainsRef.current) return;
     
     setSyncingChains(true);
@@ -172,86 +160,39 @@ export function useChainSync() {
     } catch (err) {
       console.error('Failed to sync chains:', err);
     } finally {
-      if (isMountedRef.current) {
-        setSyncingChains(false);
-      }
+      if (isMountedRef.current) setSyncingChains(false);
     }
   }, [user, setSyncingChains]);
 
-  // Debounced sync
   const debouncedSync = useCallback(() => {
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current);
-    }
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(syncChains, SYNC_DEBOUNCE_MS);
   }, [syncChains]);
 
   // Load on mount
   useEffect(() => {
     isMountedRef.current = true;
-    
-    if (user) {
-      loadChains();
-    } else {
-      setLoadingChains(false);
-    }
+    if (user) loadChains();
+    else setLoadingChains(false);
     
     return () => {
       isMountedRef.current = false;
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-      if (activeChainSyncRef.current) {
-        clearTimeout(activeChainSyncRef.current);
-      }
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+      if (activeChainSyncRef.current) clearTimeout(activeChainSyncRef.current);
     };
   }, [user, loadChains, setLoadingChains]);
 
   // Auto-sync when chains change
   useEffect(() => {
-    if (user && chains.length > 0) {
-      debouncedSync();
-    }
+    if (user && chains.length > 0) debouncedSync();
   }, [chains, user, debouncedSync]);
 
-  // Persist active chain when it changes (account-level)
+  // Persist active chain when it changes
   useEffect(() => {
     if (user && activeChainId !== undefined) {
       debouncedActiveChainSync(activeChainId);
     }
   }, [activeChainId, user, debouncedActiveChainSync]);
 
-  return {
-    loadChains,
-    syncChains,
-    persistActiveChain,
-  };
-}
-
-// Merge local and remote chains, preferring newer versions
-function mergeChains(
-  local: ThoughtChain[],
-  remote: ThoughtChain[]
-): ThoughtChain[] {
-  const merged = new Map<string, ThoughtChain>();
-  
-  // Add remote chains first
-  for (const chain of remote) {
-    merged.set(chain.id, chain);
-  }
-  
-  // Merge local chains (prefer newer)
-  for (const chain of local) {
-    const existing = merged.get(chain.id);
-    const localIsNewer = !existing || new Date(chain.updated_at) > new Date(existing.updated_at);
-    
-    if (localIsNewer) {
-      merged.set(chain.id, chain);
-    }
-  }
-  
-  // Sort by created_at descending
-  return Array.from(merged.values()).sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  return { loadChains, syncChains, persistActiveChain };
 }

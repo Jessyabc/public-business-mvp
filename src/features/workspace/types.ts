@@ -5,7 +5,7 @@
  * - Chains break ONLY when user explicitly breaks them
  * - Global feed shows ALL thoughts in strict timestamp order (newest first)
  * - day_key kept for backward compat but NOT used for grouping
- * - Copy-on-edit: edits create new thoughts with edited_from_id reference
+ * - In-place edit: edits update the original thought directly
  */
 
 export type ThoughtState = 'active' | 'anchored';
@@ -35,8 +35,8 @@ export interface ThoughtObject {
   display_label?: string | null;
   /** Chain ID this thought belongs to (Pull-the-Thread system) */
   chain_id?: ChainId | null;
-   /** Reference to original thought when this is an edit (copy-on-edit) */
-   edited_from_id?: string | null;
+  /** Reference to original thought when this is an edit (legacy, kept for DB compat) */
+  edited_from_id?: string | null;
 }
 
  /** Feed scope for projection views */
@@ -64,15 +64,13 @@ export interface WorkspaceState {
 }
 
 export interface WorkspaceActions {
-  // Core thought operations - userId is optional, passed from auth context
+  // Core thought operations
   createThought: (dayKey?: string, userId?: string, chainId?: ChainId, focusedChainId?: ChainId | null) => string;
   updateThought: (id: string, content: string) => void;
   anchorThought: (id: string) => void;
   reactivateThought: (id: string) => void;
   cancelEdit: (id: string, originalContent: string) => void;
   deleteThought: (id: string) => void;
-   /** Copy-on-edit: creates new thought referencing original */
-   editThought: (id: string, newContent: string, userId?: string) => string | null;
   
   // State management
   setActiveThought: (id: string | null) => void;
@@ -82,15 +80,13 @@ export interface WorkspaceActions {
   setLastSynced: (timestamp: string) => void;
   setHasMorePages: (hasMore: boolean) => void;
   setOldestLoadedAt: (cursor: string | null) => void;
-  resetStore: () => void; // Reset store for auth cleanup
+  resetStore: () => void;
   
   // Selectors
   getActiveThought: () => ThoughtObject | null;
   getAnchoredThoughts: () => ThoughtObject[];
-   /** Get ALL anchored thoughts in strict timestamp order (newest first) */
-   getGlobalFeed: () => ThoughtObject[];
-   /** Get anchor thought for a chain (first thought in that chain) */
-   getChainAnchor: (chainId: ChainId) => ThoughtObject | null;
+  getGlobalFeed: () => ThoughtObject[];
+  getChainAnchor: (chainId: ChainId) => ThoughtObject | null;
 }
 
 export type WorkspaceStore = WorkspaceState & WorkspaceActions;

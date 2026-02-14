@@ -7,14 +7,12 @@
 
 // Components
 export { WorkspaceCanvas } from "./components/WorkspaceCanvas";
-export { ActiveChainView } from "./components/ActiveChainView";
-export { ChainThread } from "./components/ChainThread";
 export { OpenCircle } from "./components/OpenCircle";
 
 // Stores
 export { useWorkspaceStore } from "./useWorkspaceStore";
 export { useChainStore } from "./stores/chainStore";
- export { useFeedStore } from "./stores/feedStore";
+export { useFeedStore } from "./stores/feedStore";
 
 // Sync hooks
 export { useWorkspaceSync } from "./useWorkspaceSync";
@@ -24,5 +22,5 @@ export { useChainSync } from "./useChainSync";
 export { useChainGestures } from "./hooks/useChainGestures";
 
 // Types
- export type { ThoughtObject, ThoughtState, FeedScope, ChainLink, WorkspaceStore, ChainId } from "./types";
-export type { ThoughtChain, ThoughtLens, ChainStore, ChainViewMode, PullGestureState } from "./types/chain";
+export type { ThoughtObject, ThoughtState, FeedScope, ChainLink, WorkspaceStore, ChainId } from "./types";
+export type { ThoughtChain, ChainStore, ChainViewMode, PullGestureState } from "./types/chain";
