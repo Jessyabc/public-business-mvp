@@ -126,12 +126,15 @@ export function useWorkspaceSync() {
   }, [user, hasMorePages, oldestLoadedAt, setThoughts, setHasMorePages, setOldestLoadedAt]);
 
   // Sync thoughts to Supabase
-  const syncThoughts = useCallback(async () => {
+  const syncThoughts = useCallback(async (force = false) => {
     if (!user) return;
     
     const currentThoughts = useWorkspaceStore.getState().thoughts;
-    const currentJson = JSON.stringify(currentThoughts);
-    if (currentJson === lastSyncedThoughtsRef.current) return;
+    
+    if (!force) {
+      const currentJson = JSON.stringify(currentThoughts);
+      if (currentJson === lastSyncedThoughtsRef.current) return;
+    }
     
     setSyncing(true);
     try {
@@ -156,7 +159,7 @@ export function useWorkspaceSync() {
         if (error) throw error;
       }
       
-      lastSyncedThoughtsRef.current = currentJson;
+      lastSyncedThoughtsRef.current = JSON.stringify(currentThoughts);
       setLastSynced(new Date().toISOString());
     } catch (err) {
       console.error('Failed to sync workspace thoughts:', err);
@@ -188,12 +191,14 @@ export function useWorkspaceSync() {
     if (user && thoughts.length > 0) debouncedSync();
   }, [thoughts, user, debouncedSync]);
 
-  // Immediate sync on anchor count change
+  // Immediate sync when anchored count changes (forced to bypass JSON check)
   const anchoredCount = thoughts.filter(t => t.state === 'anchored').length;
+  const prevAnchoredRef = useRef(anchoredCount);
   useEffect(() => {
-    if (user && anchoredCount > 0) {
-      const id = setTimeout(() => syncThoughts(), 500);
-      return () => clearTimeout(id);
+    if (user && anchoredCount !== prevAnchoredRef.current) {
+      prevAnchoredRef.current = anchoredCount;
+      // Force sync immediately when anchor state changes
+      syncThoughts(true);
     }
   }, [anchoredCount, user, syncThoughts]);
 
@@ -235,12 +240,17 @@ function mergeThoughts(local: ThoughtObject[], remote: ThoughtObject[]): Thought
   
   for (const t of local) {
     const existing = merged.get(t.id);
-    const localIsNewer = !existing || new Date(t.updated_at) > new Date(existing.updated_at);
     
-    if (localIsNewer) {
+    if (!existing) {
+      // Local-only thought (not yet synced to server)
       merged.set(t.id, t);
-    } else if (existing && t.state === 'active' && existing.state === 'anchored') {
-      merged.set(t.id, { ...existing, state: 'active' });
+    } else {
+      // Both exist: pick the one with later updated_at
+      const localIsNewer = new Date(t.updated_at) > new Date(existing.updated_at);
+      if (localIsNewer) {
+        merged.set(t.id, t);
+      }
+      // Server wins if same or newer - do NOT override anchored→active
     }
     
     const final = merged.get(t.id)!;
