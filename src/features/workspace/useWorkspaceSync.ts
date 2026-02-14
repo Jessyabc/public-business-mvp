@@ -208,17 +208,16 @@ export function useWorkspaceSync() {
     }
   }, [thoughts, user, debouncedSync]);
 
-  // Force immediate sync when a thought is anchored
+  // Force immediate sync when anchored count changes
+  const anchoredCount = thoughts.filter(t => t.state === 'anchored').length;
   useEffect(() => {
-    const anchoredCount = thoughts.filter(t => t.state === 'anchored').length;
     if (user && anchoredCount > 0) {
-      // Small delay to ensure state is settled, then force sync
       const timeoutId = setTimeout(() => {
         syncThoughts();
       }, 500);
       return () => clearTimeout(timeoutId);
     }
-  }, [thoughts.filter(t => t.state === 'anchored').length, user, syncThoughts]);
+  }, [anchoredCount, user, syncThoughts]);
 
   // Sync before unload
   useEffect(() => {
