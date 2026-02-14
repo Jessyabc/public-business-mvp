@@ -193,9 +193,7 @@ export function ChainThread({
           />
           
           <OpenCircle
-            onContinue={handleContinue}
             onBreak={handleBreak}
-            onMerge={handleMerge}
             size={isActive ? 'lg' : 'md'}
           />
         </div>

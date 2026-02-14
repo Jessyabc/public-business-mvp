@@ -14,11 +14,12 @@ import { useChainStore } from '../stores/chainStore';
 import { useFeedStore } from '../stores/feedStore';
 import { useChainSync } from '../useChainSync';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
- import { useLinkSync } from '../hooks/useLinkSync';
- import { useEmbedThought } from '../hooks/useThoughtSearch';
+import { useLinkSync } from '../hooks/useLinkSync';
+import { useEmbedThought } from '../hooks/useThoughtSearch';
 import { ThinkingSurface } from './ThinkingSurface';
- import { ThinkFeed } from './ThinkFeed';
- import { OpenCircle } from './OpenCircle';
+import { ThinkFeed } from './ThinkFeed';
+import { OpenCircle } from './OpenCircle';
+import { BreakComposer } from './BreakComposer';
 import { EmptyWorkspace } from './EmptyWorkspace';
 import { ContinuePrompt } from './ContinuePrompt';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,10 +44,7 @@ export function WorkspaceCanvas() {
   
   // Prevent immediate re-open after blur closes the thought
   const justAnchoredRef = useRef(false);
-  const [showChainNaming, setShowChainNaming] = useState(false);
-  const [newChainId, setNewChainId] = useState<string | null>(null);
-  const [chainNameDraft, setChainNameDraft] = useState('');
-  const chainNameInputRef = useRef<HTMLInputElement>(null);
+  const [showBreakComposer, setShowBreakComposer] = useState(false);
   
   // Safety timeout for loading state
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
@@ -88,8 +86,13 @@ export function WorkspaceCanvas() {
     createThought(undefined, user?.id, undefined, targetChainId);
   }, [createThought, user?.id, scope, focusedChainId]);
  
-   // Handle break chain gesture
+   // Handle break chain gesture - opens the break composer
     const handleBreakChain = useCallback(() => {
+      setShowBreakComposer(true);
+    }, []);
+
+    // Handle break composer submit - creates chain + first thought
+    const handleBreakSubmit = useCallback((content: string, chainLabel: string) => {
       if (!user) return;
       
       const lastThoughtInChain = thoughts
@@ -100,41 +103,34 @@ export function WorkspaceCanvas() {
           return timeB - timeA;
         })[0];
       
+      // Create the new chain
       const chainId = breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
       
-      // Show naming prompt
-      setNewChainId(chainId);
-      setChainNameDraft('');
-      setShowChainNaming(true);
-      setTimeout(() => chainNameInputRef.current?.focus(), 150);
-    }, [user, breakChain, activeChainId, thoughts]);
-
-    const handleSaveChainName = useCallback(() => {
-      if (newChainId) {
-        const trimmed = chainNameDraft.trim();
-        if (trimmed) {
-          const { updateChainLabel } = useChainStore.getState();
-          updateChainLabel(newChainId, trimmed);
-          // Persist to Supabase
-          if (user) {
-            supabase
-              .from('thought_chains')
-              .update({ display_label: trimmed, updated_at: new Date().toISOString() })
-              .eq('id', newChainId)
-              .eq('user_id', user.id)
-              .then(() => {});
-          }
-        }
+      // Set label if provided
+      if (chainLabel) {
+        const { updateChainLabel } = useChainStore.getState();
+        updateChainLabel(chainId, chainLabel);
+        supabase
+          .from('thought_chains')
+          .update({ display_label: chainLabel, updated_at: new Date().toISOString() })
+          .eq('id', chainId)
+          .eq('user_id', user.id)
+          .then(() => {});
       }
-      setShowChainNaming(false);
-      setNewChainId(null);
-      setChainNameDraft('');
-    }, [newChainId, chainNameDraft, user]);
+      
+      // Create and immediately anchor the first thought in the new chain
+      const thoughtId = createThought(undefined, user.id, chainId);
+      useWorkspaceStore.getState().updateThought(thoughtId, content);
+      useWorkspaceStore.getState().anchorThought(thoughtId);
+      
+      // Embed for search
+      embedThought(thoughtId).catch(console.error);
+      
+      setShowBreakComposer(false);
+    }, [user, breakChain, activeChainId, thoughts, createThought, embedThought]);
 
-    const handleSkipChainName = useCallback(() => {
-      setShowChainNaming(false);
-      setNewChainId(null);
-      setChainNameDraft('');
+    const handleBreakCancel = useCallback(() => {
+      setShowBreakComposer(false);
     }, []);
 
    // Reset user-initiated flag when thought is anchored, embed for search, and prevent immediate re-open
@@ -307,53 +303,9 @@ export function WorkspaceCanvas() {
                  </span>
                </div>
                
-                {/* Chain naming prompt (appears after break gesture) */}
-                {showChainNaming && (
-                  <div 
-                    className="flex items-center gap-2 w-full px-3 py-2 rounded-xl"
-                    style={{
-                      background: 'rgba(72, 159, 227, 0.08)',
-                      border: '1px solid rgba(72, 159, 227, 0.2)',
-                    }}
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <span className="text-xs whitespace-nowrap" style={{ color: '#489FE3' }}>
-                      Name this chain:
-                    </span>
-                    <input
-                      ref={chainNameInputRef}
-                      type="text"
-                      value={chainNameDraft}
-                      onChange={(e) => setChainNameDraft(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveChainName();
-                        if (e.key === 'Escape') handleSkipChainName();
-                      }}
-                      placeholder="Optional..."
-                      className="flex-1 bg-transparent border-none outline-none text-sm min-w-0"
-                      style={{ color: '#4A443D' }}
-                    />
-                    <button
-                      onClick={handleSaveChainName}
-                      className="text-xs px-2 py-1 rounded-lg font-medium"
-                      style={{ color: '#489FE3', background: 'rgba(72, 159, 227, 0.12)' }}
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleSkipChainName}
-                      className="text-xs px-2 py-1 rounded-lg"
-                      style={{ color: '#A09890' }}
-                    >
-                      Skip
-                    </button>
-                  </div>
-                )}
-
                 {/* Break control (+ button) BETWEEN input and feed */}
                 <div className="flex justify-center py-1">
                   <OpenCircle
-                    onContinue={handleStartThinking}
                     onBreak={handleBreakChain}
                     size="sm"
                   />
@@ -371,6 +323,13 @@ export function WorkspaceCanvas() {
            </section>
         )}
       </div>
+
+      {/* Break Composer Modal */}
+      <BreakComposer
+        isOpen={showBreakComposer}
+        onSubmit={handleBreakSubmit}
+        onCancel={handleBreakCancel}
+      />
     </div>
   );
 }
