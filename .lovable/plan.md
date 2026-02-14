@@ -1,58 +1,40 @@
 
 
-## Consolidate Tailwind CSS v4 to a Single Integration Path
+## Fix: Restore Global Tailwind Utility Spacing in Production
 
-### The Problem
+### Root Cause
 
-Right now there are **two conflicting Tailwind integration points**:
+The inline critical CSS in `index.html` line 29 contains an **unlayered CSS reset** that overrides all Tailwind spacing utilities site-wide:
 
-1. `postcss.config.js` -- uses `@tailwindcss/postcss`
-2. `vite.config.ts` -- does NOT use `@tailwindcss/vite`
-
-The PostCSS path is the one causing production build failures. We need to pick ONE and clean up everything else.
-
-### The Choice: `@tailwindcss/vite` (recommended)
-
-Since this is a Vite project, Tailwind's own docs recommend `@tailwindcss/vite`. It hooks directly into Vite's transform pipeline and avoids the known production build issues with the PostCSS plugin.
-
-### Exactly What Changes
-
-| File | What happens |
-|------|-------------|
-| `package.json` | Replace `@tailwindcss/postcss` with `@tailwindcss/vite`. Remove `autoprefixer` (handled automatically by the Vite plugin). Keep `postcss` and `tailwindcss`. |
-| `vite.config.ts` | Add `import tailwindcss from '@tailwindcss/vite'` and add `tailwindcss()` to the plugins array. |
-| `postcss.config.js` | Empty the plugins object -- no Tailwind processing here anymore. |
-| `src/index.css` | No changes needed. `@import "tailwindcss"`, `@theme`, `@source` all work identically. |
-
-### File-by-file Details
-
-**package.json** -- dependency swap:
-- Remove: `@tailwindcss/postcss`, `autoprefixer`
-- Add: `@tailwindcss/vite` (same version `^4.1.18`)
-
-**vite.config.ts** -- add plugin:
-```
-import tailwindcss from '@tailwindcss/vite';
-
-plugins: [
-  tailwindcss(),   // FIRST -- before React
-  react(),
-  componentTaggerPlugin,
-].filter(Boolean),
+```css
+*{box-sizing:border-box;margin:0;padding:0}
 ```
 
-**postcss.config.js** -- gut it:
-```
-export default {
-  plugins: {},
-}
+Because this sits outside any `@layer`, it has higher specificity than Tailwind v4's layered utilities (`space-x-*`, `mx-*`, `px-*`, `py-*`, etc.). This means **any Tailwind class that sets margin or padding can be silently overridden** -- not just in the Header, but everywhere in the app.
+
+The same reset already exists properly inside `@layer base` in `src/index.css`, where it correctly defers to Tailwind utilities. The inline version is redundant and destructive.
+
+### The Fix (1 line change)
+
+**`index.html` line 29** -- remove `margin:0;padding:0` from the inline critical CSS:
+
+```css
+/* Before */
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* After */
+*{box-sizing:border-box}
 ```
 
-### Why This Fixes Production
+That is the entire fix. No hardcoded styles, no component-level overrides. This restores the correct CSS cascade so that all Tailwind utilities (`space-x-*`, `gap-*`, `p-*`, `m-*`, etc.) work as intended across every component globally.
 
-The `@tailwindcss/vite` plugin participates directly in Vite's module graph. It sees every file Vite processes, so it reliably generates all utility classes for both dev and production builds. The PostCSS plugin runs in a separate pass and can miss files, which is why dev (HMR) works but `vite build` drops styles.
+### Why Only This One Change
+
+- The proper `margin:0; padding:0` reset is already in `src/index.css` inside `@layer base` -- it will continue to apply as a baseline but yield to any Tailwind utility class.
+- `box-sizing: border-box` is safe to keep inline because no Tailwind utility ever needs to override it.
+- No component files need changes. `space-x-8`, `space-x-4`, etc. in the Header (and everywhere else) will simply start working again.
 
 ### After Implementation
 
-Republish and hard-refresh (`Cmd+Shift+R`) the live URL. All Tailwind utilities and custom glass classes should render correctly.
+Republish and hard-refresh the live site. All spacing, padding, and margin utilities should render correctly across the entire app.
 
