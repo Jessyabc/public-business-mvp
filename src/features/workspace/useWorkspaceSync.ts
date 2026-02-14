@@ -1,8 +1,8 @@
 /**
  * Pillar #1: Individual Workspace - Supabase Sync
  * 
- * Handles persistence to workspace_thoughts table.
- * Cursor-based pagination, debounced auto-save, offline-first.
+ * DB is source of truth. On load, server data replaces local state.
+ * Cursor-based pagination, debounced auto-save.
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -35,7 +35,7 @@ export function useWorkspaceSync() {
   const lastSyncedThoughtsRef = useRef<string>('');
   const isLoadingMoreRef = useRef(false);
 
-  // Load first page of thoughts
+  // Load first page of thoughts — DB is source of truth, replaces local state
   const loadThoughts = useCallback(async () => {
     if (!user) {
       setLoading(false);
@@ -61,10 +61,9 @@ export function useWorkspaceSync() {
       
       if (data && isMountedRef.current) {
         const loaded = mapRows(data);
-        const localThoughts = useWorkspaceStore.getState().thoughts;
-        const merged = mergeThoughts(localThoughts, loaded);
         
-        setThoughts(merged);
+        // DB is source of truth — replace local state entirely
+        setThoughts(loaded);
         setHasMorePages(data.length === PAGE_SIZE);
         if (data.length > 0) {
           setOldestLoadedAt(data[data.length - 1].updated_at);
@@ -73,10 +72,10 @@ export function useWorkspaceSync() {
         // Clear stale active thought
         const currentActiveId = useWorkspaceStore.getState().activeThoughtId;
         if (currentActiveId) {
-          const active = merged.find(t => t.id === currentActiveId);
+          const active = loaded.find(t => t.id === currentActiveId);
           if (!active || active.state === 'anchored') setActiveThought(null);
         }
-        lastSyncedThoughtsRef.current = JSON.stringify(merged);
+        lastSyncedThoughtsRef.current = JSON.stringify(loaded);
         setLastSynced(new Date().toISOString());
       }
     } catch (err) {
@@ -106,7 +105,6 @@ export function useWorkspaceSync() {
       if (data && isMountedRef.current) {
         const loaded = mapRows(data);
         const current = useWorkspaceStore.getState().thoughts;
-        // Append without duplicates
         const existingIds = new Set(current.map(t => t.id));
         const newThoughts = loaded.filter(t => !existingIds.has(t.id));
         
@@ -191,13 +189,12 @@ export function useWorkspaceSync() {
     if (user && thoughts.length > 0) debouncedSync();
   }, [thoughts, user, debouncedSync]);
 
-  // Immediate sync when anchored count changes (forced to bypass JSON check)
+  // Immediate sync when anchored count changes
   const anchoredCount = thoughts.filter(t => t.state === 'anchored').length;
   const prevAnchoredRef = useRef(anchoredCount);
   useEffect(() => {
     if (user && anchoredCount !== prevAnchoredRef.current) {
       prevAnchoredRef.current = anchoredCount;
-      // Force sync immediately when anchor state changes
       syncThoughts(true);
     }
   }, [anchoredCount, user, syncThoughts]);
@@ -231,35 +228,4 @@ function mapRows(data: any[]): ThoughtObject[] {
       edited_from_id: row.edited_from_id || null,
     };
   });
-}
-
-function mergeThoughts(local: ThoughtObject[], remote: ThoughtObject[]): ThoughtObject[] {
-  const merged = new Map<string, ThoughtObject>();
-  
-  for (const t of remote) merged.set(t.id, t);
-  
-  for (const t of local) {
-    const existing = merged.get(t.id);
-    
-    if (!existing) {
-      // Local-only thought (not yet synced to server)
-      merged.set(t.id, t);
-    } else {
-      // Both exist: pick the one with later updated_at
-      const localIsNewer = new Date(t.updated_at) > new Date(existing.updated_at);
-      if (localIsNewer) {
-        merged.set(t.id, t);
-      }
-      // Server wins if same or newer - do NOT override anchored→active
-    }
-    
-    const final = merged.get(t.id)!;
-    if (!final.day_key) {
-      final.day_key = (final.anchored_at || final.created_at).split('T')[0];
-    }
-  }
-  
-  return Array.from(merged.values()).sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  );
 }

@@ -5,6 +5,7 @@
  * PB Blue glow appears when focused = active cognition.
  * When thought settles, blue fades and thought becomes warm neumorphic.
  * 
+ * In-place edit: edits update the original thought directly.
  * Swipe-down gesture anchors the thought into the feed.
  */
 
@@ -13,18 +14,17 @@ import { motion, useMotionValue, useTransform, useAnimation } from 'framer-motio
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useChainStore } from '../stores/chainStore';
-import { useAuth } from '@/contexts/AuthContext';
 import { useHaptic } from '@/hooks/useHaptic';
 import { cn } from '@/lib/utils';
 
 const PB_BLUE = '#489FE3';
-const SWIPE_DOWN_THRESHOLD = 60; // px to trigger anchor
+const SWIPE_DOWN_THRESHOLD = 60;
 
 interface ThinkingSurfaceProps {
   thoughtId: string;
   onAnchor?: (thoughtId?: string) => void;
   autoFocus?: boolean;
-  wasAnchored?: boolean; // Pass from parent to correctly track reactivated thoughts
+  wasAnchored?: boolean;
 }
 
 export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnchored: wasAnchoredProp = false }: ThinkingSurfaceProps) {
@@ -34,9 +34,8 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
   const originalContentRef = useRef<string>('');
   const wasAnchoredRef = useRef<boolean>(false);
   const isMobile = useIsMobile();
-  const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit, editThought } = useWorkspaceStore();
+  const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit } = useWorkspaceStore();
   const { activeChainId, pendingChainId, getChainById } = useChainStore();
-  const { user } = useAuth();
   const { triggerHaptic } = useHaptic();
   
   // Swipe-down state
@@ -57,7 +56,6 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
   useEffect(() => {
     if (thought) {
       originalContentRef.current = thought.content;
-      // Use prop if provided (for reactivated thoughts), otherwise check current state
       wasAnchoredRef.current = wasAnchoredProp || thought.state === 'anchored';
     }
   }, [thoughtId, wasAnchoredProp]);
@@ -84,7 +82,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
     handleInput();
   }, [thoughtId, updateThought, handleInput]);
 
-  // Anchor helper (shared by blur and swipe)
+  // Anchor helper - in-place edit model
   const performAnchor = useCallback(() => {
     if (!thought) return;
     
@@ -93,36 +91,25 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
     const wasAnchored = wasAnchoredRef.current;
     const hasChanges = currentContent !== originalContent;
     
-    if (!hasChanges) {
-      if (wasAnchored) {
-        cancelEdit(thoughtId, originalContentRef.current);
-        onAnchor?.(thoughtId);
-      } else {
-        if (!currentContent) {
-          deleteThought(thoughtId);
-          onAnchor?.(thoughtId);
-        } else {
-          anchorThought(thoughtId);
-          onAnchor?.(thoughtId);
-        }
-      }
+    if (!currentContent) {
+      // Empty thought — delete it
+      deleteThought(thoughtId);
+      onAnchor?.(thoughtId);
       return;
     }
     
-    if (currentContent) {
-      if (wasAnchored) {
-        cancelEdit(thoughtId, originalContentRef.current);
-        const newThoughtId = editThought(thoughtId, currentContent, user?.id);
-        onAnchor?.(newThoughtId ?? thoughtId);
-      } else {
-        anchorThought(thoughtId);
-        onAnchor?.(thoughtId);
-      }
-    } else {
-      deleteThought(thoughtId);
+    if (wasAnchored && !hasChanges) {
+      // Was reactivated but no changes — restore original timestamps
+      cancelEdit(thoughtId, originalContentRef.current);
       onAnchor?.(thoughtId);
+      return;
     }
-  }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, editThought, onAnchor, user?.id]);
+    
+    // Either new thought or in-place edit with changes — anchor it
+    // For in-place edits, the content is already updated via updateThought
+    anchorThought(thoughtId);
+    onAnchor?.(thoughtId);
+  }, [thought, thoughtId, anchorThought, deleteThought, cancelEdit, onAnchor]);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
@@ -180,13 +167,11 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
     if (!swipeStartRef.current) return;
     const dy = e.touches[0].clientY - swipeStartRef.current.y;
     
-    // Only activate swipe-down if textarea is scrolled to top
     if (swipeStartRef.current.scrollTop <= 0 && dy > 10) {
       isSwipingRef.current = true;
       const clamped = Math.min(dy, SWIPE_DOWN_THRESHOLD * 1.5);
       swipeY.set(clamped);
       
-      // Haptic at threshold
       if (clamped >= SWIPE_DOWN_THRESHOLD) {
         triggerHaptic('medium');
       }
@@ -201,7 +186,6 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
     
     const currentY = swipeY.get();
     if (currentY >= SWIPE_DOWN_THRESHOLD && thought?.content.trim()) {
-      // Animate out and anchor
       triggerHaptic('success');
       controls.start({ y: 100, opacity: 0, scale: 0.9, transition: { duration: 0.25 } })
         .then(() => {
@@ -210,7 +194,6 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
           controls.set({ y: 0, opacity: 1, scale: 1 });
         });
     } else {
-      // Spring back
       swipeY.set(0);
     }
     

@@ -26,7 +26,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
-// Safety timeout for workspace loading (in case sync gets stuck)
 const LOADING_TIMEOUT_MS = 15000;
 
 export function WorkspaceCanvas() {
@@ -45,12 +44,9 @@ export function WorkspaceCanvas() {
   const { breakChain, activeChainId } = useChainStore();
   const { scope, focusedChainId } = useFeedStore();
   
-  // Prevent immediate re-open after blur closes the thought
   const justAnchoredRef = useRef(false);
-  const wasAnchoredRef = useRef(false); // Track if active thought was reactivated from anchored
+  const wasAnchoredRef = useRef(false);
   const [showBreakComposer, setShowBreakComposer] = useState(false);
-  
-  // Safety timeout for loading state
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   
   useEffect(() => {
@@ -58,21 +54,16 @@ export function WorkspaceCanvas() {
       setLoadingTimedOut(false);
       return;
     }
-    
     const timeoutId = window.setTimeout(() => {
       console.warn('WorkspaceCanvas: Loading timed out, forcing render');
       setLoadingTimedOut(true);
-      // Also force the store to reset loading
       setLoading(false);
     }, LOADING_TIMEOUT_MS);
-    
     return () => window.clearTimeout(timeoutId);
   }, [isLoading, setLoading]);
   
-  // Track if user deliberately started thinking (for auto-focus)
   const [userInitiated, setUserInitiated] = useState(false);
   
-  // Initialize sync for thoughts and chains
   const { loadMoreThoughts } = useWorkspaceSync();
   useChainSync();
   const { isConnected } = useRealtimeSync();
@@ -84,8 +75,6 @@ export function WorkspaceCanvas() {
   const hasAnchoredThoughts = thoughts.some((t) => t.state === 'anchored');
 
   // Track if current active thought was reactivated from anchored state
-  // We detect this by checking: if activeThought exists and has an anchored_at timestamp,
-  // it was a reactivated anchored thought (new thoughts never have anchored_at)
   useEffect(() => {
     if (activeThought?.anchored_at) {
       wasAnchoredRef.current = true;
@@ -96,90 +85,79 @@ export function WorkspaceCanvas() {
 
   const handleStartThinking = useCallback(() => {
     setUserInitiated(true);
-    // If viewing a specific chain, use that as the target chain
     const targetChainId = scope === 'chain' && focusedChainId ? focusedChainId : undefined;
     createThought(undefined, user?.id, undefined, targetChainId);
   }, [createThought, user?.id, scope, focusedChainId]);
  
-   // Handle break chain gesture - opens the break composer
-    const handleBreakChain = useCallback(() => {
-      setShowBreakComposer(true);
-    }, []);
+  const handleBreakChain = useCallback(() => {
+    setShowBreakComposer(true);
+  }, []);
 
-    // Handle break composer submit - creates chain + first thought
-    const handleBreakSubmit = useCallback((content: string, chainLabel: string) => {
-      if (!user) return;
-      
-      const lastThoughtInChain = thoughts
-        .filter(t => t.chain_id === activeChainId && t.state === 'anchored')
-        .sort((a, b) => {
-          const timeA = new Date(a.anchored_at || a.created_at).getTime();
-          const timeB = new Date(b.anchored_at || b.created_at).getTime();
-          return timeB - timeA;
-        })[0];
-      
-      // Create the new chain
-      const chainId = breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
-      
-      // Set label if provided
-      if (chainLabel) {
-        const { updateChainLabel } = useChainStore.getState();
-        updateChainLabel(chainId, chainLabel);
-        supabase
-          .from('thought_chains')
-          .update({ display_label: chainLabel, updated_at: new Date().toISOString() })
-          .eq('id', chainId)
-          .eq('user_id', user.id)
-          .then(() => {});
-      }
-      
-      // Create and immediately anchor the first thought in the new chain
-      const thoughtId = createThought(undefined, user.id, chainId);
-      useWorkspaceStore.getState().updateThought(thoughtId, content);
-      useWorkspaceStore.getState().anchorThought(thoughtId);
-      
-      // Embed for search
-      embedThought(thoughtId).catch(console.error);
-      
-      setShowBreakComposer(false);
-      
-      // Immediately open a new active thought in the new chain so keyboard stays active
-      setTimeout(() => {
-        setUserInitiated(true);
-        createThought(undefined, user.id, chainId);
-      }, 100);
-    }, [user, breakChain, activeChainId, thoughts, createThought, embedThought]);
+  const handleBreakSubmit = useCallback((content: string, chainLabel: string) => {
+    if (!user) return;
+    
+    const lastThoughtInChain = thoughts
+      .filter(t => t.chain_id === activeChainId && t.state === 'anchored')
+      .sort((a, b) => {
+        const timeA = new Date(a.anchored_at || a.created_at).getTime();
+        const timeB = new Date(b.anchored_at || b.created_at).getTime();
+        return timeB - timeA;
+      })[0];
+    
+    const chainId = breakChain(user.id, activeChainId, lastThoughtInChain?.id ?? null);
+    
+    if (chainLabel) {
+      const { updateChainLabel } = useChainStore.getState();
+      updateChainLabel(chainId, chainLabel);
+      supabase
+        .from('thought_chains')
+        .update({ display_label: chainLabel, updated_at: new Date().toISOString() })
+        .eq('id', chainId)
+        .eq('user_id', user.id)
+        .then(() => {});
+    }
+    
+    // Create and immediately anchor the first thought in the new chain
+    const thoughtId = createThought(undefined, user.id, chainId);
+    useWorkspaceStore.getState().updateThought(thoughtId, content);
+    useWorkspaceStore.getState().anchorThought(thoughtId);
+    
+    embedThought(thoughtId).catch(console.error);
+    
+    setShowBreakComposer(false);
+    
+    setTimeout(() => {
+      setUserInitiated(true);
+      createThought(undefined, user.id, chainId);
+    }, 100);
+  }, [user, breakChain, activeChainId, thoughts, createThought, embedThought]);
 
-    const handleBreakCancel = useCallback(() => {
-      setShowBreakComposer(false);
-    }, []);
+  const handleBreakCancel = useCallback(() => {
+    setShowBreakComposer(false);
+  }, []);
 
-   // Reset user-initiated flag when thought is anchored, embed for search, and prevent immediate re-open
-   const handleAnchor = useCallback((thoughtId?: string) => {
+  const handleAnchor = useCallback((thoughtId?: string) => {
     setUserInitiated(false);
     justAnchoredRef.current = true;
-    // Reset after a short delay to allow click events to complete
     setTimeout(() => {
       justAnchoredRef.current = false;
     }, 100);
      
-     // Embed the thought for semantic search (fire and forget)
-     if (thoughtId) {
-       embedThought(thoughtId).catch(console.error);
-     }
-   }, [embedThought]);
+    if (thoughtId) {
+      embedThought(thoughtId).catch(console.error);
+    }
+  }, [embedThought]);
 
-  // Directly anchor active thought (used when clicking away, regardless of focus)
+  // Directly anchor active thought (used when clicking away)
   const anchorActiveThought = useCallback(() => {
     if (!activeThought) return;
     
     const content = activeThought.content.trim();
     const wasAnchored = wasAnchoredRef.current;
     
-    // First, blur any focused textarea to prevent double-fire
+    // Blur textarea to prevent double-fire
     const textarea = document.querySelector('.thinking-surface textarea') as HTMLTextAreaElement;
     if (textarea && document.activeElement === textarea) {
-      // Remove blur handler temporarily to prevent double execution
       textarea.setAttribute('data-skip-blur', 'true');
       textarea.blur();
     }
@@ -187,7 +165,6 @@ export function WorkspaceCanvas() {
     if (!content) {
       deleteThought(activeThought.id);
     } else if (wasAnchored) {
-      // Was a reactivated thought — just restore it (cancel edit)
       cancelEdit(activeThought.id, content);
     } else {
       anchorThought(activeThought.id);
@@ -196,15 +173,10 @@ export function WorkspaceCanvas() {
     handleAnchor(activeThought.id);
   }, [activeThought, anchorThought, deleteThought, cancelEdit, handleAnchor]);
 
-  // Handle canvas click (tap anywhere empty to start writing or anchor active thought)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    // Prevent re-opening immediately after blur closed the thought
-    if (justAnchoredRef.current) {
-      return;
-    }
+    if (justAnchoredRef.current) return;
     
     const target = e.target as HTMLElement;
-    // Check if click is on an interactive element that should not trigger new thought
     const isOnThought = target.closest('.anchored-thought') || 
                          target.closest('.thought-card') ||
                         target.closest('.thinking-surface') ||
@@ -217,7 +189,6 @@ export function WorkspaceCanvas() {
                         target.closest('textarea') ||
                         target.closest('a');
     
-    // If there's an active thought and clicking outside, anchor it directly
     if (activeThought && !isOnThought) {
       anchorActiveThought();
       return;
@@ -225,13 +196,12 @@ export function WorkspaceCanvas() {
     
     if (!activeThought && !isOnThought) {
       setUserInitiated(true);
-      // If viewing a specific chain, use that as the target chain
       const targetChainId = scope === 'chain' && focusedChainId ? focusedChainId : undefined;
       createThought(undefined, user?.id, undefined, targetChainId);
     }
   }, [activeThought, anchorActiveThought, createThought, user?.id, scope, focusedChainId]);
 
-  // Global Enter key to start writing (when no thought is active)
+  // Global Enter key to start writing
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -243,7 +213,6 @@ export function WorkspaceCanvas() {
       if (e.key === 'Enter' && !activeThought && !isTyping && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
         e.preventDefault();
         setUserInitiated(true);
-        // If viewing a specific chain, use that as the target chain
         const { scope: currentScope, focusedChainId: currentFocusedChain } = useFeedStore.getState();
         const targetChainId = currentScope === 'chain' && currentFocusedChain ? currentFocusedChain : undefined;
         createThought(undefined, user?.id, undefined, targetChainId);
@@ -254,7 +223,6 @@ export function WorkspaceCanvas() {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
    }, [activeThought, createThought, user?.id]);
 
-  // Show loading only if we're actually loading and haven't timed out
   if (isLoading && !loadingTimedOut) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -276,9 +244,7 @@ export function WorkspaceCanvas() {
       {/* Sync indicator */}
       {isSyncing && (
         <div className="fixed top-4 right-4 z-50">
-          <span className="text-xs text-[var(--text-tertiary)] opacity-30">
-            ·
-          </span>
+          <span className="text-xs text-[var(--text-tertiary)] opacity-30">·</span>
         </div>
       )}
 
@@ -299,10 +265,7 @@ export function WorkspaceCanvas() {
         </div>
       )}
 
-
-
       <div className="max-w-3xl mx-auto space-y-8">
-        {/* Breathing space / Active thinking area */}
         <section>
           {activeThought ? (
             <ThinkingSurface 
@@ -312,12 +275,9 @@ export function WorkspaceCanvas() {
               wasAnchored={wasAnchoredRef.current}
             />
           ) : hasThoughts ? (
-             /* Input area with break control below */
              <div className="flex flex-col items-center gap-2">
-               {/* Continue prompt (shows after 30min inactivity) */}
                <ContinuePrompt className="mb-1" />
                
-               {/* Tap to think hint box */}
                <div
                  className="group min-h-[56px] w-full rounded-2xl transition-all duration-300 ease-out flex items-center justify-center cursor-text"
                  style={{
@@ -349,7 +309,6 @@ export function WorkspaceCanvas() {
                  </span>
                </div>
                
-                {/* Break control (+ button) BETWEEN input and feed */}
                 <div className="flex justify-center py-1">
                   <OpenCircle
                     onBreak={handleBreakChain}
@@ -362,7 +321,6 @@ export function WorkspaceCanvas() {
           )}
         </section>
 
-         {/* ThinkFeed - continuous feed of all thoughts */}
         {hasAnchoredThoughts && (
           <section className="-mt-2">
               <ThinkFeed onLoadMore={loadMoreThoughts} />
@@ -370,7 +328,6 @@ export function WorkspaceCanvas() {
         )}
       </div>
 
-      {/* Break Composer Modal */}
       <BreakComposer
         isOpen={showBreakComposer}
         onSubmit={handleBreakSubmit}

@@ -2,13 +2,10 @@
  * Think Space: Pull-the-Thread System - Chain Types
  * 
  * Raw Chains are the source of truth.
- * Merged Lenses are views, not containers.
- * 
  * Timeline Integrity: Merged views sort by global anchored_at with stable tie-breakers.
  */
 
 export type ChainId = string;
-export type LensId = string;
 
 /**
  * Raw Chain - Source of truth for a sequence of thoughts
@@ -28,32 +25,9 @@ export interface ThoughtChain {
 }
 
 /**
- * Merged Lens - A view over multiple raw chains
- * NOT the source of truth. Lenses never own thoughts.
- */
-export interface ThoughtLens {
-  id: LensId;
-  user_id: string;
-  created_at: string;
-  label: string | null; // Optional - meaning can emerge later
-  updated_at: string;
-  chain_ids: ChainId[]; // Populated from lens_chains join table
-}
-
-/**
- * Chain membership in a lens
- */
-export interface LensChainMembership {
-  id: string;
-  lens_id: LensId;
-  chain_id: ChainId;
-  added_at: string;
-}
-
-/**
  * Chain state for UI
  */
-export type ChainViewMode = 'raw' | 'lens' | 'all';
+export type ChainViewMode = 'raw' | 'all';
 
 /**
  * Gesture states for omnidirectional pull-to-break interaction
@@ -79,10 +53,8 @@ export interface PullGestureState {
  */
 export interface ChainState {
   chains: ThoughtChain[];
-  lenses: ThoughtLens[];
   activeChainId: ChainId | null;
-  pendingChainId: ChainId | null; // Chain created by break gesture, becomes active on first anchor
-  activeLensId: LensId | null;
+  pendingChainId: ChainId | null;
   viewMode: ChainViewMode;
   isLoadingChains: boolean;
   isSyncingChains: boolean;
@@ -100,30 +72,20 @@ export interface ChainActions {
   
   // Break chain gesture result - includes divergence tracking
   breakChain: (userId: string, fromChainId?: ChainId | null, atThoughtId?: string | null) => ChainId;
-  clearPendingChain: () => void; // Clear pending chain (used when activating it)
-  
-  // Lens operations (V2)
-  createLens: (userId: string, chainIds: ChainId[], label?: string | null) => LensId;
-  deleteLens: (id: LensId) => void;
-  addChainToLens: (lensId: LensId, chainId: ChainId) => void;
-  removeChainFromLens: (lensId: LensId, chainId: ChainId) => void;
-  setActiveLens: (id: LensId | null) => void;
+  clearPendingChain: () => void;
   
   // View mode
   setViewMode: (mode: ChainViewMode) => void;
   
   // State management
   setChains: (chains: ThoughtChain[]) => void;
-  setLenses: (lenses: ThoughtLens[]) => void;
   setLoadingChains: (loading: boolean) => void;
   setSyncingChains: (syncing: boolean) => void;
-  resetStore: () => void; // Reset store for auth cleanup
+  resetStore: () => void;
   
   // Selectors
   getActiveChain: () => ThoughtChain | null;
-  getActiveLens: () => ThoughtLens | null;
   getChainById: (id: ChainId) => ThoughtChain | null;
-  getChainsForLens: (lensId: LensId) => ThoughtChain[];
 }
 
 export type ChainStore = ChainState & ChainActions;

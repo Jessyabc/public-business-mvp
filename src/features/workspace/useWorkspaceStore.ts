@@ -6,12 +6,12 @@
  * Key invariants:
  * - Chains break ONLY when user explicitly breaks them
  * - Global feed is strictly time-ordered (newest first)
- * - Copy-on-edit: edits create new thoughts, original preserved
+ * - In-place edit: edits update the original thought directly
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
- import type { WorkspaceStore, ThoughtObject, ChainId } from './types';
+import type { WorkspaceStore, ThoughtObject, ChainId } from './types';
 import { format, parseISO } from 'date-fns';
 import { useChainStore } from './stores/chainStore';
 
@@ -39,46 +39,39 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       hasMorePages: false,
       oldestLoadedAt: null,
 
-      // Create a new thought, optionally for a specific day
+      // Create a new thought
       createThought: (dayKey?: string, userId?: string, chainId?: ChainId, focusedChainId?: ChainId | null) => {
         const id = generateId();
         const now = new Date().toISOString();
-         // day_key kept for backward compat only
-         const targetDayKey = dayKey || getTodayKey();
+        const targetDayKey = dayKey || getTodayKey();
         
-        // Ensure day_key is in correct format (YYYY-MM-DD)
         const normalizedDayKey = targetDayKey.includes('T') 
           ? getDayKey(targetDayKey) 
           : targetDayKey;
         
-        // Get chain from chain store if not provided
-        // Priority: 1) provided chainId, 2) focusedChainId (from chain view), 3) pendingChainId (from break gesture), 4) activeChainId
         const chainStore = useChainStore.getState();
         const pendingChainId = chainStore.pendingChainId;
         const activeChainId = chainStore.activeChainId;
         
-        // Use focused chain from view if provided, then pending chain (from break gesture), otherwise active
         let finalChainId: ChainId | null = chainId || focusedChainId || pendingChainId || activeChainId;
         
-        // If no chain and user exists, create one
         if (!finalChainId && userId) {
           finalChainId = chainStore.createChain(userId);
         }
         
-        // If using focusedChainId, set it as active chain immediately
         if (focusedChainId && finalChainId === focusedChainId) {
           chainStore.setActiveChain(focusedChainId);
         }
         
         const newThought: ThoughtObject = {
           id,
-          user_id: userId || '', // Set from auth context, fallback empty
+          user_id: userId || '',
           content: '',
           state: 'active',
           created_at: now,
           updated_at: now,
           day_key: normalizedDayKey,
-          chain_id: finalChainId, // Assign to active chain
+          chain_id: finalChainId,
         };
         
         set((state) => ({
@@ -100,11 +93,9 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }));
       },
 
-      // Anchor a thought (implicit transition, not "save" or "submit")
+      // Anchor a thought
       anchorThought: (id) => {
         const now = new Date().toISOString();
-        
-        // Get the thought before updating to check its chain_id
         const thought = get().thoughts.find(t => t.id === id);
         const thoughtChainId = thought?.chain_id;
         
@@ -116,28 +107,24 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                   state: 'anchored', 
                   anchored_at: now, 
                   updated_at: now,
-                   day_key: getDayKey(now),
+                  day_key: getDayKey(now),
                 }
               : t
           ),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
         }));
         
-        // If this thought belongs to the pending chain, activate it
         const chainStore = useChainStore.getState();
         if (thoughtChainId && chainStore.pendingChainId === thoughtChainId) {
-          // Activate the pending chain and clear pending status
           chainStore.setActiveChain(thoughtChainId);
           chainStore.clearPendingChain();
         }
       },
 
-      // Reactivate an anchored thought for continued thinking
-      // IMPORTANT: Rule 6 - opening old thought places user in that chain
+      // Reactivate an anchored thought for in-place editing
       reactivateThought: (id) => {
         const thought = get().thoughts.find(t => t.id === id);
         
-        // Re-anchor to the thought's chain (V1 Rule 6)
         if (thought?.chain_id) {
           const chainStore = useChainStore.getState();
           chainStore.setActiveChain(thought.chain_id);
@@ -162,7 +149,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                   ...t, 
                   content: originalContent,
                   state: 'anchored',
-                  // Don't update updated_at, anchored_at, or day_key - keep original values
                 }
               : t
           ),
@@ -170,48 +156,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }));
       },
 
-      // Delete a thought (also marks it for deletion from Supabase)
+      // Delete a thought
       deleteThought: (id) => {
-        // Get the thought before removing it so we can delete from Supabase
-        const thoughtToDelete = get().thoughts.find(t => t.id === id);
-        
         set((state) => ({
           thoughts: state.thoughts.filter((t) => t.id !== id),
           activeThoughtId: state.activeThoughtId === id ? null : state.activeThoughtId,
         }));
-        
-        // Return the deleted thought ID for sync handling
-        return thoughtToDelete?.id ?? null;
       },
-
-       // Copy-on-edit: creates new thought referencing original
-       editThought: (id, newContent, userId) => {
-         const original = get().thoughts.find(t => t.id === id);
-         if (!original || original.content === newContent) return null;
- 
-         const now = new Date().toISOString();
-         const editedId = generateId();
- 
-         const editedThought: ThoughtObject = {
-           id: editedId,
-           user_id: userId || original.user_id,
-           content: newContent,
-           state: 'anchored',
-           created_at: now,
-           updated_at: now,
-           anchored_at: now,
-           day_key: getDayKey(now),
-           chain_id: original.chain_id,
-           edited_from_id: id,
-         };
- 
-         set(state => ({
-           thoughts: [editedThought, ...state.thoughts],
-           activeThoughtId: null,
-         }));
- 
-         return editedId;
-       },
 
       // State setters
       setActiveThought: (id) => set({ activeThoughtId: id }),
@@ -222,7 +173,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       setHasMorePages: (hasMorePages) => set({ hasMorePages }),
       setOldestLoadedAt: (oldestLoadedAt) => set({ oldestLoadedAt }),
 
-      // Reset store (for auth cleanup)
       resetStore: () => {
         set({
           thoughts: [],
@@ -252,29 +202,27 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           });
       },
 
-       // Get ALL anchored thoughts in strict timestamp order (newest first)
-       getGlobalFeed: () => {
+      getGlobalFeed: () => {
         const { thoughts } = get();
-         return thoughts
-           .filter((t) => t.state === 'anchored')
-           .sort((a, b) => {
-             const timeA = new Date(a.anchored_at || a.created_at).getTime();
-             const timeB = new Date(b.anchored_at || b.created_at).getTime();
-             return timeB - timeA; // Newest first
+        return thoughts
+          .filter((t) => t.state === 'anchored')
+          .sort((a, b) => {
+            const timeA = new Date(a.anchored_at || a.created_at).getTime();
+            const timeB = new Date(b.anchored_at || b.created_at).getTime();
+            return timeB - timeA;
           });
       },
 
-       // Get anchor thought for a chain (earliest thought in that chain)
-       getChainAnchor: (chainId) => {
-         const { thoughts } = get();
-         const chainThoughts = thoughts
-           .filter((t) => t.chain_id === chainId && t.state === 'anchored')
-           .sort((a, b) => {
-             const timeA = new Date(a.anchored_at || a.created_at).getTime();
-             const timeB = new Date(b.anchored_at || b.created_at).getTime();
-             return timeA - timeB; // Oldest first for anchor
-           });
-         return chainThoughts[0] || null;
+      getChainAnchor: (chainId) => {
+        const { thoughts } = get();
+        const chainThoughts = thoughts
+          .filter((t) => t.chain_id === chainId && t.state === 'anchored')
+          .sort((a, b) => {
+            const timeA = new Date(a.anchored_at || a.created_at).getTime();
+            const timeB = new Date(b.anchored_at || b.created_at).getTime();
+            return timeA - timeB;
+          });
+        return chainThoughts[0] || null;
       },
     }),
     {
