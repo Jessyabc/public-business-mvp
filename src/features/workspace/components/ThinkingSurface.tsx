@@ -24,9 +24,10 @@ interface ThinkingSurfaceProps {
   thoughtId: string;
   onAnchor?: (thoughtId?: string) => void;
   autoFocus?: boolean;
+  wasAnchored?: boolean; // Pass from parent to correctly track reactivated thoughts
 }
 
-export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: ThinkingSurfaceProps) {
+export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnchored: wasAnchoredProp = false }: ThinkingSurfaceProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [enterCount, setEnterCount] = useState(0);
@@ -56,9 +57,10 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
   useEffect(() => {
     if (thought) {
       originalContentRef.current = thought.content;
-      wasAnchoredRef.current = thought.state === 'anchored';
+      // Use prop if provided (for reactivated thoughts), otherwise check current state
+      wasAnchoredRef.current = wasAnchoredProp || thought.state === 'anchored';
     }
-  }, [thoughtId]);
+  }, [thoughtId, wasAnchoredProp]);
   
   useEffect(() => { setEnterCount(0); }, [thought?.content]);
   

@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
  
  interface ThoughtCardProps {
    thought: ThoughtObject;
+   isEditable?: boolean;
  }
  
  /**
@@ -31,7 +32,7 @@ import { cn } from '@/lib/utils';
    return format(parseISO(isoString), 'h:mm a');
  }
  
- export function ThoughtCard({ thought }: ThoughtCardProps) {
+ export function ThoughtCard({ thought, isEditable = false }: ThoughtCardProps) {
    const { reactivateThought, deleteThought } = useWorkspaceStore();
    const { activeChainId } = useChainStore();
    const { viewChain, scope } = useFeedStore();
@@ -45,8 +46,9 @@ import { cn } from '@/lib/utils';
    const isEdited = !!thought.edited_from_id;
  
    const handleClick = useCallback(() => {
+     if (!isEditable) return; // Only latest thoughts are editable
      reactivateThought(thought.id);
-   }, [thought.id, reactivateThought]);
+   }, [thought.id, reactivateThought, isEditable]);
  
    // Tap on chain indicator to focus that chain
    const handleChainFocus = useCallback((e: React.MouseEvent) => {
@@ -99,9 +101,9 @@ import { cn } from '@/lib/utils';
        onKeyDown={(e) => e.key === 'Enter' && handleClick()}
        className={cn(
          "thought-card group",
-         "relative w-full cursor-pointer py-3",
+         "relative w-full py-3",
          "transition-all duration-200 ease-out",
-         "hover:translate-x-1"
+         isEditable ? "cursor-pointer hover:translate-x-1" : "cursor-default"
        )}
      >
        <div className="flex gap-3">

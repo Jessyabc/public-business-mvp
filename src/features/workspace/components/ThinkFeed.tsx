@@ -77,6 +77,23 @@ export function ThinkFeed({ onLoadMore }: ThinkFeedProps) {
     return anchors;
   }, [visibleThoughts]);
 
+  // Build a set of "latest thought per chain" IDs — only these are editable
+  const latestPerChain = useMemo(() => {
+    const latest = new Set<string>();
+    const seenChains = new Set<string>();
+    
+    // visibleThoughts is already sorted newest-first
+    for (const thought of visibleThoughts) {
+      const key = thought.chain_id || '__no_chain__';
+      if (!seenChains.has(key)) {
+        seenChains.add(key);
+        latest.add(thought.id);
+      }
+    }
+    
+    return latest;
+  }, [visibleThoughts]);
+
   const isChainAnchor = useCallback((thought: typeof visibleThoughts[0]) => {
     return thought.chain_id && chainAnchorIds.get(thought.chain_id) === thought.id;
   }, [chainAnchorIds]);
@@ -117,7 +134,7 @@ export function ThinkFeed({ onLoadMore }: ThinkFeedProps) {
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="relative"
             >
-             <ThoughtCard thought={thought} />
+             <ThoughtCard thought={thought} isEditable={latestPerChain.has(thought.id)} />
 
              {isAnchor && chain && (
                <ChainStartMarker chain={chain} anchorThought={thought} />
