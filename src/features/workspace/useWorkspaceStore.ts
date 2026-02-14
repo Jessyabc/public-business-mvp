@@ -36,6 +36,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       isLoading: false,
       isSyncing: false,
       lastSyncedAt: null,
+      hasMorePages: false,
+      oldestLoadedAt: null,
 
       // Create a new thought, optionally for a specific day
       createThought: (dayKey?: string, userId?: string, chainId?: ChainId, focusedChainId?: ChainId | null) => {
@@ -217,6 +219,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       setLoading: (isLoading) => set({ isLoading }),
       setSyncing: (isSyncing) => set({ isSyncing }),
       setLastSynced: (lastSyncedAt) => set({ lastSyncedAt }),
+      setHasMorePages: (hasMorePages) => set({ hasMorePages }),
+      setOldestLoadedAt: (oldestLoadedAt) => set({ oldestLoadedAt }),
 
       // Reset store (for auth cleanup)
       resetStore: () => {
@@ -226,6 +230,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           isLoading: false,
           isSyncing: false,
           lastSyncedAt: null,
+          hasMorePages: false,
+          oldestLoadedAt: null,
         });
       },
 

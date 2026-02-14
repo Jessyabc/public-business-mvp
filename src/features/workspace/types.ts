@@ -57,6 +57,10 @@ export interface WorkspaceState {
   isLoading: boolean;
   isSyncing: boolean;
   lastSyncedAt: string | null;
+  /** Pagination: whether more pages exist on server */
+  hasMorePages: boolean;
+  /** Pagination: cursor for next page (oldest loaded updated_at) */
+  oldestLoadedAt: string | null;
 }
 
 export interface WorkspaceActions {
@@ -76,6 +80,8 @@ export interface WorkspaceActions {
   setLoading: (loading: boolean) => void;
   setSyncing: (syncing: boolean) => void;
   setLastSynced: (timestamp: string) => void;
+  setHasMorePages: (hasMore: boolean) => void;
+  setOldestLoadedAt: (cursor: string | null) => void;
   resetStore: () => void; // Reset store for auth cleanup
   
   // Selectors
