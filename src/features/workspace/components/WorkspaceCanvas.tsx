@@ -71,11 +71,11 @@ export function WorkspaceCanvas() {
   const [userInitiated, setUserInitiated] = useState(false);
   
   // Initialize sync for thoughts and chains
-  useWorkspaceSync();
+  const { loadMoreThoughts } = useWorkspaceSync();
   useChainSync();
-  const { isConnected } = useRealtimeSync(); // Cross-device realtime updates
-   useLinkSync(); // Chain links sync
-   const { embedThought } = useEmbedThought();
+  const { isConnected } = useRealtimeSync();
+  useLinkSync();
+  const { embedThought } = useEmbedThought();
   
   const activeThought = getActiveThought();
   const hasThoughts = thoughts.length > 0;
@@ -367,8 +367,8 @@ export function WorkspaceCanvas() {
          {/* ThinkFeed - continuous feed of all thoughts */}
         {hasAnchoredThoughts && (
           <section className="-mt-2">
-             <ThinkFeed />
-          </section>
+              <ThinkFeed onLoadMore={loadMoreThoughts} />
+           </section>
         )}
       </div>
     </div>

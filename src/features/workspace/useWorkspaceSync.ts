@@ -2,7 +2,7 @@
  * Pillar #1: Individual Workspace - Supabase Sync
  * 
  * Handles persistence to workspace_thoughts table.
- * Debounced auto-save, offline-first with reconciliation.
+ * Cursor-based pagination, debounced auto-save, offline-first.
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -12,7 +12,8 @@ import { useWorkspaceStore } from './useWorkspaceStore';
 import type { ThoughtObject } from './types';
 
 const SYNC_DEBOUNCE_MS = 1500;
-const LOAD_TIMEOUT_MS = 10000; // 10 second timeout for loading
+const LOAD_TIMEOUT_MS = 10000;
+const PAGE_SIZE = 40;
 
 export function useWorkspaceSync() {
   const { user } = useAuth();
@@ -23,32 +24,27 @@ export function useWorkspaceSync() {
     setLoading,
     setSyncing,
     setLastSynced,
+    hasMorePages,
+    setHasMorePages,
+    oldestLoadedAt,
+    setOldestLoadedAt,
   } = useWorkspaceStore();
   
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
   const lastSyncedThoughtsRef = useRef<string>('');
-  const loadAbortRef = useRef<AbortController | null>(null);
+  const isLoadingMoreRef = useRef(false);
 
-  // Load thoughts from Supabase on mount
+  // Load first page of thoughts
   const loadThoughts = useCallback(async () => {
     if (!user) {
-      // No user - ensure loading is false
       setLoading(false);
       return;
     }
     
-    // Cancel any previous load operation
-    if (loadAbortRef.current) {
-      loadAbortRef.current.abort();
-    }
-    loadAbortRef.current = new AbortController();
-    
     setLoading(true);
-    
-    // Set up a timeout to prevent infinite loading
     const timeoutId = window.setTimeout(() => {
-      console.warn('Workspace loading timed out after', LOAD_TIMEOUT_MS, 'ms');
+      console.warn('Workspace loading timed out');
       setLoading(false);
     }, LOAD_TIMEOUT_MS);
     
@@ -57,60 +53,77 @@ export function useWorkspaceSync() {
         .from('workspace_thoughts')
         .select('*')
         .eq('user_id', user.id)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(PAGE_SIZE);
 
-      // Clear timeout since we got a response
       window.clearTimeout(timeoutId);
-      
       if (error) throw error;
       
       if (data && isMountedRef.current) {
-        const loadedThoughts: ThoughtObject[] = data.map((row) => {
-          // Derive day_key from anchored_at if available, otherwise created_at
-          const dayKeySource = row.anchored_at || row.created_at;
-          const dayKey = row.day_key || dayKeySource.split('T')[0];
-          
-          return {
-            id: row.id,
-            user_id: row.user_id,
-            content: row.content,
-              // Preserve state from database
-              state: row.state as 'active' | 'anchored',
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            day_key: dayKey,
-            display_label: row.display_label || null,
-            anchored_at: row.anchored_at || null,
-            chain_id: row.chain_id || null,
-            edited_from_id: row.edited_from_id || null,
-          };
-        });
-        
-        // Merge with local thoughts (prefer newer, preserve active state)
+        const loaded = mapRows(data);
         const localThoughts = useWorkspaceStore.getState().thoughts;
-        const mergedThoughts = mergeThoughts(localThoughts, loadedThoughts);
+        const merged = mergeThoughts(localThoughts, loaded);
         
-        setThoughts(mergedThoughts);
-        // Only clear active thought if it's not in the merged list or was anchored
+        setThoughts(merged);
+        setHasMorePages(data.length === PAGE_SIZE);
+        if (data.length > 0) {
+          setOldestLoadedAt(data[data.length - 1].updated_at);
+        }
+
+        // Clear stale active thought
         const currentActiveId = useWorkspaceStore.getState().activeThoughtId;
         if (currentActiveId) {
-          const activeThought = mergedThoughts.find(t => t.id === currentActiveId);
-          if (!activeThought || activeThought.state === 'anchored') {
-            setActiveThought(null);
-          }
+          const active = merged.find(t => t.id === currentActiveId);
+          if (!active || active.state === 'anchored') setActiveThought(null);
         }
-        lastSyncedThoughtsRef.current = JSON.stringify(mergedThoughts);
+        lastSyncedThoughtsRef.current = JSON.stringify(merged);
         setLastSynced(new Date().toISOString());
       }
     } catch (err) {
       console.error('Failed to load workspace thoughts:', err);
-      // Clear timeout on error too
       window.clearTimeout(timeoutId);
     } finally {
-      // Always set loading to false, even if unmounted (Zustand handles this safely)
       setLoading(false);
     }
-  }, [user, setThoughts, setActiveThought, setLoading, setLastSynced]);
+  }, [user, setThoughts, setActiveThought, setLoading, setLastSynced, setHasMorePages, setOldestLoadedAt]);
+
+  // Load next page (cursor-based)
+  const loadMoreThoughts = useCallback(async () => {
+    if (!user || !hasMorePages || isLoadingMoreRef.current || !oldestLoadedAt) return;
+    
+    isLoadingMoreRef.current = true;
+    try {
+      const { data, error } = await supabase
+        .from('workspace_thoughts')
+        .select('*')
+        .eq('user_id', user.id)
+        .lt('updated_at', oldestLoadedAt)
+        .order('updated_at', { ascending: false })
+        .limit(PAGE_SIZE);
+
+      if (error) throw error;
+      
+      if (data && isMountedRef.current) {
+        const loaded = mapRows(data);
+        const current = useWorkspaceStore.getState().thoughts;
+        // Append without duplicates
+        const existingIds = new Set(current.map(t => t.id));
+        const newThoughts = loaded.filter(t => !existingIds.has(t.id));
+        
+        if (newThoughts.length > 0) {
+          setThoughts([...current, ...newThoughts]);
+        }
+        setHasMorePages(data.length === PAGE_SIZE);
+        if (data.length > 0) {
+          setOldestLoadedAt(data[data.length - 1].updated_at);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load more thoughts:', err);
+    } finally {
+      isLoadingMoreRef.current = false;
+    }
+  }, [user, hasMorePages, oldestLoadedAt, setThoughts, setHasMorePages, setOldestLoadedAt]);
 
   // Sync thoughts to Supabase
   const syncThoughts = useCallback(async () => {
@@ -118,41 +131,28 @@ export function useWorkspaceSync() {
     
     const currentThoughts = useWorkspaceStore.getState().thoughts;
     const currentJson = JSON.stringify(currentThoughts);
-    
-    // Skip if nothing changed
     if (currentJson === lastSyncedThoughtsRef.current) return;
     
     setSyncing(true);
     try {
-      // Ensure all thoughts have valid day_key before syncing
-      const thoughtsToSync = currentThoughts.map((t) => {
-        // Ensure day_key is set
-        let dayKey = t.day_key;
-        if (!dayKey) {
-          const dayKeySource = t.anchored_at || t.created_at;
-          dayKey = dayKeySource.split('T')[0];
-        }
-        
-        return {
-          id: t.id,
-          user_id: user.id,
-          content: t.content,
-          state: t.state,
-          created_at: t.created_at,
-          updated_at: t.updated_at,
-          day_key: dayKey,
-          display_label: t.display_label || null,
-          anchored_at: t.anchored_at || null,
-          chain_id: t.chain_id || null,
-          edited_from_id: t.edited_from_id || null,
-        };
-      });
+      const thoughtsToSync = currentThoughts.map((t) => ({
+        id: t.id,
+        user_id: user.id,
+        content: t.content,
+        state: t.state,
+        created_at: t.created_at,
+        updated_at: t.updated_at,
+        day_key: t.day_key || (t.anchored_at || t.created_at).split('T')[0],
+        display_label: t.display_label || null,
+        anchored_at: t.anchored_at || null,
+        chain_id: t.chain_id || null,
+        edited_from_id: t.edited_from_id || null,
+      }));
 
       if (thoughtsToSync.length > 0) {
         const { error } = await supabase
           .from('workspace_thoughts')
           .upsert(thoughtsToSync, { onConflict: 'id' });
-
         if (error) throw error;
       }
       
@@ -161,123 +161,94 @@ export function useWorkspaceSync() {
     } catch (err) {
       console.error('Failed to sync workspace thoughts:', err);
     } finally {
-      if (isMountedRef.current) {
-        setSyncing(false);
-      }
+      if (isMountedRef.current) setSyncing(false);
     }
   }, [user, setSyncing, setLastSynced]);
 
   // Debounced sync
   const debouncedSync = useCallback(() => {
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current);
-    }
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(syncThoughts, SYNC_DEBOUNCE_MS);
   }, [syncThoughts]);
 
-  // Load on mount - with proper cleanup
+  // Load on mount
   useEffect(() => {
     isMountedRef.current = true;
-    
-    // Only load if we have a user
-    if (user) {
-      loadThoughts();
-    } else {
-      // Ensure loading is false when there's no user
-      setLoading(false);
-    }
+    if (user) loadThoughts();
+    else setLoading(false);
     
     return () => {
       isMountedRef.current = false;
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-      // Abort any pending load operation
-      if (loadAbortRef.current) {
-        loadAbortRef.current.abort();
-      }
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
   }, [user, loadThoughts, setLoading]);
 
-  // Auto-sync when thoughts change (including when first thought is created)
+  // Auto-sync on changes
   useEffect(() => {
-    // Sync whenever we have a user and any thoughts exist
-    // This ensures first thought gets persisted
-    if (user && thoughts.length > 0) {
-      debouncedSync();
-    }
+    if (user && thoughts.length > 0) debouncedSync();
   }, [thoughts, user, debouncedSync]);
 
-  // Force immediate sync when anchored count changes
+  // Immediate sync on anchor count change
   const anchoredCount = thoughts.filter(t => t.state === 'anchored').length;
   useEffect(() => {
     if (user && anchoredCount > 0) {
-      const timeoutId = setTimeout(() => {
-        syncThoughts();
-      }, 500);
-      return () => clearTimeout(timeoutId);
+      const id = setTimeout(() => syncThoughts(), 500);
+      return () => clearTimeout(id);
     }
   }, [anchoredCount, user, syncThoughts]);
 
   // Sync before unload
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      syncThoughts();
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    const handler = () => syncThoughts();
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
   }, [syncThoughts]);
 
-  return {
-    loadThoughts,
-    syncThoughts,
-  };
+  return { loadThoughts, syncThoughts, loadMoreThoughts };
 }
 
-// Merge local and remote thoughts, preferring newer versions
-// Preserves active thoughts and ensures proper day_key assignment
-function mergeThoughts(
-  local: ThoughtObject[],
-  remote: ThoughtObject[]
-): ThoughtObject[] {
+// --- Helpers ---
+
+function mapRows(data: any[]): ThoughtObject[] {
+  return data.map((row) => {
+    const dayKeySource = row.anchored_at || row.created_at;
+    return {
+      id: row.id,
+      user_id: row.user_id,
+      content: row.content,
+      state: row.state as 'active' | 'anchored',
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      day_key: row.day_key || dayKeySource.split('T')[0],
+      display_label: row.display_label || null,
+      anchored_at: row.anchored_at || null,
+      chain_id: row.chain_id || null,
+      edited_from_id: row.edited_from_id || null,
+    };
+  });
+}
+
+function mergeThoughts(local: ThoughtObject[], remote: ThoughtObject[]): ThoughtObject[] {
   const merged = new Map<string, ThoughtObject>();
   
-  // Add remote thoughts first
-  for (const thought of remote) {
-    merged.set(thought.id, thought);
-  }
+  for (const t of remote) merged.set(t.id, t);
   
-  // Merge local thoughts (prefer newer, but preserve active state if local is active)
-  for (const thought of local) {
-    const existing = merged.get(thought.id);
-    const localIsNewer = !existing || new Date(thought.updated_at) > new Date(existing.updated_at);
+  for (const t of local) {
+    const existing = merged.get(t.id);
+    const localIsNewer = !existing || new Date(t.updated_at) > new Date(existing.updated_at);
     
     if (localIsNewer) {
-      // Use local version
-      merged.set(thought.id, thought);
-    } else if (existing && thought.state === 'active' && existing.state === 'anchored') {
-      // Preserve local active state even if remote is newer (user is currently editing)
-      merged.set(thought.id, { ...existing, state: 'active' });
+      merged.set(t.id, t);
+    } else if (existing && t.state === 'active' && existing.state === 'anchored') {
+      merged.set(t.id, { ...existing, state: 'active' });
     }
     
-    // Ensure day_key is set for all thoughts
-    const finalThought = merged.get(thought.id)!;
-    if (!finalThought.day_key) {
-      const dayKeySource = finalThought.anchored_at || finalThought.created_at;
-      finalThought.day_key = dayKeySource.split('T')[0];
+    const final = merged.get(t.id)!;
+    if (!final.day_key) {
+      final.day_key = (final.anchored_at || final.created_at).split('T')[0];
     }
   }
   
-  // Ensure all thoughts have valid day_key
-  Array.from(merged.values()).forEach((thought) => {
-    if (!thought.day_key) {
-      const dayKeySource = thought.anchored_at || thought.created_at;
-      thought.day_key = dayKeySource.split('T')[0];
-    }
-  });
-  
-  // Sort by updated_at descending
   return Array.from(merged.values()).sort(
     (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
