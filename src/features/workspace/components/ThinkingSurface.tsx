@@ -270,7 +270,7 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false }: Thin
           className="text-center text-sm mt-4 opacity-50"
           style={{ color: '#6B635B' }}
         >
-          Just start writing. Press ⌘↵ to save.
+          {isMobile ? 'Just start writing. Tap outside to save.' : 'Just start writing. Press ⌘↵ to save.'}
         </p>
       )}
     </div>

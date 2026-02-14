@@ -96,12 +96,12 @@
        {/* Search input */}
        <AnimatePresence>
          {isOpen && (
-           <motion.div
-             initial={{ opacity: 0, width: 80 }}
-             animate={{ opacity: 1, width: 280 }}
-             exit={{ opacity: 0, width: 80 }}
-             transition={{ duration: 0.2 }}
-             className="absolute right-0 top-0 z-50"
+            <motion.div
+              initial={{ opacity: 0, width: 80 }}
+              animate={{ opacity: 1, width: '100%' }}
+              exit={{ opacity: 0, width: 80 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-0 top-0 z-50 w-full max-w-[280px]"
            >
              <div
                className="flex items-center gap-2 px-3 py-1.5 rounded-xl"

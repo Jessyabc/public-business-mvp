@@ -5,14 +5,15 @@
   * Adapted from AnchoredThought with feed-specific features.
   */
  
- import { useCallback } from 'react';
- import { useWorkspaceStore } from '../useWorkspaceStore';
- import { useChainStore } from '../stores/chainStore';
- import { useFeedStore } from '../stores/feedStore';
- import { supabase } from '@/integrations/supabase/client';
- import { useAuth } from '@/contexts/AuthContext';
- import { Trash2, GitBranch, Edit3 } from 'lucide-react';
- import { cn } from '@/lib/utils';
+import { useCallback, useState } from 'react';
+import { useWorkspaceStore } from '../useWorkspaceStore';
+import { useChainStore } from '../stores/chainStore';
+import { useFeedStore } from '../stores/feedStore';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Trash2, GitBranch, Edit3 } from 'lucide-react';
+import { cn } from '@/lib/utils';
  import { format, parseISO } from 'date-fns';
  import type { ThoughtObject } from '../types';
  
@@ -34,9 +35,10 @@
    const { reactivateThought, deleteThought } = useWorkspaceStore();
    const { activeChainId } = useChainStore();
    const { viewChain, scope } = useFeedStore();
-   const { user } = useAuth();
-   
-   // Check if this thought belongs to the active chain
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
+    
+  // Check if this thought belongs to the active chain
    const isInActiveChain = thought.chain_id === activeChainId;
    
    // Check if this is an edited thought
@@ -54,25 +56,38 @@
      }
    }, [thought.chain_id, viewChain]);
  
-   const handleDelete = useCallback(async (e: React.MouseEvent) => {
-     e.stopPropagation();
-     
-     // Delete from local store first (optimistic)
-     deleteThought(thought.id);
-     
-     // Delete from Supabase
-     if (user) {
-       try {
-         await supabase
-           .from('workspace_thoughts')
-           .delete()
-           .eq('id', thought.id)
-           .eq('user_id', user.id);
-       } catch (err) {
-         console.error('Failed to delete thought from database:', err);
-       }
-     }
-   }, [thought.id, deleteThought, user]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDeleteRequest = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
+    
+    // Delete from local store first (optimistic)
+    deleteThought(thought.id);
+    
+    // Delete from Supabase
+    if (user) {
+      try {
+        await supabase
+          .from('workspace_thoughts')
+          .delete()
+          .eq('id', thought.id)
+          .eq('user_id', user.id);
+      } catch (err) {
+        console.error('Failed to delete thought from database:', err);
+      }
+    }
+  }, [thought.id, deleteThought, user]);
+
+  const handleDeleteCancel = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
+  }, []);
  
    const timeString = formatTime(thought.anchored_at || thought.created_at);
  
@@ -146,28 +161,56 @@
              {thought.content}
            </p>
            
-           {/* Delete on hover */}
-           <button
-             onClick={handleDelete}
-             className={cn(
-               "absolute top-2 right-2 p-1.5 rounded-lg",
-               "opacity-0 group-hover:opacity-60",
-               "hover:opacity-100",
-               "transition-all duration-200"
-             )}
-             style={{ color: '#9B9590' }}
-             onMouseEnter={(e) => {
-               e.currentTarget.style.color = '#C75050';
-               e.currentTarget.style.background = 'rgba(199, 80, 80, 0.1)';
-             }}
-             onMouseLeave={(e) => {
-               e.currentTarget.style.color = '#9B9590';
-               e.currentTarget.style.background = 'transparent';
-             }}
-             aria-label="Delete thought"
-           >
-             <Trash2 className="w-3.5 h-3.5" />
-           </button>
+            {/* Delete button - visible on hover (desktop) or always subtle (mobile) */}
+            {!showDeleteConfirm ? (
+              <button
+                onClick={handleDeleteRequest}
+                className={cn(
+                  "absolute top-2 right-2 p-1.5 rounded-lg",
+                  "transition-all duration-200",
+                  isMobile 
+                    ? "opacity-40 active:opacity-100" 
+                    : "opacity-0 group-hover:opacity-60 hover:opacity-100"
+                )}
+                style={{ color: '#9B9590' }}
+                onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    e.currentTarget.style.color = '#C75050';
+                    e.currentTarget.style.background = 'rgba(199, 80, 80, 0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isMobile) {
+                    e.currentTarget.style.color = '#9B9590';
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+                aria-label="Delete thought"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <div 
+                className="absolute top-1 right-1 flex items-center gap-1 p-1 rounded-lg z-20"
+                style={{ background: 'rgba(245, 240, 235, 0.95)' }}
+              >
+                <span className="text-xs px-1" style={{ color: '#6B635B' }}>Delete?</span>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-2 py-1 rounded text-xs font-medium transition-colors"
+                  style={{ background: 'rgba(199, 80, 80, 0.15)', color: '#C75050' }}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={handleDeleteCancel}
+                  className="px-2 py-1 rounded text-xs transition-colors"
+                  style={{ color: '#6B635B' }}
+                >
+                  No
+                </button>
+              </div>
+            )}
          </div>
        </div>
      </div>
