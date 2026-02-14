@@ -9,7 +9,7 @@
  * Server is authoritative. Deduplicates optimistic inserts by ID.
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspaceStore } from '../useWorkspaceStore';
@@ -25,6 +25,7 @@ export function useRealtimeSync() {
   const { user } = useAuth();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const pendingUpdatesRef = useRef<Map<string, 'thought' | 'chain'>>(new Map());
+  const [isConnected, setIsConnected] = useState(true);
   
   // Get store actions
   const { thoughts, setThoughts } = useWorkspaceStore();
@@ -280,8 +281,12 @@ export function useRealtimeSync() {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           console.log('[Realtime] Subscribed to workspace changes');
+          setIsConnected(true);
         } else if (status === 'CHANNEL_ERROR') {
           console.error('[Realtime] Channel error');
+          setIsConnected(false);
+        } else if (status === 'CLOSED') {
+          setIsConnected(false);
         }
       });
 
@@ -303,6 +308,6 @@ export function useRealtimeSync() {
   ]);
 
   return {
-    isConnected: true, // Could track actual connection status
+    isConnected,
   };
 }
