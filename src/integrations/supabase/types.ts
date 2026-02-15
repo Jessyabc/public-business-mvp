@@ -251,6 +251,80 @@ export type Database = {
           },
         ]
       }
+      chain_spark_links: {
+        Row: {
+          chain_id: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          chain_id: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          chain_id?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_spark_links_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "thought_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_spark_links_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "business_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_spark_links_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "my_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_spark_links_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_spark_links_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "public_posts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_spark_links_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_business_insight_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "chain_spark_links_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "view_post_t_score"
+            referencedColumns: ["post_id"]
+          },
+        ]
+      }
       contact_requests: {
         Row: {
           company: string | null
