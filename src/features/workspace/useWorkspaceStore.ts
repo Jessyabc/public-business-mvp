@@ -123,6 +123,31 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       // Reactivate an anchored thought for in-place editing
       reactivateThought: (id) => {
+        const { thoughts, activeThoughtId } = get();
+        
+        // If another thought is currently active, re-anchor it first to prevent data loss
+        if (activeThoughtId && activeThoughtId !== id) {
+          const activePrev = thoughts.find(t => t.id === activeThoughtId);
+          if (activePrev && activePrev.state === 'active') {
+            if (activePrev.content.trim()) {
+              // Re-anchor the previously active thought
+              const now = new Date().toISOString();
+              set((state) => ({
+                thoughts: state.thoughts.map((t) =>
+                  t.id === activeThoughtId
+                    ? { ...t, state: 'anchored', anchored_at: t.anchored_at || now, updated_at: now }
+                    : t
+                ),
+              }));
+            } else {
+              // Empty thought — remove it
+              set((state) => ({
+                thoughts: state.thoughts.filter((t) => t.id !== activeThoughtId),
+              }));
+            }
+          }
+        }
+        
         const thought = get().thoughts.find(t => t.id === id);
         
         if (thought?.chain_id) {
