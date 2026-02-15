@@ -16,6 +16,7 @@ import { ThoughtCard } from './ThoughtCard';
 import { ChainStartMarker } from './ChainStartMarker';
 import { FeedScopeIndicator } from './FeedScopeIndicator';
 import { SearchInline } from './SearchInline';
+import { ChainPromoteCTA } from './ChainPromoteCTA';
 
 
 const PB_BLUE = '#489FE3';
@@ -27,7 +28,7 @@ interface ThinkFeedProps {
 export function ThinkFeed({ onLoadMore }: ThinkFeedProps) {
   const { getGlobalFeed, hasMorePages } = useWorkspaceStore();
   const { getChainById } = useChainStore();
-  const { getVisibleThoughts } = useFeedStore();
+  const { getVisibleThoughts, scope, focusedChainId } = useFeedStore();
   const feedRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -153,6 +154,11 @@ export function ThinkFeed({ onLoadMore }: ThinkFeedProps) {
           );
         })}
       </AnimatePresence>
+
+      {/* Chain promotion CTA - only in chain view */}
+      {scope === 'chain' && focusedChainId && (
+        <ChainPromoteCTA chainId={focusedChainId} thoughts={visibleThoughts} />
+      )}
 
       {/* Infinite scroll sentinel */}
       {hasMorePages && (

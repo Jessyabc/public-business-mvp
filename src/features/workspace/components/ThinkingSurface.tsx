@@ -15,6 +15,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspaceStore } from '../useWorkspaceStore';
 import { useChainStore } from '../stores/chainStore';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
+import { VoiceMicButton } from './VoiceMicButton';
 import { cn } from '@/lib/utils';
 
 const PB_BLUE = '#489FE3';
@@ -37,6 +39,31 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
   const { thoughts, updateThought, anchorThought, deleteThought, cancelEdit } = useWorkspaceStore();
   const { activeChainId, pendingChainId, getChainById } = useChainStore();
   const { triggerHaptic } = useHaptic();
+  
+  // Voice recording
+  const handleVoiceTranscript = useCallback((text: string) => {
+    const current = thoughts.find(t => t.id === thoughtId);
+    const existingContent = current?.content || '';
+    const separator = existingContent && !existingContent.endsWith(' ') ? ' ' : '';
+    updateThought(thoughtId, existingContent + separator + text);
+    // Auto-resize textarea
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [thoughtId, thoughts, updateThought]);
+  
+  const { isRecording, isProcessing, startRecording, stopRecording } = useVoiceRecorder({
+    onTranscript: handleVoiceTranscript,
+  });
+  
+  const toggleVoice = useCallback(() => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
   
   // Swipe-down state
   const swipeY = useMotionValue(0);
@@ -251,26 +278,37 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
           }}
         />
         
-        <textarea
-          ref={textareaRef}
-          value={thought.content}
-          onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          placeholder="What's on your mind..."
-          className={cn(
-            "relative z-10 w-full min-h-[120px] p-6",
-            "bg-transparent border-none outline-none resize-none",
-            "text-lg leading-relaxed",
-            "placeholder:opacity-40",
-            "focus:outline-none focus:ring-0"
-          )}
-          style={{
-            color: '#3D3833',
-            caretColor: PB_BLUE,
-          }}
-        />
+        <div className="relative z-10">
+          <textarea
+            ref={textareaRef}
+            value={thought.content}
+            onChange={handleChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder={isRecording ? "Listening..." : "What's on your mind..."}
+            className={cn(
+              "w-full min-h-[120px] p-6 pr-14",
+              "bg-transparent border-none outline-none resize-none",
+              "text-lg leading-relaxed",
+              "placeholder:opacity-40",
+              "focus:outline-none focus:ring-0"
+            )}
+            style={{
+              color: '#3D3833',
+              caretColor: PB_BLUE,
+            }}
+          />
+          
+          {/* Mic button - persistent in corner */}
+          <div className="absolute top-4 right-3">
+            <VoiceMicButton
+              isRecording={isRecording}
+              isProcessing={isProcessing}
+              onToggle={toggleVoice}
+            />
+          </div>
+        </div>
       </div>
       
       {/* Chain indicator */}
