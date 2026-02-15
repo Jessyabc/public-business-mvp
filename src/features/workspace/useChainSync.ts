@@ -78,6 +78,7 @@ export function useChainSync() {
   }, [persistActiveChain]);
 
   // Load chains — DB is source of truth
+  // Exception: if DB is empty but localStorage has chains, push local data to DB first
   const loadChains = useCallback(async () => {
     if (!user) {
       setLoadingChains(false);
@@ -87,7 +88,7 @@ export function useChainSync() {
     setLoadingChains(true);
     
     try {
-      const [chainsResult, activeChainId] = await Promise.all([
+      const [chainsResult, dbActiveChainId] = await Promise.all([
         supabase
           .from('thought_chains')
           .select('*')
@@ -98,7 +99,33 @@ export function useChainSync() {
 
       if (chainsResult.error) throw chainsResult.error;
       
-      if (chainsResult.data && isMountedRef.current) {
+      if (!isMountedRef.current) return;
+
+      // If DB is empty but we have local chains, push them to DB
+      const localChains = useChainStore.getState().chains;
+      if ((!chainsResult.data || chainsResult.data.length === 0) && localChains.length > 0) {
+        console.info('DB empty but localStorage has chains — syncing up');
+        const toSync = localChains.map((c) => ({
+          id: c.id,
+          user_id: user.id,
+          created_at: c.created_at,
+          first_thought_at: c.first_thought_at,
+          display_label: c.display_label,
+          updated_at: c.updated_at,
+          diverged_from_chain_id: c.diverged_from_chain_id ?? null,
+          diverged_at_thought_id: c.diverged_at_thought_id ?? null,
+        }));
+        const { error: upsertError } = await supabase
+          .from('thought_chains')
+          .upsert(toSync, { onConflict: 'id' });
+        if (upsertError) console.error('Failed to push local chains to DB:', upsertError);
+        
+        lastSyncedChainsRef.current = JSON.stringify(localChains);
+        setLoadingChains(false);
+        return;
+      }
+      
+      if (chainsResult.data) {
         const loadedChains: ThoughtChain[] = chainsResult.data.map((row) => ({
           id: row.id,
           user_id: row.user_id,
@@ -114,9 +141,9 @@ export function useChainSync() {
         setChains(loadedChains);
         lastSyncedChainsRef.current = JSON.stringify(loadedChains);
         
-        if (activeChainId && loadedChains.some(c => c.id === activeChainId)) {
-          setActiveChain(activeChainId);
-          lastSyncedActiveChainRef.current = activeChainId;
+        if (dbActiveChainId && loadedChains.some(c => c.id === dbActiveChainId)) {
+          setActiveChain(dbActiveChainId);
+          lastSyncedActiveChainRef.current = dbActiveChainId;
         }
       }
     } catch (err) {
