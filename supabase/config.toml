@@ -5,3 +5,6 @@ project_id = "opjltuyirkbbpwgkavjq"
  
  [functions.search-thoughts]
  verify_jwt = false
+
+ [functions.transcribe-voice]
+ verify_jwt = false
