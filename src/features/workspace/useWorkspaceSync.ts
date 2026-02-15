@@ -36,6 +36,7 @@ export function useWorkspaceSync() {
   const isLoadingMoreRef = useRef(false);
 
   // Load first page of thoughts — DB is source of truth, replaces local state
+  // Exception: if DB is empty but localStorage has data, push local data to DB first
   const loadThoughts = useCallback(async () => {
     if (!user) {
       setLoading(false);
@@ -59,7 +60,62 @@ export function useWorkspaceSync() {
       window.clearTimeout(timeoutId);
       if (error) throw error;
       
-      if (data && isMountedRef.current) {
+      if (!isMountedRef.current) return;
+
+      // If DB is empty but we have local thoughts, push them to DB instead of wiping
+      // First ensure chains are synced (FK dependency)
+      const localThoughts = useWorkspaceStore.getState().thoughts;
+      if ((!data || data.length === 0) && localThoughts.length > 0) {
+        console.info('DB empty but localStorage has thoughts — syncing up');
+        
+        // Ensure chains exist in DB first (FK constraint)
+        const { useChainStore } = await import('./stores/chainStore');
+        const localChains = useChainStore.getState().chains;
+        if (localChains.length > 0) {
+          const chainsToSync = localChains.map((c) => ({
+            id: c.id,
+            user_id: user.id,
+            created_at: c.created_at,
+            first_thought_at: c.first_thought_at,
+            display_label: c.display_label,
+            updated_at: c.updated_at,
+            diverged_from_chain_id: c.diverged_from_chain_id ?? null,
+            diverged_at_thought_id: c.diverged_at_thought_id ?? null,
+          }));
+          await supabase
+            .from('thought_chains')
+            .upsert(chainsToSync, { onConflict: 'id' })
+            .then(({ error: chainErr }) => {
+              if (chainErr) console.error('Failed to push chains before thoughts:', chainErr);
+            });
+        }
+        
+        const toSync = localThoughts.map((t) => ({
+          id: t.id,
+          user_id: user.id,
+          content: t.content,
+          state: t.state,
+          created_at: t.created_at,
+          updated_at: t.updated_at,
+          day_key: t.day_key || (t.anchored_at || t.created_at).split('T')[0],
+          display_label: t.display_label || null,
+          anchored_at: t.anchored_at || null,
+          chain_id: t.chain_id || null,
+          edited_from_id: t.edited_from_id || null,
+        }));
+        const { error: upsertError } = await supabase
+          .from('workspace_thoughts')
+          .upsert(toSync, { onConflict: 'id' });
+        if (upsertError) console.error('Failed to push local thoughts to DB:', upsertError);
+        
+        lastSyncedThoughtsRef.current = JSON.stringify(localThoughts);
+        setLastSynced(new Date().toISOString());
+        setHasMorePages(false);
+        setLoading(false);
+        return;
+      }
+      
+      if (data) {
         const loaded = mapRows(data);
         
         // DB is source of truth — replace local state entirely
