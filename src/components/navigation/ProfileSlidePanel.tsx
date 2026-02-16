@@ -122,7 +122,13 @@ export function ProfileSlidePanel({
             {/* Business Hint */}
             {showBusinessHint && (
               <button
-                onClick={onSwipeTowardsBusiness}
+                onClick={() => {
+                  if (isMobile && onSwipeTowardsBusiness) {
+                    onSwipeTowardsBusiness();
+                  } else {
+                    handleNavigate('/business-dashboard');
+                  }
+                }}
                 className={cn(
                   "mx-4 mb-4 p-4 rounded-xl",
                   "bg-primary/5 border border-primary/20",
@@ -133,7 +139,7 @@ export function ProfileSlidePanel({
                 <div>
                   <p className="text-sm font-medium text-foreground">Business Dashboard</p>
                   {isMobile && (
-                    <p className="text-xs text-muted-foreground">Swipe left to access</p>
+                    <p className="text-xs text-muted-foreground">Swipe left or tap to access</p>
                   )}
                 </div>
                 <ChevronLeft className="h-5 w-5 text-primary" />
