@@ -101,7 +101,10 @@
  
   return (
     <div className="chain-start-marker">
-      <div className="flex items-center gap-3 py-3">
+      <div 
+        className="flex items-center gap-3 py-3 cursor-pointer"
+        onClick={handleChainFocus}
+      >
         {/* Spacer to align with thought time column */}
         <div className="shrink-0 w-16" />
 
