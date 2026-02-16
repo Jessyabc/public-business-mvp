@@ -12,6 +12,7 @@ import { useChainStore } from '../stores/chainStore';
 import { useFeedStore } from '../stores/feedStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { buildSparkPayload } from '@/lib/posts/builders';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ThoughtObject } from '../types';
@@ -44,18 +45,16 @@ export function ChainPromoteCTA({ chainId, thoughts }: ChainPromoteCTAProps) {
     setIsPublishing(true);
 
     try {
-      // 1. Create the Spark post
+      // 1. Create the Spark post using canonical builder
+      const payload = buildSparkPayload({
+        userId: user.id,
+        content: sparkContent,
+        metadata: { origin: 'chain_promote', chain_id: chainId },
+      });
+
       const { data: post, error: postError } = await supabase
         .from('posts')
-        .insert({
-          user_id: user.id,
-          content: sparkContent.trim(),
-          type: 'spark',
-          mode: 'public',
-          status: 'published',
-          visibility: 'public',
-          published_at: new Date().toISOString(),
-        } as any)
+        .insert({ ...payload, published_at: new Date().toISOString() })
         .select('id')
         .single();
 
