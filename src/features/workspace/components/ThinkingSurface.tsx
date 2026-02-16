@@ -160,17 +160,27 @@ export function ThinkingSurface({ thoughtId, onAnchor, autoFocus = false, wasAnc
       return;
     }
     
-    if (isMobile && e.key === 'Enter' && !thought?.content.trim()) {
+    // Mobile double-enter: anchor (with content) or delete (empty)
+    if (isMobile && e.key === 'Enter') {
+      const hasContent = !!thought?.content.trim();
       const newCount = enterCount + 1;
       setEnterCount(newCount);
       if (newCount >= 2) {
         e.preventDefault();
-        textareaRef.current?.blur();
-        deleteThought(thoughtId);
-        onAnchor?.(thoughtId);
+        if (hasContent) {
+          // Anchor the thought with content
+          textareaRef.current?.setAttribute('data-skip-blur', 'true');
+          textareaRef.current?.blur();
+          performAnchor();
+        } else {
+          // Delete empty thought
+          textareaRef.current?.blur();
+          deleteThought(thoughtId);
+          onAnchor?.(thoughtId);
+        }
       }
     }
-  }, [thought, thoughtId, anchorThought, deleteThought, onAnchor, isMobile, enterCount]);
+  }, [thought, thoughtId, anchorThought, deleteThought, onAnchor, isMobile, enterCount, performAnchor]);
 
   useEffect(() => { handleInput(); }, [handleInput]);
 
