@@ -177,24 +177,37 @@ export function WorkspaceCanvas() {
     if (justAnchoredRef.current) return;
     
     const target = e.target as HTMLElement;
-    const isOnThought = target.closest('.anchored-thought') || 
-                         target.closest('.thought-card') ||
-                        target.closest('.thinking-surface') ||
-                         target.closest('.think-feed') ||
-                         target.closest('.open-circle') ||
-                         target.closest('.chain-start-marker') ||
-                         target.closest('.feed-scope-indicator') ||
-                        target.closest('button') ||
-                        target.closest('input') ||
-                        target.closest('textarea') ||
-                        target.closest('a');
     
-    if (activeThought && !isOnThought) {
-      anchorActiveThought();
+    // When actively editing, only the thinking surface itself and interactive elements should block anchoring
+    if (activeThought) {
+      const isOnActiveSurface = target.closest('.thinking-surface') ||
+                                target.closest('button') ||
+                                target.closest('input') ||
+                                target.closest('textarea') ||
+                                target.closest('a') ||
+                                target.closest('.open-circle');
+      
+      if (!isOnActiveSurface) {
+        anchorActiveThought();
+        return;
+      }
       return;
     }
     
-    if (!activeThought && !isOnThought) {
+    // No active thought — check if we should create a new one
+    const isOnInteractive = target.closest('.anchored-thought') || 
+                            target.closest('.thought-card') ||
+                            target.closest('.thinking-surface') ||
+                            target.closest('.think-feed') ||
+                            target.closest('.open-circle') ||
+                            target.closest('.chain-start-marker') ||
+                            target.closest('.feed-scope-indicator') ||
+                            target.closest('button') ||
+                            target.closest('input') ||
+                            target.closest('textarea') ||
+                            target.closest('a');
+    
+    if (!isOnInteractive) {
       setUserInitiated(true);
       const targetChainId = scope === 'chain' && focusedChainId ? focusedChainId : undefined;
       createThought(undefined, user?.id, undefined, targetChainId);
