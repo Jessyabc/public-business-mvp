@@ -480,7 +480,7 @@ export function ComposerModal({ isOpen, onClose }: ComposerModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-lg sm:max-w-xl lg:max-w-2xl !bg-[#F5F0EB] border-none shadow-2xl">
+      <DialogContent className="max-w-lg sm:max-w-xl lg:max-w-2xl !bg-[#F5F0EB] border-none shadow-2xl text-[#1a1a1a] [&_*]:!text-[#1a1a1a] [&_.text-muted-foreground]:!text-[#666] [&_.text-foreground\\/80]:!text-[#333] [&_placeholder]:!text-[#999]">
         <DialogHeader>
           <DialogTitle className="sr-only">Create Spark</DialogTitle>
           <DialogDescription className="sr-only">
